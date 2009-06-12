@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GameData.h"
-#include <string>
 
 enum PhaseType
 {
@@ -16,6 +15,7 @@ enum PhaseType
     PHASE_SPECIES_MET,
     PHASE_SPECIES_ALLIES,
     PHASE_SPECIES_ENEMIES,
+    PHASE_SYSTEM_SCAN,
     PHASE_ORDERS_TEMPLATE,
     PHASE_TECH_LEVELS,
 };
@@ -30,7 +30,7 @@ public:
     String^         GetContent()    { return m_Content; }
     String^         GetSummary();
 
-    bool            Parse(const std::string &line);
+    bool            Parse(String ^line);
 
 private:
     String^         GetSpeciesSummary();
@@ -43,7 +43,9 @@ private:
     String^         FinishLineAggregate();
 
     bool            MatchTech(String ^s, String ^techName, TechType tech);
-    bool            MatchWithOutput(String ^s, String ^exp);
+    bool            MatchSystemScanStart(String ^s);
+    void            MatchPlanetScan(String ^s);
+    bool            MatchWithOutput(String ^%s, String ^exp);
     bool            MatchAggregateList(String ^s, String ^prefix, String ^exp);
 
     String^         GetMatchResult(int arg)      { return m_TmpRegexResult[arg]; }
@@ -59,4 +61,9 @@ private:
 
     bool            m_bParsingAggregate;
     String         ^m_StringAggregate;
+
+    int             m_ScanX;
+    int             m_ScanY;
+    int             m_ScanZ;
+    bool            m_ScanHasPlanets;
 };

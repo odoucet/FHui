@@ -3,55 +3,65 @@
 
 #include "Report.h"
 
-#include <fstream>
-#include <iostream>
-#include <string>
-
-using namespace std;
+using namespace System::IO;
 
 namespace fhui 
 {
 
-void Form1::LoadReports()
+void Form1::LoadGameData()
 {
     try
     {
-        if( LoadReport("C:\\Games\\FarHorizons\\Reports\\t14.txt") )
-        {
-            Report ^report = dynamic_cast<Report^>(m_Reports->GetByIndex(0));
-            if( report )
-            {
-                RepText->Text = report->GetContent();
-                Summary->Text = report->GetSummary();
-            }
-        }
+        InitData();
+        LoadGalaxy();
+        LoadReports();
+        LoadCommands();
     }
     catch( SystemException ^e )
     {
-        Summary->Text = "Failed loading report.";
+        Summary->Text = "Failed loading game data.";
         RepText->Text = e->ToString();
     }
 }
 
-bool Form1::LoadReport(const char *fileName)
+void Form1::LoadGalaxy()
+{
+}
+
+void Form1::LoadReports()
+{
+    DirectoryInfo ^dir = gcnew DirectoryInfo("reports");
+    for each( FileInfo ^f in dir->GetFiles("*"))
+    {
+        LoadReport( f->FullName );
+    }
+
+    Report ^report = dynamic_cast<Report^>(m_Reports->GetByIndex(0));
+    if( report )
+    {
+        RepText->Text = report->GetContent();
+        Summary->Text = report->GetSummary();
+    }
+}
+
+void Form1::LoadReport(String ^fileName)
 {
     Report ^report = gcnew Report(m_GameData);
 
-    string line;
-    ifstream ifs(fileName);
-    while( getline(ifs, line) )
+    StreamReader ^sr = File::OpenText(fileName);
+    if( sr == nullptr )
+        return;
+
+    String ^line;
+    while( (line = sr->ReadLine()) != nullptr ) 
     {
         if( false == report->Parse(line) )
             break;
     }
+    sr->Close();
 
     if( report->IsValid() )
-    {
         m_Reports->Add(report->GetTour(), report);
-        return true;
-    }
-
-    return false;
 }
 
 void Form1::LoadCommands()

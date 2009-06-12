@@ -237,6 +237,10 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\strings.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -288,10 +292,6 @@
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath=".\ReadMe.txt"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

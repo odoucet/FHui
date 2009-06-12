@@ -26,11 +26,9 @@ namespace fhui {
 		Form1(void)
             : m_Reports(gcnew SortedList)
 		{
-			InitializeComponent();
-			InitData();
-            LoadReports();
-            LoadCommands();
-		}
+            InitializeComponent();
+            LoadGameData();
+        }
 
 	protected:
 		/// <summary>
@@ -44,8 +42,10 @@ namespace fhui {
 			}
 		}
 
+        void LoadGameData();
+        void LoadGalaxy();
         void LoadReports();
-        bool LoadReport(const char *fileName);
+        void LoadReport(String ^fileName);
         void LoadCommands();
         void InitData();
 
@@ -74,6 +74,11 @@ namespace fhui {
 
     private: System::Windows::Forms::ComboBox^  RepMode;
     private: System::Windows::Forms::TextBox^  RepText;
+    private: System::Windows::Forms::DataGridView^  GridSystems;
+
+
+    private: System::Windows::Forms::DataGridViewTextBoxColumn^  ColX;
+    private: System::ComponentModel::IContainer^  components;
 
 
 
@@ -91,7 +96,7 @@ namespace fhui {
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		System::ComponentModel::Container ^components;
+
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -111,6 +116,8 @@ namespace fhui {
             this->TabReports = (gcnew System::Windows::Forms::TabPage());
             this->TabMap = (gcnew System::Windows::Forms::TabPage());
             this->TabSystems = (gcnew System::Windows::Forms::TabPage());
+            this->GridSystems = (gcnew System::Windows::Forms::DataGridView());
+            this->ColX = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
             this->TabPlanets = (gcnew System::Windows::Forms::TabPage());
             this->TabColonies = (gcnew System::Windows::Forms::TabPage());
             this->TabShips = (gcnew System::Windows::Forms::TabPage());
@@ -125,6 +132,8 @@ namespace fhui {
             this->TopSplitCont->SuspendLayout();
             this->MenuTabs->SuspendLayout();
             this->TabReports->SuspendLayout();
+            this->TabSystems->SuspendLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->GridSystems))->BeginInit();
             this->SuspendLayout();
             // 
             // splitContainer1
@@ -270,12 +279,33 @@ namespace fhui {
             // 
             // TabSystems
             // 
+            this->TabSystems->Controls->Add(this->GridSystems);
             this->TabSystems->Location = System::Drawing::Point(4, 22);
             this->TabSystems->Name = L"TabSystems";
             this->TabSystems->Size = System::Drawing::Size(616, 574);
             this->TabSystems->TabIndex = 2;
             this->TabSystems->Text = L"Systems";
             this->TabSystems->UseVisualStyleBackColor = true;
+            // 
+            // GridSystems
+            // 
+            this->GridSystems->AllowUserToAddRows = false;
+            this->GridSystems->AllowUserToDeleteRows = false;
+            this->GridSystems->AllowUserToOrderColumns = true;
+            this->GridSystems->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
+            this->GridSystems->Columns->AddRange(gcnew cli::array< System::Windows::Forms::DataGridViewColumn^  >(1) {this->ColX});
+            this->GridSystems->Dock = System::Windows::Forms::DockStyle::Fill;
+            this->GridSystems->Location = System::Drawing::Point(0, 0);
+            this->GridSystems->Name = L"GridSystems";
+            this->GridSystems->ReadOnly = true;
+            this->GridSystems->Size = System::Drawing::Size(616, 574);
+            this->GridSystems->TabIndex = 0;
+            // 
+            // ColX
+            // 
+            this->ColX->HeaderText = L"X";
+            this->ColX->Name = L"ColX";
+            this->ColX->ReadOnly = true;
             // 
             // TabPlanets
             // 
@@ -341,6 +371,8 @@ namespace fhui {
             this->TopSplitCont->ResumeLayout(false);
             this->MenuTabs->ResumeLayout(false);
             this->TabReports->ResumeLayout(false);
+            this->TabSystems->ResumeLayout(false);
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->GridSystems))->EndInit();
             this->ResumeLayout(false);
 
         }

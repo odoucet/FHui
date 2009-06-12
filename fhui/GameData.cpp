@@ -1,6 +1,31 @@
 #include "StdAfx.h"
 #include "GameData.h"
 
+// ---------------------------------------------------------
+
+int Planet::CalculateLSN(AtmosphericReq ^atmReq, int tc, int pc)
+{
+    int lsn =
+        3 * Math::Abs(m_PressClass - pc) +
+        3 * Math::Abs(m_TempClass - tc);
+
+    for( int i = 0; i < GAS_MAX; ++i )
+    {
+        if( m_Atmosphere[i] > 0 && atmReq->m_Poisonous[i] )
+            lsn += 3;
+    }
+
+    if( m_Atmosphere[atmReq->m_ReqGas] < atmReq->m_ReqMin ||
+        m_Atmosphere[atmReq->m_ReqGas] > atmReq->m_ReqMax )
+    {
+        lsn += 3;
+    }
+
+    return lsn;
+}
+
+// ---------------------------------------------------------
+
 GameData::GameData(void)
 {
     m_SpeciesName       = nullptr;
@@ -80,12 +105,8 @@ Alien^ GameData::AddAlien(int tour, String ^sp)
         return alien;
     }
 
-    Alien ^alien = gcnew Alien;
+    Alien ^alien = gcnew Alien(sp, tour);
     m_Aliens->Add(spKey, alien);
-
-    alien->m_Name        = sp;
-    alien->m_Relation    = SP_NEUTRAL;
-    alien->m_TourMet     = tour;
 
     return alien;
 }
@@ -118,11 +139,13 @@ void GameData::SetFleetCost(int tour, int cost, float percent)
     }
 }
 
-void GameData::SetAtmosphereReq(String ^gas, int reqMin, int reqMax)
+void GameData::SetAtmosphereReq(GasType gas, int reqMin, int reqMax)
 {
-    if( m_AtmReq->m_Neutral->IndexOf(gas) != -1 ||
-        m_AtmReq->m_Poisonous->IndexOf(gas) != -1 ||
-        (m_AtmReq->m_ReqGas != nullptr && String::Compare(m_AtmReq->m_ReqGas, gas) != 0) )
+    bool atmCheck = true;
+
+    if( (m_AtmReq->m_ReqGas != GAS_MAX && m_AtmReq->m_ReqGas != gas) ||
+        m_AtmReq->m_Neutral[gas] ||
+        m_AtmReq->m_Poisonous[gas] )
     {
         throw gcnew ArgumentException("Inconsistent atmospheric data in reports.");
     }
@@ -132,24 +155,29 @@ void GameData::SetAtmosphereReq(String ^gas, int reqMin, int reqMax)
     m_AtmReq->m_ReqMax = reqMax;
 }
 
-void GameData::SetAtmosphereNeutral(String ^gas)
+void GameData::SetAtmosphereNeutral(GasType gas)
 {
-    if( m_AtmReq->m_Poisonous->IndexOf(gas) != -1 ||
-        (m_AtmReq->m_ReqGas != nullptr && String::Compare(m_AtmReq->m_ReqGas, gas) == 0) )
+    if( m_AtmReq->m_ReqGas == gas ||
+        m_AtmReq->m_Poisonous[gas] )
     {
         throw gcnew ArgumentException("Inconsistent atmospheric data in reports.");
     }
 
-    m_AtmReq->m_Neutral->Add(gas);
+    m_AtmReq->m_Neutral[gas] = true;
 }
 
-void GameData::SetAtmospherePoisonous(String ^gas)
+void GameData::SetAtmospherePoisonous(GasType gas)
 {
-    if( m_AtmReq->m_Neutral->IndexOf(gas) != -1 ||
-        (m_AtmReq->m_ReqGas != nullptr && String::Compare(m_AtmReq->m_ReqGas, gas) == 0) )
+    if( m_AtmReq->m_ReqGas == gas ||
+        m_AtmReq->m_Neutral[gas] )
     {
         throw gcnew ArgumentException("Inconsistent atmospheric data in reports.");
     }
 
-    m_AtmReq->m_Poisonous->Add(gas);
+    m_AtmReq->m_Poisonous[gas] = true;
+}
+
+void GameData::AddPlanetScan(int tour, int x, int y, int z, int plNum, Planet ^planet)
+{
+    //...
 }

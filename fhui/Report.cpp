@@ -9,6 +9,10 @@ Report::Report(GameData ^gd)
     , m_Tour(0)
     , m_bParsingAggregate(false)
     , m_StringAggregate(nullptr)
+    , m_ScanX(0)
+    , m_ScanY(0)
+    , m_ScanZ(0)
+    , m_ScanHasPlanets(false)
 {
     m_Content           = gcnew String("");
     m_TmpRegexResult    = gcnew array<String^>(1);
@@ -18,7 +22,7 @@ bool Report::IsValid()
 {
     return
         m_GameData->GetSpecies() != nullptr &&
-        m_GameData->GetAtmosphere()->m_ReqGas != nullptr &&
+        m_GameData->GetAtmosphere()->m_ReqGas != GAS_MAX &&
         m_Phase == PHASE_ORDERS_TEMPLATE;
 }
 
@@ -49,7 +53,7 @@ String^ Report::GetSpeciesSummary()
         m_GameData->GetSpecies(),
         "?",    // TODO: temp class
         "?",    // TODO: press class
-        m_GameData->GetAtmosphere()->m_ReqGas,
+        GasToString( m_GameData->GetAtmosphere()->m_ReqGas ),
         m_GameData->GetAtmosphere()->m_ReqMin,
         m_GameData->GetAtmosphere()->m_ReqMax );
 }
@@ -102,8 +106,9 @@ String^ Report::GetAliensSummary()
         Alien ^alien = safe_cast<Alien^>(aliens->GetByIndex(i));
         if( alien->m_Relation == SP_ALLY )
         {
-            ret = String::Format("{0}Ally: SP {0}\r\n",
+            String ^tmp = String::Format("{0}Ally: SP {1}\r\n",
                 ret, alien->m_Name);
+            ret = tmp;
         }
     }
 
@@ -112,8 +117,9 @@ String^ Report::GetAliensSummary()
         Alien ^alien = safe_cast<Alien^>(aliens->GetByIndex(i));
         if( alien->m_Relation == SP_ENEMY )
         {
-            ret = String::Format("{0}Enemy: SP {0}\r\n",
+            String ^tmp = String::Format("{0}Enemy: SP {1}\r\n",
                 ret, alien->m_Name);
+            ret = tmp;
         }
     }
 
@@ -126,16 +132,14 @@ String^ Report::GetAliensSummary()
 // ------------------------------------------------------------
 // Parser
 
-bool Report::Parse(const std::string &line)
+bool Report::Parse(String ^s)
 {
     m_Content = String::Concat(m_Content,
-        gcnew String((line + "\r\n").c_str()) );
-
-    String ^s = gcnew String(line.c_str());
+        String::Concat(s, "\r\n") );
 
     if( m_Phase == PHASE_FILE_DETECT )
     {
-        if( line == "" )
+        if( String::IsNullOrEmpty(s) )
             return true;
 
         if( Regex("^\\s*EVENT LOG FOR TURN \\d+").Match(s)->Success )
@@ -151,7 +155,7 @@ bool Report::Parse(const std::string &line)
 
     if( m_bParsingAggregate )
     {
-        if( line != "" )
+        if( !String::IsNullOrEmpty(s) )
         {
             m_StringAggregate = String::Concat(m_StringAggregate, s);
             return true;
@@ -174,18 +178,20 @@ bool Report::Parse(const std::string &line)
         // Atmospheric requirements
         else if( MatchWithOutput(s, "Atmospheric Requirement: (\\d+)%-(\\d+)% ([A-Za-z0-9]+)") )
             m_GameData->SetAtmosphereReq(
-                GetMatchResult(2),      // required gas
-                GetMatchResultInt(0),   // min level
-                GetMatchResultInt(1) ); // max level
+                GasFromString( GetMatchResult(2) ), // required gas
+                GetMatchResultInt(0),               // min level
+                GetMatchResultInt(1) );             // max level
         else if( MatchAggregateList(s, "Neutral Gases:", "([A-Za-z0-9]+)") )
         {
             for( int i = 0; i < m_TmpRegexResult->Length; ++i )
-                m_GameData->SetAtmosphereNeutral(GetMatchResult(i));
+                m_GameData->SetAtmosphereNeutral(
+                    GasFromString(GetMatchResult(i)) );
         }
         else if( MatchAggregateList(s, "Poisonous Gases:", "([A-Za-z0-9]+)") )
         {
             for( int i = 0; i < m_TmpRegexResult->Length; ++i )
-                m_GameData->SetAtmospherePoisonous(GetMatchResult(i));
+                m_GameData->SetAtmospherePoisonous(
+                    GasFromString(GetMatchResult(i)) );
         }
         // Fleet maintenance
         else if( MatchWithOutput(s, "Fleet maintenance cost = (\\d+) \\((\\d+\\.?\\d+)% of total production\\)") )
@@ -197,11 +203,14 @@ bool Report::Parse(const std::string &line)
             StartLineAggregate(PHASE_SPECIES_ALLIES, s);
         else if( Regex("^Enemies:").Match(s)->Success )
             StartLineAggregate(PHASE_SPECIES_ENEMIES, s);
-        else if( Regex("^Combat orders:").Match(s)->Success )
-            m_Phase = PHASE_ORDERS_COMBAT;
         // Tech levels
         else if( Regex("^Tech Levels:").Match(s)->Success )
             m_Phase = PHASE_TECH_LEVELS;
+        // System scan
+        else if( MatchSystemScanStart(s) )
+        {}
+        else if( Regex("^Combat orders:").Match(s)->Success )
+            m_Phase = PHASE_ORDERS_COMBAT;
         // Parsing ends here
         else if( Regex("^ORDER SECTION.").Match(s)->Success )
             m_Phase = PHASE_ORDERS_TEMPLATE;
@@ -257,6 +266,9 @@ bool Report::Parse(const std::string &line)
     case PHASE_ORDERS_POST_ARRIVAL:
         if( Regex("^Strike orders:").Match(s)->Success )
             m_Phase = PHASE_ORDERS_STRIKE;
+        // System scan
+        else if( MatchSystemScanStart(s) )
+        {}
         break;
 
     case PHASE_ORDERS_STRIKE:
@@ -276,9 +288,84 @@ bool Report::Parse(const std::string &line)
         else
             return false;
         break;
+
+    case PHASE_SYSTEM_SCAN:
+        if( Regex("^\\s*$").Match(s)->Success )
+        {
+            if( m_ScanHasPlanets )
+                m_Phase = PHASE_GLOBAL;
+        }
+        else
+            MatchPlanetScan(s);
+        break;
     }
 
     return true;
+}
+
+bool Report::MatchSystemScanStart(String ^s)
+{
+    if( MatchWithOutput(s, "Coordinates:\\s+[Xx]\\s+=\\s+(\\d+)\\s+[Yy]\\s+=\\s+(\\d+)\\s+[Zz]\\s+=\\s+(\\d+)") )
+    {
+        m_Phase = PHASE_SYSTEM_SCAN;
+        m_ScanX = GetMatchResultInt(0);
+        m_ScanY = GetMatchResultInt(1);
+        m_ScanZ = GetMatchResultInt(2);
+        m_ScanHasPlanets = false;
+        return true;
+    }
+    return false;
+}
+
+void Report::MatchPlanetScan(String ^s)
+{
+    //                          0:plNum   1:dia    2:gv            3:tc       4:pc    5:mining diff
+    if( MatchWithOutput(s, "^\\s+(\\d+)\\s+(\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+\\.\\d+)\\s+") )
+    {
+        Planet ^planet = gcnew Planet(
+            GetMatchResultInt(1),
+            GetMatchResultFloat(2),
+            GetMatchResultInt(3),
+            GetMatchResultInt(4),
+            GetMatchResultFloat(5) );
+        int plNum = GetMatchResultInt(0);
+
+        // Try reading LSN
+        if( MatchWithOutput(s, "(\\d+)\\s+") )
+        {
+            planet->m_LSN = GetMatchResultInt(0);
+        }
+        else if( MatchWithOutput(s, "[x-?]+\\s+") )
+        {
+            // just skip from input
+        }
+        else
+            throw gcnew ArgumentException("Report contains invalid planetary scan (LSN)");
+
+        // Scan gases
+        if( MatchWithOutput(s, "^No atmosphere\\s*") )
+        {
+            // just skip from input
+        }
+        else
+        {
+            bool bGasMatched = false;
+            while( MatchWithOutput(s, ",?(\\w+)\\((\\d+)%\\)") )
+            {
+                bGasMatched = true;
+                int gas = GasFromString(GetMatchResult(0));
+                planet->m_Atmosphere[gas] = GetMatchResultInt(1);
+            }
+            if( !bGasMatched )
+                throw gcnew ArgumentException("Report contains invalid planetary scan (atmosphere)");
+        }
+
+        if( !String::IsNullOrEmpty(s) )
+            planet->m_Comment = s;
+
+        m_GameData->AddPlanetScan( m_Tour, m_ScanX, m_ScanY, m_ScanZ, plNum, planet );
+        m_ScanHasPlanets = true;
+    }
 }
 
 bool Report::MatchTech(String ^s, String ^techName, TechType tech)
@@ -326,13 +413,16 @@ float Report::GetMatchResultFloat(int arg)
         Globalization::CultureInfo::InvariantCulture );
 }
 
-bool Report::MatchWithOutput(String ^s, String ^exp)
+bool Report::MatchWithOutput(String ^%s, String ^exp)
 {
     Array::Clear(m_TmpRegexResult, 0, m_TmpRegexResult->Length);
 
     Match ^m = Regex(exp).Match(s);
     if( m->Success )
     {
+        String ^g = m->Groups[0]->ToString();
+        s = s->Substring( s->IndexOf(g) + g->Length );
+
         int cnt = m->Groups->Count - 1;
         Array::Resize(m_TmpRegexResult, cnt);
         for( int i = 0; i < cnt; ++i )
