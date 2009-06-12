@@ -71,22 +71,55 @@ public ref class StarSystem
 {
 public:
     StarSystem(int x, int y, int z, String ^type)
-        : m_X(x)
-        , m_Y(y)
-        , m_Z(z)
-        , m_Type(type)
+        : m_Planets(gcnew array<Planet^>(0))
         , m_TourScanned(-1)
-        , m_Planets(gcnew array<Planet^>(0))
+        , m_Distance(0)
+        , m_Mishap(0)
     {
+        X = x;
+        Y = y;
+        Z = z;
+        Type = type;
     }
 
-    int             m_X;
-    int             m_Y;
-    int             m_Z;
-    String         ^m_Type;
+    property int        X;
+    property int        Y;
+    property int        Z;
+    property String^    Type;
+    property String^    NumPlanets
+    {
+        String^ get()
+        {
+            if( m_TourScanned == -1 )
+                return "?";
+            int minLSN = 99999;
+            for each( Planet ^pl in m_Planets )
+                minLSN = Math::Min(minLSN, pl->m_LSN == -1 ? 99999 : pl->m_LSN);
+            return String::Format("{0} ({1})", m_Planets->Length, minLSN);
+        }
+    }
+    property String^    ScanTour
+    {
+        String^ get()
+        {
+            if( m_TourScanned == -1 )       return "Not scanned";
+            else if( m_TourScanned == 0 )   return "Received";
+            else                            return String::Format("Scaned, {0}", m_TourScanned);
+        }
+    }
+    property String^    Distance
+    {
+        String^ get() { return String::Format("{0:F2}", m_Distance); }
+    }
+    property String^    Mishap
+    {
+        String^ get() { return String::Format("{0:F2}% ({1:F2}%)", m_Mishap, m_Mishap * m_Mishap / 100.0); }
+    }
 
-    int             m_TourScanned;
-    array<Planet^> ^m_Planets;
+    array<Planet^>     ^m_Planets;
+    int                 m_TourScanned;
+    double              m_Distance;
+    double              m_Mishap;
 };
 
 public ref class GameData
@@ -99,7 +132,9 @@ public:
     void            GetTechLevel(TechType, int%, int%);
     void            GetFleetCost(int%, float%);
     Alien^          GetAlien(String ^sp);
-    SortedList^     GetAliensAll()              { return m_Aliens; }
+    SortedList^     GetAliens()                 { return m_Aliens; }
+    StarSystem^     GetStarSystem(int x, int y, int z);
+    array<StarSystem^>^ GetStarSystems()        { return m_Systems; }
 
     // ------------------------------------------
     void            SetSpecies(String ^sp);
@@ -110,6 +145,7 @@ public:
     void            SetFleetCost(int tour, int, float);
     Alien^          AddAlien(int tour, String ^sp);
     void            SetAlienRelation(int tour, String ^sp, SPRelType);
+    void            AddStarSystem(int x, int y, int z, String ^type);
     void            AddPlanetScan(int tour, int x, int y, int z, int plNum, Planet ^planet);
 
     // ------------------------------------------
@@ -117,13 +153,14 @@ protected:
     int             TourAlign(int tour);
 
     // ------------------------------------------
-    String         ^m_SpeciesName;
-    AtmosphericReq ^m_AtmReq;
-    array<int>     ^m_TechLevels;
-    array<int>     ^m_TechLevelsTeach;
-    int             m_FleetCost;
-    float           m_FleetCostPercent;
-    SortedList     ^m_Aliens;
+    String             ^m_SpeciesName;
+    AtmosphericReq     ^m_AtmReq;
+    array<int>         ^m_TechLevels;
+    array<int>         ^m_TechLevelsTeach;
+    int                 m_FleetCost;
+    float               m_FleetCostPercent;
+    SortedList         ^m_Aliens;
+    array<StarSystem^> ^m_Systems;
 
-    int             m_TourMax;
+    int                 m_TourMax;
 };

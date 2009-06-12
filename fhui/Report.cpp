@@ -99,7 +99,7 @@ String^ Report::GetAliensSummary()
 {
     String ^ret = gcnew String("");
 
-    SortedList ^aliens = m_GameData->GetAliensAll();
+    SortedList ^aliens = m_GameData->GetAliens();
 
     for( int i = 0; i < aliens->Count; ++i )
     {
@@ -166,6 +166,11 @@ bool Report::Parse(String ^s)
     {
     case PHASE_GLOBAL:
         // Turn number
+        if( MatchWithOutput(s, "^\\s*EVENT LOG FOR TURN (\\d+)") )
+        {
+            m_Tour = GetMatchResultInt(0);
+            break;
+        }
         if( MatchWithOutput(s, "START OF TURN (\\d+)") )
         {
             m_Tour = GetMatchResultInt(0);

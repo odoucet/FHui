@@ -36,6 +36,7 @@ GameData::GameData(void)
     m_FleetCost         = 0;
     m_FleetCostPercent  = 0.0;
     m_Aliens            = gcnew SortedList;
+    m_Systems           = gcnew array<StarSystem^>(0);
 }
 
 // ---------------------------------------------------------
@@ -177,7 +178,49 @@ void GameData::SetAtmospherePoisonous(GasType gas)
     m_AtmReq->m_Poisonous[gas] = true;
 }
 
+StarSystem^ GameData::GetStarSystem(int x, int y, int z)
+{
+    for each( StarSystem ^system in m_Systems )
+    {
+        if( system->X == x &&
+            system->Y == y &&
+            system->Z == z )
+            return system;
+    }
+
+    return nullptr;
+}
+
+void GameData::AddStarSystem(int x, int y, int z, String ^type)
+{
+    StarSystem ^system = GetStarSystem(x, y, z);
+    if( system != nullptr )
+        throw gcnew ArgumentException(
+            String::Format("Star system already added: [{0} {1} {2}]", x, y, z) );
+
+    system = gcnew StarSystem(x, y, z, type);
+    Array::Resize(m_Systems, m_Systems->Length + 1);
+    m_Systems[m_Systems->Length - 1] = system;
+}
+
 void GameData::AddPlanetScan(int tour, int x, int y, int z, int plNum, Planet ^planet)
 {
-    //...
+    StarSystem ^system = GetStarSystem(x, y, z);
+    if( system == nullptr )
+        throw gcnew ArgumentException(
+            String::Format("Star system [{0} {1} {2}] not found in galaxy list!", x, y, z) );
+
+    Array::Resize(system->m_Planets, Math::Max(plNum, system->m_Planets->Length));
+    --plNum;
+    if( system->m_Planets[plNum] == nullptr ||
+        tour == m_TourMax )
+    {
+        if( system->m_Planets[plNum] != nullptr &&
+            String::IsNullOrEmpty(planet->m_Comment) )
+        {
+            planet->m_Comment = system->m_Planets[plNum]->m_Comment;
+        }
+        system->m_Planets[plNum] = planet;
+        system->m_TourScanned = Math::Max(system->m_TourScanned, tour);
+    }
 }
