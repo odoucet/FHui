@@ -135,26 +135,28 @@ namespace fhui {
             System::Windows::Forms::Label^  label1;
             System::Windows::Forms::SplitContainer^  TopSplitCont;
             System::Windows::Forms::Label^  label2;
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle1 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle2 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             this->RepStatus = (gcnew System::Windows::Forms::Label());
             this->RepMode = (gcnew System::Windows::Forms::ComboBox());
             this->RepTourNr = (gcnew System::Windows::Forms::ComboBox());
             this->RepText = (gcnew System::Windows::Forms::TextBox());
-            this->splitContainer2 = (gcnew System::Windows::Forms::SplitContainer());
-            this->SystemsGVVal = (gcnew System::Windows::Forms::TextBox());
-            this->SystemsRef = (gcnew System::Windows::Forms::ComboBox());
             this->Summary = (gcnew System::Windows::Forms::TextBox());
             this->MenuTabs = (gcnew System::Windows::Forms::TabControl());
             this->TabReports = (gcnew System::Windows::Forms::TabPage());
             this->TabMap = (gcnew System::Windows::Forms::TabPage());
             this->TabSystems = (gcnew System::Windows::Forms::TabPage());
+            this->splitContainer2 = (gcnew System::Windows::Forms::SplitContainer());
+            this->SystemsShipAge = (gcnew System::Windows::Forms::ComboBox());
+            this->SystemsGV = (gcnew System::Windows::Forms::CheckBox());
+            this->SystemsGVVal = (gcnew System::Windows::Forms::TextBox());
+            this->SystemsRef = (gcnew System::Windows::Forms::ComboBox());
+            this->SystemsGrid = (gcnew System::Windows::Forms::DataGridView());
             this->TabPlanets = (gcnew System::Windows::Forms::TabPage());
             this->TabColonies = (gcnew System::Windows::Forms::TabPage());
             this->TabShips = (gcnew System::Windows::Forms::TabPage());
             this->TabAliens = (gcnew System::Windows::Forms::TabPage());
             this->TabCommands = (gcnew System::Windows::Forms::TabPage());
-            this->SystemsGV = (gcnew System::Windows::Forms::CheckBox());
-            this->SystemsShipAge = (gcnew System::Windows::Forms::ComboBox());
-            this->SystemsGrid = (gcnew System::Windows::Forms::DataGridView());
             splitContainer1 = (gcnew System::Windows::Forms::SplitContainer());
             label1 = (gcnew System::Windows::Forms::Label());
             TopSplitCont = (gcnew System::Windows::Forms::SplitContainer());
@@ -162,15 +164,15 @@ namespace fhui {
             splitContainer1->Panel1->SuspendLayout();
             splitContainer1->Panel2->SuspendLayout();
             splitContainer1->SuspendLayout();
-            this->splitContainer2->Panel1->SuspendLayout();
-            this->splitContainer2->Panel2->SuspendLayout();
-            this->splitContainer2->SuspendLayout();
             TopSplitCont->Panel1->SuspendLayout();
             TopSplitCont->Panel2->SuspendLayout();
             TopSplitCont->SuspendLayout();
             this->MenuTabs->SuspendLayout();
             this->TabReports->SuspendLayout();
             this->TabSystems->SuspendLayout();
+            this->splitContainer2->Panel1->SuspendLayout();
+            this->splitContainer2->Panel2->SuspendLayout();
+            this->splitContainer2->SuspendLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsGrid))->BeginInit();
             this->SuspendLayout();
             // 
@@ -192,7 +194,7 @@ namespace fhui {
             // splitContainer1.Panel2
             // 
             splitContainer1->Panel2->Controls->Add(this->RepText);
-            splitContainer1->Size = System::Drawing::Size(597, 529);
+            splitContainer1->Size = System::Drawing::Size(583, 529);
             splitContainer1->SplitterDistance = 25;
             splitContainer1->SplitterWidth = 1;
             splitContainer1->TabIndex = 0;
@@ -238,50 +240,9 @@ namespace fhui {
             this->RepText->Name = L"RepText";
             this->RepText->ReadOnly = true;
             this->RepText->ScrollBars = System::Windows::Forms::ScrollBars::Both;
-            this->RepText->Size = System::Drawing::Size(597, 503);
+            this->RepText->Size = System::Drawing::Size(583, 503);
             this->RepText->TabIndex = 0;
             this->RepText->WordWrap = false;
-            // 
-            // splitContainer2
-            // 
-            this->splitContainer2->Dock = System::Windows::Forms::DockStyle::Fill;
-            this->splitContainer2->Location = System::Drawing::Point(0, 0);
-            this->splitContainer2->Name = L"splitContainer2";
-            this->splitContainer2->Orientation = System::Windows::Forms::Orientation::Horizontal;
-            // 
-            // splitContainer2.Panel1
-            // 
-            this->splitContainer2->Panel1->Controls->Add(this->SystemsShipAge);
-            this->splitContainer2->Panel1->Controls->Add(label2);
-            this->splitContainer2->Panel1->Controls->Add(this->SystemsGV);
-            this->splitContainer2->Panel1->Controls->Add(this->SystemsGVVal);
-            this->splitContainer2->Panel1->Controls->Add(this->SystemsRef);
-            this->splitContainer2->Panel1->Controls->Add(label1);
-            // 
-            // splitContainer2.Panel2
-            // 
-            this->splitContainer2->Panel2->Controls->Add(this->SystemsGrid);
-            this->splitContainer2->Size = System::Drawing::Size(603, 535);
-            this->splitContainer2->SplitterDistance = 30;
-            this->splitContainer2->SplitterWidth = 1;
-            this->splitContainer2->TabIndex = 0;
-            // 
-            // SystemsGVVal
-            // 
-            this->SystemsGVVal->Location = System::Drawing::Point(305, 5);
-            this->SystemsGVVal->MaxLength = 4;
-            this->SystemsGVVal->Name = L"SystemsGVVal";
-            this->SystemsGVVal->Size = System::Drawing::Size(45, 20);
-            this->SystemsGVVal->TabIndex = 2;
-            this->SystemsGVVal->Text = L"0";
-            // 
-            // SystemsRef
-            // 
-            this->SystemsRef->FormattingEnabled = true;
-            this->SystemsRef->Location = System::Drawing::Point(105, 4);
-            this->SystemsRef->Name = L"SystemsRef";
-            this->SystemsRef->Size = System::Drawing::Size(147, 21);
-            this->SystemsRef->TabIndex = 1;
             // 
             // label1
             // 
@@ -311,20 +272,20 @@ namespace fhui {
             // 
             TopSplitCont->Panel2->Controls->Add(this->MenuTabs);
             TopSplitCont->Size = System::Drawing::Size(793, 565);
-            TopSplitCont->SplitterDistance = 176;
+            TopSplitCont->SplitterDistance = 210;
             TopSplitCont->SplitterWidth = 2;
             TopSplitCont->TabIndex = 0;
             // 
             // Summary
             // 
             this->Summary->Dock = System::Windows::Forms::DockStyle::Fill;
-            this->Summary->Font = (gcnew System::Drawing::Font(L"Courier New", 6.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            this->Summary->Font = (gcnew System::Drawing::Font(L"Courier New", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
             this->Summary->Location = System::Drawing::Point(0, 0);
             this->Summary->Multiline = true;
             this->Summary->Name = L"Summary";
             this->Summary->ReadOnly = true;
-            this->Summary->Size = System::Drawing::Size(172, 561);
+            this->Summary->Size = System::Drawing::Size(206, 561);
             this->Summary->TabIndex = 0;
             this->Summary->WordWrap = false;
             // 
@@ -342,7 +303,7 @@ namespace fhui {
             this->MenuTabs->Location = System::Drawing::Point(0, 0);
             this->MenuTabs->Name = L"MenuTabs";
             this->MenuTabs->SelectedIndex = 0;
-            this->MenuTabs->Size = System::Drawing::Size(611, 561);
+            this->MenuTabs->Size = System::Drawing::Size(577, 561);
             this->MenuTabs->TabIndex = 0;
             // 
             // TabReports
@@ -352,7 +313,7 @@ namespace fhui {
             this->TabReports->Margin = System::Windows::Forms::Padding(0);
             this->TabReports->Name = L"TabReports";
             this->TabReports->Padding = System::Windows::Forms::Padding(3);
-            this->TabReports->Size = System::Drawing::Size(603, 535);
+            this->TabReports->Size = System::Drawing::Size(589, 535);
             this->TabReports->TabIndex = 0;
             this->TabReports->Text = L"Reports";
             this->TabReports->UseVisualStyleBackColor = true;
@@ -372,10 +333,112 @@ namespace fhui {
             this->TabSystems->Controls->Add(this->splitContainer2);
             this->TabSystems->Location = System::Drawing::Point(4, 22);
             this->TabSystems->Name = L"TabSystems";
-            this->TabSystems->Size = System::Drawing::Size(603, 535);
+            this->TabSystems->Size = System::Drawing::Size(569, 535);
             this->TabSystems->TabIndex = 2;
             this->TabSystems->Text = L"Systems";
             this->TabSystems->UseVisualStyleBackColor = true;
+            // 
+            // splitContainer2
+            // 
+            this->splitContainer2->Dock = System::Windows::Forms::DockStyle::Fill;
+            this->splitContainer2->Location = System::Drawing::Point(0, 0);
+            this->splitContainer2->Name = L"splitContainer2";
+            this->splitContainer2->Orientation = System::Windows::Forms::Orientation::Horizontal;
+            // 
+            // splitContainer2.Panel1
+            // 
+            this->splitContainer2->Panel1->Controls->Add(this->SystemsShipAge);
+            this->splitContainer2->Panel1->Controls->Add(label2);
+            this->splitContainer2->Panel1->Controls->Add(this->SystemsGV);
+            this->splitContainer2->Panel1->Controls->Add(this->SystemsGVVal);
+            this->splitContainer2->Panel1->Controls->Add(this->SystemsRef);
+            this->splitContainer2->Panel1->Controls->Add(label1);
+            // 
+            // splitContainer2.Panel2
+            // 
+            this->splitContainer2->Panel2->Controls->Add(this->SystemsGrid);
+            this->splitContainer2->Size = System::Drawing::Size(569, 535);
+            this->splitContainer2->SplitterDistance = 30;
+            this->splitContainer2->SplitterWidth = 1;
+            this->splitContainer2->TabIndex = 0;
+            // 
+            // SystemsShipAge
+            // 
+            this->SystemsShipAge->FormattingEnabled = true;
+            this->SystemsShipAge->Location = System::Drawing::Point(415, 5);
+            this->SystemsShipAge->Name = L"SystemsShipAge";
+            this->SystemsShipAge->Size = System::Drawing::Size(135, 21);
+            this->SystemsShipAge->TabIndex = 6;
+            // 
+            // label2
+            // 
+            label2->AutoSize = true;
+            label2->Location = System::Drawing::Point(356, 8);
+            label2->Name = L"label2";
+            label2->Size = System::Drawing::Size(53, 13);
+            label2->TabIndex = 5;
+            label2->Text = L"Ship Age:";
+            // 
+            // SystemsGV
+            // 
+            this->SystemsGV->AutoSize = true;
+            this->SystemsGV->Location = System::Drawing::Point(258, 7);
+            this->SystemsGV->Name = L"SystemsGV";
+            this->SystemsGV->Size = System::Drawing::Size(44, 17);
+            this->SystemsGV->TabIndex = 4;
+            this->SystemsGV->Text = L"GV:";
+            this->SystemsGV->UseVisualStyleBackColor = true;
+            // 
+            // SystemsGVVal
+            // 
+            this->SystemsGVVal->Location = System::Drawing::Point(305, 5);
+            this->SystemsGVVal->MaxLength = 4;
+            this->SystemsGVVal->Name = L"SystemsGVVal";
+            this->SystemsGVVal->Size = System::Drawing::Size(45, 20);
+            this->SystemsGVVal->TabIndex = 2;
+            this->SystemsGVVal->Text = L"0";
+            // 
+            // SystemsRef
+            // 
+            this->SystemsRef->FormattingEnabled = true;
+            this->SystemsRef->Location = System::Drawing::Point(105, 4);
+            this->SystemsRef->Name = L"SystemsRef";
+            this->SystemsRef->Size = System::Drawing::Size(147, 21);
+            this->SystemsRef->TabIndex = 1;
+            // 
+            // SystemsGrid
+            // 
+            this->SystemsGrid->AllowUserToAddRows = false;
+            this->SystemsGrid->AllowUserToDeleteRows = false;
+            this->SystemsGrid->AllowUserToOrderColumns = true;
+            this->SystemsGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
+            this->SystemsGrid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
+            dataGridViewCellStyle1->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle1->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle1->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+                static_cast<System::Byte>(238)));
+            dataGridViewCellStyle1->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle1->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle1->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle1->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->SystemsGrid->DefaultCellStyle = dataGridViewCellStyle1;
+            this->SystemsGrid->Dock = System::Windows::Forms::DockStyle::Fill;
+            this->SystemsGrid->Location = System::Drawing::Point(0, 0);
+            this->SystemsGrid->Name = L"SystemsGrid";
+            this->SystemsGrid->ReadOnly = true;
+            dataGridViewCellStyle2->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle2->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle2->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+                static_cast<System::Byte>(238)));
+            dataGridViewCellStyle2->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle2->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle2->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle2->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->SystemsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            this->SystemsGrid->RowHeadersWidth = 4;
+            this->SystemsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
+            this->SystemsGrid->Size = System::Drawing::Size(569, 100);
+            this->SystemsGrid->TabIndex = 0;
             // 
             // TabPlanets
             // 
@@ -422,48 +485,6 @@ namespace fhui {
             this->TabCommands->Text = L"Commands";
             this->TabCommands->UseVisualStyleBackColor = true;
             // 
-            // SystemsGV
-            // 
-            this->SystemsGV->AutoSize = true;
-            this->SystemsGV->Location = System::Drawing::Point(258, 7);
-            this->SystemsGV->Name = L"SystemsGV";
-            this->SystemsGV->Size = System::Drawing::Size(44, 17);
-            this->SystemsGV->TabIndex = 4;
-            this->SystemsGV->Text = L"GV:";
-            this->SystemsGV->UseVisualStyleBackColor = true;
-            // 
-            // label2
-            // 
-            label2->AutoSize = true;
-            label2->Location = System::Drawing::Point(356, 8);
-            label2->Name = L"label2";
-            label2->Size = System::Drawing::Size(53, 13);
-            label2->TabIndex = 5;
-            label2->Text = L"Ship Age:";
-            // 
-            // SystemsShipAge
-            // 
-            this->SystemsShipAge->FormattingEnabled = true;
-            this->SystemsShipAge->Location = System::Drawing::Point(415, 5);
-            this->SystemsShipAge->Name = L"SystemsShipAge";
-            this->SystemsShipAge->Size = System::Drawing::Size(135, 21);
-            this->SystemsShipAge->TabIndex = 6;
-            // 
-            // SystemsGrid
-            // 
-            this->SystemsGrid->AllowUserToAddRows = false;
-            this->SystemsGrid->AllowUserToDeleteRows = false;
-            this->SystemsGrid->AllowUserToOrderColumns = true;
-            this->SystemsGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
-            this->SystemsGrid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-            this->SystemsGrid->Dock = System::Windows::Forms::DockStyle::Fill;
-            this->SystemsGrid->Location = System::Drawing::Point(0, 0);
-            this->SystemsGrid->Name = L"SystemsGrid";
-            this->SystemsGrid->ReadOnly = true;
-            this->SystemsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
-            this->SystemsGrid->Size = System::Drawing::Size(603, 504);
-            this->SystemsGrid->TabIndex = 0;
-            // 
             // Form1
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -472,15 +493,12 @@ namespace fhui {
             this->Controls->Add(TopSplitCont);
             this->Name = L"Form1";
             this->Text = L"FarHorizons User Interface";
+            this->WindowState = System::Windows::Forms::FormWindowState::Maximized;
             splitContainer1->Panel1->ResumeLayout(false);
             splitContainer1->Panel1->PerformLayout();
             splitContainer1->Panel2->ResumeLayout(false);
             splitContainer1->Panel2->PerformLayout();
             splitContainer1->ResumeLayout(false);
-            this->splitContainer2->Panel1->ResumeLayout(false);
-            this->splitContainer2->Panel1->PerformLayout();
-            this->splitContainer2->Panel2->ResumeLayout(false);
-            this->splitContainer2->ResumeLayout(false);
             TopSplitCont->Panel1->ResumeLayout(false);
             TopSplitCont->Panel1->PerformLayout();
             TopSplitCont->Panel2->ResumeLayout(false);
@@ -488,6 +506,10 @@ namespace fhui {
             this->MenuTabs->ResumeLayout(false);
             this->TabReports->ResumeLayout(false);
             this->TabSystems->ResumeLayout(false);
+            this->splitContainer2->Panel1->ResumeLayout(false);
+            this->splitContainer2->Panel1->PerformLayout();
+            this->splitContainer2->Panel2->ResumeLayout(false);
+            this->splitContainer2->ResumeLayout(false);
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsGrid))->EndInit();
             this->ResumeLayout(false);
 
