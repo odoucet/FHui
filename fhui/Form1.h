@@ -1,6 +1,7 @@
 #pragma once
 
 ref class GameData;
+ref class PlanetView;
 
 namespace fhui {
 
@@ -48,8 +49,11 @@ namespace fhui {
         void LoadReport(String ^fileName);
         void LoadCommands();
         void InitData();
+        void SetupSystems();
+        void SetupPlanets();
 
         GameData   ^m_GameData;
+        SortedList ^m_PlanetsView;
         SortedList ^m_Reports;
 
         // --------------------------------------------------

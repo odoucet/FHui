@@ -18,24 +18,8 @@ void Form1::LoadGameData()
         LoadReports();
         LoadCommands();
 
-        SystemsGrid->AutoGenerateColumns = false;
-        SystemsGrid->DataSource = m_GameData->GetStarSystems();
-        SystemsGrid->Columns->Add("X", "X");
-        SystemsGrid->Columns->Add("Y", "Y");
-        SystemsGrid->Columns->Add("Z", "Z");
-        SystemsGrid->Columns->Add("Type", "Type");
-        SystemsGrid->Columns->Add("Scan", "Scan");
-        SystemsGrid->Columns->Add("NumPL", "Planets");
-        SystemsGrid->Columns->Add("Dist", "Distance");
-        SystemsGrid->Columns->Add("Mishap", "Mishap %");
-        SystemsGrid->Columns["X"]->DataPropertyName         = "X";
-        SystemsGrid->Columns["Y"]->DataPropertyName         = "Y";
-        SystemsGrid->Columns["Z"]->DataPropertyName         = "Z";
-        SystemsGrid->Columns["Type"]->DataPropertyName      = "Type";
-        SystemsGrid->Columns["Scan"]->DataPropertyName      = "ScanTour";
-        SystemsGrid->Columns["NumPL"]->DataPropertyName     = "NumPlanets";
-        SystemsGrid->Columns["Dist"]->DataPropertyName      = "Distance";
-        SystemsGrid->Columns["Mishap"]->DataPropertyName    = "Mishap";
+        SetupSystems();
+        SetupPlanets();
     }
     catch( SystemException ^e )
     {
@@ -106,6 +90,36 @@ void Form1::InitData()
     m_GameData = gcnew GameData;
 
     RepMode->SelectedIndex = 1;
+}
+
+void Form1::SetupSystems()
+{
+    SystemsGrid->AutoGenerateColumns = false;
+    SystemsGrid->DataSource = m_GameData->GetStarSystems();
+    SystemsGrid->Columns->Add("X", "X");
+    SystemsGrid->Columns->Add("Y", "Y");
+    SystemsGrid->Columns->Add("Z", "Z");
+    SystemsGrid->Columns->Add("Type", "Type");
+    SystemsGrid->Columns->Add("Scan", "Scan");
+    SystemsGrid->Columns->Add("NumPL", "Planets");
+    SystemsGrid->Columns->Add("Dist", "Distance");
+    SystemsGrid->Columns->Add("Mishap", "Mishap %");
+    SystemsGrid->Columns["X"]->DataPropertyName         = "X";
+    SystemsGrid->Columns["Y"]->DataPropertyName         = "Y";
+    SystemsGrid->Columns["Z"]->DataPropertyName         = "Z";
+    SystemsGrid->Columns["Type"]->DataPropertyName      = "Type";
+    SystemsGrid->Columns["Scan"]->DataPropertyName      = "ScanTour";
+    SystemsGrid->Columns["NumPL"]->DataPropertyName     = "NumPlanets";
+    SystemsGrid->Columns["Dist"]->DataPropertyName      = "Distance";
+    SystemsGrid->Columns["Mishap"]->DataPropertyName    = "Mishap";
+
+    SystemsGrid->Columns["X"]->SortMode = DataGridViewColumnSortMode::Automatic;
+//    for each( DataGridViewColumn ^column in SystemsGrid->Columns )
+//        column->SortMode = DataGridViewColumnSortMode::Automatic;
+}
+
+void Form1::SetupPlanets()
+{
 }
 
 }

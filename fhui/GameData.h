@@ -122,6 +122,46 @@ public:
     double              m_Mishap;
 };
 
+public ref class PlanetView
+{
+public:
+    PlanetView(int x, int y, int z, int plNum, Planet ^planet)
+        : m_Planet(planet)
+    {
+        X = x;
+        Y = y;
+        Z = z;
+        PlNum = plNum;
+        TempClass = planet->m_TempClass;
+        PressClass = planet->m_PressClass;
+        LSN = planet->m_LSN;
+        Comment = planet->m_Comment;
+    }
+
+    property int        X;
+    property int        Y;
+    property int        Z;
+    property int        PlNum;
+    property String^    Name;
+    property int        TempClass;
+    property int        PressClass;
+    property String^    MiningDiff { String^ get() { return String::Format("{0:F2}", m_Planet->m_MiningDiff); } }
+    property int        LSN;
+    property String^    Distance
+    {
+        String^ get() { return String::Format("{0:F2}", m_Distance); }
+    }
+    property String^    Mishap
+    {
+        String^ get() { return String::Format("{0:F2}% ({1:F2}%)", m_Mishap, m_Mishap * m_Mishap / 100.0); }
+    }
+    property String^    Comment;
+
+    Planet             ^m_Planet;
+    double              m_Distance;
+    double              m_Mishap;
+};
+
 public ref class GameData
 {
 public:
