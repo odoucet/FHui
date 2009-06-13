@@ -94,6 +94,36 @@ void Form1::InitData()
 
 void Form1::SetupSystems()
 {
+    // Put system data in a DataTable so that column sorting works.
+    DataTable ^dataTable = gcnew DataTable();
+
+    dataTable->Columns->Add("X", int::typeid );
+    dataTable->Columns->Add("Y", int::typeid );
+    dataTable->Columns->Add("Z", int::typeid );
+    dataTable->Columns->Add("Type", String::typeid );
+    dataTable->Columns->Add("Scan", String::typeid );
+    dataTable->Columns->Add("Planets", String::typeid );
+    dataTable->Columns->Add("Distance", double::typeid );
+    dataTable->Columns->Add("Mishap %", double::typeid );
+
+    array<StarSystem^>^ data = m_GameData->GetStarSystems();
+
+    for ( int i = data->GetLowerBound( 0 ); i <= data->GetUpperBound( 0 ); i++ )
+    {
+        DataRow^ row = dataTable->NewRow();
+        row["X"] = m_GameData->GetStarSystems()[i]->X;
+        row["Y"] = m_GameData->GetStarSystems()[i]->Y;
+        row["Z"] = m_GameData->GetStarSystems()[i]->Z;
+        row["Type"] = m_GameData->GetStarSystems()[i]->Type;
+        row["Scan"] = m_GameData->GetStarSystems()[i]->ScanTour;
+        row["Planets"] = m_GameData->GetStarSystems()[i]->NumPlanets;
+        row["Distance"] = 0; // calculate it
+        row["Mishap %"] = 0; // calculate it
+        dataTable->Rows->Add(row);
+    }
+    SystemsGrid->DataSource = dataTable;
+
+/*
     SystemsGrid->AutoGenerateColumns = false;
     SystemsGrid->DataSource = m_GameData->GetStarSystems();
     SystemsGrid->Columns->Add("X", "X");
@@ -116,6 +146,8 @@ void Form1::SetupSystems()
     SystemsGrid->Columns["X"]->SortMode = DataGridViewColumnSortMode::Automatic;
 //    for each( DataGridViewColumn ^column in SystemsGrid->Columns )
 //        column->SortMode = DataGridViewColumnSortMode::Automatic;
+*/
+
 }
 
 void Form1::SetupPlanets()
