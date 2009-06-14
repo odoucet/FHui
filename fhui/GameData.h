@@ -27,15 +27,15 @@ public:
 public ref class Alien
 {
 public:
-    Alien(String ^name, int tour)
+    Alien(String ^name, int turn)
         : m_Name(name)
         , m_Relation(SP_NEUTRAL)
-        , m_TourMet(tour)
+        , m_TurnMet(turn)
     {}
 
     String         ^m_Name;
     SPRelType       m_Relation;
-    int             m_TourMet;
+    int             m_TurnMet;
 };
 
 public ref class Planet
@@ -72,7 +72,7 @@ public ref class StarSystem
 public:
     StarSystem(int x, int y, int z, String ^type)
         : m_Planets(gcnew array<Planet^>(0))
-        , m_TourScanned(-1)
+        , m_TurnScanned(-1)
         , m_Distance(0)
         , m_Mishap(0)
     {
@@ -90,7 +90,7 @@ public:
     {
         String^ get()
         {
-            if( m_TourScanned == -1 )
+            if( m_TurnScanned == -1 )
                 return "?";
             int minLSN = 99999;
             for each( Planet ^pl in m_Planets )
@@ -98,13 +98,13 @@ public:
             return String::Format("{0} ({1})", m_Planets->Length, minLSN);
         }
     }
-    property String^    ScanTour
+    property String^    ScanTurn
     {
         String^ get()
         {
-            if( m_TourScanned == -1 )       return "Not scanned";
-            else if( m_TourScanned == 0 )   return "Received";
-            else                            return String::Format("Scaned, {0}", m_TourScanned);
+            if( m_TurnScanned == -1 )       return "Not scanned";
+            else if( m_TurnScanned == 0 )   return "Received";
+            else                            return String::Format("Scaned, {0}", m_TurnScanned);
         }
     }
     property String^    Distance
@@ -117,7 +117,7 @@ public:
     }
 
     array<Planet^>     ^m_Planets;
-    int                 m_TourScanned;
+    int                 m_TurnScanned;
     double              m_Distance;
     double              m_Mishap;
 };
@@ -181,16 +181,16 @@ public:
     void            SetAtmosphereReq(GasType gas, int, int);
     void            SetAtmosphereNeutral(GasType gas);
     void            SetAtmospherePoisonous(GasType gas);
-    void            SetTechLevel(int tour, TechType, int, int);
-    void            SetFleetCost(int tour, int, float);
-    Alien^          AddAlien(int tour, String ^sp);
-    void            SetAlienRelation(int tour, String ^sp, SPRelType);
+    void            SetTechLevel(int turn, TechType, int, int);
+    void            SetFleetCost(int turn, int, float);
+    Alien^          AddAlien(int turn, String ^sp);
+    void            SetAlienRelation(int turn, String ^sp, SPRelType);
     void            AddStarSystem(int x, int y, int z, String ^type);
-    void            AddPlanetScan(int tour, int x, int y, int z, int plNum, Planet ^planet);
+    void            AddPlanetScan(int turn, int x, int y, int z, int plNum, Planet ^planet);
 
     // ------------------------------------------
 protected:
-    int             TourAlign(int tour);
+    int             TurnAlign(int turn);
 
     // ------------------------------------------
     String             ^m_SpeciesName;
@@ -202,5 +202,5 @@ protected:
     SortedList         ^m_Aliens;
     array<StarSystem^> ^m_Systems;
 
-    int                 m_TourMax;
+    int                 m_TurnMax;
 };

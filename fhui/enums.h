@@ -2,7 +2,7 @@
 
 using namespace System;
 
-const int TOUR_NOTES = 99999;
+const int TURN_NOTES = 99999;
 
 enum TechType
 {

@@ -30,7 +30,7 @@ GameData::GameData(void)
 {
     m_SpeciesName       = nullptr;
     m_AtmReq            = gcnew AtmosphericReq;
-    m_TourMax           = 0;
+    m_TurnMax           = 0;
     m_TechLevels        = gcnew array<int>(TECH_MAX){0};
     m_TechLevelsTeach   = gcnew array<int>(TECH_MAX){0};
     m_FleetCost         = 0;
@@ -68,13 +68,13 @@ Alien^ GameData::GetAlien(String ^sp)
 
 // ---------------------------------------------------------
 
-int GameData::TourAlign(int tour)
+int GameData::TurnAlign(int turn)
 {
-    if( tour == 0 )
+    if( turn == 0 )
     {
-        return TOUR_NOTES;
+        return TURN_NOTES;
     }
-    return tour;
+    return turn;
 }
 
 void GameData::SetSpecies(String ^sp)
@@ -88,7 +88,7 @@ void GameData::SetSpecies(String ^sp)
                 m_SpeciesName, sp) );
 }
 
-Alien^ GameData::AddAlien(int tour, String ^sp)
+Alien^ GameData::AddAlien(int turn, String ^sp)
 {
     String ^spKey = sp->ToLower();
     if( m_Aliens->ContainsKey(spKey) )
@@ -96,44 +96,44 @@ Alien^ GameData::AddAlien(int tour, String ^sp)
         Alien ^alien = safe_cast<Alien^>
             ( m_Aliens->GetByIndex( m_Aliens->IndexOfKey(spKey) ) );
 
-        alien->m_TourMet = Math::Min(TourAlign(tour), alien->m_TourMet);
+        alien->m_TurnMet = Math::Min(TurnAlign(turn), alien->m_TurnMet);
 
-        // Reset relation if this is latest tour,
+        // Reset relation if this is latest turn,
         // it will self tune while parsing Allies and Enemies.
-        if( tour == m_TourMax )
+        if( turn == m_TurnMax )
             alien->m_Relation = SP_NEUTRAL;
 
         return alien;
     }
 
-    Alien ^alien = gcnew Alien(sp, tour);
+    Alien ^alien = gcnew Alien(sp, turn);
     m_Aliens->Add(spKey, alien);
 
     return alien;
 }
 
-void GameData::SetAlienRelation(int tour, String ^sp, SPRelType rel)
+void GameData::SetAlienRelation(int turn, String ^sp, SPRelType rel)
 {
-    Alien ^alien = AddAlien(tour, sp);
+    Alien ^alien = AddAlien(turn, sp);
     alien->m_Relation = rel;
 }
 
-void GameData::SetTechLevel(int tour, TechType tech, int lev, int levTeach)
+void GameData::SetTechLevel(int turn, TechType tech, int lev, int levTeach)
 {
-    if( tour >= m_TourMax )
+    if( turn >= m_TurnMax )
     {
-        m_TourMax = tour;
+        m_TurnMax = turn;
 
         m_TechLevels[tech] = lev;
         m_TechLevelsTeach[tech] = levTeach;
     }
 }
 
-void GameData::SetFleetCost(int tour, int cost, float percent)
+void GameData::SetFleetCost(int turn, int cost, float percent)
 {
-    if( tour >= m_TourMax )
+    if( turn >= m_TurnMax )
     {
-        m_TourMax = tour;
+        m_TurnMax = turn;
 
         m_FleetCost = cost;
         m_FleetCostPercent = percent;
@@ -203,7 +203,7 @@ void GameData::AddStarSystem(int x, int y, int z, String ^type)
     m_Systems[m_Systems->Length - 1] = system;
 }
 
-void GameData::AddPlanetScan(int tour, int x, int y, int z, int plNum, Planet ^planet)
+void GameData::AddPlanetScan(int turn, int x, int y, int z, int plNum, Planet ^planet)
 {
     StarSystem ^system = GetStarSystem(x, y, z);
     if( system == nullptr )
@@ -213,7 +213,7 @@ void GameData::AddPlanetScan(int tour, int x, int y, int z, int plNum, Planet ^p
     Array::Resize(system->m_Planets, Math::Max(plNum, system->m_Planets->Length));
     --plNum;
     if( system->m_Planets[plNum] == nullptr ||
-        tour == m_TourMax )
+        turn == m_TurnMax )
     {
         if( system->m_Planets[plNum] != nullptr &&
             String::IsNullOrEmpty(planet->m_Comment) )
@@ -221,6 +221,6 @@ void GameData::AddPlanetScan(int tour, int x, int y, int z, int plNum, Planet ^p
             planet->m_Comment = system->m_Planets[plNum]->m_Comment;
         }
         system->m_Planets[plNum] = planet;
-        system->m_TourScanned = Math::Max(system->m_TourScanned, tour);
+        system->m_TurnScanned = Math::Max(system->m_TurnScanned, turn);
     }
 }

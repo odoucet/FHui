@@ -26,7 +26,7 @@ public:
     Report(GameData^);
 
     bool            IsValid();
-    int             GetTour()       { return m_Tour; }
+    int             GetTurn()       { return m_Turn; }
     String^         GetContent()    { return m_Content; }
     String^         GetSummary();
 
@@ -54,7 +54,7 @@ private:
 
     GameData       ^m_GameData;
     String         ^m_Content;
-    int             m_Tour;
+    int             m_Turn;
 
     PhaseType       m_Phase;
     array<String^> ^m_TmpRegexResult;

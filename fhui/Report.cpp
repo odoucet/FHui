@@ -6,7 +6,7 @@ using namespace System::Text::RegularExpressions;
 Report::Report(GameData ^gd)
     : m_GameData(gd)
     , m_Phase(PHASE_GLOBAL)
-    , m_Tour(0)
+    , m_Turn(0)
     , m_bParsingAggregate(false)
     , m_StringAggregate(nullptr)
     , m_ScanX(0)
@@ -168,12 +168,12 @@ bool Report::Parse(String ^s)
         // Turn number
         if( MatchWithOutput(s, "^\\s*EVENT LOG FOR TURN (\\d+)") )
         {
-            m_Tour = GetMatchResultInt(0);
+            m_Turn = GetMatchResultInt(0);
             break;
         }
         if( MatchWithOutput(s, "START OF TURN (\\d+)") )
         {
-            m_Tour = GetMatchResultInt(0);
+            m_Turn = GetMatchResultInt(0);
             break;
         }
 
@@ -200,7 +200,7 @@ bool Report::Parse(String ^s)
         }
         // Fleet maintenance
         else if( MatchWithOutput(s, "Fleet maintenance cost = (\\d+) \\((\\d+\\.?\\d+)% of total production\\)") )
-            m_GameData->SetFleetCost(m_Tour, GetMatchResultInt(0), GetMatchResultFloat(1));
+            m_GameData->SetFleetCost(m_Turn, GetMatchResultInt(0), GetMatchResultFloat(1));
         // Species...
         else if( Regex("^Species met:").Match(s)->Success )
             StartLineAggregate(PHASE_SPECIES_MET, s);
@@ -225,7 +225,7 @@ bool Report::Parse(String ^s)
         if( MatchAggregateList(FinishLineAggregate(), "Species met:", "SP\\s+([^,;]+)") )
         {
             for( int i = 0; i < m_TmpRegexResult->Length; ++i )
-                m_GameData->AddAlien(m_Tour, GetMatchResult(i));
+                m_GameData->AddAlien(m_Turn, GetMatchResult(i));
             break;
         }
         return false;
@@ -234,7 +234,7 @@ bool Report::Parse(String ^s)
         if( MatchAggregateList(FinishLineAggregate(), "Allies:", "SP\\s+([^,;]+)") )
         {
             for( int i = 0; i < m_TmpRegexResult->Length; ++i )
-                m_GameData->SetAlienRelation(m_Tour, GetMatchResult(i), SP_ALLY);
+                m_GameData->SetAlienRelation(m_Turn, GetMatchResult(i), SP_ALLY);
             break;
         }
         return false;
@@ -243,7 +243,7 @@ bool Report::Parse(String ^s)
         if( MatchAggregateList(FinishLineAggregate(), "Enemies:", "SP\\s+([^,;]+)") )
         {
             for( int i = 0; i < m_TmpRegexResult->Length; ++i )
-                m_GameData->SetAlienRelation(m_Tour, GetMatchResult(i), SP_ENEMY);
+                m_GameData->SetAlienRelation(m_Turn, GetMatchResult(i), SP_ENEMY);
             break;
         }
         return false;
@@ -368,7 +368,7 @@ void Report::MatchPlanetScan(String ^s)
         if( !String::IsNullOrEmpty(s) )
             planet->m_Comment = s;
 
-        m_GameData->AddPlanetScan( m_Tour, m_ScanX, m_ScanY, m_ScanZ, plNum, planet );
+        m_GameData->AddPlanetScan( m_Turn, m_ScanX, m_ScanY, m_ScanZ, plNum, planet );
         m_ScanHasPlanets = true;
     }
 }
@@ -379,12 +379,12 @@ bool Report::MatchTech(String ^s, String ^techName, TechType tech)
     String ^e1 = String::Format("{0} = (\\d+)", techName);
     if( MatchWithOutput(s, e2) )
     {
-        m_GameData->SetTechLevel(m_Tour, tech, GetMatchResultInt(0), GetMatchResultInt(1));
+        m_GameData->SetTechLevel(m_Turn, tech, GetMatchResultInt(0), GetMatchResultInt(1));
         return true;
     }
     if( MatchWithOutput(s, e1) )
     {
-        m_GameData->SetTechLevel(m_Tour, tech, GetMatchResultInt(0), GetMatchResultInt(0));
+        m_GameData->SetTechLevel(m_Turn, tech, GetMatchResultInt(0), GetMatchResultInt(0));
         return true;
     }
     return false;
