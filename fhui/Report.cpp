@@ -13,6 +13,7 @@ Report::Report(GameData ^gd)
     , m_ScanY(0)
     , m_ScanZ(0)
     , m_ScanHasPlanets(false)
+    , m_ScanHome(nullptr)
 {
     m_Content           = gcnew String("");
     m_TmpRegexResult    = gcnew array<String^>(1);
@@ -22,111 +23,9 @@ bool Report::IsValid()
 {
     return
         m_GameData->GetSpecies() != nullptr &&
-        m_GameData->GetAtmosphere()->m_ReqGas != GAS_MAX &&
+        m_GameData->GetSpeciesName() != nullptr &&
+        m_GameData->GetSpecies()->m_AtmReq->IsValid() &&
         m_Phase == PHASE_ORDERS_TEMPLATE;
-}
-
-String^ Report::GetSummary()
-{
-    if( !IsValid() )
-        return "ERROR";
-
-    return String::Format(
-        "{1}"
-        "--------------------------------\r\n"
-        "{2}"
-        "{3}"
-        "--------------------------------\r\n"
-        "{4}",
-        "--------------------------------\r\n",
-        GetSpeciesSummary(),
-        GetAllTechsSummary(),
-        GetFleetSummary(),
-        GetAliensSummary() );
-}
-
-String^ Report::GetSpeciesSummary()
-{
-    return String::Format(
-        "Species: {0}\r\n"
-        "T:{1} P:{2} A:{3} {4}-{5}%\r\n",
-        m_GameData->GetSpecies(),
-        "?",    // TODO: temp class
-        "?",    // TODO: press class
-        GasToString( m_GameData->GetAtmosphere()->m_ReqGas ),
-        m_GameData->GetAtmosphere()->m_ReqMin,
-        m_GameData->GetAtmosphere()->m_ReqMax );
-}
-
-String^ Report::GetAllTechsSummary()
-{
-    return String::Format(
-        "  MI={0} | MA={1}\r\n"
-        "  ML={2} | GV={3}\r\n"
-        "  LS={4} | BI={5}\r\n",
-        GetTechSummary(TECH_MI),
-        GetTechSummary(TECH_MA),
-        GetTechSummary(TECH_ML),
-        GetTechSummary(TECH_GV),
-        GetTechSummary(TECH_LS),
-        GetTechSummary(TECH_BI) );
-}
-
-String^ Report::GetFleetSummary()
-{
-    int cost;
-    float costPerc;
-    m_GameData->GetFleetCost(cost, costPerc);
-
-    return String::Format("Fleet maint. = {0} ({1}%)\r\n",
-        cost, costPerc);
-}
-
-String^ Report::GetTechSummary(TechType tech)
-{
-    int lev, levTeach;
-    m_GameData->GetTechLevel(tech, lev, levTeach);
-
-    if( lev != levTeach )
-    {
-        return String::Format("{0,3}/{1,3}", lev, levTeach);
-    }
-
-    return String::Format("{0,3}    ", lev);
-}
-
-String^ Report::GetAliensSummary()
-{
-    String ^ret = gcnew String("");
-
-    SortedList ^aliens = m_GameData->GetAliens();
-
-    for( int i = 0; i < aliens->Count; ++i )
-    {
-        Alien ^alien = safe_cast<Alien^>(aliens->GetByIndex(i));
-        if( alien->m_Relation == SP_ALLY )
-        {
-            String ^tmp = String::Format("{0}Ally: SP {1}\r\n",
-                ret, alien->m_Name);
-            ret = tmp;
-        }
-    }
-
-    for( int i = 0; i < aliens->Count; ++i )
-    {
-        Alien ^alien = safe_cast<Alien^>(aliens->GetByIndex(i));
-        if( alien->m_Relation == SP_ENEMY )
-        {
-            String ^tmp = String::Format("{0}Enemy: SP {1}\r\n",
-                ret, alien->m_Name);
-            ret = tmp;
-        }
-    }
-
-    if( ret->Length == 0 )
-        ret = "No Allies/Enemies";
-
-    return ret;
 }
 
 // ------------------------------------------------------------
@@ -204,6 +103,8 @@ bool Report::Parse(String ^s)
         // Species...
         else if( Regex("^Species met:").Match(s)->Success )
             StartLineAggregate(PHASE_SPECIES_MET, s);
+        else if( MatchWithOutput(s, "Scan of home star system for SP\\s+([^,;]+):$") )
+            m_ScanHome = m_GameData->AddAlien(m_Turn, GetMatchResult(0));
         else if( Regex("^Allies:").Match(s)->Success )
             StartLineAggregate(PHASE_SPECIES_ALLIES, s);
         else if( Regex("^Enemies:").Match(s)->Success )
@@ -298,7 +199,10 @@ bool Report::Parse(String ^s)
         if( Regex("^\\s*$").Match(s)->Success )
         {
             if( m_ScanHasPlanets )
+            {
                 m_Phase = PHASE_GLOBAL;
+                m_ScanHome = nullptr;
+            }
         }
         else
             MatchPlanetScan(s);
@@ -317,6 +221,11 @@ bool Report::MatchSystemScanStart(String ^s)
         m_ScanY = GetMatchResultInt(1);
         m_ScanZ = GetMatchResultInt(2);
         m_ScanHasPlanets = false;
+
+        // Set the home system
+        if( m_ScanHome )
+            m_ScanHome->m_HomeSystem = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ);
+
         return true;
     }
     return false;
@@ -339,6 +248,13 @@ void Report::MatchPlanetScan(String ^s)
         if( MatchWithOutput(s, "(\\d+)\\s+") )
         {
             planet->m_LSN = GetMatchResultInt(0);
+
+            if( m_ScanHome && planet->m_LSN == 0 )
+            {
+                m_ScanHome->m_HomePlanet = plNum;
+                m_ScanHome->m_AtmReq->m_TempClass  = planet->m_TempClass;
+                m_ScanHome->m_AtmReq->m_PressClass = planet->m_PressClass;
+            }
         }
         else if( MatchWithOutput(s, "[x-?]+\\s+") )
         {
@@ -379,12 +295,22 @@ bool Report::MatchTech(String ^s, String ^techName, TechType tech)
     String ^e1 = String::Format("{0} = (\\d+)", techName);
     if( MatchWithOutput(s, e2) )
     {
-        m_GameData->SetTechLevel(m_Turn, tech, GetMatchResultInt(0), GetMatchResultInt(1));
+        m_GameData->SetTechLevel(
+            m_Turn,
+            m_GameData->GetSpecies(),
+            tech,
+            GetMatchResultInt(0),
+            GetMatchResultInt(1));
         return true;
     }
     if( MatchWithOutput(s, e1) )
     {
-        m_GameData->SetTechLevel(m_Turn, tech, GetMatchResultInt(0), GetMatchResultInt(0));
+        m_GameData->SetTechLevel(
+            m_Turn,
+            m_GameData->GetSpecies(),
+            tech,
+            GetMatchResultInt(0),
+            GetMatchResultInt(0));
         return true;
     }
     return false;

@@ -26,13 +26,31 @@ int Planet::CalculateLSN(AtmosphericReq ^atmReq, int tc, int pc)
 
 // ---------------------------------------------------------
 
+double StarSystem::CalcDistance(int x, int y, int z)
+{
+    int dx = Math::Abs(X - x);
+    int dy = Math::Abs(Y - y);
+    int dz = Math::Abs(Z - z);
+    return Math::Sqrt(dx * dx + dy * dy + dz * dz);
+}
+
+double StarSystem::CalcMishap(int x, int y, int z, int gv, int age)
+{
+    if( gv == 0 )
+        throw gcnew ArgumentException("GV must not be 0 for mishap calculation!");
+
+    double dist = CalcDistance(x, y, z);
+    if( dist == 0 )
+        return 0.0;
+    return (dist * dist) / gv + (age * 2.0);
+}
+
+// ---------------------------------------------------------
+
 GameData::GameData(void)
 {
-    m_SpeciesName       = nullptr;
-    m_AtmReq            = gcnew AtmosphericReq;
+    m_Species           = nullptr;
     m_TurnMax           = 0;
-    m_TechLevels        = gcnew array<int>(TECH_MAX){0};
-    m_TechLevelsTeach   = gcnew array<int>(TECH_MAX){0};
     m_FleetCost         = 0;
     m_FleetCostPercent  = 0.0;
     m_Aliens            = gcnew SortedList;
@@ -41,11 +59,103 @@ GameData::GameData(void)
 
 // ---------------------------------------------------------
 
-void GameData::GetTechLevel(TechType tech, int %lev, int %levTeach)
+String^ GameData::GetSummary()
 {
-    lev = m_TechLevels[tech];
-    levTeach = m_TechLevelsTeach[tech];
+    return String::Format(
+        "{1}"
+        "--------------------------------\r\n"
+        "{2}"
+        "{3}"
+        "--------------------------------\r\n"
+        "{4}",
+        "--------------------------------\r\n",
+        GetSpeciesSummary(),
+        GetAllTechsSummary(),
+        GetFleetSummary(),
+        GetAliensSummary() );
 }
+
+String^ GameData::GetSpeciesSummary()
+{
+    AtmosphericReq ^atm = m_Species->m_AtmReq;
+
+    return String::Format(
+        "Species: {0}\r\n"
+        "T:{1} P:{2} A:{3} {4}-{5}%\r\n",
+        GetSpeciesName(),
+        atm->m_TempClass == -1 ? "??" : atm->m_TempClass.ToString(),
+        atm->m_PressClass == -1 ? "??" : atm->m_PressClass.ToString(),
+        GasToString( atm->m_ReqGas ),
+        atm->m_ReqMin,
+        atm->m_ReqMax );
+}
+
+String^ GameData::GetAllTechsSummary()
+{
+    return String::Format(
+        "  MI={0} | MA={1}\r\n"
+        "  ML={2} | GV={3}\r\n"
+        "  LS={4} | BI={5}\r\n",
+        GetTechSummary(TECH_MI),
+        GetTechSummary(TECH_MA),
+        GetTechSummary(TECH_ML),
+        GetTechSummary(TECH_GV),
+        GetTechSummary(TECH_LS),
+        GetTechSummary(TECH_BI) );
+}
+
+String^ GameData::GetFleetSummary()
+{
+    return String::Format("Fleet maint. = {0} ({1}%)\r\n",
+        m_FleetCost, m_FleetCostPercent);
+}
+
+String^ GameData::GetTechSummary(TechType tech)
+{
+    int lev = m_Species->m_TechLevels[tech];
+    int levTeach = m_Species->m_TechLevelsTeach[tech];
+
+    if( lev != levTeach )
+    {
+        return String::Format("{0,3}/{1,3}", lev, levTeach);
+    }
+
+    return String::Format("{0,3}    ", lev);
+}
+
+String^ GameData::GetAliensSummary()
+{
+    String ^ret = gcnew String("");
+
+    for( int i = 0; i < m_Aliens->Count; ++i )
+    {
+        Alien ^alien = safe_cast<Alien^>(m_Aliens->GetByIndex(i));
+        if( alien->m_Relation == SP_ALLY )
+        {
+            String ^tmp = String::Format("{0}Ally: SP {1}\r\n",
+                ret, alien->m_Name);
+            ret = tmp;
+        }
+    }
+
+    for( int i = 0; i < m_Aliens->Count; ++i )
+    {
+        Alien ^alien = safe_cast<Alien^>(m_Aliens->GetByIndex(i));
+        if( alien->m_Relation == SP_ENEMY )
+        {
+            String ^tmp = String::Format("{0}Enemy: SP {1}\r\n",
+                ret, alien->m_Name);
+            ret = tmp;
+        }
+    }
+
+    if( ret->Length == 0 )
+        ret = "No Allies/Enemies";
+
+    return ret;
+}
+
+// ------------------------------------------------------------
 
 void GameData::GetFleetCost(int %cost, float %percent)
 {
@@ -79,13 +189,15 @@ int GameData::TurnAlign(int turn)
 
 void GameData::SetSpecies(String ^sp)
 {
-    if( m_SpeciesName == nullptr )
-        m_SpeciesName = sp;
+    if( m_Species == nullptr )
+    {
+        m_Species = AddAlien(0, sp);
+    }
 
-    if( String::Compare(m_SpeciesName, sp) != 0 )
+    if( String::Compare(m_Species->m_Name, sp) != 0 )
         throw gcnew ArgumentException(
             String::Format("Reports for different species: {0} and {1}",
-                m_SpeciesName, sp) );
+                m_Species->m_Name, sp) );
 }
 
 Alien^ GameData::AddAlien(int turn, String ^sp)
@@ -118,14 +230,15 @@ void GameData::SetAlienRelation(int turn, String ^sp, SPRelType rel)
     alien->m_Relation = rel;
 }
 
-void GameData::SetTechLevel(int turn, TechType tech, int lev, int levTeach)
+void GameData::SetTechLevel(int turn, Alien ^sp, TechType tech, int lev, int levTeach)
 {
-    if( turn >= m_TurnMax )
+    if( turn >= m_TurnMax || sp->m_TechEstimateTurn == -1 )
     {
         m_TurnMax = turn;
 
-        m_TechLevels[tech] = lev;
-        m_TechLevelsTeach[tech] = levTeach;
+        sp->m_TechEstimateTurn      = turn;
+        sp->m_TechLevels[tech]      = lev;
+        sp->m_TechLevelsTeach[tech] = levTeach;
     }
 }
 
@@ -142,40 +255,44 @@ void GameData::SetFleetCost(int turn, int cost, float percent)
 
 void GameData::SetAtmosphereReq(GasType gas, int reqMin, int reqMax)
 {
-    bool atmCheck = true;
+    AtmosphericReq ^atm = GetSpecies()->m_AtmReq;
 
-    if( (m_AtmReq->m_ReqGas != GAS_MAX && m_AtmReq->m_ReqGas != gas) ||
-        m_AtmReq->m_Neutral[gas] ||
-        m_AtmReq->m_Poisonous[gas] )
+    if( (atm->m_ReqGas != GAS_MAX && atm->m_ReqGas != gas) ||
+        atm->m_Neutral[gas] ||
+        atm->m_Poisonous[gas] )
     {
         throw gcnew ArgumentException("Inconsistent atmospheric data in reports.");
     }
 
-    m_AtmReq->m_ReqGas = gas;
-    m_AtmReq->m_ReqMin = reqMin;
-    m_AtmReq->m_ReqMax = reqMax;
+    atm->m_ReqGas = gas;
+    atm->m_ReqMin = reqMin;
+    atm->m_ReqMax = reqMax;
 }
 
 void GameData::SetAtmosphereNeutral(GasType gas)
 {
-    if( m_AtmReq->m_ReqGas == gas ||
-        m_AtmReq->m_Poisonous[gas] )
+    AtmosphericReq ^atm = GetSpecies()->m_AtmReq;
+
+    if( atm->m_ReqGas == gas ||
+        atm->m_Poisonous[gas] )
     {
         throw gcnew ArgumentException("Inconsistent atmospheric data in reports.");
     }
 
-    m_AtmReq->m_Neutral[gas] = true;
+    atm->m_Neutral[gas] = true;
 }
 
 void GameData::SetAtmospherePoisonous(GasType gas)
 {
-    if( m_AtmReq->m_ReqGas == gas ||
-        m_AtmReq->m_Neutral[gas] )
+    AtmosphericReq ^atm = GetSpecies()->m_AtmReq;
+
+    if( atm->m_ReqGas == gas ||
+        atm->m_Neutral[gas] )
     {
         throw gcnew ArgumentException("Inconsistent atmospheric data in reports.");
     }
 
-    m_AtmReq->m_Poisonous[gas] = true;
+    atm->m_Poisonous[gas] = true;
 }
 
 StarSystem^ GameData::GetStarSystem(int x, int y, int z)

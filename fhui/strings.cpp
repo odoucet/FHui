@@ -26,6 +26,8 @@ static GasStr s_GasStrings[GAS_MAX] =
 
 String^ GasToString(GasType gas)
 {
+    if( gas == GAS_MAX )
+        return "???";
     for( int i = 0; i < GAS_MAX; ++i )
         if( s_GasStrings[i].type == gas )
             return gcnew String(s_GasStrings[i].str);

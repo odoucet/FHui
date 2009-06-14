@@ -28,17 +28,10 @@ public:
     bool            IsValid();
     int             GetTurn()       { return m_Turn; }
     String^         GetContent()    { return m_Content; }
-    String^         GetSummary();
 
     bool            Parse(String ^line);
 
 private:
-    String^         GetSpeciesSummary();
-    String^         GetAllTechsSummary();
-    String^         GetTechSummary(TechType tech);
-    String^         GetFleetSummary();
-    String^         GetAliensSummary();
-
     void            StartLineAggregate(PhaseType, String ^s);
     String^         FinishLineAggregate();
 
@@ -66,4 +59,5 @@ private:
     int             m_ScanY;
     int             m_ScanZ;
     bool            m_ScanHasPlanets;
+    Alien          ^m_ScanHome;
 };

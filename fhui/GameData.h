@@ -6,6 +6,7 @@ using namespace System;
 using namespace System::Collections;
 using namespace System::Collections::Specialized;
 
+ref class StarSystem;
 
 public ref class AtmosphericReq
 {
@@ -15,13 +16,20 @@ public:
         , m_ReqMin(0)
         , m_Neutral(gcnew array<bool>(GAS_MAX) )
         , m_Poisonous(gcnew array<bool>(GAS_MAX) )
+        , m_TempClass(-1)
+        , m_PressClass(-1)
     {}
+
+    bool IsValid() { return m_ReqGas != GAS_MAX && m_TempClass != -1 && m_PressClass != -1; }
 
     GasType             m_ReqGas;
     int                 m_ReqMin;
     int                 m_ReqMax;
     array<bool>        ^m_Neutral;
     array<bool>        ^m_Poisonous;
+
+    int                 m_TempClass;
+    int                 m_PressClass;
 };
 
 public ref class Alien
@@ -31,11 +39,26 @@ public:
         : m_Name(name)
         , m_Relation(SP_NEUTRAL)
         , m_TurnMet(turn)
-    {}
+        , m_AtmReq(gcnew AtmosphericReq)
+        , m_HomeSystem(nullptr)
+        , m_HomePlanet(-1)
+        , m_TechEstimateTurn(-1)
+    {
+        m_TechLevels        = gcnew array<int>(TECH_MAX){0};
+        m_TechLevelsTeach   = gcnew array<int>(TECH_MAX){0};
+    }
 
     String         ^m_Name;
     SPRelType       m_Relation;
     int             m_TurnMet;
+    AtmosphericReq ^m_AtmReq;
+
+    StarSystem     ^m_HomeSystem;
+    int             m_HomePlanet;
+
+    int             m_TechEstimateTurn;
+    array<int>     ^m_TechLevels;
+    array<int>     ^m_TechLevelsTeach;
 };
 
 public ref class Planet
@@ -73,14 +96,17 @@ public:
     StarSystem(int x, int y, int z, String ^type)
         : m_Planets(gcnew array<Planet^>(0))
         , m_TurnScanned(-1)
-        , m_Distance(0)
-        , m_Mishap(0)
     {
         X = x;
         Y = y;
         Z = z;
         Type = type;
     }
+
+    double CalcDistance(StarSystem ^s)                  { return CalcDistance(s->X, s->Y, s->Z); }
+    double CalcMishap(StarSystem ^s, int gv, int age)   { return CalcMishap(s->X, s->Y, s->Z, gv, age); }
+    double CalcDistance(int x, int y, int z);
+    double CalcMishap(int x, int y, int z, int gv, int age);
 
     property int        X;
     property int        Y;
@@ -107,21 +133,12 @@ public:
             else                            return String::Format("Scaned, {0}", m_TurnScanned);
         }
     }
-    property String^    Distance
-    {
-        String^ get() { return String::Format("{0:F2}", m_Distance); }
-    }
-    property String^    Mishap
-    {
-        String^ get() { return String::Format("{0:F2}% ({1:F2}%)", m_Mishap, m_Mishap * m_Mishap / 100.0); }
-    }
 
     array<Planet^>     ^m_Planets;
     int                 m_TurnScanned;
-    double              m_Distance;
-    double              m_Mishap;
 };
 
+/*
 public ref class PlanetView
 {
 public:
@@ -161,15 +178,18 @@ public:
     double              m_Distance;
     double              m_Mishap;
 };
+*/
 
 public ref class GameData
 {
 public:
     GameData();
 
-    String^         GetSpecies()                { return m_SpeciesName; }
-    AtmosphericReq^ GetAtmosphere()             { return m_AtmReq; }
-    void            GetTechLevel(TechType, int%, int%);
+
+    String^         GetSummary();
+
+    Alien^          GetSpecies()                { return m_Species; }
+    String^         GetSpeciesName()            { return m_Species->m_Name; }
     void            GetFleetCost(int%, float%);
     Alien^          GetAlien(String ^sp);
     SortedList^     GetAliens()                 { return m_Aliens; }
@@ -181,7 +201,7 @@ public:
     void            SetAtmosphereReq(GasType gas, int, int);
     void            SetAtmosphereNeutral(GasType gas);
     void            SetAtmospherePoisonous(GasType gas);
-    void            SetTechLevel(int turn, TechType, int, int);
+    void            SetTechLevel(int turn, Alien ^sp, TechType, int, int);
     void            SetFleetCost(int turn, int, float);
     Alien^          AddAlien(int turn, String ^sp);
     void            SetAlienRelation(int turn, String ^sp, SPRelType);
@@ -192,11 +212,14 @@ public:
 protected:
     int             TurnAlign(int turn);
 
+    String^         GetSpeciesSummary();
+    String^         GetAllTechsSummary();
+    String^         GetTechSummary(TechType tech);
+    String^         GetFleetSummary();
+    String^         GetAliensSummary();
+
     // ------------------------------------------
-    String             ^m_SpeciesName;
-    AtmosphericReq     ^m_AtmReq;
-    array<int>         ^m_TechLevels;
-    array<int>         ^m_TechLevelsTeach;
+    Alien              ^m_Species;
     int                 m_FleetCost;
     float               m_FleetCostPercent;
     SortedList         ^m_Aliens;

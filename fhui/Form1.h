@@ -72,7 +72,7 @@ namespace fhui {
     private: System::Windows::Forms::TabPage^  TabCommands;
     private: System::Windows::Forms::Label^  RepStatus;
 
-    private: System::Windows::Forms::ComboBox^  RepTourNr;
+    private: System::Windows::Forms::ComboBox^  RepTurnNr;
 
 
 
@@ -139,7 +139,7 @@ namespace fhui {
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle2 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             this->RepStatus = (gcnew System::Windows::Forms::Label());
             this->RepMode = (gcnew System::Windows::Forms::ComboBox());
-            this->RepTourNr = (gcnew System::Windows::Forms::ComboBox());
+            this->RepTurnNr = (gcnew System::Windows::Forms::ComboBox());
             this->RepText = (gcnew System::Windows::Forms::TextBox());
             this->Summary = (gcnew System::Windows::Forms::TextBox());
             this->MenuTabs = (gcnew System::Windows::Forms::TabControl());
@@ -189,7 +189,7 @@ namespace fhui {
             // 
             splitContainer1->Panel1->Controls->Add(this->RepStatus);
             splitContainer1->Panel1->Controls->Add(this->RepMode);
-            splitContainer1->Panel1->Controls->Add(this->RepTourNr);
+            splitContainer1->Panel1->Controls->Add(this->RepTurnNr);
             // 
             // splitContainer1.Panel2
             // 
@@ -219,16 +219,16 @@ namespace fhui {
             this->RepMode->Sorted = true;
             this->RepMode->TabIndex = 0;
             // 
-            // RepTourNr
+            // RepTurnNr
             // 
-            this->RepTourNr->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
-            this->RepTourNr->FormattingEnabled = true;
-            this->RepTourNr->Location = System::Drawing::Point(110, 3);
-            this->RepTourNr->MaxDropDownItems = 12;
-            this->RepTourNr->Name = L"RepTourNr";
-            this->RepTourNr->Size = System::Drawing::Size(129, 21);
-            this->RepTourNr->Sorted = true;
-            this->RepTourNr->TabIndex = 0;
+            this->RepTurnNr->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+            this->RepTurnNr->FormattingEnabled = true;
+            this->RepTurnNr->Location = System::Drawing::Point(110, 3);
+            this->RepTurnNr->MaxDropDownItems = 12;
+            this->RepTurnNr->Name = L"RepTurnNr";
+            this->RepTurnNr->Size = System::Drawing::Size(129, 21);
+            this->RepTurnNr->Sorted = true;
+            this->RepTurnNr->TabIndex = 0;
             // 
             // RepText
             // 

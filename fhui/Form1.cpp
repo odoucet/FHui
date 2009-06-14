@@ -56,11 +56,18 @@ void Form1::LoadReports()
         LoadReport( f->FullName );
     }
 
-    Report ^report = dynamic_cast<Report^>(m_Reports->GetByIndex(0));
-    if( report )
+    if( m_Reports->Count > 0 )
     {
-        RepText->Text = report->GetContent();
-        Summary->Text = report->GetSummary();
+        Report ^report = dynamic_cast<Report^>(m_Reports->GetByIndex(0));
+        if( report )
+        {
+            RepText->Text = report->GetContent();
+            Summary->Text = m_GameData->GetSummary();
+        }
+    }
+    else
+    {
+        RepText->Text = "No report successfully loaded.";
     }
 }
 
@@ -104,10 +111,15 @@ void Form1::SetupSystems()
     dataTable->Columns->Add("Scan", String::typeid );
     dataTable->Columns->Add("Planets", String::typeid );
     dataTable->Columns->Add("Distance", double::typeid );
-    dataTable->Columns->Add("Mishap %", double::typeid );
+    dataTable->Columns->Add("Mishap %", String::typeid );
+
+    Alien ^sp = m_GameData->GetSpecies();
+    int gv = sp->m_TechLevels[TECH_GV];
 
     for each( StarSystem ^system in m_GameData->GetStarSystems() )
     {
+        double mishap = system->CalcMishap(sp->m_HomeSystem, gv, 0);
+
         DataRow^ row = dataTable->NewRow();
         row["X"] = system->X;
         row["Y"] = system->Y;
@@ -115,11 +127,14 @@ void Form1::SetupSystems()
         row["Type"] = system->Type;
         row["Scan"] = system->ScanTurn;
         row["Planets"] = system->NumPlanets;
-        row["Distance"] = 0.0; // calculate it
-        row["Mishap %"] = 0.0; // calculate it
+        row["Distance"] = system->CalcDistance(sp->m_HomeSystem);
+        row["Mishap %"] = String::Format("{0:F2}% ({1:F2}%)", mishap, mishap * mishap / 100.0);
+
         dataTable->Rows->Add(row);
     }
     SystemsGrid->DataSource = dataTable;
+
+    SystemsGrid->Columns["Distance"]->DefaultCellStyle->Format = "F2";
 }
 
 void Form1::SetupPlanets()
