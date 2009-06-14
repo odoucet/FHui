@@ -236,13 +236,14 @@ void Report::MatchPlanetScan(String ^s)
     //                          0:plNum   1:dia    2:gv            3:tc       4:pc    5:mining diff
     if( MatchWithOutput(s, "^\\s+(\\d+)\\s+(\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+\\.\\d+)\\s+") )
     {
+        int plNum = GetMatchResultInt(0);
         Planet ^planet = gcnew Planet(
+            plNum,
             GetMatchResultInt(1),
             GetMatchResultFloat(2),
             GetMatchResultInt(3),
             GetMatchResultInt(4),
             GetMatchResultFloat(5) );
-        int plNum = GetMatchResultInt(0);
 
         // Try reading LSN
         if( MatchWithOutput(s, "(\\d+)\\s+") )

@@ -108,10 +108,10 @@ void Form1::SetupSystems()
     dataTable->Columns->Add("Y", int::typeid );
     dataTable->Columns->Add("Z", int::typeid );
     dataTable->Columns->Add("Type", String::typeid );
-    dataTable->Columns->Add("Scan", String::typeid );
     dataTable->Columns->Add("Planets", String::typeid );
     dataTable->Columns->Add("Distance", double::typeid );
     dataTable->Columns->Add("Mishap %", String::typeid );
+    dataTable->Columns->Add("Scan", String::typeid );
 
     Alien ^sp = m_GameData->GetSpecies();
     int gv = sp->m_TechLevels[TECH_GV];
@@ -125,20 +125,70 @@ void Form1::SetupSystems()
         row["Y"] = system->Y;
         row["Z"] = system->Z;
         row["Type"] = system->Type;
-        row["Scan"] = system->ScanTurn;
         row["Planets"] = system->NumPlanets;
         row["Distance"] = system->CalcDistance(sp->m_HomeSystem);
-        row["Mishap %"] = String::Format("{0:F2}% ({1:F2}%)", mishap, mishap * mishap / 100.0);
+        row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
+        row["Scan"] = system->ScanTurn;
 
         dataTable->Rows->Add(row);
     }
     SystemsGrid->DataSource = dataTable;
 
+    // Formatting
     SystemsGrid->Columns["Distance"]->DefaultCellStyle->Format = "F2";
+
+    // Some columns are not sortable... yet
+    SystemsGrid->Columns["Scan"]->SortMode = DataGridViewColumnSortMode::NotSortable;
+    SystemsGrid->Columns["Mishap %"]->SortMode = DataGridViewColumnSortMode::NotSortable;
 }
 
 void Form1::SetupPlanets()
 {
+    // Put system data in a DataTable so that column sorting works.
+    DataTable ^dataTable = gcnew DataTable();
+
+    dataTable->Columns->Add("Coords", String::typeid );
+    dataTable->Columns->Add("TC", int::typeid );
+    dataTable->Columns->Add("PC", int::typeid );
+    dataTable->Columns->Add("MD", double::typeid );
+    dataTable->Columns->Add("LSN", int::typeid );
+    dataTable->Columns->Add("Distance", double::typeid );
+    dataTable->Columns->Add("Mishap %", String::typeid );
+    dataTable->Columns->Add("Scan", String::typeid );
+
+    Alien ^sp = m_GameData->GetSpecies();
+    int gv = sp->m_TechLevels[TECH_GV];
+
+    for each( StarSystem ^system in m_GameData->GetStarSystems() )
+    {
+        double distance = system->CalcDistance(sp->m_HomeSystem);
+        double mishap = system->CalcMishap(sp->m_HomeSystem, gv, 0);
+
+        for each( Planet ^planet in system->m_Planets )
+        {
+            DataRow^ row = dataTable->NewRow();
+            row["Coords"] = String::Format("{0} {1} {2} {3}",
+                system->X, system->Y, system->Z, planet->m_Number);
+            row["TC"] = planet->m_TempClass;
+            row["PC"] = planet->m_PressClass;
+            row["MD"] = planet->m_MiningDiff;
+            row["LSN"] = planet->m_LSN;
+            row["Distance"] = distance;
+            row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
+            row["Scan"] = system->ScanTurn;
+
+            dataTable->Rows->Add(row);
+        }
+    }
+    PlanetsGrid->DataSource = dataTable;
+
+    // Formatting
+    PlanetsGrid->Columns["MD"]->DefaultCellStyle->Format = "F2";
+    PlanetsGrid->Columns["Distance"]->DefaultCellStyle->Format = "F2";
+
+    // Some columns are not sortable... yet
+    PlanetsGrid->Columns["Scan"]->SortMode = DataGridViewColumnSortMode::NotSortable;
+    PlanetsGrid->Columns["Mishap %"]->SortMode = DataGridViewColumnSortMode::NotSortable;
 }
 
 }

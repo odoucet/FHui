@@ -64,8 +64,9 @@ public:
 public ref class Planet
 {
 public:
-    Planet(int dia, float gv, int tc, int pc, float md)
-        : m_Diameter(dia)
+    Planet(int nr, int dia, float gv, int tc, int pc, float md)
+        : m_Number(nr)
+        , m_Diameter(dia)
         , m_Grav(gv)
         , m_TempClass(tc)
         , m_PressClass(pc)
@@ -78,6 +79,7 @@ public:
 
     int CalculateLSN(AtmosphericReq^, int tc, int pc);
 
+    int         m_Number;
     int         m_Diameter;
     float       m_Grav;
     int         m_TempClass;
