@@ -62,6 +62,8 @@ void Form1::LoadReports()
 
     if( m_Reports->Count > 0 )
     {
+        m_GameData->LinkColonies();
+
         // Display summary
         Summary->Text = m_GameData->GetSummary();
 

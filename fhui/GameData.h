@@ -143,10 +143,12 @@ public:
 public ref class Colony
 {
 public:
-    Colony(Alien ^owner, String ^name, StarSystem ^system, Planet ^planet)
-        : m_Name(name)
+    Colony(Alien ^owner, String ^name, StarSystem ^system, int planetNum)
+        : m_Owner(owner)
+        , m_Name(name)
         , m_System(system)
-        , m_Planet(planet)
+        , m_Planet(nullptr)
+        , m_PlanetNum(planetNum)
         , m_AvailPop(0)
         , m_EconomicEff(0)
         , m_MiBase(0)
@@ -161,6 +163,7 @@ public:
     String         ^m_Name;
     StarSystem     ^m_System;
     Planet         ^m_Planet;
+    int             m_PlanetNum;
     int             m_AvailPop;
     int             m_EconomicEff;
     double          m_MiBase;
@@ -198,7 +201,8 @@ public:
     void            AddPlanetScan(int turn, int x, int y, int z, int plNum, Planet ^planet);
     void            SetTurnStartEU(int turn, int eu);
     void            AddTurnProducedEU(int turn, int eu);
-    Colony^         AddColony(int turn, Alien^, String^, StarSystem^, Planet^);
+    Colony^         AddColony(int turn, Alien^, String^, StarSystem^, int);
+    void            LinkColonies(); // link colonies and planets
 
     // ------------------------------------------
 protected:

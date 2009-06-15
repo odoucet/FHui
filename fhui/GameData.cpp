@@ -166,7 +166,7 @@ String^ GameData::GetAliensSummary()
     }
 
     if( ret->Length == 0 )
-        ret = "No Allies/Enemies";
+        ret = "No Allies/Enemies\r\n";
 
     return ret;
 }
@@ -206,6 +206,22 @@ bool GameData::TurnCheck(int turn)
         m_TurnEUProduced    = 0;
         m_FleetCost         = 0;
         m_FleetCostPercent  = 0.0;
+
+        // Remove all player's colonies in case one of them no longer exists
+        bool removed = false;
+        do {
+            removed = false;
+            for each( DictionaryEntry ^entry in m_Colonies )
+            {
+                Colony ^colony = safe_cast<Colony^>(entry->Value);
+                if( colony->m_Owner == m_Species )
+                {
+                    m_Colonies->Remove(entry->Key);
+                    removed = true;
+                    break;
+                }
+            }
+        } while( removed );
     }
     return turn == m_TurnMax;
 }
@@ -393,7 +409,7 @@ void GameData::AddTurnProducedEU(int turn, int eu)
     }
 }
 
-Colony^ GameData::AddColony(int turn, Alien ^sp, String ^name, StarSystem ^system, Planet ^planet)
+Colony^ GameData::AddColony(int turn, Alien ^sp, String ^name, StarSystem ^system, int plNum)
 {
     bool createColony = false;
 
@@ -410,10 +426,32 @@ Colony^ GameData::AddColony(int turn, Alien ^sp, String ^name, StarSystem ^syste
 
     if( createColony )
     {
-        Colony ^colony = gcnew Colony(sp, name, system, planet);
+        Colony ^colony = gcnew Colony(sp, name, system, plNum);
         m_Colonies[name->ToLower()] = colony;
         return colony;
     }
 
     return nullptr;
+}
+
+void GameData::LinkColonies()
+{
+    for each( DictionaryEntry ^entry in m_Colonies )
+    {
+        Colony ^colony = safe_cast<Colony^>(entry->Value);
+        if( colony->m_Owner == m_Species )
+        {
+            StarSystem ^system = colony->m_System;
+
+            if( system->m_Planets->Length < colony->m_PlanetNum )
+                throw gcnew ArgumentException(
+                    String::Format("Colony PL {0} at [{1} {2} {3} {4}]: Planet not scanned!",
+                        colony->m_Name,
+                        system->X, system->Y, system->Z,
+                        colony->m_PlanetNum ) );
+
+            colony->m_Planet = system->m_Planets[ colony->m_PlanetNum - 1 ];
+            colony->m_Planet->m_Name = colony->m_Name;
+        }
+    }
 }

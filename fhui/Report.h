@@ -32,7 +32,7 @@ public:
     int             GetTurn()       { return m_Turn; }
     String^         GetContent()    { return m_Content; }
 
-    bool            Parse(String ^line);
+    bool            Parse(String ^s);
 
 private:
     void            StartLineAggregate(PhaseType, String ^s);

@@ -125,8 +125,9 @@ bool Report::Parse(String ^s)
         // System scan
         else if( MatchSystemScanStart(s) )
         {}
-//        else if( Regex("^(HOME|COLONY) PLANET: PL.+").Match(s)->Success )
-//        {}//StartLineAggregate(PHASE_COLONY, s);
+        else if( Regex("^\\w+ PLANET: PL.+").Match(s)->Success ||
+                 Regex("^\\w+ COLONY: PL.+").Match(s)->Success )
+            StartLineAggregate(PHASE_COLONY, s);
         else if( Regex("^Combat orders:").Match(s)->Success )
             m_Phase = PHASE_ORDERS_COMBAT;
         // Parsing ends here
@@ -365,40 +366,56 @@ bool Report::MatchTech(String ^s, String ^techName, TechType tech)
 
 void Report::MatchColonyScan(String ^s)
 {
-    return;
     if( m_bParsingAggregate )
     {
         s = FinishLineAggregate();
+        m_Phase = PHASE_COLONY;
     }
 
-    if( MatchWithOutput(s, "(HOME|COLONY)\\s+PLANET: PL ([^,;]+)\\s+Coordinates: x = (\\d+), y = (\\d+), z = (\\d+), planet number (\\d+)") )
+    if( m_ScanColony == nullptr )
     {
-        StarSystem ^system = m_GameData->GetStarSystem(
-            GetMatchResultInt(2),
-            GetMatchResultInt(3),
-            GetMatchResultInt(4) );
-        Planet ^planet = system->m_Planets[ GetMatchResultInt(5) - 1 ];
-        if( planet == nullptr )
+        PlanetType planetType = PLANET_HOME;
+        if( MatchWithOutput(s, "^\\s*(HOME|COLONY)\\s+PLANET: PL\\s+") )
         {
+            if( GetMatchResult(0)[0] == 'C' )
+                planetType = PLANET_COLONY;
+        }
+        else if( MatchWithOutput(s, "^\\s*(MINING|RESORT)\\s+COLONY: PL\\s+") )
+        {
+            if( GetMatchResult(0)[0] == 'M' )
+                planetType = PLANET_COLONY_MINING;
+            else
+                planetType = PLANET_COLONY_RESORT;
+        }
+        else
             throw gcnew ArgumentException(
-                String::Format("Colony PL {0} at [{1} {2} {3} {4}]: Planet not scanned!",
-                    GetMatchResult(0),
-                    system->X, system->Y, system->Z, GetMatchResultInt(5) ) );
-        }
+                String::Format("Unknown colony type in report: {0}", s) );
 
-        m_ScanColony = m_GameData->AddColony(
-            m_Turn,
-            m_GameData->GetSpecies(),
-            GetMatchResult(0),
-            system,
-            planet );
-
-        if( m_ScanColony == nullptr )
+        if( MatchWithOutput(s, "([^,;]+)\\s+Coordinates: x = (\\d+), y = (\\d+), z = (\\d+), planet number (\\d+)") )
         {
-            m_Phase = PHASE_GLOBAL;
-            return;
-        }
+            String ^plName = GetMatchResult(0);
+            plName = plName->TrimEnd(' ');
+            StarSystem ^system = m_GameData->GetStarSystem(
+                GetMatchResultInt(1),
+                GetMatchResultInt(2),
+                GetMatchResultInt(3) );
 
+            m_ScanColony = m_GameData->AddColony(
+                m_Turn,
+                m_GameData->GetSpecies(),
+                plName,
+                system,
+                GetMatchResultInt(4) );
+
+            if( m_ScanColony == nullptr )
+            {
+                m_Phase = PHASE_GLOBAL;
+                return;
+            }
+        }
+        else
+            throw gcnew ArgumentException(
+                String::Format("Unable to parse colony coordinates: {0}", s) );
     }
 }
 
