@@ -287,7 +287,16 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="subwcrev .\.. .\svn_rev.template .\svn_rev.h"
-						Outputs=".\..\svn_rev.h"
+						Outputs=".\svn_rev.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="subwcrev .\.. .\svn_rev.template .\svn_rev.h"
+						Outputs=".\svn_rev.h"
 					/>
 				</FileConfiguration>
 			</File>
