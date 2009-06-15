@@ -56,6 +56,7 @@ GameData::GameData(void)
     , m_Aliens(gcnew SortedList)
     , m_Systems(gcnew array<StarSystem^>(0))
     , m_Colonies(gcnew SortedList)
+    , m_PlanetNames(gcnew SortedList)
     , m_TurnMax(0)
 {
 }
@@ -222,6 +223,9 @@ bool GameData::TurnCheck(int turn)
                 }
             }
         } while( removed );
+
+        // remove planet names
+        m_PlanetNames->Clear();
     }
     return turn == m_TurnMax;
 }
@@ -434,7 +438,15 @@ Colony^ GameData::AddColony(int turn, Alien ^sp, String ^name, StarSystem ^syste
     return nullptr;
 }
 
-void GameData::LinkColonies()
+void GameData::AddPlanetName(int turn, int x, int y, int z, int pl, String ^name)
+{
+    if( TurnCheck(turn) )
+    {
+        m_PlanetNames[name->ToLower()] = gcnew PlanetName(x, y, z, pl, name);
+    }
+}
+
+void GameData::LinkPlanetNames()
 {
     for each( DictionaryEntry ^entry in m_Colonies )
     {
@@ -453,5 +465,13 @@ void GameData::LinkColonies()
             colony->m_Planet = system->m_Planets[ colony->m_PlanetNum - 1 ];
             colony->m_Planet->m_Name = colony->m_Name;
         }
+    }
+
+    for each( DictionaryEntry ^entry in m_PlanetNames )
+    {
+        PlanetName ^plName = safe_cast<PlanetName^>(entry->Value);
+        StarSystem ^system = GetStarSystem( plName->X, plName->Y, plName->Z );
+        if( system->m_Planets->Length >= plName->Num )
+            system->m_Planets[ plName->Num - 1 ]->m_Name = plName->Name;
     }
 }

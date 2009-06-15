@@ -28,7 +28,22 @@ void Form1::LoadGameData()
     catch( SystemException ^e )
     {
         Summary->Text = "Failed loading game data.";
-        RepText->Text = e->ToString();
+        RepText->Text = String::Format(
+            "Fatal Exception !\r\n"
+            "---------------------------------------------------------------------------\r\n"
+            "Please send this message and problem description to:\r\n"
+            "   jdukat+fhui@gmail.com.\r\n"
+            "---------------------------------------------------------------------------\r\n"
+            "FHUI rev.: {0} {1}\r\n"
+            "Message  : {2}\r\n"
+            "Type     : {3}\r\n"
+            "---------------------------------------------------------------------------\r\n"
+            "{4}\r\n"
+            "---------------------------------------------------------------------------\r\n",
+            FHUI_REVISION_NUMBER, ( FHUI_REVISION_MODIFIED ? "(modified)" : "" ),
+            e->Message,
+            e->GetType()->ToString(),
+            e->StackTrace );
     }
 }
 
@@ -62,7 +77,7 @@ void Form1::LoadReports()
 
     if( m_Reports->Count > 0 )
     {
-        m_GameData->LinkColonies();
+        m_GameData->LinkPlanetNames();
 
         // Display summary
         Summary->Text = m_GameData->GetSummary();

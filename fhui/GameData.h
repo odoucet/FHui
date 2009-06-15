@@ -179,6 +179,25 @@ public:
     array<int>     ^m_Inventory;
 };
 
+public ref class PlanetName
+{
+public:
+    PlanetName(int x, int y, int z, int num, String ^name)
+    {
+        X = x;
+        Y = y;
+        Z = z;
+        Num = num;
+        Name = name;
+    }
+
+    property int X;
+    property int Y;
+    property int Z;
+    property int Num;
+    property String^ Name;
+};
+
 public ref class GameData
 {
 public:
@@ -193,6 +212,8 @@ public:
     SortedList^     GetAliens()                 { return m_Aliens; }
     StarSystem^     GetStarSystem(int x, int y, int z);
     array<StarSystem^>^ GetStarSystems()        { return m_Systems; }
+    SortedList^     GetColonies()               { return m_Colonies; }
+    SortedList^     GetPlanetNames()            { return m_PlanetNames; }
 
     // ------------------------------------------
     void            SetSpecies(String ^sp);
@@ -208,7 +229,8 @@ public:
     void            SetTurnStartEU(int turn, int eu);
     void            AddTurnProducedEU(int turn, int eu);
     Colony^         AddColony(int turn, Alien^, String^, StarSystem^, int);
-    void            LinkColonies(); // link colonies and planets
+    void            AddPlanetName(int turn, int x, int y, int z, int pl, String ^name);
+    void            LinkPlanetNames();
 
     // ------------------------------------------
 protected:
@@ -230,6 +252,7 @@ protected:
     SortedList         ^m_Aliens;
     array<StarSystem^> ^m_Systems;
     SortedList         ^m_Colonies;
+    SortedList         ^m_PlanetNames;
 
     int                 m_TurnMax;
 };

@@ -19,6 +19,7 @@ enum PhaseType
     PHASE_COLONY,
     PHASE_COLONY_INVENTORY,
     PHASE_COLONY_SHIPS,
+    PHASE_OTHER_PLANETS_SHIPS,
     PHASE_ORDERS_TEMPLATE,
     PHASE_TECH_LEVELS,
 };
@@ -47,6 +48,7 @@ private:
     void            MatchColonyScan(String ^s);
     void            MatchColonyInventoryScan(String ^s);
     void            MatchColonyShipsScan(String ^s);
+    void            MatchOtherPlanetsShipsScan(String ^s);
 
     String^         GetMatchResult(int arg)      { return m_TmpRegexResult[arg]; }
     int             GetMatchResultInt(int arg);

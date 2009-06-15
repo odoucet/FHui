@@ -122,6 +122,8 @@ bool Report::Parse(String ^s)
         else if( Regex("^\\w+ PLANET: PL.+").Match(s)->Success ||
                  Regex("^\\w+ COLONY: PL.+").Match(s)->Success )
             StartLineAggregate(PHASE_COLONY, s);
+        else if( Regex("^Other planets and ships:").Match(s)->Success )
+            m_Phase = PHASE_OTHER_PLANETS_SHIPS;
         else if( Regex("^Combat orders:").Match(s)->Success )
             m_Phase = PHASE_ORDERS_COMBAT;
         // Parsing ends here
@@ -241,6 +243,12 @@ bool Report::Parse(String ^s)
         else
             MatchColonyShipsScan(s);
         break;
+
+    case PHASE_OTHER_PLANETS_SHIPS:
+        if( MatchSectionEnd(s) )
+            m_Phase = PHASE_GLOBAL;
+        else
+            MatchOtherPlanetsShipsScan(s);
     }
 
     return true;
@@ -458,6 +466,20 @@ void Report::MatchColonyInventoryScan(String ^s)
 void Report::MatchColonyShipsScan(String ^s)
 {
 
+}
+
+void Report::MatchOtherPlanetsShipsScan(String ^s)
+{
+    if( MatchWithOutput(s, "^\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+#(\\d+)\\s+PL\\s+(.+)$") )
+    {
+        m_GameData->AddPlanetName(
+            m_Turn,
+            GetMatchResultInt(0),
+            GetMatchResultInt(1),
+            GetMatchResultInt(2),
+            GetMatchResultInt(3),
+            GetMatchResult(4) );
+    }
 }
 
 void Report::StartLineAggregate(PhaseType phase, String ^s)
