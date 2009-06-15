@@ -209,19 +209,24 @@ public:
     void            SetAlienRelation(int turn, String ^sp, SPRelType);
     void            AddStarSystem(int x, int y, int z, String ^type);
     void            AddPlanetScan(int turn, int x, int y, int z, int plNum, Planet ^planet);
+    void            SetTurnStartEU(int turn, int eu);
+    void            AddTurnProducedEU(int turn, int eu);
 
     // ------------------------------------------
 protected:
+    bool            TurnCheck(int turn);
     int             TurnAlign(int turn);
 
     String^         GetSpeciesSummary();
     String^         GetAllTechsSummary();
     String^         GetTechSummary(TechType tech);
-    String^         GetFleetSummary();
+    String^         GetEconomicSummary();
     String^         GetAliensSummary();
 
     // ------------------------------------------
     Alien              ^m_Species;
+    int                 m_TurnEUStart;
+    int                 m_TurnEUProduced;
     int                 m_FleetCost;
     float               m_FleetCostPercent;
     SortedList         ^m_Aliens;

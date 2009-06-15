@@ -48,13 +48,15 @@ double StarSystem::CalcMishap(int x, int y, int z, int gv, int age)
 // ---------------------------------------------------------
 
 GameData::GameData(void)
+    : m_Species(nullptr)
+    , m_TurnEUStart(0)
+    , m_TurnEUProduced(0)
+    , m_FleetCost(0)
+    , m_FleetCostPercent(0.0)
+    , m_Aliens(gcnew SortedList)
+    , m_Systems(gcnew array<StarSystem^>(0))
+    , m_TurnMax(0)
 {
-    m_Species           = nullptr;
-    m_TurnMax           = 0;
-    m_FleetCost         = 0;
-    m_FleetCostPercent  = 0.0;
-    m_Aliens            = gcnew SortedList;
-    m_Systems           = gcnew array<StarSystem^>(0);
 }
 
 // ---------------------------------------------------------
@@ -62,16 +64,17 @@ GameData::GameData(void)
 String^ GameData::GetSummary()
 {
     return String::Format(
+        "{0}"
+        "---------------------------\r\n"
         "{1}"
-        "--------------------------------\r\n"
+        "---------------------------\r\n"
         "{2}"
+        "---------------------------\r\n"
         "{3}"
-        "--------------------------------\r\n"
-        "{4}",
-        "--------------------------------\r\n",
+        "---------------------------\r\n",
         GetSpeciesSummary(),
         GetAllTechsSummary(),
-        GetFleetSummary(),
+        GetEconomicSummary(),
         GetAliensSummary() );
 }
 
@@ -81,8 +84,13 @@ String^ GameData::GetSpeciesSummary()
 
     return String::Format(
         "Species: {0}\r\n"
-        "T:{1} P:{2} A:{3} {4}-{5}%\r\n",
+        "Home: [{1} {2} {3} {4}]\r\n"
+        "TC:{5} PC:{6}  Atm:{7} {8}-{9}%\r\n",
         GetSpeciesName(),
+        m_Species->m_HomeSystem->X,
+        m_Species->m_HomeSystem->Y,
+        m_Species->m_HomeSystem->Z,
+        m_Species->m_HomePlanet,
         atm->m_TempClass == -1 ? "??" : atm->m_TempClass.ToString(),
         atm->m_PressClass == -1 ? "??" : atm->m_PressClass.ToString(),
         GasToString( atm->m_ReqGas ),
@@ -93,9 +101,9 @@ String^ GameData::GetSpeciesSummary()
 String^ GameData::GetAllTechsSummary()
 {
     return String::Format(
-        "  MI={0} | MA={1}\r\n"
-        "  ML={2} | GV={3}\r\n"
-        "  LS={4} | BI={5}\r\n",
+        "  MI={0} | GV={3}\r\n"
+        "  MA={1} | LS={4}\r\n"
+        "  ML={2} | BI={5}\r\n",
         GetTechSummary(TECH_MI),
         GetTechSummary(TECH_MA),
         GetTechSummary(TECH_ML),
@@ -104,10 +112,17 @@ String^ GameData::GetAllTechsSummary()
         GetTechSummary(TECH_BI) );
 }
 
-String^ GameData::GetFleetSummary()
+String^ GameData::GetEconomicSummary()
 {
-    return String::Format("Fleet maint. = {0} ({1}%)\r\n",
-        m_FleetCost, m_FleetCostPercent);
+    return String::Format(
+        "EUs  carried: {0,7}\r\n"
+        "    produced: {1,7}\r\n"
+        "Fleet maint.: {2} ({3:F2}%)\r\n"
+        "Production  : {4,7}\r\n",
+        m_TurnEUStart,
+        m_TurnEUProduced,
+        m_FleetCost, m_FleetCostPercent,
+        m_TurnEUProduced + m_TurnEUStart - m_FleetCost);
 }
 
 String^ GameData::GetTechSummary(TechType tech)
@@ -155,8 +170,6 @@ String^ GameData::GetAliensSummary()
     return ret;
 }
 
-// ------------------------------------------------------------
-
 void GameData::GetFleetCost(int %cost, float %percent)
 {
     cost = m_FleetCost;
@@ -177,6 +190,24 @@ Alien^ GameData::GetAlien(String ^sp)
 }
 
 // ---------------------------------------------------------
+
+bool GameData::TurnCheck(int turn)
+{
+    if( turn > m_TurnMax )
+    {
+        m_TurnMax = turn;
+
+        // New turn cleanup
+        for each( DictionaryEntry ^entry in m_Aliens )
+            safe_cast<Alien^>(entry->Value)->m_Relation = SP_NEUTRAL; // FIXME: default relation may be different...
+
+        m_TurnEUStart       = 0;
+        m_TurnEUProduced    = 0;
+        m_FleetCost         = 0;
+        m_FleetCostPercent  = 0.0;
+    }
+    return turn == m_TurnMax;
+}
 
 int GameData::TurnAlign(int turn)
 {
@@ -226,13 +257,16 @@ Alien^ GameData::AddAlien(int turn, String ^sp)
 
 void GameData::SetAlienRelation(int turn, String ^sp, SPRelType rel)
 {
-    Alien ^alien = AddAlien(turn, sp);
-    alien->m_Relation = rel;
+    if( TurnCheck(turn) )
+    {
+        Alien ^alien = AddAlien(turn, sp);
+        alien->m_Relation = rel;
+    }
 }
 
 void GameData::SetTechLevel(int turn, Alien ^sp, TechType tech, int lev, int levTeach)
 {
-    if( turn >= m_TurnMax || sp->m_TechEstimateTurn == -1 )
+    if( TurnCheck(turn) || sp->m_TechEstimateTurn == -1 )
     {
         m_TurnMax = turn;
 
@@ -244,10 +278,8 @@ void GameData::SetTechLevel(int turn, Alien ^sp, TechType tech, int lev, int lev
 
 void GameData::SetFleetCost(int turn, int cost, float percent)
 {
-    if( turn >= m_TurnMax )
+    if( TurnCheck(turn) )
     {
-        m_TurnMax = turn;
-
         m_FleetCost = cost;
         m_FleetCostPercent = percent;
     }
@@ -302,7 +334,9 @@ StarSystem^ GameData::GetStarSystem(int x, int y, int z)
         if( system->X == x &&
             system->Y == y &&
             system->Z == z )
+        {
             return system;
+        }
     }
 
     return nullptr;
@@ -339,5 +373,21 @@ void GameData::AddPlanetScan(int turn, int x, int y, int z, int plNum, Planet ^p
         }
         system->m_Planets[plNum] = planet;
         system->m_TurnScanned = Math::Max(system->m_TurnScanned, turn);
+    }
+}
+
+void GameData::SetTurnStartEU(int turn, int eu)
+{
+    if( TurnCheck(turn) )
+    {
+        m_TurnEUStart = eu;
+    }
+}
+
+void GameData::AddTurnProducedEU(int turn, int eu)
+{
+    if( TurnCheck(turn) )
+    {
+        m_TurnEUProduced += eu;
     }
 }

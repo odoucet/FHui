@@ -70,40 +70,45 @@ bool Report::Parse(String ^s)
             m_Turn = GetMatchResultInt(0);
             break;
         }
-        if( MatchWithOutput(s, "START OF TURN (\\d+)") )
+        if( MatchWithOutput(s, "^\\s*START OF TURN (\\d+)") )
         {
             m_Turn = GetMatchResultInt(0);
             break;
         }
 
         // Species name
-        if( MatchWithOutput(s, "Species name: ([^,;]+)") )
+        if( MatchWithOutput(s, "^Species name: ([^,;]+)") )
             m_GameData->SetSpecies( GetMatchResult(0) );
         // Atmospheric requirements
-        else if( MatchWithOutput(s, "Atmospheric Requirement: (\\d+)%-(\\d+)% ([A-Za-z0-9]+)") )
+        else if( MatchWithOutput(s, "^Atmospheric Requirement: (\\d+)%-(\\d+)% ([A-Za-z0-9]+)") )
             m_GameData->SetAtmosphereReq(
                 GasFromString( GetMatchResult(2) ), // required gas
                 GetMatchResultInt(0),               // min level
                 GetMatchResultInt(1) );             // max level
-        else if( MatchAggregateList(s, "Neutral Gases:", "([A-Za-z0-9]+)") )
+        else if( MatchAggregateList(s, "^Neutral Gases:", "([A-Za-z0-9]+)") )
         {
             for( int i = 0; i < m_TmpRegexResult->Length; ++i )
                 m_GameData->SetAtmosphereNeutral(
                     GasFromString(GetMatchResult(i)) );
         }
-        else if( MatchAggregateList(s, "Poisonous Gases:", "([A-Za-z0-9]+)") )
+        else if( MatchAggregateList(s, "^Poisonous Gases:", "([A-Za-z0-9]+)") )
         {
             for( int i = 0; i < m_TmpRegexResult->Length; ++i )
                 m_GameData->SetAtmospherePoisonous(
                     GasFromString(GetMatchResult(i)) );
         }
+        // Economy
+        else if( MatchWithOutput(s, "^Economic units = (\\d+)") )
+            m_GameData->SetTurnStartEU( m_Turn, GetMatchResultInt(0) );
+        else if( MatchWithOutput(s, "^Total available for spending this turn = (\\d+) - (\\d+) = \\d+") )
+            m_GameData->AddTurnProducedEU( m_Turn, GetMatchResultInt(0) ); // TBD: move to colony parser
         // Fleet maintenance
-        else if( MatchWithOutput(s, "Fleet maintenance cost = (\\d+) \\((\\d+\\.?\\d+)% of total production\\)") )
+        else if( MatchWithOutput(s, "^Fleet maintenance cost = (\\d+) \\((\\d+\\.?\\d+)% of total production\\)") )
             m_GameData->SetFleetCost(m_Turn, GetMatchResultInt(0), GetMatchResultFloat(1));
         // Species...
         else if( Regex("^Species met:").Match(s)->Success )
             StartLineAggregate(PHASE_SPECIES_MET, s);
-        else if( MatchWithOutput(s, "Scan of home star system for SP\\s+([^,;]+):$") )
+        else if( MatchWithOutput(s, "^Scan of home star system for SP\\s+([^,;]+):$") )
             m_ScanHome = m_GameData->AddAlien(m_Turn, GetMatchResult(0));
         else if( Regex("^Allies:").Match(s)->Success )
             StartLineAggregate(PHASE_SPECIES_ALLIES, s);
@@ -123,7 +128,7 @@ bool Report::Parse(String ^s)
         break;
 
     case PHASE_SPECIES_MET:
-        if( MatchAggregateList(FinishLineAggregate(), "Species met:", "SP\\s+([^,;]+)") )
+        if( MatchAggregateList(FinishLineAggregate(), "^Species met:", "SP\\s+([^,;]+)") )
         {
             for( int i = 0; i < m_TmpRegexResult->Length; ++i )
                 m_GameData->AddAlien(m_Turn, GetMatchResult(i));
@@ -132,7 +137,7 @@ bool Report::Parse(String ^s)
         return false;
 
     case PHASE_SPECIES_ALLIES:
-        if( MatchAggregateList(FinishLineAggregate(), "Allies:", "SP\\s+([^,;]+)") )
+        if( MatchAggregateList(FinishLineAggregate(), "^Allies:", "SP\\s+([^,;]+)") )
         {
             for( int i = 0; i < m_TmpRegexResult->Length; ++i )
                 m_GameData->SetAlienRelation(m_Turn, GetMatchResult(i), SP_ALLY);
@@ -141,7 +146,7 @@ bool Report::Parse(String ^s)
         return false;
 
     case PHASE_SPECIES_ENEMIES:
-        if( MatchAggregateList(FinishLineAggregate(), "Enemies:", "SP\\s+([^,;]+)") )
+        if( MatchAggregateList(FinishLineAggregate(), "^Enemies:", "SP\\s+([^,;]+)") )
         {
             for( int i = 0; i < m_TmpRegexResult->Length; ++i )
                 m_GameData->SetAlienRelation(m_Turn, GetMatchResult(i), SP_ENEMY);

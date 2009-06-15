@@ -58,12 +58,16 @@ void Form1::LoadReports()
 
     if( m_Reports->Count > 0 )
     {
-        Report ^report = dynamic_cast<Report^>(m_Reports->GetByIndex(0));
-        if( report )
+        // Display summary
+        Summary->Text = m_GameData->GetSummary();
+
+        // Setup combo box with list of loaded reports
+        array<String^> ^arr = gcnew array<String^>(m_Reports->Count);
+        for( int n = 0, i = m_Reports->Count - 1; i >= 0; --i, ++n )
         {
-            RepText->Text = report->GetContent();
-            Summary->Text = m_GameData->GetSummary();
+            arr[n] = String::Format("Turn {0}", m_Reports->GetKey(i));
         }
+        RepTurnNr->DataSource = arr;
     }
     else
     {
@@ -86,6 +90,15 @@ void Form1::LoadReport(String ^fileName)
 
     if( report->IsValid() )
         m_Reports->Add(report->GetTurn(), report);
+}
+
+void Form1::DisplayReport()
+{
+    String ^sel = RepTurnNr->SelectedItem->ToString();
+    int key = int::Parse(sel->Substring(5));    // Skip 'Turn '
+
+    Report ^report = safe_cast<Report^>(m_Reports[key]);
+    RepText->Text = report->GetContent();
 }
 
 void Form1::LoadCommands()
@@ -140,6 +153,9 @@ void Form1::SetupSystems()
     // Some columns are not sortable... yet
     SystemsGrid->Columns["Scan"]->SortMode = DataGridViewColumnSortMode::NotSortable;
     SystemsGrid->Columns["Mishap %"]->SortMode = DataGridViewColumnSortMode::NotSortable;
+
+    // Default sort column
+    SystemsGrid->Sort( SystemsGrid->Columns["Distance"], ListSortDirection::Ascending );
 }
 
 void Form1::SetupPlanets()
@@ -189,6 +205,9 @@ void Form1::SetupPlanets()
     // Some columns are not sortable... yet
     PlanetsGrid->Columns["Scan"]->SortMode = DataGridViewColumnSortMode::NotSortable;
     PlanetsGrid->Columns["Mishap %"]->SortMode = DataGridViewColumnSortMode::NotSortable;
+
+    // Default sort column
+    PlanetsGrid->Sort( PlanetsGrid->Columns["LSN"], ListSortDirection::Ascending );
 }
 
 }
