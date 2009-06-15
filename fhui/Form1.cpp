@@ -2,6 +2,7 @@
 #include "Form1.h"
 
 #include "Report.h"
+#include "svn_rev.h"
 
 using namespace System::IO;
 using namespace System::Text::RegularExpressions;
@@ -20,6 +21,9 @@ void Form1::LoadGameData()
 
         SetupSystems();
         SetupPlanets();
+
+        this->Text = String::Format("[SP {0}] Far Horizons User Interface, build {1}",
+            m_GameData->GetSpeciesName(), FHUI_REVISION_NUMBER);
     }
     catch( SystemException ^e )
     {
