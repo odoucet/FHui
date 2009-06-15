@@ -22,8 +22,8 @@ void Form1::LoadGameData()
         SetupSystems();
         SetupPlanets();
 
-        this->Text = String::Format("[SP {0}] Far Horizons User Interface, build {1}",
-            m_GameData->GetSpeciesName(), FHUI_REVISION_NUMBER);
+        this->Text = String::Format("[SP {0}] Far Horizons User Interface, build {1} {2}",
+            m_GameData->GetSpeciesName(), FHUI_REVISION_NUMBER, (FHUI_REVISION_MODIFIED?"(modified)":""));
     }
     catch( SystemException ^e )
     {

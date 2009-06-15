@@ -1,0 +1,2 @@
+#define FHUI_REVISION_NUMBER    $WCREV$
+#define FHUI_REVISION_MODIFIED  ( $WCMODS?true:false$ /*modified*/ | $WCMODS?true:false$ /*mixed update*/ )

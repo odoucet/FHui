@@ -29,6 +29,7 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -276,6 +277,19 @@
 			<File
 				RelativePath=".\stdafx.h"
 				>
+			</File>
+			<File
+				RelativePath=".\svn_rev.template"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="subwcrev .\.. .\svn_rev.template .\svn_rev.h"
+						Outputs=".\..\svn_rev.h"
+					/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
