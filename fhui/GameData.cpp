@@ -55,6 +55,7 @@ GameData::GameData(void)
     , m_FleetCostPercent(0.0)
     , m_Aliens(gcnew SortedList)
     , m_Systems(gcnew array<StarSystem^>(0))
+    , m_Colonies(gcnew SortedList)
     , m_TurnMax(0)
 {
 }
@@ -390,4 +391,29 @@ void GameData::AddTurnProducedEU(int turn, int eu)
     {
         m_TurnEUProduced += eu;
     }
+}
+
+Colony^ GameData::AddColony(int turn, Alien ^sp, String ^name, StarSystem ^system, Planet ^planet)
+{
+    bool createColony = false;
+
+    if( TurnCheck(turn) )
+    {
+        createColony = true;
+    }
+    else if( sp != m_Species )
+    {   // Turn N-1 report scanned after Turn N report
+        // and seeing an alien colony that wasn't seen next turn.
+        if( m_Colonies->ContainsKey(name->ToLower()) == false )
+            createColony = true;
+    }
+
+    if( createColony )
+    {
+        Colony ^colony = gcnew Colony(sp, name, system, planet);
+        m_Colonies[name->ToLower()] = colony;
+        return colony;
+    }
+
+    return nullptr;
 }

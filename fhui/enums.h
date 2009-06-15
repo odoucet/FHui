@@ -42,3 +42,25 @@ enum GasType
 
 String^ GasToString(GasType gas);
 GasType GasFromString(String^ gas);
+
+enum PlanetType
+{
+    PLANET_HOME,
+    PLANET_COLONY,
+    PLANET_COLONY_MINING,
+    PLANET_COLONY_RESORT,
+    PLANET_MAX
+};
+
+enum InventoryType
+{
+    INV_CU,
+    INV_IU,
+    INV_AU,
+    INV_PD,
+    INV_SU,
+    INV_FD,
+    INV_FS,
+    // FIXME: add other items...
+    INV_MAX
+};

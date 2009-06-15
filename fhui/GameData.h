@@ -132,7 +132,7 @@ public:
         {
             if( m_TurnScanned == -1 )       return "Not scanned";
             else if( m_TurnScanned == 0 )   return "Received";
-            else                            return String::Format("Scaned, {0}", m_TurnScanned);
+            else                            return String::Format("Scanned, {0}", m_TurnScanned);
         }
     }
 
@@ -140,11 +140,40 @@ public:
     int                 m_TurnScanned;
 };
 
+public ref class Colony
+{
+public:
+    Colony(Alien ^owner, String ^name, StarSystem ^system, Planet ^planet)
+        : m_Name(name)
+        , m_System(system)
+        , m_Planet(planet)
+        , m_AvailPop(0)
+        , m_EconomicEff(0)
+        , m_MiBase(0)
+        , m_MaBase(0)
+        , m_RMCarried(0)
+        , m_Shipyards(0)
+    {
+        m_Inventory = gcnew array<int>(INV_MAX){0};
+    }
+
+    Alien          ^m_Owner;
+    String         ^m_Name;
+    StarSystem     ^m_System;
+    Planet         ^m_Planet;
+    int             m_AvailPop;
+    int             m_EconomicEff;
+    double          m_MiBase;
+    double          m_MaBase;
+    int             m_RMCarried;
+    int             m_Shipyards;
+    array<int>     ^m_Inventory;
+};
+
 public ref class GameData
 {
 public:
     GameData();
-
 
     String^         GetSummary();
 
@@ -169,6 +198,7 @@ public:
     void            AddPlanetScan(int turn, int x, int y, int z, int plNum, Planet ^planet);
     void            SetTurnStartEU(int turn, int eu);
     void            AddTurnProducedEU(int turn, int eu);
+    Colony^         AddColony(int turn, Alien^, String^, StarSystem^, Planet^);
 
     // ------------------------------------------
 protected:
@@ -189,6 +219,7 @@ protected:
     float               m_FleetCostPercent;
     SortedList         ^m_Aliens;
     array<StarSystem^> ^m_Systems;
+    SortedList         ^m_Colonies;
 
     int                 m_TurnMax;
 };

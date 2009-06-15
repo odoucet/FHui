@@ -167,6 +167,7 @@ void Form1::SetupPlanets()
     // Put system data in a DataTable so that column sorting works.
     DataTable ^dataTable = gcnew DataTable();
 
+    dataTable->Columns->Add("Name", String::typeid );
     dataTable->Columns->Add("Coords", String::typeid );
     dataTable->Columns->Add("TC", int::typeid );
     dataTable->Columns->Add("PC", int::typeid );
@@ -187,6 +188,7 @@ void Form1::SetupPlanets()
         for each( Planet ^planet in system->m_Planets )
         {
             DataRow^ row = dataTable->NewRow();
+            row["Name"] = planet->m_Name;
             row["Coords"] = String::Format("{0} {1} {2} {3}",
                 system->X, system->Y, system->Z, planet->m_Number);
             row["TC"] = planet->m_TempClass;

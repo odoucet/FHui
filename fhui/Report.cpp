@@ -14,6 +14,7 @@ Report::Report(GameData ^gd)
     , m_ScanZ(0)
     , m_ScanHasPlanets(false)
     , m_ScanHome(nullptr)
+    , m_ScanColony(nullptr)
 {
     m_Content           = gcnew String("");
     m_TmpRegexResult    = gcnew array<String^>(1);
@@ -102,6 +103,10 @@ bool Report::Parse(String ^s)
             m_GameData->SetTurnStartEU( m_Turn, GetMatchResultInt(0) );
         else if( MatchWithOutput(s, "^Total available for spending this turn = (\\d+) - (\\d+) = \\d+") )
             m_GameData->AddTurnProducedEU( m_Turn, GetMatchResultInt(0) ); // TBD: move to colony parser
+        else if( MatchWithOutput(s, "^This mining colony will generate (\\d+) - (\\d+) = \\d+ economic units this turn\\.") )
+            m_GameData->AddTurnProducedEU( m_Turn, GetMatchResultInt(0) ); // TBD: move to colony parser
+        else if( MatchWithOutput(s, "^This resort colony will generate (\\d+) - (\\d+) = \\d+ economic units this turn\\.") )
+            m_GameData->AddTurnProducedEU( m_Turn, GetMatchResultInt(0) ); // TBD: move to colony parser
         // Fleet maintenance
         else if( MatchWithOutput(s, "^Fleet maintenance cost = (\\d+) \\((\\d+\\.?\\d+)% of total production\\)") )
             m_GameData->SetFleetCost(m_Turn, GetMatchResultInt(0), GetMatchResultFloat(1));
@@ -120,6 +125,8 @@ bool Report::Parse(String ^s)
         // System scan
         else if( MatchSystemScanStart(s) )
         {}
+//        else if( Regex("^(HOME|COLONY) PLANET: PL.+").Match(s)->Success )
+//        {}//StartLineAggregate(PHASE_COLONY, s);
         else if( Regex("^Combat orders:").Match(s)->Success )
             m_Phase = PHASE_ORDERS_COMBAT;
         // Parsing ends here
@@ -162,6 +169,9 @@ bool Report::Parse(String ^s)
     case PHASE_ORDERS_PRE_DEP:
         if( Regex("^Jump orders:").Match(s)->Success )
             m_Phase = PHASE_ORDERS_JUMP;
+        // System scan
+        else if( MatchSystemScanStart(s) )
+        {}
         break;
 
     case PHASE_ORDERS_JUMP:
@@ -186,13 +196,13 @@ bool Report::Parse(String ^s)
         if( Regex("^Other events:").Match(s)->Success )
             m_Phase = PHASE_GLOBAL;
         break;
-    
+
     case PHASE_TECH_LEVELS:
-        if( MatchTech(s, "Mining", TECH_MI) ||
-            MatchTech(s, "Manufacturing", TECH_MA) ||
-            MatchTech(s, "Military", TECH_ML) ||
-            MatchTech(s, "Gravitics", TECH_GV) ||
-            MatchTech(s, "Life Support", TECH_LS) )
+        if( MatchTech(s, "^\\s*Mining", TECH_MI) ||
+            MatchTech(s, "^\\s*Manufacturing", TECH_MA) ||
+            MatchTech(s, "^\\s*Military", TECH_ML) ||
+            MatchTech(s, "^\\s*Gravitics", TECH_GV) ||
+            MatchTech(s, "^\\s*Life Support", TECH_LS) )
             break;
         else if( MatchTech(s, "Biology", TECH_BI) )
             m_Phase = PHASE_GLOBAL;
@@ -212,14 +222,45 @@ bool Report::Parse(String ^s)
         else
             MatchPlanetScan(s);
         break;
+
+    case PHASE_COLONY:
+        if( MatchSectionEnd(s) )
+        {
+            m_Phase = PHASE_GLOBAL;
+            m_ScanColony = nullptr;
+        }
+        else
+            MatchColonyScan(s);
+        break;
+
+    case PHASE_COLONY_INVENTORY:
+        if( String::IsNullOrEmpty(s) )
+            m_Phase = PHASE_COLONY;
+        else
+            MatchColonyInventoryScan(s);
+        break;
+
+    case PHASE_COLONY_SHIPS:
+        if( String::IsNullOrEmpty(s) )
+            m_Phase = PHASE_COLONY;
+        else
+            MatchColonyShipsScan(s);
+        break;
     }
 
     return true;
 }
 
+bool Report::MatchSectionEnd(String ^s)
+{
+    if( Regex("^(\\*\\s)+\\*\\s*$").Match(s)->Success )
+        return true;
+    return false;
+}
+
 bool Report::MatchSystemScanStart(String ^s)
 {
-    if( MatchWithOutput(s, "Coordinates:\\s+[Xx]\\s+=\\s+(\\d+)\\s+[Yy]\\s+=\\s+(\\d+)\\s+[Zz]\\s+=\\s+(\\d+)") )
+    if( MatchWithOutput(s, "^Coordinates:\\s+[Xx]\\s+=\\s+(\\d+)\\s+[Yy]\\s+=\\s+(\\d+)\\s+[Zz]\\s+=\\s+(\\d+)") )
     {
         m_Phase = PHASE_SYSTEM_SCAN;
         m_ScanX = GetMatchResultInt(0);
@@ -320,6 +361,55 @@ bool Report::MatchTech(String ^s, String ^techName, TechType tech)
         return true;
     }
     return false;
+}
+
+void Report::MatchColonyScan(String ^s)
+{
+    return;
+    if( m_bParsingAggregate )
+    {
+        s = FinishLineAggregate();
+    }
+
+    if( MatchWithOutput(s, "(HOME|COLONY)\\s+PLANET: PL ([^,;]+)\\s+Coordinates: x = (\\d+), y = (\\d+), z = (\\d+), planet number (\\d+)") )
+    {
+        StarSystem ^system = m_GameData->GetStarSystem(
+            GetMatchResultInt(2),
+            GetMatchResultInt(3),
+            GetMatchResultInt(4) );
+        Planet ^planet = system->m_Planets[ GetMatchResultInt(5) - 1 ];
+        if( planet == nullptr )
+        {
+            throw gcnew ArgumentException(
+                String::Format("Colony PL {0} at [{1} {2} {3} {4}]: Planet not scanned!",
+                    GetMatchResult(0),
+                    system->X, system->Y, system->Z, GetMatchResultInt(5) ) );
+        }
+
+        m_ScanColony = m_GameData->AddColony(
+            m_Turn,
+            m_GameData->GetSpecies(),
+            GetMatchResult(0),
+            system,
+            planet );
+
+        if( m_ScanColony == nullptr )
+        {
+            m_Phase = PHASE_GLOBAL;
+            return;
+        }
+
+    }
+}
+
+void Report::MatchColonyInventoryScan(String ^s)
+{
+
+}
+
+void Report::MatchColonyShipsScan(String ^s)
+{
+
 }
 
 void Report::StartLineAggregate(PhaseType phase, String ^s)

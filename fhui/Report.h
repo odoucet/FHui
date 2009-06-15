@@ -16,6 +16,9 @@ enum PhaseType
     PHASE_SPECIES_ALLIES,
     PHASE_SPECIES_ENEMIES,
     PHASE_SYSTEM_SCAN,
+    PHASE_COLONY,
+    PHASE_COLONY_INVENTORY,
+    PHASE_COLONY_SHIPS,
     PHASE_ORDERS_TEMPLATE,
     PHASE_TECH_LEVELS,
 };
@@ -35,11 +38,15 @@ private:
     void            StartLineAggregate(PhaseType, String ^s);
     String^         FinishLineAggregate();
 
+    bool            MatchSectionEnd(String ^s);
+    bool            MatchWithOutput(String ^%s, String ^exp);
+    bool            MatchAggregateList(String ^s, String ^prefix, String ^exp);
     bool            MatchTech(String ^s, String ^techName, TechType tech);
     bool            MatchSystemScanStart(String ^s);
     void            MatchPlanetScan(String ^s);
-    bool            MatchWithOutput(String ^%s, String ^exp);
-    bool            MatchAggregateList(String ^s, String ^prefix, String ^exp);
+    void            MatchColonyScan(String ^s);
+    void            MatchColonyInventoryScan(String ^s);
+    void            MatchColonyShipsScan(String ^s);
 
     String^         GetMatchResult(int arg)      { return m_TmpRegexResult[arg]; }
     int             GetMatchResultInt(int arg);
@@ -60,4 +67,5 @@ private:
     int             m_ScanZ;
     bool            m_ScanHasPlanets;
     Alien          ^m_ScanHome;
+    Colony         ^m_ScanColony;
 };
