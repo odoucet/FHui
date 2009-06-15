@@ -103,9 +103,9 @@ bool Report::Parse(String ^s)
             m_GameData->SetTurnStartEU( m_Turn, GetMatchResultInt(0) );
         else if( MatchWithOutput(s, "^Total available for spending this turn = (\\d+) - (\\d+) = \\d+") )
             m_GameData->AddTurnProducedEU( m_Turn, GetMatchResultInt(0) ); // TBD: move to colony parser
-        else if( MatchWithOutput(s, "^This mining colony will generate (\\d+) - (\\d+) = \\d+ economic units this turn\\.") )
+        else if( MatchWithOutput(s, "^\\s*This mining colony will generate (\\d+) - (\\d+) = \\d+ economic units this turn\\.") )
             m_GameData->AddTurnProducedEU( m_Turn, GetMatchResultInt(0) ); // TBD: move to colony parser
-        else if( MatchWithOutput(s, "^This resort colony will generate (\\d+) - (\\d+) = \\d+ economic units this turn\\.") )
+        else if( MatchWithOutput(s, "^\\s*This resort colony will generate (\\d+) - (\\d+) = \\d+ economic units this turn\\.") )
             m_GameData->AddTurnProducedEU( m_Turn, GetMatchResultInt(0) ); // TBD: move to colony parser
         // Fleet maintenance
         else if( MatchWithOutput(s, "^Fleet maintenance cost = (\\d+) \\((\\d+\\.?\\d+)% of total production\\)") )
