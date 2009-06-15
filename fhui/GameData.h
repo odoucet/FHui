@@ -146,11 +146,14 @@ public:
     Colony(Alien ^owner, String ^name, StarSystem ^system, int planetNum)
         : m_Owner(owner)
         , m_Name(name)
+        , m_PlanetType(PLANET_HOME)
         , m_System(system)
         , m_Planet(nullptr)
         , m_PlanetNum(planetNum)
         , m_AvailPop(0)
         , m_EconomicEff(0)
+        , m_EUProd(0)
+        , m_EUFleet(0)
         , m_MiBase(0)
         , m_MaBase(0)
         , m_RMCarried(0)
@@ -161,11 +164,14 @@ public:
 
     Alien          ^m_Owner;
     String         ^m_Name;
+    PlanetType      m_PlanetType;
     StarSystem     ^m_System;
     Planet         ^m_Planet;
     int             m_PlanetNum;
     int             m_AvailPop;
     int             m_EconomicEff;
+    int             m_EUProd;
+    int             m_EUFleet;
     double          m_MiBase;
     double          m_MaBase;
     int             m_RMCarried;

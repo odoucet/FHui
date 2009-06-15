@@ -101,12 +101,6 @@ bool Report::Parse(String ^s)
         // Economy
         else if( MatchWithOutput(s, "^Economic units = (\\d+)") )
             m_GameData->SetTurnStartEU( m_Turn, GetMatchResultInt(0) );
-        else if( MatchWithOutput(s, "^Total available for spending this turn = (\\d+) - (\\d+) = \\d+") )
-            m_GameData->AddTurnProducedEU( m_Turn, GetMatchResultInt(0) ); // TBD: move to colony parser
-        else if( MatchWithOutput(s, "^\\s*This mining colony will generate (\\d+) - (\\d+) = \\d+ economic units this turn\\.") )
-            m_GameData->AddTurnProducedEU( m_Turn, GetMatchResultInt(0) ); // TBD: move to colony parser
-        else if( MatchWithOutput(s, "^\\s*This resort colony will generate (\\d+) - (\\d+) = \\d+ economic units this turn\\.") )
-            m_GameData->AddTurnProducedEU( m_Turn, GetMatchResultInt(0) ); // TBD: move to colony parser
         // Fleet maintenance
         else if( MatchWithOutput(s, "^Fleet maintenance cost = (\\d+) \\((\\d+\\.?\\d+)% of total production\\)") )
             m_GameData->SetFleetCost(m_Turn, GetMatchResultInt(0), GetMatchResultFloat(1));
@@ -374,6 +368,7 @@ void Report::MatchColonyScan(String ^s)
 
     if( m_ScanColony == nullptr )
     {
+        // Initial colony data
         PlanetType planetType = PLANET_HOME;
         if( MatchWithOutput(s, "^\\s*(HOME|COLONY)\\s+PLANET: PL\\s+") )
         {
@@ -412,10 +407,46 @@ void Report::MatchColonyScan(String ^s)
                 m_Phase = PHASE_GLOBAL;
                 return;
             }
+
+            m_ScanColony->m_PlanetType = planetType;
         }
         else
             throw gcnew ArgumentException(
                 String::Format("Unable to parse colony coordinates: {0}", s) );
+
+        return;
+    }
+
+    // Remaining entries
+    switch( m_ScanColony->m_PlanetType )
+    {
+    case PLANET_HOME:
+    case PLANET_COLONY:
+        if( MatchWithOutput(s, "^Total available for spending this turn = (\\d+) - (\\d+) = \\d+") )
+        {
+            m_ScanColony->m_EUProd  = GetMatchResultInt(0);
+            m_ScanColony->m_EUFleet = GetMatchResultInt(1);
+            m_GameData->AddTurnProducedEU( m_Turn, m_ScanColony->m_EUProd );
+        }
+        break;
+
+    case PLANET_COLONY_MINING:
+        if( MatchWithOutput(s, "^\\s*This mining colony will generate (\\d+) - (\\d+) = \\d+ economic units this turn\\.") )
+        {
+            m_ScanColony->m_EUProd  = GetMatchResultInt(0);
+            m_ScanColony->m_EUFleet = GetMatchResultInt(1);
+            m_GameData->AddTurnProducedEU( m_Turn, m_ScanColony->m_EUProd );
+        }
+        break;
+
+    case PLANET_COLONY_RESORT:
+        if( MatchWithOutput(s, "^\\s*This resort colony will generate (\\d+) - (\\d+) = \\d+ economic units this turn\\.") )
+        {
+            m_ScanColony->m_EUProd  = GetMatchResultInt(0);
+            m_ScanColony->m_EUFleet = GetMatchResultInt(1);
+            m_GameData->AddTurnProducedEU( m_Turn, m_ScanColony->m_EUProd );
+        }
+        break;
     }
 }
 
