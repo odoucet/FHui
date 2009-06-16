@@ -1,0 +1,10 @@
+This is a change log for FHUI releases.
+Major new features and bug fixes will be listed here.
++ New features
+* Bug fixes
+
+FHUI build 20
++ Support for special "report" for turn 0, intended for loading data aquired via diplomacy.
++ LSN calculations for planets, even those received with data for different species.
++ Systems grid shows tooltips with system scans.
++ 'About' tab added.

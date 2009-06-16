@@ -306,7 +306,7 @@ void Report::MatchPlanetScan(String ^s)
                 m_ScanHome->m_AtmReq->m_PressClass = planet->m_PressClass;
             }
         }
-        else if( MatchWithOutput(s, "[x-?]+\\s+") )
+        else if( MatchWithOutput(s, "[x?\\-]+\\s+") )
         {
             // just skip from input
         }

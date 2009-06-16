@@ -1,0 +1,1 @@
+* tekst tooltipow nad gridem Systems moglby sie wyswietlac courierem zamiast defaultowym fontem.

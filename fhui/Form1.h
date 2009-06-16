@@ -43,16 +43,19 @@ namespace fhui {
 			}
 		}
 
-        void    LoadGameData();
-        void    LoadGalaxy();
-        void    LoadReports();
-        void    LoadReport(String ^fileName);
-        void    LoadCommands();
-        void    InitData();
-        void    SetupSystems();
-        void    SetupPlanets();
+        void        LoadGameData();
+        void        LoadGalaxy();
+        void        LoadReports();
+        void        LoadReport(String ^fileName);
+        void        LoadCommands();
+        void        InitData();
+        void        SetupSystems();
+        void        SetupPlanets();
 
-        void    DisplayReport();
+        void        FillAboutBox();
+        void        DisplayReport();
+
+        String^     SystemsGetRowTooltip(DataGridViewRow ^row);
 
         GameData   ^m_GameData;
         SortedList ^m_PlanetsView;
@@ -97,6 +100,8 @@ namespace fhui {
     private: System::Windows::Forms::TextBox^  PlanetsGVVal;
     private: System::Windows::Forms::ComboBox^  PlanetsRef;
     private: System::Windows::Forms::DataGridView^  PlanetsGrid;
+    private: System::Windows::Forms::TabPage^  TabAbout;
+    private: System::Windows::Forms::TextBox^  TextAbout;
 
 
 
@@ -145,12 +150,12 @@ namespace fhui {
             System::Windows::Forms::Label^  label1;
             System::Windows::Forms::SplitContainer^  TopSplitCont;
             System::Windows::Forms::Label^  label2;
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle13 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle14 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle1 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle2 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::Label^  label3;
             System::Windows::Forms::Label^  label4;
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle15 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle16 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle3 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle4 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             this->RepStatus = (gcnew System::Windows::Forms::Label());
             this->RepMode = (gcnew System::Windows::Forms::ComboBox());
             this->RepTurnNr = (gcnew System::Windows::Forms::ComboBox());
@@ -177,6 +182,8 @@ namespace fhui {
             this->TabShips = (gcnew System::Windows::Forms::TabPage());
             this->TabAliens = (gcnew System::Windows::Forms::TabPage());
             this->TabCommands = (gcnew System::Windows::Forms::TabPage());
+            this->TabAbout = (gcnew System::Windows::Forms::TabPage());
+            this->TextAbout = (gcnew System::Windows::Forms::TextBox());
             splitContainer1 = (gcnew System::Windows::Forms::SplitContainer());
             label1 = (gcnew System::Windows::Forms::Label());
             TopSplitCont = (gcnew System::Windows::Forms::SplitContainer());
@@ -201,6 +208,7 @@ namespace fhui {
             this->splitContainer3->Panel2->SuspendLayout();
             this->splitContainer3->SuspendLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsGrid))->BeginInit();
+            this->TabAbout->SuspendLayout();
             this->SuspendLayout();
             // 
             // splitContainer1
@@ -327,6 +335,7 @@ namespace fhui {
             this->MenuTabs->Controls->Add(this->TabShips);
             this->MenuTabs->Controls->Add(this->TabAliens);
             this->MenuTabs->Controls->Add(this->TabCommands);
+            this->MenuTabs->Controls->Add(this->TabAbout);
             this->MenuTabs->Dock = System::Windows::Forms::DockStyle::Fill;
             this->MenuTabs->Location = System::Drawing::Point(0, 0);
             this->MenuTabs->Name = L"MenuTabs";
@@ -441,32 +450,33 @@ namespace fhui {
             this->SystemsGrid->AllowUserToOrderColumns = true;
             this->SystemsGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
             this->SystemsGrid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-            dataGridViewCellStyle13->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle13->BackColor = System::Drawing::SystemColors::Window;
-            dataGridViewCellStyle13->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle1->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle1->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle1->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle13->ForeColor = System::Drawing::SystemColors::ControlText;
-            dataGridViewCellStyle13->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle13->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle13->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
-            this->SystemsGrid->DefaultCellStyle = dataGridViewCellStyle13;
+            dataGridViewCellStyle1->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle1->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle1->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle1->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->SystemsGrid->DefaultCellStyle = dataGridViewCellStyle1;
             this->SystemsGrid->Dock = System::Windows::Forms::DockStyle::Fill;
             this->SystemsGrid->Location = System::Drawing::Point(0, 0);
             this->SystemsGrid->Name = L"SystemsGrid";
             this->SystemsGrid->ReadOnly = true;
-            dataGridViewCellStyle14->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle14->BackColor = System::Drawing::SystemColors::Control;
-            dataGridViewCellStyle14->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle2->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle2->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle2->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle14->ForeColor = System::Drawing::SystemColors::WindowText;
-            dataGridViewCellStyle14->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle14->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle14->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
-            this->SystemsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle14;
+            dataGridViewCellStyle2->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle2->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle2->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle2->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->SystemsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle2;
             this->SystemsGrid->RowHeadersWidth = 4;
             this->SystemsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
             this->SystemsGrid->Size = System::Drawing::Size(569, 504);
             this->SystemsGrid->TabIndex = 0;
+            this->SystemsGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::SystemsGrid_DataBindingComplete);
             // 
             // TabPlanets
             // 
@@ -562,28 +572,28 @@ namespace fhui {
             this->PlanetsGrid->AllowUserToOrderColumns = true;
             this->PlanetsGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
             this->PlanetsGrid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-            dataGridViewCellStyle15->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle15->BackColor = System::Drawing::SystemColors::Window;
-            dataGridViewCellStyle15->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle3->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle3->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle3->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle15->ForeColor = System::Drawing::SystemColors::ControlText;
-            dataGridViewCellStyle15->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle15->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle15->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
-            this->PlanetsGrid->DefaultCellStyle = dataGridViewCellStyle15;
+            dataGridViewCellStyle3->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle3->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle3->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle3->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->PlanetsGrid->DefaultCellStyle = dataGridViewCellStyle3;
             this->PlanetsGrid->Dock = System::Windows::Forms::DockStyle::Fill;
             this->PlanetsGrid->Location = System::Drawing::Point(0, 0);
             this->PlanetsGrid->Name = L"PlanetsGrid";
             this->PlanetsGrid->ReadOnly = true;
-            dataGridViewCellStyle16->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle16->BackColor = System::Drawing::SystemColors::Control;
-            dataGridViewCellStyle16->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle4->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle4->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle4->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle16->ForeColor = System::Drawing::SystemColors::WindowText;
-            dataGridViewCellStyle16->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle16->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle16->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
-            this->PlanetsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle16;
+            dataGridViewCellStyle4->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle4->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle4->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle4->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->PlanetsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle4;
             this->PlanetsGrid->RowHeadersWidth = 4;
             this->PlanetsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
             this->PlanetsGrid->Size = System::Drawing::Size(569, 504);
@@ -625,6 +635,30 @@ namespace fhui {
             this->TabCommands->Text = L"Commands";
             this->TabCommands->UseVisualStyleBackColor = true;
             // 
+            // TabAbout
+            // 
+            this->TabAbout->Controls->Add(this->TextAbout);
+            this->TabAbout->Location = System::Drawing::Point(4, 22);
+            this->TabAbout->Name = L"TabAbout";
+            this->TabAbout->Padding = System::Windows::Forms::Padding(3);
+            this->TabAbout->Size = System::Drawing::Size(569, 535);
+            this->TabAbout->TabIndex = 8;
+            this->TabAbout->Text = L"About";
+            this->TabAbout->UseVisualStyleBackColor = true;
+            // 
+            // TextAbout
+            // 
+            this->TextAbout->Dock = System::Windows::Forms::DockStyle::Fill;
+            this->TextAbout->Font = (gcnew System::Drawing::Font(L"Courier New", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+                static_cast<System::Byte>(238)));
+            this->TextAbout->Location = System::Drawing::Point(3, 3);
+            this->TextAbout->Multiline = true;
+            this->TextAbout->Name = L"TextAbout";
+            this->TextAbout->ReadOnly = true;
+            this->TextAbout->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
+            this->TextAbout->Size = System::Drawing::Size(563, 529);
+            this->TextAbout->TabIndex = 0;
+            // 
             // Form1
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -657,12 +691,22 @@ namespace fhui {
             this->splitContainer3->Panel2->ResumeLayout(false);
             this->splitContainer3->ResumeLayout(false);
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsGrid))->EndInit();
+            this->TabAbout->ResumeLayout(false);
+            this->TabAbout->PerformLayout();
             this->ResumeLayout(false);
 
         }
 #pragma endregion
 private: System::Void RepTurnNr_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
              DisplayReport();
+         }
+private: System::Void SystemsGrid_DataBindingComplete(System::Object^  sender, System::Windows::Forms::DataGridViewBindingCompleteEventArgs^  e) {
+             for each( DataGridViewRow ^row in ((DataGridView^)sender)->Rows )
+             {
+                 String ^scan = SystemsGetRowTooltip( row );
+                 for each( DataGridViewCell ^cell in row->Cells )
+                     cell->ToolTipText = scan;
+             }
          }
 };
 }

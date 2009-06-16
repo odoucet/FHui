@@ -77,7 +77,7 @@ public:
         , m_Comment(nullptr)
     {}
 
-    int CalculateLSN(AtmosphericReq^, int tc, int pc);
+    int         CalculateLSN(AtmosphericReq^);
 
     int         m_Number;
     int         m_Diameter;
@@ -105,10 +105,12 @@ public:
         Type = type;
     }
 
-    double CalcDistance(StarSystem ^s)                  { return CalcDistance(s->X, s->Y, s->Z); }
-    double CalcMishap(StarSystem ^s, int gv, int age)   { return CalcMishap(s->X, s->Y, s->Z, gv, age); }
-    double CalcDistance(int x, int y, int z);
-    double CalcMishap(int x, int y, int z, int gv, int age);
+    double      CalcDistance(StarSystem ^s)                  { return CalcDistance(s->X, s->Y, s->Z); }
+    double      CalcMishap(StarSystem ^s, int gv, int age)   { return CalcMishap(s->X, s->Y, s->Z, gv, age); }
+    double      CalcDistance(int x, int y, int z);
+    double      CalcMishap(int x, int y, int z, int gv, int age);
+
+    String^     GenerateScan();
 
     property int        X;
     property int        Y;
@@ -230,12 +232,15 @@ public:
     void            AddTurnProducedEU(int turn, int eu);
     Colony^         AddColony(int turn, Alien^, String^, StarSystem^, int);
     void            AddPlanetName(int turn, int x, int y, int z, int pl, String ^name);
-    void            LinkPlanetNames();
+    void            UpdatePlanets();
 
     // ------------------------------------------
 protected:
     bool            TurnCheck(int turn);
     int             TurnAlign(int turn);
+
+    void            CalculateLSN();
+    void            LinkPlanetNames();
 
     String^         GetSpeciesSummary();
     String^         GetAllTechsSummary();

@@ -3,11 +3,11 @@
 
 // ---------------------------------------------------------
 
-int Planet::CalculateLSN(AtmosphericReq ^atmReq, int tc, int pc)
+int Planet::CalculateLSN(AtmosphericReq ^atmReq)
 {
     int lsn =
-        3 * Math::Abs(m_PressClass - pc) +
-        3 * Math::Abs(m_TempClass - tc);
+        3 * Math::Abs(m_PressClass - atmReq->m_PressClass) +
+        3 * Math::Abs(m_TempClass - atmReq->m_TempClass);
 
     for( int i = 0; i < GAS_MAX; ++i )
     {
@@ -43,6 +43,52 @@ double StarSystem::CalcMishap(int x, int y, int z, int gv, int age)
     if( dist == 0 )
         return 0.0;
     return (dist * dist) / gv + (age * 2.0);
+}
+
+String^ StarSystem::GenerateScan()
+{
+    String ^scan = String::Format(
+        "Coordinates: x = {0}  y = {1}  z = {2}  stellar type = {3}  {4} planets.\r\n\r\n"
+        "               Temp  Press Mining\r\n"
+        "  #  Dia  Grav Class Class  Diff  LSN  Atmosphere\r\n"
+        " ---------------------------------------------------------------------\r\n",
+        X, Y, Z, Type,
+        m_Planets->Length == 0 ? "?" : m_Planets->Length.ToString() );
+
+    for( int i = 0; i < m_Planets->Length; ++i )
+    {
+        Planet ^planet = m_Planets[i];
+        String ^plStr = String::Format(
+            "{0,3}{1,5}{2,7:F2}{3,4}{4,6}{5,8:F2}{6,5}  ",
+            i + 1,
+            planet->m_Diameter,
+            planet->m_Grav,
+            planet->m_TempClass,
+            planet->m_PressClass,
+            planet->m_MiningDiff,
+            planet->m_LSN );
+        bool anyGas = false;
+        for( int gas = 0; gas < GAS_MAX; ++gas )
+        {
+            if( planet->m_Atmosphere[gas] )
+            {
+                plStr = String::Concat( plStr,
+                    String::Format(
+                        "{0}{1}({2}%)",
+                        anyGas ? "," : "",
+                        GasToString(static_cast<GasType>(gas)),
+                        planet->m_Atmosphere[gas] ) );
+                anyGas = true;
+            }
+        }
+        if( !anyGas )
+            plStr = String::Concat(plStr, "No atmosphere");
+
+        plStr = String::Concat(plStr, "\r\n");
+        scan  = String::Concat(scan, plStr);
+    }
+
+    return scan;
 }
 
 // ---------------------------------------------------------
@@ -134,10 +180,10 @@ String^ GameData::GetTechSummary(TechType tech)
 
     if( lev != levTeach )
     {
-        return String::Format("{0,3}/{1,3}", lev, levTeach);
+        return String::Format("{0,2}/{1,2}", lev, levTeach);
     }
 
-    return String::Format("{0,3}    ", lev);
+    return String::Format("{0,2}   ", lev);
 }
 
 String^ GameData::GetAliensSummary()
@@ -443,6 +489,23 @@ void GameData::AddPlanetName(int turn, int x, int y, int z, int pl, String ^name
     if( TurnCheck(turn) )
     {
         m_PlanetNames[name->ToLower()] = gcnew PlanetName(x, y, z, pl, name);
+    }
+}
+
+void GameData::UpdatePlanets()
+{
+    CalculateLSN();
+    LinkPlanetNames();
+}
+
+void GameData::CalculateLSN()
+{
+    for each( StarSystem ^system in m_Systems )
+    {
+        for each( Planet ^planet in system->m_Planets )
+        {
+            planet->m_LSN = planet->CalculateLSN(m_Species->m_AtmReq);
+        }
     }
 }
 

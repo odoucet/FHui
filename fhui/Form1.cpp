@@ -7,6 +7,13 @@
 using namespace System::IO;
 using namespace System::Text::RegularExpressions;
 
+#define FHUI_CONTACT_EMAILS "jdukat+fhui@gmail.com"
+#define FHUI_CONTACT_WIKI   "http://www.cetnerowski.com/farhorizons/pmwiki/pmwiki.php/FHUI/FHUI"
+
+#define FHUI_BUILD_INFO_APPENDIX ""
+#define FHUI_BUILD_INFO() String::Format("{0}{1}{2}", FHUI_REVISION_NUMBER, FHUI_BUILD_INFO_APPENDIX, FHUI_REVISION_MODIFIED ? " (modified)" : "")
+
+
 namespace fhui 
 {
 
@@ -14,6 +21,7 @@ void Form1::LoadGameData()
 {
     try
     {
+        FillAboutBox();
         InitData();
         LoadGalaxy();
         LoadReports();
@@ -22,8 +30,8 @@ void Form1::LoadGameData()
         SetupSystems();
         SetupPlanets();
 
-        this->Text = String::Format("[SP {0}] Far Horizons User Interface, build {1} {2}",
-            m_GameData->GetSpeciesName(), FHUI_REVISION_NUMBER, (FHUI_REVISION_MODIFIED?"(modified)":""));
+        this->Text = String::Format("[SP {0}] Far Horizons User Interface, build {1}",
+            m_GameData->GetSpeciesName(), FHUI_BUILD_INFO() );
     }
     catch( SystemException ^e )
     {
@@ -32,19 +40,49 @@ void Form1::LoadGameData()
             "Fatal Exception !\r\n"
             "---------------------------------------------------------------------------\r\n"
             "Please send this message and problem description to:\r\n"
-            "   jdukat+fhui@gmail.com.\r\n"
+            "   {0}.\r\n"
             "---------------------------------------------------------------------------\r\n"
-            "FHUI rev.: {0} {1}\r\n"
+            "FHUI rev.: {1}\r\n"
             "Message  : {2}\r\n"
             "Type     : {3}\r\n"
             "---------------------------------------------------------------------------\r\n"
             "{4}\r\n"
             "---------------------------------------------------------------------------\r\n",
-            FHUI_REVISION_NUMBER, ( FHUI_REVISION_MODIFIED ? "(modified)" : "" ),
+            FHUI_CONTACT_EMAILS,
+            FHUI_BUILD_INFO(),
             e->Message,
             e->GetType()->ToString(),
             e->StackTrace );
     }
+}
+
+void Form1::FillAboutBox()
+{
+    String ^changeLog = nullptr;
+
+    try {
+        StreamReader ^sr = File::OpenText("changelog.txt");
+        changeLog = sr->ReadToEnd();
+    }
+    catch( Exception^ )
+    {
+        changeLog = "** Change log file not found or unreadable **";
+    }
+
+    TextAbout->Text = String::Format(
+        "---------------------------------------------------------------------------\r\n"
+        "   Far Horizons User Interface\r\n"
+        "     Revision: {0}\r\n"
+        "     Contact : {1}\r\n"
+        "     WIKI    : {2}\r\n"
+        "     License : Freeware\r\n"
+        "---------------------------------------------------------------------------\r\n"
+        "{3}\r\n"
+        "---------------------------------------------------------------------------\r\n",
+            FHUI_BUILD_INFO(),
+            FHUI_CONTACT_EMAILS,
+            FHUI_CONTACT_WIKI,
+            changeLog );
 }
 
 void Form1::LoadGalaxy()
@@ -77,7 +115,7 @@ void Form1::LoadReports()
 
     if( m_Reports->Count > 0 )
     {
-        m_GameData->LinkPlanetNames();
+        m_GameData->UpdatePlanets();
 
         // Display summary
         Summary->Text = m_GameData->GetSummary();
@@ -131,6 +169,15 @@ void Form1::InitData()
     m_GameData = gcnew GameData;
 
     RepMode->SelectedIndex = 1;
+}
+
+String^ Form1::SystemsGetRowTooltip(DataGridViewRow ^row)
+{
+    int x = int::Parse(row->Cells[ SystemsGrid->Columns["X"]->Index ]->Value->ToString());
+    int y = int::Parse(row->Cells[ SystemsGrid->Columns["Y"]->Index ]->Value->ToString());
+    int z = int::Parse(row->Cells[ SystemsGrid->Columns["Z"]->Index ]->Value->ToString());
+    StarSystem ^system = m_GameData->GetStarSystem(x, y, z);
+    return system->GenerateScan();
 }
 
 void Form1::SetupSystems()

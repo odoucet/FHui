@@ -162,6 +162,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Copy changelog to build output dir."
+				CommandLine="copy changelog.txt $(OutDir)"
 			/>
 		</Configuration>
 	</Configurations>
@@ -286,7 +288,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="subwcrev .\.. .\svn_rev.template .\svn_rev.h"
+						CommandLine="subwcrev .\.. .\svn_rev.template .\svn_rev.h&#x0D;&#x0A;"
 						Outputs=".\svn_rev.h"
 					/>
 				</FileConfiguration>
@@ -295,7 +297,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="subwcrev .\.. .\svn_rev.template .\svn_rev.h"
+						CommandLine="subwcrev .\.. .\svn_rev.template .\svn_rev.h&#x0D;&#x0A;"
 						Outputs=".\svn_rev.h"
 					/>
 				</FileConfiguration>
@@ -315,6 +317,14 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\changelog.txt"
+			>
+		</File>
+		<File
+			RelativePath=".\todo.txt"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
