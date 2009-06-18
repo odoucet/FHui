@@ -456,6 +456,39 @@ void Report::MatchColonyScan(String ^s)
         }
         break;
     }
+
+    if( MatchWithOutput(s, "^\\s*Economic efficiency = (\\d+)%") )
+    {
+        m_ScanColony->m_EconomicEff = GetMatchResultInt(0);
+    }
+    else if( MatchWithOutput(s, "^\\s*Production penalty = (\\d+)% \\(") )
+    {
+        m_ScanColony->m_ProdPenalty = GetMatchResultInt(0);
+    }
+    else if( MatchWithOutput(s, "^\\s*Mining base = (\\d+\\.\\d+) \\(") )
+    {
+        m_ScanColony->m_MiBase = GetMatchResultFloat(0);
+    }
+    else if( MatchWithOutput(s, "^\\s*Raw Material Units (RM,C1) carried over from last turn = (\\d+)") )
+    {
+        m_ScanColony->m_RMCarried = GetMatchResultInt(0);
+    }
+    else if( MatchWithOutput(s, "^\\s*Manufacturing base = (\\d+\\.\\d+) \\(") )
+    {
+        m_ScanColony->m_MiBase = GetMatchResultFloat(0);
+    }
+    else if( MatchWithOutput(s, "^\\s*Shipyard capacity = (\\d+)") )
+    {
+        m_ScanColony->m_Shipyards = GetMatchResultInt(0);
+    }
+    else if( MatchWithOutput(s, "^\\s*Available population units = (\\d+)") )
+    {
+        m_ScanColony->m_AvailPop = GetMatchResultInt(0);
+    }
+    else if( Regex("^\\s*Planetary inventory:").Match(s)->Success )
+        m_Phase = PHASE_COLONY_INVENTORY;
+    else if( Regex("^\\s*Ships at PL [^,;]+:").Match(s)->Success )
+        m_Phase = PHASE_COLONY_SHIPS;
 }
 
 void Report::MatchColonyInventoryScan(String ^s)
