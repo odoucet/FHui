@@ -1,6 +1,22 @@
 #include "stdafx.h"
 #include "enums.h"
 
+String^ SpRelToString(SPRelType rel)
+{
+    switch( rel )
+    {
+    case SP_PLAYER:     return "*Player*";
+    case SP_NEUTRAL:    return "Neutral";
+    case SP_ALLY:       return "Ally";
+    case SP_ENEMY:      return "Enemy";
+    default:
+        {
+            int r = rel;
+            throw gcnew ArgumentException(String::Format("Invalid species relation: {0}", r));
+        }
+    }
+}
+
 struct GasStr
 {
     GasType     type;
@@ -45,4 +61,65 @@ GasType GasFromString(String^ gas)
         }
     throw gcnew ArgumentException(
         String::Format("Invalid atmospheric GAS: {0}", gas) );
+}
+
+String^ PlTypeToString(PlanetType plType)
+{
+    switch( plType )
+    {
+    case PLANET_HOME:           return "HOME";
+    case PLANET_COLONY:         return "Colony";
+    case PLANET_COLONY_MINING:  return "Mining";
+    case PLANET_COLONY_RESORT:  return "Resort";
+    default:
+        {
+            int t = plType;
+            throw gcnew ArgumentException(String::Format("Invalid planet type: {0}", t));
+        }
+    }
+}
+
+
+String^ InvToString(InventoryType inv)
+{
+#define INV_TO_STRING(i) case INV_##i: return #i
+    switch( inv )
+    {
+    INV_TO_STRING(CU);
+    INV_TO_STRING(IU);
+    INV_TO_STRING(AU);
+    INV_TO_STRING(PD);
+    INV_TO_STRING(SU);
+    INV_TO_STRING(FD);
+    INV_TO_STRING(FS);
+    INV_TO_STRING(DR);
+    INV_TO_STRING(FM);
+    INV_TO_STRING(FJ);
+    INV_TO_STRING(GW);
+    INV_TO_STRING(GT);
+    INV_TO_STRING(JP);
+    INV_TO_STRING(TP);
+    INV_TO_STRING(GU1);
+    INV_TO_STRING(GU2);
+    INV_TO_STRING(GU3);
+    INV_TO_STRING(GU4);
+    INV_TO_STRING(GU5);
+    INV_TO_STRING(GU6);
+    INV_TO_STRING(GU7);
+    INV_TO_STRING(GU8);
+    INV_TO_STRING(GU9);
+    INV_TO_STRING(SG1);
+    INV_TO_STRING(SG2);
+    INV_TO_STRING(SG3);
+    INV_TO_STRING(SG4);
+    INV_TO_STRING(SG5);
+    INV_TO_STRING(SG6);
+    INV_TO_STRING(SG7);
+    INV_TO_STRING(SG8);
+    INV_TO_STRING(SG9);
+    }
+#undef INV_TO_STRING
+
+    int i = inv;
+    throw gcnew ArgumentException(String::Format("Invalid inventory type: {0}", i));
 }

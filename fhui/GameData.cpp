@@ -3,6 +3,22 @@
 
 // ---------------------------------------------------------
 
+String^ Alien::PrintHome()
+{
+    if( m_HomeSystem == nullptr )
+        return "???";
+    String ^plName = nullptr;
+    if( m_HomePlanet != -1 &&
+        m_HomePlanet <= m_HomeSystem->m_Planets->Length )
+        plName = m_HomeSystem->m_Planets[m_HomePlanet]->m_Name;
+    if( plName == nullptr )
+        plName = "?";
+    return String::Format( "{0} {1} ({2})",
+        m_HomeSystem->PrintLocation(), m_HomePlanet, plName );
+}
+
+// ---------------------------------------------------------
+
 int Planet::CalculateLSN(AtmosphericReq ^atmReq)
 {
     int lsn =
@@ -91,6 +107,44 @@ String^ StarSystem::GenerateScan()
     return scan;
 }
 
+String^ StarSystem::PrintNumPlanets()
+{
+    if( m_TurnScanned == -1 )
+        return "?";
+    int minLSN = 99999;
+    for each( Planet ^pl in m_Planets )
+        minLSN = Math::Min(minLSN, pl->m_LSN == -1 ? 99999 : pl->m_LSN);
+    return String::Format("{0} ({1})", m_Planets->Length, minLSN);
+}
+
+String^ StarSystem::PrintScanTurn()
+{
+    if( m_TurnScanned == -1 )       return "Not scanned";
+    else if( m_TurnScanned == 0 )   return "Received";
+    else                            return String::Format("Scanned, {0}", m_TurnScanned);
+}
+
+// ---------------------------------------------------------
+
+String^ Colony::PrintInventoryShort()
+{
+    String ^ret = "";
+
+    for( int i = 0; i < INV_MAX; ++i )
+    {
+        if( m_Inventory[i] )
+        {
+            ret = String::Format("{0}{1}{2}{3}",
+                ret,
+                String::IsNullOrEmpty(ret) ? "" : ",",
+                m_Inventory[i],
+                InvToString(static_cast<InventoryType>(i)) );
+        }
+    }
+
+    return ret;
+}
+
 // ---------------------------------------------------------
 
 GameData::GameData(void)
@@ -119,11 +173,17 @@ String^ GameData::GetSummary()
         "{2}"
         "---------------------------\r\n"
         "{3}"
+        "---------------------------\r\n"
+        "{4}"
+        "---------------------------\r\n"
+        "{5}"
         "---------------------------\r\n",
         GetSpeciesSummary(),
         GetAllTechsSummary(),
         GetEconomicSummary(),
-        GetAliensSummary() );
+        GetAliensSummary(),
+        GetPlanetsSummary(),
+        GetShipsSummary() );
 }
 
 String^ GameData::GetSpeciesSummary()
@@ -188,34 +248,50 @@ String^ GameData::GetTechSummary(TechType tech)
 
 String^ GameData::GetAliensSummary()
 {
-    String ^ret = gcnew String("");
+    String ^ret = "";
 
-    for( int i = 0; i < m_Aliens->Count; ++i )
+    for each( DictionaryEntry ^entry in m_Aliens )
     {
-        Alien ^alien = safe_cast<Alien^>(m_Aliens->GetByIndex(i));
+        Alien ^alien = safe_cast<Alien^>(entry->Value);
+        if( alien == m_Species )
+            continue;
+
+        String ^prefix = "N";
         if( alien->m_Relation == SP_ALLY )
-        {
-            String ^tmp = String::Format("{0}Ally: SP {1}\r\n",
-                ret, alien->m_Name);
-            ret = tmp;
-        }
-    }
+            prefix = "A";
+        else if( alien->m_Relation == SP_ENEMY )
+            prefix = "E";
 
-    for( int i = 0; i < m_Aliens->Count; ++i )
-    {
-        Alien ^alien = safe_cast<Alien^>(m_Aliens->GetByIndex(i));
-        if( alien->m_Relation == SP_ENEMY )
-        {
-            String ^tmp = String::Format("{0}Enemy: SP {1}\r\n",
-                ret, alien->m_Name);
-            ret = tmp;
-        }
+        ret = String::Format("{0}{1}: SP {2}\r\n",
+            ret, prefix, alien->m_Name );
     }
-
-    if( ret->Length == 0 )
-        ret = "No Allies/Enemies\r\n";
 
     return ret;
+}
+
+String^ GameData::GetPlanetsSummary()
+{
+    return "Planets summary\r\n - TODO...\r\n";
+    /*
+    String ^ret = "";
+
+    for each( DictionaryEntry ^entry in m_PlanetNames )
+    {
+        PlanetName ^plName = safe_cast<PlanetName^>(entry->Value);
+        String ^prefix = "  ";
+        //TODO: prefix: home, colony, alien, etc...
+        ret = String::Format("{0}{1} PL {2} {3} {4} {5} {6}\r\n",
+            ret, prefix, plName->Name,
+            plName->X, plName->Y, plName->Z, plName->Num);
+    }
+
+    return ret;
+    */
+}
+
+String^ GameData::GetShipsSummary()
+{
+    return "Ships summary\r\n - TODO...\r\n";
 }
 
 void GameData::GetFleetCost(int %cost, float %percent)
@@ -247,7 +323,11 @@ bool GameData::TurnCheck(int turn)
 
         // New turn cleanup
         for each( DictionaryEntry ^entry in m_Aliens )
-            safe_cast<Alien^>(entry->Value)->m_Relation = SP_NEUTRAL; // FIXME: default relation may be different...
+        {
+            Alien ^alien = safe_cast<Alien^>(entry->Value);
+            if( alien != m_Species )
+                alien->m_Relation = SP_NEUTRAL; // FIXME: default relation may be different...
+        }
 
         m_TurnEUStart       = 0;
         m_TurnEUProduced    = 0;
@@ -290,6 +370,7 @@ void GameData::SetSpecies(String ^sp)
     if( m_Species == nullptr )
     {
         m_Species = AddAlien(0, sp);
+        m_Species->m_Relation = SP_PLAYER;
     }
 
     if( String::Compare(m_Species->m_Name, sp) != 0 )

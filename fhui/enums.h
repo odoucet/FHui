@@ -17,10 +17,13 @@ enum TechType
 
 enum SPRelType
 {
+    SP_PLAYER,
     SP_NEUTRAL,
     SP_ALLY,
     SP_ENEMY
 };
+
+String^ SpRelToString(SPRelType);
 
 enum GasType
 {
@@ -52,6 +55,8 @@ enum PlanetType
     PLANET_MAX
 };
 
+String^ PlTypeToString(PlanetType);
+
 enum InventoryType
 {
     INV_CU,
@@ -61,6 +66,32 @@ enum InventoryType
     INV_SU,
     INV_FD,
     INV_FS,
-    // FIXME: add other items...
+    INV_DR,
+    INV_FM,
+    INV_FJ,
+    INV_GW,
+    INV_GT,
+    INV_JP,
+    INV_TP,
+    INV_GU1,
+    INV_GU2,
+    INV_GU3,
+    INV_GU4,
+    INV_GU5,
+    INV_GU6,
+    INV_GU7,
+    INV_GU8,
+    INV_GU9,
+    INV_SG1,
+    INV_SG2,
+    INV_SG3,
+    INV_SG4,
+    INV_SG5,
+    INV_SG6,
+    INV_SG7,
+    INV_SG8,
+    INV_SG9,
     INV_MAX
 };
+
+String^ InvToString(InventoryType inv);

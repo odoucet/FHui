@@ -48,6 +48,9 @@ public:
         m_TechLevelsTeach   = gcnew array<int>(TECH_MAX){0};
     }
 
+    String^         PrintRelation() { return SpRelToString(m_Relation); }
+    String^         PrintHome();
+
     String         ^m_Name;
     SPRelType       m_Relation;
     int             m_TurnMet;
@@ -111,32 +114,14 @@ public:
     double      CalcMishap(int x, int y, int z, int gv, int age);
 
     String^     GenerateScan();
+    String^     PrintLocation() { return String::Format("{0} {1} {2}", X, Y, Z); }
+    String^     PrintNumPlanets();
+    String^     PrintScanTurn();
 
     property int        X;
     property int        Y;
     property int        Z;
     property String^    Type;
-    property String^    NumPlanets
-    {
-        String^ get()
-        {
-            if( m_TurnScanned == -1 )
-                return "?";
-            int minLSN = 99999;
-            for each( Planet ^pl in m_Planets )
-                minLSN = Math::Min(minLSN, pl->m_LSN == -1 ? 99999 : pl->m_LSN);
-            return String::Format("{0} ({1})", m_Planets->Length, minLSN);
-        }
-    }
-    property String^    ScanTurn
-    {
-        String^ get()
-        {
-            if( m_TurnScanned == -1 )       return "Not scanned";
-            else if( m_TurnScanned == 0 )   return "Received";
-            else                            return String::Format("Scanned, {0}", m_TurnScanned);
-        }
-    }
 
     array<Planet^>     ^m_Planets;
     int                 m_TurnScanned;
@@ -146,24 +131,27 @@ public ref class Colony
 {
 public:
     Colony(Alien ^owner, String ^name, StarSystem ^system, int planetNum)
-        : m_Owner(owner)//
-        , m_Name(name)//
-        , m_PlanetType(PLANET_HOME)//
-        , m_System(system)//
-        , m_Planet(nullptr)//
-        , m_PlanetNum(planetNum)//
+        : m_Owner(owner)
+        , m_Name(name)
+        , m_PlanetType(PLANET_HOME)
+        , m_System(system)
+        , m_Planet(nullptr)
+        , m_PlanetNum(planetNum)
         , m_AvailPop(0)
-        , m_EconomicEff(0)//
-        , m_ProdPenalty(0)//
-        , m_EUProd(0)//
-        , m_EUFleet(0)//
-        , m_MiBase(0)//
-        , m_MaBase(0)//
-        , m_RMCarried(0)//
-        , m_Shipyards(0)//
+        , m_EconomicEff(0)
+        , m_ProdPenalty(0)
+        , m_EUProd(0)
+        , m_EUFleet(0)
+        , m_MiBase(0)
+        , m_MaBase(0)
+        , m_RMCarried(0)
+        , m_Shipyards(0)
     {
         m_Inventory = gcnew array<int>(INV_MAX){0};
     }
+
+    String^     PrintLocation() { return String::Format("{0} {1}", m_System->PrintLocation(), m_PlanetNum); }
+    String^     PrintInventoryShort();
 
     Alien          ^m_Owner;
     String         ^m_Name;
@@ -249,6 +237,8 @@ protected:
     String^         GetTechSummary(TechType tech);
     String^         GetEconomicSummary();
     String^         GetAliensSummary();
+    String^         GetPlanetsSummary();
+    String^         GetShipsSummary();
 
     // ------------------------------------------
     Alien              ^m_Species;

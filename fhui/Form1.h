@@ -51,6 +51,9 @@ namespace fhui {
         void        InitData();
         void        SetupSystems();
         void        SetupPlanets();
+        void        SetupColonies();
+        void        SetupShips();
+        void        SetupAliens();
 
         void        FillAboutBox();
         void        DisplayReport();
@@ -102,6 +105,18 @@ namespace fhui {
     private: System::Windows::Forms::DataGridView^  PlanetsGrid;
     private: System::Windows::Forms::TabPage^  TabAbout;
     private: System::Windows::Forms::TextBox^  TextAbout;
+    private: System::Windows::Forms::SplitContainer^  splitContainer4;
+    private: System::Windows::Forms::DataGridView^  ColoniesGrid;
+    private: System::Windows::Forms::SplitContainer^  splitContainer5;
+    private: System::Windows::Forms::DataGridView^  ShipsGrid;
+    private: System::Windows::Forms::ComboBox^  comboBox1;
+    private: System::Windows::Forms::CheckBox^  checkBox1;
+    private: System::Windows::Forms::TextBox^  textBox1;
+    private: System::Windows::Forms::ComboBox^  comboBox2;
+    private: System::Windows::Forms::DataGridView^  dataGridView1;
+    private: System::Windows::Forms::SplitContainer^  splitContainer6;
+    private: System::Windows::Forms::DataGridView^  AliensGrid;
+
 
 
 
@@ -156,6 +171,19 @@ namespace fhui {
             System::Windows::Forms::Label^  label4;
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle3 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle4 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::Label^  label5;
+            System::Windows::Forms::Label^  label6;
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle11 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle12 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::Label^  label8;
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle5 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle6 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::Label^  label9;
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle7 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle8 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::Label^  label10;
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle9 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle10 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             this->RepStatus = (gcnew System::Windows::Forms::Label());
             this->RepMode = (gcnew System::Windows::Forms::ComboBox());
             this->RepTurnNr = (gcnew System::Windows::Forms::ComboBox());
@@ -184,12 +212,28 @@ namespace fhui {
             this->TabCommands = (gcnew System::Windows::Forms::TabPage());
             this->TabAbout = (gcnew System::Windows::Forms::TabPage());
             this->TextAbout = (gcnew System::Windows::Forms::TextBox());
+            this->comboBox1 = (gcnew System::Windows::Forms::ComboBox());
+            this->checkBox1 = (gcnew System::Windows::Forms::CheckBox());
+            this->textBox1 = (gcnew System::Windows::Forms::TextBox());
+            this->comboBox2 = (gcnew System::Windows::Forms::ComboBox());
+            this->dataGridView1 = (gcnew System::Windows::Forms::DataGridView());
+            this->splitContainer4 = (gcnew System::Windows::Forms::SplitContainer());
+            this->ColoniesGrid = (gcnew System::Windows::Forms::DataGridView());
+            this->splitContainer5 = (gcnew System::Windows::Forms::SplitContainer());
+            this->ShipsGrid = (gcnew System::Windows::Forms::DataGridView());
+            this->splitContainer6 = (gcnew System::Windows::Forms::SplitContainer());
+            this->AliensGrid = (gcnew System::Windows::Forms::DataGridView());
             splitContainer1 = (gcnew System::Windows::Forms::SplitContainer());
             label1 = (gcnew System::Windows::Forms::Label());
             TopSplitCont = (gcnew System::Windows::Forms::SplitContainer());
             label2 = (gcnew System::Windows::Forms::Label());
             label3 = (gcnew System::Windows::Forms::Label());
             label4 = (gcnew System::Windows::Forms::Label());
+            label5 = (gcnew System::Windows::Forms::Label());
+            label6 = (gcnew System::Windows::Forms::Label());
+            label8 = (gcnew System::Windows::Forms::Label());
+            label9 = (gcnew System::Windows::Forms::Label());
+            label10 = (gcnew System::Windows::Forms::Label());
             splitContainer1->Panel1->SuspendLayout();
             splitContainer1->Panel2->SuspendLayout();
             splitContainer1->SuspendLayout();
@@ -208,7 +252,23 @@ namespace fhui {
             this->splitContainer3->Panel2->SuspendLayout();
             this->splitContainer3->SuspendLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsGrid))->BeginInit();
+            this->TabColonies->SuspendLayout();
+            this->TabShips->SuspendLayout();
+            this->TabAliens->SuspendLayout();
             this->TabAbout->SuspendLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->dataGridView1))->BeginInit();
+            this->splitContainer4->Panel1->SuspendLayout();
+            this->splitContainer4->Panel2->SuspendLayout();
+            this->splitContainer4->SuspendLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ColoniesGrid))->BeginInit();
+            this->splitContainer5->Panel1->SuspendLayout();
+            this->splitContainer5->Panel2->SuspendLayout();
+            this->splitContainer5->SuspendLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ShipsGrid))->BeginInit();
+            this->splitContainer6->Panel1->SuspendLayout();
+            this->splitContainer6->Panel2->SuspendLayout();
+            this->splitContainer6->SuspendLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->AliensGrid))->BeginInit();
             this->SuspendLayout();
             // 
             // splitContainer1
@@ -601,6 +661,7 @@ namespace fhui {
             // 
             // TabColonies
             // 
+            this->TabColonies->Controls->Add(this->splitContainer4);
             this->TabColonies->Location = System::Drawing::Point(4, 22);
             this->TabColonies->Name = L"TabColonies";
             this->TabColonies->Size = System::Drawing::Size(569, 535);
@@ -610,6 +671,7 @@ namespace fhui {
             // 
             // TabShips
             // 
+            this->TabShips->Controls->Add(this->splitContainer5);
             this->TabShips->Location = System::Drawing::Point(4, 22);
             this->TabShips->Name = L"TabShips";
             this->TabShips->Size = System::Drawing::Size(569, 535);
@@ -619,6 +681,7 @@ namespace fhui {
             // 
             // TabAliens
             // 
+            this->TabAliens->Controls->Add(this->splitContainer6);
             this->TabAliens->Location = System::Drawing::Point(4, 22);
             this->TabAliens->Name = L"TabAliens";
             this->TabAliens->Size = System::Drawing::Size(569, 535);
@@ -659,6 +722,279 @@ namespace fhui {
             this->TextAbout->Size = System::Drawing::Size(563, 529);
             this->TextAbout->TabIndex = 0;
             // 
+            // comboBox1
+            // 
+            this->comboBox1->FormattingEnabled = true;
+            this->comboBox1->Location = System::Drawing::Point(415, 5);
+            this->comboBox1->Name = L"comboBox1";
+            this->comboBox1->Size = System::Drawing::Size(135, 21);
+            this->comboBox1->TabIndex = 6;
+            // 
+            // label5
+            // 
+            label5->AutoSize = true;
+            label5->Location = System::Drawing::Point(356, 8);
+            label5->Name = L"label5";
+            label5->Size = System::Drawing::Size(53, 13);
+            label5->TabIndex = 5;
+            label5->Text = L"Ship Age:";
+            // 
+            // checkBox1
+            // 
+            this->checkBox1->AutoSize = true;
+            this->checkBox1->Location = System::Drawing::Point(258, 7);
+            this->checkBox1->Name = L"checkBox1";
+            this->checkBox1->Size = System::Drawing::Size(44, 17);
+            this->checkBox1->TabIndex = 4;
+            this->checkBox1->Text = L"GV:";
+            this->checkBox1->UseVisualStyleBackColor = true;
+            // 
+            // textBox1
+            // 
+            this->textBox1->Location = System::Drawing::Point(305, 5);
+            this->textBox1->MaxLength = 4;
+            this->textBox1->Name = L"textBox1";
+            this->textBox1->Size = System::Drawing::Size(45, 20);
+            this->textBox1->TabIndex = 2;
+            this->textBox1->Text = L"0";
+            // 
+            // comboBox2
+            // 
+            this->comboBox2->FormattingEnabled = true;
+            this->comboBox2->Location = System::Drawing::Point(105, 4);
+            this->comboBox2->Name = L"comboBox2";
+            this->comboBox2->Size = System::Drawing::Size(147, 21);
+            this->comboBox2->TabIndex = 1;
+            // 
+            // label6
+            // 
+            label6->AutoSize = true;
+            label6->Location = System::Drawing::Point(4, 7);
+            label6->Name = L"label6";
+            label6->Size = System::Drawing::Size(95, 13);
+            label6->TabIndex = 0;
+            label6->Text = L"Reference system:";
+            // 
+            // dataGridView1
+            // 
+            this->dataGridView1->AllowUserToAddRows = false;
+            this->dataGridView1->AllowUserToDeleteRows = false;
+            this->dataGridView1->AllowUserToOrderColumns = true;
+            this->dataGridView1->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
+            this->dataGridView1->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
+            dataGridViewCellStyle11->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle11->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle11->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+                static_cast<System::Byte>(238)));
+            dataGridViewCellStyle11->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle11->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle11->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle11->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->dataGridView1->DefaultCellStyle = dataGridViewCellStyle11;
+            this->dataGridView1->Dock = System::Windows::Forms::DockStyle::Fill;
+            this->dataGridView1->Location = System::Drawing::Point(0, 0);
+            this->dataGridView1->Name = L"dataGridView1";
+            this->dataGridView1->ReadOnly = true;
+            dataGridViewCellStyle12->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle12->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle12->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+                static_cast<System::Byte>(238)));
+            dataGridViewCellStyle12->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle12->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle12->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle12->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->dataGridView1->RowHeadersDefaultCellStyle = dataGridViewCellStyle12;
+            this->dataGridView1->RowHeadersWidth = 4;
+            this->dataGridView1->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
+            this->dataGridView1->Size = System::Drawing::Size(569, 504);
+            this->dataGridView1->TabIndex = 0;
+            // 
+            // splitContainer4
+            // 
+            this->splitContainer4->Dock = System::Windows::Forms::DockStyle::Fill;
+            this->splitContainer4->Location = System::Drawing::Point(0, 0);
+            this->splitContainer4->Name = L"splitContainer4";
+            this->splitContainer4->Orientation = System::Windows::Forms::Orientation::Horizontal;
+            // 
+            // splitContainer4.Panel1
+            // 
+            this->splitContainer4->Panel1->Controls->Add(label8);
+            // 
+            // splitContainer4.Panel2
+            // 
+            this->splitContainer4->Panel2->Controls->Add(this->ColoniesGrid);
+            this->splitContainer4->Size = System::Drawing::Size(569, 535);
+            this->splitContainer4->SplitterDistance = 30;
+            this->splitContainer4->SplitterWidth = 1;
+            this->splitContainer4->TabIndex = 2;
+            // 
+            // label8
+            // 
+            label8->AutoSize = true;
+            label8->Location = System::Drawing::Point(4, 7);
+            label8->Name = L"label8";
+            label8->Size = System::Drawing::Size(19, 13);
+            label8->TabIndex = 0;
+            label8->Text = L"....";
+            // 
+            // ColoniesGrid
+            // 
+            this->ColoniesGrid->AllowUserToAddRows = false;
+            this->ColoniesGrid->AllowUserToDeleteRows = false;
+            this->ColoniesGrid->AllowUserToOrderColumns = true;
+            this->ColoniesGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
+            this->ColoniesGrid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
+            dataGridViewCellStyle5->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle5->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle5->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+                static_cast<System::Byte>(238)));
+            dataGridViewCellStyle5->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle5->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle5->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle5->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->ColoniesGrid->DefaultCellStyle = dataGridViewCellStyle5;
+            this->ColoniesGrid->Dock = System::Windows::Forms::DockStyle::Fill;
+            this->ColoniesGrid->Location = System::Drawing::Point(0, 0);
+            this->ColoniesGrid->Name = L"ColoniesGrid";
+            this->ColoniesGrid->ReadOnly = true;
+            dataGridViewCellStyle6->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle6->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle6->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+                static_cast<System::Byte>(238)));
+            dataGridViewCellStyle6->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle6->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle6->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle6->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->ColoniesGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle6;
+            this->ColoniesGrid->RowHeadersWidth = 4;
+            this->ColoniesGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
+            this->ColoniesGrid->Size = System::Drawing::Size(569, 504);
+            this->ColoniesGrid->TabIndex = 0;
+            // 
+            // splitContainer5
+            // 
+            this->splitContainer5->Dock = System::Windows::Forms::DockStyle::Fill;
+            this->splitContainer5->Location = System::Drawing::Point(0, 0);
+            this->splitContainer5->Name = L"splitContainer5";
+            this->splitContainer5->Orientation = System::Windows::Forms::Orientation::Horizontal;
+            // 
+            // splitContainer5.Panel1
+            // 
+            this->splitContainer5->Panel1->Controls->Add(label9);
+            // 
+            // splitContainer5.Panel2
+            // 
+            this->splitContainer5->Panel2->Controls->Add(this->ShipsGrid);
+            this->splitContainer5->Size = System::Drawing::Size(569, 535);
+            this->splitContainer5->SplitterDistance = 30;
+            this->splitContainer5->SplitterWidth = 1;
+            this->splitContainer5->TabIndex = 2;
+            // 
+            // label9
+            // 
+            label9->AutoSize = true;
+            label9->Location = System::Drawing::Point(4, 7);
+            label9->Name = L"label9";
+            label9->Size = System::Drawing::Size(31, 13);
+            label9->TabIndex = 0;
+            label9->Text = L"........";
+            // 
+            // ShipsGrid
+            // 
+            this->ShipsGrid->AllowUserToAddRows = false;
+            this->ShipsGrid->AllowUserToDeleteRows = false;
+            this->ShipsGrid->AllowUserToOrderColumns = true;
+            this->ShipsGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
+            this->ShipsGrid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
+            dataGridViewCellStyle7->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle7->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle7->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+                static_cast<System::Byte>(238)));
+            dataGridViewCellStyle7->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle7->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle7->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle7->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->ShipsGrid->DefaultCellStyle = dataGridViewCellStyle7;
+            this->ShipsGrid->Dock = System::Windows::Forms::DockStyle::Fill;
+            this->ShipsGrid->Location = System::Drawing::Point(0, 0);
+            this->ShipsGrid->Name = L"ShipsGrid";
+            this->ShipsGrid->ReadOnly = true;
+            dataGridViewCellStyle8->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle8->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle8->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+                static_cast<System::Byte>(238)));
+            dataGridViewCellStyle8->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle8->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle8->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle8->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->ShipsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle8;
+            this->ShipsGrid->RowHeadersWidth = 4;
+            this->ShipsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
+            this->ShipsGrid->Size = System::Drawing::Size(569, 504);
+            this->ShipsGrid->TabIndex = 0;
+            // 
+            // splitContainer6
+            // 
+            this->splitContainer6->Dock = System::Windows::Forms::DockStyle::Fill;
+            this->splitContainer6->Location = System::Drawing::Point(0, 0);
+            this->splitContainer6->Name = L"splitContainer6";
+            this->splitContainer6->Orientation = System::Windows::Forms::Orientation::Horizontal;
+            // 
+            // splitContainer6.Panel1
+            // 
+            this->splitContainer6->Panel1->Controls->Add(label10);
+            // 
+            // splitContainer6.Panel2
+            // 
+            this->splitContainer6->Panel2->Controls->Add(this->AliensGrid);
+            this->splitContainer6->Size = System::Drawing::Size(569, 535);
+            this->splitContainer6->SplitterDistance = 30;
+            this->splitContainer6->SplitterWidth = 1;
+            this->splitContainer6->TabIndex = 2;
+            // 
+            // label10
+            // 
+            label10->AutoSize = true;
+            label10->Location = System::Drawing::Point(4, 7);
+            label10->Name = L"label10";
+            label10->Size = System::Drawing::Size(34, 13);
+            label10->TabIndex = 0;
+            label10->Text = L".........";
+            // 
+            // AliensGrid
+            // 
+            this->AliensGrid->AllowUserToAddRows = false;
+            this->AliensGrid->AllowUserToDeleteRows = false;
+            this->AliensGrid->AllowUserToOrderColumns = true;
+            this->AliensGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
+            this->AliensGrid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
+            dataGridViewCellStyle9->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle9->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle9->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+                static_cast<System::Byte>(238)));
+            dataGridViewCellStyle9->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle9->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle9->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle9->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->AliensGrid->DefaultCellStyle = dataGridViewCellStyle9;
+            this->AliensGrid->Dock = System::Windows::Forms::DockStyle::Fill;
+            this->AliensGrid->Location = System::Drawing::Point(0, 0);
+            this->AliensGrid->Name = L"AliensGrid";
+            this->AliensGrid->ReadOnly = true;
+            dataGridViewCellStyle10->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle10->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle10->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+                static_cast<System::Byte>(238)));
+            dataGridViewCellStyle10->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle10->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle10->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle10->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->AliensGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle10;
+            this->AliensGrid->RowHeadersWidth = 4;
+            this->AliensGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
+            this->AliensGrid->Size = System::Drawing::Size(569, 504);
+            this->AliensGrid->TabIndex = 0;
+            // 
             // Form1
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -691,8 +1027,27 @@ namespace fhui {
             this->splitContainer3->Panel2->ResumeLayout(false);
             this->splitContainer3->ResumeLayout(false);
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsGrid))->EndInit();
+            this->TabColonies->ResumeLayout(false);
+            this->TabShips->ResumeLayout(false);
+            this->TabAliens->ResumeLayout(false);
             this->TabAbout->ResumeLayout(false);
             this->TabAbout->PerformLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->dataGridView1))->EndInit();
+            this->splitContainer4->Panel1->ResumeLayout(false);
+            this->splitContainer4->Panel1->PerformLayout();
+            this->splitContainer4->Panel2->ResumeLayout(false);
+            this->splitContainer4->ResumeLayout(false);
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ColoniesGrid))->EndInit();
+            this->splitContainer5->Panel1->ResumeLayout(false);
+            this->splitContainer5->Panel1->PerformLayout();
+            this->splitContainer5->Panel2->ResumeLayout(false);
+            this->splitContainer5->ResumeLayout(false);
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ShipsGrid))->EndInit();
+            this->splitContainer6->Panel1->ResumeLayout(false);
+            this->splitContainer6->Panel1->PerformLayout();
+            this->splitContainer6->Panel2->ResumeLayout(false);
+            this->splitContainer6->ResumeLayout(false);
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->AliensGrid))->EndInit();
             this->ResumeLayout(false);
 
         }

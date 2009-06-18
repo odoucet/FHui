@@ -8,3 +8,7 @@ FHUI build 20
 + LSN calculations for planets, even those received with data for different species.
 + Systems grid shows tooltips with system scans.
 + 'About' tab added.
+
+FHUI build 22
++ Colonies tab now displays basic informations about player's colonies.
++ All met species show in summary panel and listed on Aliens tab.

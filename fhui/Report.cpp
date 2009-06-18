@@ -493,7 +493,70 @@ void Report::MatchColonyScan(String ^s)
 
 void Report::MatchColonyInventoryScan(String ^s)
 {
-
+    if( MatchWithOutput(s, "^[\\w\\s]+\\(PD,C3\\) = (\\d+) (warship equivalence = \\d+ tons)") )
+        m_ScanColony->m_Inventory[INV_PD] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(SU,C20\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_SU] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(CU,C1\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_CU] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(IU,C1\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_IU] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(AU,C1\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_AU] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(FS,C1\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_FS] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(FD,C1\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_FD] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(DR,C1\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_DR] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(FM,C5\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_FM] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(FJ,C5\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_FJ] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(GW,C100\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_GW] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(GT,C20\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_GT] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(JP,C10\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_JP] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(TP,C100\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_TP] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(GU1,C5\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_GU1] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(GU2,C10\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_GU2] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(GU3,C15\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_GU3] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(GU4,C20\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_GU4] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(GU5,C25\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_GU5] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(GU6,C30\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_GU6] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(GU7,C35\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_GU7] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(GU8,C40\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_GU8] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(GU9,C45\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_GU9] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(SG1,C5\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_SG1] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(SG2,C10\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_SG2] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(SG3,C15\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_SG3] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(SG4,C20\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_SG4] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(SG5,C25\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_SG5] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(SG6,C30\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_SG6] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(SG7,C35\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_SG7] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(SG8,C40\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_SG8] = GetMatchResultInt(0);
+    else if( MatchWithOutput(s, "^[\\w\\s]+\\(SG9,C45\\) = (\\d+)") )
+        m_ScanColony->m_Inventory[INV_SG9] = GetMatchResultInt(0);
 }
 
 void Report::MatchColonyShipsScan(String ^s)

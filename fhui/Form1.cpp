@@ -29,6 +29,9 @@ void Form1::LoadGameData()
 
         SetupSystems();
         SetupPlanets();
+        SetupColonies();
+        SetupShips();
+        SetupAliens();
 
         this->Text = String::Format("[SP {0}] Far Horizons User Interface, build {1}",
             m_GameData->GetSpeciesName(), FHUI_BUILD_INFO() );
@@ -190,7 +193,7 @@ void Form1::SetupSystems()
     dataTable->Columns->Add("Z", int::typeid );
     dataTable->Columns->Add("Type", String::typeid );
     dataTable->Columns->Add("Planets", String::typeid );
-    dataTable->Columns->Add("Distance", double::typeid );
+    dataTable->Columns->Add("Dist.", double::typeid );
     dataTable->Columns->Add("Mishap %", String::typeid );
     dataTable->Columns->Add("Scan", String::typeid );
 
@@ -202,28 +205,28 @@ void Form1::SetupSystems()
         double mishap = system->CalcMishap(sp->m_HomeSystem, gv, 0);
 
         DataRow^ row = dataTable->NewRow();
-        row["X"] = system->X;
-        row["Y"] = system->Y;
-        row["Z"] = system->Z;
-        row["Type"] = system->Type;
-        row["Planets"] = system->NumPlanets;
-        row["Distance"] = system->CalcDistance(sp->m_HomeSystem);
+        row["X"]        = system->X;
+        row["Y"]        = system->Y;
+        row["Z"]        = system->Z;
+        row["Type"]     = system->Type;
+        row["Planets"]  = system->PrintNumPlanets();
+        row["Dist."]    = system->CalcDistance(sp->m_HomeSystem);
         row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
-        row["Scan"] = system->ScanTurn;
+        row["Scan"]     = system->PrintScanTurn();
 
         dataTable->Rows->Add(row);
     }
     SystemsGrid->DataSource = dataTable;
 
     // Formatting
-    SystemsGrid->Columns["Distance"]->DefaultCellStyle->Format = "F2";
+    SystemsGrid->Columns["Dist."]->DefaultCellStyle->Format = "F2";
 
     // Some columns are not sortable... yet
     SystemsGrid->Columns["Scan"]->SortMode = DataGridViewColumnSortMode::NotSortable;
     SystemsGrid->Columns["Mishap %"]->SortMode = DataGridViewColumnSortMode::NotSortable;
 
     // Default sort column
-    SystemsGrid->Sort( SystemsGrid->Columns["Distance"], ListSortDirection::Ascending );
+    SystemsGrid->Sort( SystemsGrid->Columns["Dist."], ListSortDirection::Ascending );
 }
 
 void Form1::SetupPlanets()
@@ -237,7 +240,7 @@ void Form1::SetupPlanets()
     dataTable->Columns->Add("PC", int::typeid );
     dataTable->Columns->Add("MD", double::typeid );
     dataTable->Columns->Add("LSN", int::typeid );
-    dataTable->Columns->Add("Distance", double::typeid );
+    dataTable->Columns->Add("Dist.", double::typeid );
     dataTable->Columns->Add("Mishap %", String::typeid );
     dataTable->Columns->Add("Scan", String::typeid );
 
@@ -252,16 +255,16 @@ void Form1::SetupPlanets()
         for each( Planet ^planet in system->m_Planets )
         {
             DataRow^ row = dataTable->NewRow();
-            row["Name"] = planet->m_Name;
-            row["Coords"] = String::Format("{0} {1} {2} {3}",
+            row["Name"]     = planet->m_Name;
+            row["Coords"]   = String::Format("{0} {1} {2} {3}",
                 system->X, system->Y, system->Z, planet->m_Number);
-            row["TC"] = planet->m_TempClass;
-            row["PC"] = planet->m_PressClass;
-            row["MD"] = planet->m_MiningDiff;
-            row["LSN"] = planet->m_LSN;
-            row["Distance"] = distance;
+            row["TC"]       = planet->m_TempClass;
+            row["PC"]       = planet->m_PressClass;
+            row["MD"]       = planet->m_MiningDiff;
+            row["LSN"]      = planet->m_LSN;
+            row["Dist."]    = distance;
             row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
-            row["Scan"] = system->ScanTurn;
+            row["Scan"]     = system->PrintScanTurn();
 
             dataTable->Rows->Add(row);
         }
@@ -270,7 +273,7 @@ void Form1::SetupPlanets()
 
     // Formatting
     PlanetsGrid->Columns["MD"]->DefaultCellStyle->Format = "F2";
-    PlanetsGrid->Columns["Distance"]->DefaultCellStyle->Format = "F2";
+    PlanetsGrid->Columns["Dist."]->DefaultCellStyle->Format = "F2";
 
     // Some columns are not sortable... yet
     PlanetsGrid->Columns["Scan"]->SortMode = DataGridViewColumnSortMode::NotSortable;
@@ -278,6 +281,107 @@ void Form1::SetupPlanets()
 
     // Default sort column
     PlanetsGrid->Sort( PlanetsGrid->Columns["LSN"], ListSortDirection::Ascending );
+}
+
+void Form1::SetupColonies()
+{
+    // Put system data in a DataTable so that column sorting works.
+    DataTable ^dataTable = gcnew DataTable();
+
+    dataTable->Columns->Add("Name", String::typeid );
+    dataTable->Columns->Add("Type", String::typeid );
+    dataTable->Columns->Add("Location", String::typeid );
+    dataTable->Columns->Add("Prod.", int::typeid );
+    dataTable->Columns->Add("Dist.", double::typeid );
+    dataTable->Columns->Add("Mishap %", String::typeid );
+    dataTable->Columns->Add("Inventory", String::typeid );
+
+    Alien ^sp = m_GameData->GetSpecies();
+    int gv = sp->m_TechLevels[TECH_GV];
+
+    for each( DictionaryEntry ^entry in m_GameData->GetColonies() )
+    {
+        Colony ^colony = safe_cast<Colony^>(entry->Value);
+
+        double distance = colony->m_System->CalcDistance(sp->m_HomeSystem);
+        double mishap = colony->m_System->CalcMishap(sp->m_HomeSystem, gv, 0);
+
+        DataRow^ row = dataTable->NewRow();
+        row["Name"]     = colony->m_Name;
+        row["Type"]     = PlTypeToString(colony->m_PlanetType);
+        row["Location"] = colony->PrintLocation();
+        row["Prod."]    = colony->m_EUProd - colony->m_EUFleet;
+        row["Dist."]    = distance;
+        row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
+        row["Inventory"]= colony->PrintInventoryShort();
+
+        dataTable->Rows->Add(row);
+    }
+    ColoniesGrid->DataSource = dataTable;
+
+    // Formatting
+    ColoniesGrid->Columns["Dist."]->DefaultCellStyle->Format = "F2";
+
+    // Default sort column
+    ColoniesGrid->Sort( ColoniesGrid->Columns["Dist."], ListSortDirection::Ascending );
+}
+
+void Form1::SetupShips()
+{
+    // Put system data in a DataTable so that column sorting works.
+    DataTable ^dataTable = gcnew DataTable();
+
+    dataTable->Columns->Add("Class", String::typeid );
+    dataTable->Columns->Add("Name", String::typeid );
+    dataTable->Columns->Add("Location", String::typeid );
+
+    /*
+    for each( DictionaryEntry ^entry in m_GameData->GetShips() )
+    {
+        Ship ^ship = safe_cast<Ship^>(entry->Value);
+
+        DataRow^ row = dataTable->NewRow();
+        row["Class"]    = ship->m_Class;
+        row["Name"]     = ship->m_Name;
+        row["Location"] = ship->Location;
+
+        dataTable->Rows->Add(row);
+    }
+    */
+    ShipsGrid->DataSource = dataTable;
+
+    // Formatting
+
+    // Default sort column
+    ShipsGrid->Sort( ShipsGrid->Columns["Class"], ListSortDirection::Ascending );
+}
+
+void Form1::SetupAliens()
+{
+    // Put system data in a DataTable so that column sorting works.
+    DataTable ^dataTable = gcnew DataTable();
+
+    dataTable->Columns->Add("Name", String::typeid );
+    dataTable->Columns->Add("Relation", String::typeid );
+    dataTable->Columns->Add("Home", String::typeid );
+
+    for each( DictionaryEntry ^entry in m_GameData->GetAliens() )
+    {
+        Alien ^alien = safe_cast<Alien^>(entry->Value);
+
+        DataRow^ row = dataTable->NewRow();
+        row["Name"]     = alien->m_Name;
+        row["Relation"] = alien->PrintRelation();
+        row["Home"]     = alien->PrintHome();
+
+        dataTable->Rows->Add(row);
+    }
+    AliensGrid->DataSource = dataTable;
+
+    // Formatting
+
+    // Default sort column
+    AliensGrid->Sort( AliensGrid->Columns["Relation"], ListSortDirection::Ascending );
 }
 
 }
