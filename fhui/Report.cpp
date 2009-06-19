@@ -57,7 +57,9 @@ bool Report::Parse(String ^s)
     {
         if( !String::IsNullOrEmpty(s) )
         {
-            m_StringAggregate = String::Concat(m_StringAggregate, s);
+            s = s->TrimStart(' ');
+            m_StringAggregate = String::Format("{0} {1}",
+                m_StringAggregate, s);
             return true;
         }
     }
@@ -465,17 +467,18 @@ void Report::MatchColonyScan(String ^s)
     {
         m_ScanColony->m_ProdPenalty = GetMatchResultInt(0);
     }
-    else if( MatchWithOutput(s, "^\\s*Mining base = (\\d+\\.\\d+) \\(") )
+    else if( MatchWithOutput(s, "^\\s*Mining base = (\\d+\\.\\d+) \\(MI = \\d+, MD = (\\d+\\.\\d+)\\)") )
     {
         m_ScanColony->m_MiBase = GetMatchResultFloat(0);
+        m_ScanColony->m_MiDiff = GetMatchResultFloat(1);
     }
-    else if( MatchWithOutput(s, "^\\s*Raw Material Units (RM,C1) carried over from last turn = (\\d+)") )
+    else if( MatchWithOutput(s, "^\\s*Raw Material Units \\(RM,C1\\) carried over from last turn = (\\d+)") )
     {
         m_ScanColony->m_RMCarried = GetMatchResultInt(0);
     }
     else if( MatchWithOutput(s, "^\\s*Manufacturing base = (\\d+\\.\\d+) \\(") )
     {
-        m_ScanColony->m_MiBase = GetMatchResultFloat(0);
+        m_ScanColony->m_MaBase = GetMatchResultFloat(0);
     }
     else if( MatchWithOutput(s, "^\\s*Shipyard capacity = (\\d+)") )
     {

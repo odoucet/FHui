@@ -192,7 +192,8 @@ void Form1::SetupSystems()
     dataTable->Columns->Add("Y", int::typeid );
     dataTable->Columns->Add("Z", int::typeid );
     dataTable->Columns->Add("Type", String::typeid );
-    dataTable->Columns->Add("Planets", String::typeid );
+    dataTable->Columns->Add("Planets", int::typeid );
+    dataTable->Columns->Add("MinLSN", int::typeid );
     dataTable->Columns->Add("Dist.", double::typeid );
     dataTable->Columns->Add("Mishap %", String::typeid );
     dataTable->Columns->Add("Scan", String::typeid );
@@ -209,7 +210,14 @@ void Form1::SetupSystems()
         row["Y"]        = system->Y;
         row["Z"]        = system->Z;
         row["Type"]     = system->Type;
-        row["Planets"]  = system->PrintNumPlanets();
+        if( system->m_TurnScanned != -1 )
+        {
+            int minLSN = 99999;
+            for each( Planet ^pl in system->m_Planets )
+                minLSN = Math::Min(minLSN, pl->m_LSN == -1 ? 99999 : pl->m_LSN);
+            row["Planets"]  = system->m_Planets->Length;
+            row["MinLSN"]   = minLSN;
+        }
         row["Dist."]    = system->CalcDistance(sp->m_HomeSystem);
         row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
         row["Scan"]     = system->PrintScanTurn();
@@ -220,6 +228,12 @@ void Form1::SetupSystems()
 
     // Formatting
     SystemsGrid->Columns["Dist."]->DefaultCellStyle->Format = "F2";
+    for each( DataColumn ^col in dataTable->Columns )
+    {
+        if( col->DataType == double::typeid || col->DataType == int::typeid )
+            SystemsGrid->Columns[col->Ordinal]->DefaultCellStyle->Alignment =
+                DataGridViewContentAlignment::MiddleRight;
+    }
 
     // Some columns are not sortable... yet
     SystemsGrid->Columns["Scan"]->SortMode = DataGridViewColumnSortMode::NotSortable;
@@ -236,8 +250,8 @@ void Form1::SetupPlanets()
 
     dataTable->Columns->Add("Name", String::typeid );
     dataTable->Columns->Add("Coords", String::typeid );
-    dataTable->Columns->Add("TC", int::typeid );
-    dataTable->Columns->Add("PC", int::typeid );
+    dataTable->Columns->Add("Temp", int::typeid );
+    dataTable->Columns->Add("Press", int::typeid );
     dataTable->Columns->Add("MD", double::typeid );
     dataTable->Columns->Add("LSN", int::typeid );
     dataTable->Columns->Add("Dist.", double::typeid );
@@ -256,10 +270,10 @@ void Form1::SetupPlanets()
         {
             DataRow^ row = dataTable->NewRow();
             row["Name"]     = planet->m_Name;
-            row["Coords"]   = String::Format("{0} {1} {2} {3}",
+            row["Coords"]   = String::Format("{0,2} {1,2} {2,2} {3}",
                 system->X, system->Y, system->Z, planet->m_Number);
-            row["TC"]       = planet->m_TempClass;
-            row["PC"]       = planet->m_PressClass;
+            row["Temp"]     = planet->m_TempClass;
+            row["Press"]    = planet->m_PressClass;
             row["MD"]       = planet->m_MiningDiff;
             row["LSN"]      = planet->m_LSN;
             row["Dist."]    = distance;
@@ -274,6 +288,12 @@ void Form1::SetupPlanets()
     // Formatting
     PlanetsGrid->Columns["MD"]->DefaultCellStyle->Format = "F2";
     PlanetsGrid->Columns["Dist."]->DefaultCellStyle->Format = "F2";
+    for each( DataColumn ^col in dataTable->Columns )
+    {
+        if( col->DataType == double::typeid || col->DataType == int::typeid )
+            PlanetsGrid->Columns[col->Ordinal]->DefaultCellStyle->Alignment =
+                DataGridViewContentAlignment::MiddleRight;
+    }
 
     // Some columns are not sortable... yet
     PlanetsGrid->Columns["Scan"]->SortMode = DataGridViewColumnSortMode::NotSortable;
@@ -291,7 +311,10 @@ void Form1::SetupColonies()
     dataTable->Columns->Add("Name", String::typeid );
     dataTable->Columns->Add("Type", String::typeid );
     dataTable->Columns->Add("Location", String::typeid );
+    dataTable->Columns->Add("Size", double::typeid );
     dataTable->Columns->Add("Prod.", int::typeid );
+    dataTable->Columns->Add("Pr[%]", int::typeid );
+    dataTable->Columns->Add("Balance", String::typeid );
     dataTable->Columns->Add("Dist.", double::typeid );
     dataTable->Columns->Add("Mishap %", String::typeid );
     dataTable->Columns->Add("Inventory", String::typeid );
@@ -310,10 +333,25 @@ void Form1::SetupColonies()
         row["Name"]     = colony->m_Name;
         row["Type"]     = PlTypeToString(colony->m_PlanetType);
         row["Location"] = colony->PrintLocation();
+        row["Size"]     = colony->m_MiBase + colony->m_MaBase;
         row["Prod."]    = colony->m_EUProd - colony->m_EUFleet;
+        row["Pr[%]"]    = 100 - colony->m_ProdPenalty;
         row["Dist."]    = distance;
         row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
         row["Inventory"]= colony->PrintInventoryShort();
+
+        if( colony->m_PlanetType == PLANET_HOME ||
+            colony->m_PlanetType == PLANET_COLONY )
+        {
+            int mi = (int)((sp->m_TechLevels[TECH_MI] * colony->m_MiBase) / colony->m_Planet->m_MiningDiff);
+            int ma = (int)(sp->m_TechLevels[TECH_MA] * colony->m_MaBase);
+            if( mi == ma )
+                row["Balance"] = "Balanced";
+            else if( mi < ma )
+                row["Balance"] = String::Format("+{0} MA cap.", ma - mi);
+            else
+                row["Balance"] = String::Format("-{0} MA cap.", mi - ma);
+        }
 
         dataTable->Rows->Add(row);
     }
@@ -321,6 +359,13 @@ void Form1::SetupColonies()
 
     // Formatting
     ColoniesGrid->Columns["Dist."]->DefaultCellStyle->Format = "F2";
+    ColoniesGrid->Columns["Size"]->DefaultCellStyle->Format = "F1";
+    for each( DataColumn ^col in dataTable->Columns )
+    {
+        if( col->DataType == double::typeid || col->DataType == int::typeid )
+            ColoniesGrid->Columns[col->Ordinal]->DefaultCellStyle->Alignment =
+                DataGridViewContentAlignment::MiddleRight;
+    }
 
     // Default sort column
     ColoniesGrid->Sort( ColoniesGrid->Columns["Dist."], ListSortDirection::Ascending );
@@ -351,6 +396,12 @@ void Form1::SetupShips()
     ShipsGrid->DataSource = dataTable;
 
     // Formatting
+    for each( DataColumn ^col in dataTable->Columns )
+    {
+        if( col->DataType == double::typeid || col->DataType == int::typeid )
+            ShipsGrid->Columns[col->Ordinal]->DefaultCellStyle->Alignment =
+                DataGridViewContentAlignment::MiddleRight;
+    }
 
     // Default sort column
     ShipsGrid->Sort( ShipsGrid->Columns["Class"], ListSortDirection::Ascending );
@@ -379,6 +430,12 @@ void Form1::SetupAliens()
     AliensGrid->DataSource = dataTable;
 
     // Formatting
+    for each( DataColumn ^col in dataTable->Columns )
+    {
+        if( col->DataType == double::typeid || col->DataType == int::typeid )
+            AliensGrid->Columns[col->Ordinal]->DefaultCellStyle->Alignment =
+                DataGridViewContentAlignment::MiddleRight;
+    }
 
     // Default sort column
     AliensGrid->Sort( AliensGrid->Columns["Relation"], ListSortDirection::Ascending );

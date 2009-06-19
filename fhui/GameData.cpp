@@ -107,16 +107,6 @@ String^ StarSystem::GenerateScan()
     return scan;
 }
 
-String^ StarSystem::PrintNumPlanets()
-{
-    if( m_TurnScanned == -1 )
-        return "?";
-    int minLSN = 99999;
-    for each( Planet ^pl in m_Planets )
-        minLSN = Math::Min(minLSN, pl->m_LSN == -1 ? 99999 : pl->m_LSN);
-    return String::Format("{0} ({1})", m_Planets->Length, minLSN);
-}
-
 String^ StarSystem::PrintScanTurn()
 {
     if( m_TurnScanned == -1 )       return "Not scanned";
@@ -130,13 +120,16 @@ String^ Colony::PrintInventoryShort()
 {
     String ^ret = "";
 
+    if( m_RMCarried > 0 )
+        ret = String::Format("{0} RM", m_RMCarried);
+
     for( int i = 0; i < INV_MAX; ++i )
     {
         if( m_Inventory[i] )
         {
-            ret = String::Format("{0}{1}{2}{3}",
+            ret = String::Format("{0}{1}{2} {3}",
                 ret,
-                String::IsNullOrEmpty(ret) ? "" : ",",
+                String::IsNullOrEmpty(ret) ? "" : ", ",
                 m_Inventory[i],
                 InvToString(static_cast<InventoryType>(i)) );
         }
@@ -193,7 +186,7 @@ String^ GameData::GetSpeciesSummary()
     return String::Format(
         "Species: {0}\r\n"
         "Home: [{1} {2} {3} {4}]\r\n"
-        "TC:{5} PC:{6}  Atm:{7} {8}-{9}%\r\n",
+        "Temp:{5} Press:{6}  Atm:{7} {8}-{9}%\r\n",
         GetSpeciesName(),
         m_Species->m_HomeSystem->X,
         m_Species->m_HomeSystem->Y,
@@ -209,9 +202,9 @@ String^ GameData::GetSpeciesSummary()
 String^ GameData::GetAllTechsSummary()
 {
     return String::Format(
-        "  MI={0} | GV={3}\r\n"
-        "  MA={1} | LS={4}\r\n"
-        "  ML={2} | BI={5}\r\n",
+        "  MI: {0} | GV: {3}\r\n"
+        "  MA: {1} | LS: {4}\r\n"
+        "  ML: {2} | BI: {5}\r\n",
         GetTechSummary(TECH_MI),
         GetTechSummary(TECH_MA),
         GetTechSummary(TECH_ML),

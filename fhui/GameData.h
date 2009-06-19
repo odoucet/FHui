@@ -114,8 +114,7 @@ public:
     double      CalcMishap(int x, int y, int z, int gv, int age);
 
     String^     GenerateScan();
-    String^     PrintLocation() { return String::Format("{0} {1} {2}", X, Y, Z); }
-    String^     PrintNumPlanets();
+    String^     PrintLocation() { return String::Format("{0,2} {1,2} {2,2}", X, Y, Z); }
     String^     PrintScanTurn();
 
     property int        X;
@@ -143,6 +142,7 @@ public:
         , m_EUProd(0)
         , m_EUFleet(0)
         , m_MiBase(0)
+        , m_MiDiff(0)
         , m_MaBase(0)
         , m_RMCarried(0)
         , m_Shipyards(0)
@@ -165,6 +165,7 @@ public:
     int             m_EUProd;
     int             m_EUFleet;
     double          m_MiBase;
+    double          m_MiDiff;
     double          m_MaBase;
     int             m_RMCarried;
     int             m_Shipyards;

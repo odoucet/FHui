@@ -3,12 +3,17 @@ Major new features and bug fixes will be listed here.
 + New features
 * Bug fixes
 
+FHUI build 23
+* Fixed incorrect spacing of species names.
++ More data on Colonies tab.
++ Several display formating improvements.
+
+FHUI build 22
++ Colonies tab now displays basic informations about player's colonies.
++ All met species show in summary panel and listed on Aliens tab.
+
 FHUI build 20
 + Support for special "report" for turn 0, intended for loading data aquired via diplomacy.
 + LSN calculations for planets, even those received with data for different species.
 + Systems grid shows tooltips with system scans.
 + 'About' tab added.
-
-FHUI build 22
-+ Colonies tab now displays basic informations about player's colonies.
-+ All met species show in summary panel and listed on Aliens tab.
