@@ -10,11 +10,27 @@ String^ Alien::PrintHome()
     String ^plName = nullptr;
     if( m_HomePlanet != -1 &&
         m_HomePlanet <= m_HomeSystem->m_Planets->Length )
-        plName = m_HomeSystem->m_Planets[m_HomePlanet]->m_Name;
+        plName = m_HomeSystem->m_Planets[m_HomePlanet - 1]->m_Name;
     if( plName == nullptr )
         plName = "?";
     return String::Format( "{0} {1} ({2})",
         m_HomeSystem->PrintLocation(), m_HomePlanet, plName );
+}
+
+String^ Alien::PrintTechLevels()
+{
+    if( m_TechEstimateTurn == -1 )
+        return "No estimates.";
+
+    return String::Format(
+        "{0,2} {1,2} {2,2} {3,2} {4,2} {5,2} (t.{6})",
+        m_TechLevels[TECH_MI],
+        m_TechLevels[TECH_MA],
+        m_TechLevels[TECH_ML],
+        m_TechLevels[TECH_GV],
+        m_TechLevels[TECH_LS],
+        m_TechLevels[TECH_BI],
+        m_TechEstimateTurn );
 }
 
 // ---------------------------------------------------------

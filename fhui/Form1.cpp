@@ -33,8 +33,10 @@ void Form1::LoadGameData()
         SetupShips();
         SetupAliens();
 
-        this->Text = String::Format("[SP {0}] Far Horizons User Interface, build {1}",
-            m_GameData->GetSpeciesName(), FHUI_BUILD_INFO() );
+        this->Text = String::Format("[SP {0}, Turn {1}] Far Horizons User Interface, build {2}",
+            m_GameData->GetSpeciesName(),
+            m_GameData->GetLastTurn(),
+            FHUI_BUILD_INFO() );
     }
     catch( SystemException ^e )
     {
@@ -415,15 +417,17 @@ void Form1::SetupAliens()
     dataTable->Columns->Add("Name", String::typeid );
     dataTable->Columns->Add("Relation", String::typeid );
     dataTable->Columns->Add("Home", String::typeid );
+    dataTable->Columns->Add("Tech Levels", String::typeid );
 
     for each( DictionaryEntry ^entry in m_GameData->GetAliens() )
     {
         Alien ^alien = safe_cast<Alien^>(entry->Value);
 
         DataRow^ row = dataTable->NewRow();
-        row["Name"]     = alien->m_Name;
-        row["Relation"] = alien->PrintRelation();
-        row["Home"]     = alien->PrintHome();
+        row["Name"]         = alien->m_Name;
+        row["Relation"]     = alien->PrintRelation();
+        row["Home"]         = alien->PrintHome();
+        row["Tech Levels"]  = alien->PrintTechLevels();
 
         dataTable->Rows->Add(row);
     }

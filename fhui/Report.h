@@ -16,6 +16,7 @@ enum PhaseType
     PHASE_SPECIES_ALLIES,
     PHASE_SPECIES_ENEMIES,
     PHASE_SYSTEM_SCAN,
+    PHASE_ALIEN_ESTIMATE,
     PHASE_COLONY,
     PHASE_COLONY_INVENTORY,
     PHASE_COLONY_SHIPS,
@@ -23,6 +24,8 @@ enum PhaseType
     PHASE_ORDERS_TEMPLATE,
     PHASE_TECH_LEVELS,
 };
+
+#define AGGREGATE_LINES_MAX  -1
 
 public ref class Report
 {
@@ -36,8 +39,8 @@ public:
     bool            Parse(String ^s);
 
 private:
-    void            StartLineAggregate(PhaseType, String ^s);
-    String^         FinishLineAggregate();
+    void            StartLineAggregate(PhaseType, String ^s, int aggrMaxLines);
+    String^         FinishLineAggregate(bool resetPhase);
 
     bool            MatchSectionEnd(String ^s);
     bool            MatchWithOutput(String ^%s, String ^exp);
@@ -63,6 +66,7 @@ private:
 
     bool            m_bParsingAggregate;
     String         ^m_StringAggregate;
+    int             m_AggregateMaxLines;
 
     int             m_ScanX;
     int             m_ScanY;
@@ -70,4 +74,6 @@ private:
     bool            m_ScanHasPlanets;
     Alien          ^m_ScanHome;
     Colony         ^m_ScanColony;
+
+    Alien          ^m_EstimateAlien;
 };

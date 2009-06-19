@@ -3,6 +3,9 @@ Major new features and bug fixes will be listed here.
 + New features
 * Bug fixes
 
+FHUI build 24
++ Tech level estimates displayed on Aliens tab.
+
 FHUI build 23
 * Fixed incorrect spacing of species names.
 + More data on Colonies tab.

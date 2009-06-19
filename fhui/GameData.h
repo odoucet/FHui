@@ -37,6 +37,8 @@ public ref class Alien
 public:
     Alien(String ^name, int turn)
         : m_Name(name)
+        , m_GovName(nullptr)
+        , m_GovType(nullptr)
         , m_Relation(SP_NEUTRAL)
         , m_TurnMet(turn)
         , m_AtmReq(gcnew AtmosphericReq)
@@ -50,8 +52,11 @@ public:
 
     String^         PrintRelation() { return SpRelToString(m_Relation); }
     String^         PrintHome();
+    String^         PrintTechLevels();
 
     String         ^m_Name;
+    String         ^m_GovName;
+    String         ^m_GovType;
     SPRelType       m_Relation;
     int             m_TurnMet;
     AtmosphericReq ^m_AtmReq;
@@ -197,6 +202,7 @@ public:
     GameData();
 
     String^         GetSummary();
+    int             GetLastTurn()               { return m_TurnMax; }
 
     Alien^          GetSpecies()                { return m_Species; }
     String^         GetSpeciesName()            { return m_Species->m_Name; }

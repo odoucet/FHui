@@ -9,12 +9,14 @@ Report::Report(GameData ^gd)
     , m_Turn(0)
     , m_bParsingAggregate(false)
     , m_StringAggregate(nullptr)
+    , m_AggregateMaxLines(-1)
     , m_ScanX(0)
     , m_ScanY(0)
     , m_ScanZ(0)
     , m_ScanHasPlanets(false)
     , m_ScanHome(nullptr)
     , m_ScanColony(nullptr)
+    , m_EstimateAlien(nullptr)
 {
     m_Content           = gcnew String("");
     m_TmpRegexResult    = gcnew array<String^>(1);
@@ -37,12 +39,15 @@ bool Report::Parse(String ^s)
     m_Content = String::Concat(m_Content,
         String::Concat(s, "\r\n") );
 
+    s = s->Trim(' ');
+    s = s->Trim('\t');
+
     if( m_Phase == PHASE_FILE_DETECT )
     {
         if( String::IsNullOrEmpty(s) )
             return true;
 
-        if( Regex("^\\s*EVENT LOG FOR TURN \\d+").Match(s)->Success )
+        if( Regex("^EVENT LOG FOR TURN \\d+").Match(s)->Success )
         {
             m_Phase = PHASE_GLOBAL;
             return true;
@@ -57,9 +62,10 @@ bool Report::Parse(String ^s)
     {
         if( !String::IsNullOrEmpty(s) )
         {
-            s = s->TrimStart(' ');
             m_StringAggregate = String::Format("{0} {1}",
                 m_StringAggregate, s);
+            if( m_AggregateMaxLines == -1 ||
+                --m_AggregateMaxLines > 0 )
             return true;
         }
     }
@@ -68,12 +74,12 @@ bool Report::Parse(String ^s)
     {
     case PHASE_GLOBAL:
         // Turn number
-        if( MatchWithOutput(s, "^\\s*EVENT LOG FOR TURN (\\d+)") )
+        if( MatchWithOutput(s, "^EVENT LOG FOR TURN (\\d+)") )
         {
             m_Turn = GetMatchResultInt(0);
             break;
         }
-        if( MatchWithOutput(s, "^\\s*START OF TURN (\\d+)") )
+        if( MatchWithOutput(s, "^START OF TURN (\\d+)") )
         {
             m_Turn = GetMatchResultInt(0);
             break;
@@ -108,13 +114,17 @@ bool Report::Parse(String ^s)
             m_GameData->SetFleetCost(m_Turn, GetMatchResultInt(0), GetMatchResultFloat(1));
         // Species...
         else if( Regex("^Species met:").Match(s)->Success )
-            StartLineAggregate(PHASE_SPECIES_MET, s);
+            StartLineAggregate(PHASE_SPECIES_MET, s, AGGREGATE_LINES_MAX);
         else if( MatchWithOutput(s, "^Scan of home star system for SP\\s+([^,;]+):$") )
             m_ScanHome = m_GameData->AddAlien(m_Turn, GetMatchResult(0));
         else if( Regex("^Allies:").Match(s)->Success )
-            StartLineAggregate(PHASE_SPECIES_ALLIES, s);
+            StartLineAggregate(PHASE_SPECIES_ALLIES, s, AGGREGATE_LINES_MAX);
         else if( Regex("^Enemies:").Match(s)->Success )
-            StartLineAggregate(PHASE_SPECIES_ENEMIES, s);
+            StartLineAggregate(PHASE_SPECIES_ENEMIES, s, AGGREGATE_LINES_MAX);
+        else if( MatchWithOutput(s, "^Government name:\\s+(.+)$") )
+            m_GameData->GetSpecies()->m_GovName = GetMatchResult(0);
+        else if( MatchWithOutput(s, "^Government type:\\s+(.+)$") )
+            m_GameData->GetSpecies()->m_GovType = GetMatchResult(0);
         // Tech levels
         else if( Regex("^Tech Levels:").Match(s)->Success )
             m_Phase = PHASE_TECH_LEVELS;
@@ -123,7 +133,7 @@ bool Report::Parse(String ^s)
         {}
         else if( Regex("^\\w+ PLANET: PL.+").Match(s)->Success ||
                  Regex("^\\w+ COLONY: PL.+").Match(s)->Success )
-            StartLineAggregate(PHASE_COLONY, s);
+            StartLineAggregate(PHASE_COLONY, s, 1);
         else if( Regex("^Other planets and ships:").Match(s)->Success )
             m_Phase = PHASE_OTHER_PLANETS_SHIPS;
         else if( Regex("^Combat orders:").Match(s)->Success )
@@ -134,7 +144,7 @@ bool Report::Parse(String ^s)
         break;
 
     case PHASE_SPECIES_MET:
-        if( MatchAggregateList(FinishLineAggregate(), "^Species met:", "SP\\s+([^,;]+)") )
+        if( MatchAggregateList(FinishLineAggregate(true), "^Species met:", "SP\\s+([^,;]+)") )
         {
             for( int i = 0; i < m_TmpRegexResult->Length; ++i )
                 m_GameData->AddAlien(m_Turn, GetMatchResult(i));
@@ -143,7 +153,7 @@ bool Report::Parse(String ^s)
         return false;
 
     case PHASE_SPECIES_ALLIES:
-        if( MatchAggregateList(FinishLineAggregate(), "^Allies:", "SP\\s+([^,;]+)") )
+        if( MatchAggregateList(FinishLineAggregate(true), "^Allies:", "SP\\s+([^,;]+)") )
         {
             for( int i = 0; i < m_TmpRegexResult->Length; ++i )
                 m_GameData->SetAlienRelation(m_Turn, GetMatchResult(i), SP_ALLY);
@@ -152,7 +162,7 @@ bool Report::Parse(String ^s)
         return false;
 
     case PHASE_SPECIES_ENEMIES:
-        if( MatchAggregateList(FinishLineAggregate(), "^Enemies:", "SP\\s+([^,;]+)") )
+        if( MatchAggregateList(FinishLineAggregate(true), "^Enemies:", "SP\\s+([^,;]+)") )
         {
             for( int i = 0; i < m_TmpRegexResult->Length; ++i )
                 m_GameData->SetAlienRelation(m_Turn, GetMatchResult(i), SP_ENEMY);
@@ -181,6 +191,8 @@ bool Report::Parse(String ^s)
     case PHASE_ORDERS_PROD:
         if( Regex("^Post-arrival orders:").Match(s)->Success )
             m_Phase = PHASE_ORDERS_POST_ARRIVAL;
+        else if( Regex("^Estimate of the technology of SP ").Match(s)->Success )
+            StartLineAggregate(PHASE_ALIEN_ESTIMATE, s, 1);
         break;
 
     case PHASE_ORDERS_POST_ARRIVAL:
@@ -197,11 +209,11 @@ bool Report::Parse(String ^s)
         break;
 
     case PHASE_TECH_LEVELS:
-        if( MatchTech(s, "^\\s*Mining", TECH_MI) ||
-            MatchTech(s, "^\\s*Manufacturing", TECH_MA) ||
-            MatchTech(s, "^\\s*Military", TECH_ML) ||
-            MatchTech(s, "^\\s*Gravitics", TECH_GV) ||
-            MatchTech(s, "^\\s*Life Support", TECH_LS) )
+        if( MatchTech(s, "^Mining", TECH_MI) ||
+            MatchTech(s, "^Manufacturing", TECH_MA) ||
+            MatchTech(s, "^Military", TECH_ML) ||
+            MatchTech(s, "^Gravitics", TECH_GV) ||
+            MatchTech(s, "^Life Support", TECH_LS) )
             break;
         else if( MatchTech(s, "Biology", TECH_BI) )
             m_Phase = PHASE_GLOBAL;
@@ -209,8 +221,36 @@ bool Report::Parse(String ^s)
             return false;
         break;
 
+    case PHASE_ALIEN_ESTIMATE:
+        if( m_bParsingAggregate )
+            s = FinishLineAggregate(false);
+
+        if( MatchWithOutput(s, "^Estimate of the technology of SP\\s+([^,;]+)\\s+\\(government name '([^']+)', government type '([^']+)'\\)") )
+        {
+            m_EstimateAlien = m_GameData->AddAlien(m_Turn, GetMatchResult(0));
+            m_EstimateAlien->m_GovName = GetMatchResult(1);
+            m_EstimateAlien->m_GovType = GetMatchResult(2);
+        }
+        else if( m_EstimateAlien != nullptr &&
+            MatchWithOutput(s, "MI =\\s+(\\d+), MA =\\s+(\\d+), ML =\\s+(\\d+), GV =\\s+(\\d+), LS =\\s+(\\d+), BI =\\s+(\\d+)\\.") )
+        {
+            if( m_Turn > m_EstimateAlien->m_TechEstimateTurn )
+            {
+                m_EstimateAlien->m_TechLevels[TECH_MI] = GetMatchResultInt(0);
+                m_EstimateAlien->m_TechLevels[TECH_MA] = GetMatchResultInt(1);
+                m_EstimateAlien->m_TechLevels[TECH_ML] = GetMatchResultInt(2);
+                m_EstimateAlien->m_TechLevels[TECH_GV] = GetMatchResultInt(3);
+                m_EstimateAlien->m_TechLevels[TECH_LS] = GetMatchResultInt(4);
+                m_EstimateAlien->m_TechLevels[TECH_BI] = GetMatchResultInt(5);
+                m_EstimateAlien->m_TechEstimateTurn = m_Turn;
+            }
+        }
+        else
+            m_Phase = PHASE_ORDERS_PROD;
+        break;
+
     case PHASE_SYSTEM_SCAN:
-        if( Regex("^\\s*$").Match(s)->Success )
+        if( String::IsNullOrEmpty(s) )
         {
             if( m_ScanHasPlanets )
             {
@@ -285,7 +325,7 @@ bool Report::MatchSystemScanStart(String ^s)
 void Report::MatchPlanetScan(String ^s)
 {
     //                          0:plNum   1:dia    2:gv            3:tc       4:pc    5:mining diff
-    if( MatchWithOutput(s, "^\\s+(\\d+)\\s+(\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+\\.\\d+)\\s+") )
+    if( MatchWithOutput(s, "^(\\d+)\\s+(\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+\\.\\d+)\\s+") )
     {
         int plNum = GetMatchResultInt(0);
         Planet ^planet = gcnew Planet(
@@ -371,21 +411,18 @@ bool Report::MatchTech(String ^s, String ^techName, TechType tech)
 void Report::MatchColonyScan(String ^s)
 {
     if( m_bParsingAggregate )
-    {
-        s = FinishLineAggregate();
-        m_Phase = PHASE_COLONY;
-    }
+        s = FinishLineAggregate(false);
 
     if( m_ScanColony == nullptr )
     {
         // Initial colony data
         PlanetType planetType = PLANET_HOME;
-        if( MatchWithOutput(s, "^\\s*(HOME|COLONY)\\s+PLANET: PL\\s+") )
+        if( MatchWithOutput(s, "^(HOME|COLONY)\\s+PLANET: PL\\s+") )
         {
             if( GetMatchResult(0)[0] == 'C' )
                 planetType = PLANET_COLONY;
         }
-        else if( MatchWithOutput(s, "^\\s*(MINING|RESORT)\\s+COLONY: PL\\s+") )
+        else if( MatchWithOutput(s, "^(MINING|RESORT)\\s+COLONY: PL\\s+") )
         {
             if( GetMatchResult(0)[0] == 'M' )
                 planetType = PLANET_COLONY_MINING;
@@ -441,7 +478,7 @@ void Report::MatchColonyScan(String ^s)
         break;
 
     case PLANET_COLONY_MINING:
-        if( MatchWithOutput(s, "^\\s*This mining colony will generate (\\d+) - (\\d+) = \\d+ economic units this turn\\.") )
+        if( MatchWithOutput(s, "^This mining colony will generate (\\d+) - (\\d+) = \\d+ economic units this turn\\.") )
         {
             m_ScanColony->m_EUProd  = GetMatchResultInt(0);
             m_ScanColony->m_EUFleet = GetMatchResultInt(1);
@@ -450,7 +487,7 @@ void Report::MatchColonyScan(String ^s)
         break;
 
     case PLANET_COLONY_RESORT:
-        if( MatchWithOutput(s, "^\\s*This resort colony will generate (\\d+) - (\\d+) = \\d+ economic units this turn\\.") )
+        if( MatchWithOutput(s, "^This resort colony will generate (\\d+) - (\\d+) = \\d+ economic units this turn\\.") )
         {
             m_ScanColony->m_EUProd  = GetMatchResultInt(0);
             m_ScanColony->m_EUFleet = GetMatchResultInt(1);
@@ -459,38 +496,38 @@ void Report::MatchColonyScan(String ^s)
         break;
     }
 
-    if( MatchWithOutput(s, "^\\s*Economic efficiency = (\\d+)%") )
+    if( MatchWithOutput(s, "^Economic efficiency = (\\d+)%") )
     {
         m_ScanColony->m_EconomicEff = GetMatchResultInt(0);
     }
-    else if( MatchWithOutput(s, "^\\s*Production penalty = (\\d+)% \\(") )
+    else if( MatchWithOutput(s, "^Production penalty = (\\d+)% \\(") )
     {
         m_ScanColony->m_ProdPenalty = GetMatchResultInt(0);
     }
-    else if( MatchWithOutput(s, "^\\s*Mining base = (\\d+\\.\\d+) \\(MI = \\d+, MD = (\\d+\\.\\d+)\\)") )
+    else if( MatchWithOutput(s, "^Mining base = (\\d+\\.\\d+) \\(MI = \\d+, MD = (\\d+\\.\\d+)\\)") )
     {
         m_ScanColony->m_MiBase = GetMatchResultFloat(0);
         m_ScanColony->m_MiDiff = GetMatchResultFloat(1);
     }
-    else if( MatchWithOutput(s, "^\\s*Raw Material Units \\(RM,C1\\) carried over from last turn = (\\d+)") )
+    else if( MatchWithOutput(s, "^Raw Material Units \\(RM,C1\\) carried over from last turn = (\\d+)") )
     {
         m_ScanColony->m_RMCarried = GetMatchResultInt(0);
     }
-    else if( MatchWithOutput(s, "^\\s*Manufacturing base = (\\d+\\.\\d+) \\(") )
+    else if( MatchWithOutput(s, "^Manufacturing base = (\\d+\\.\\d+) \\(") )
     {
         m_ScanColony->m_MaBase = GetMatchResultFloat(0);
     }
-    else if( MatchWithOutput(s, "^\\s*Shipyard capacity = (\\d+)") )
+    else if( MatchWithOutput(s, "^Shipyard capacity = (\\d+)") )
     {
         m_ScanColony->m_Shipyards = GetMatchResultInt(0);
     }
-    else if( MatchWithOutput(s, "^\\s*Available population units = (\\d+)") )
+    else if( MatchWithOutput(s, "^Available population units = (\\d+)") )
     {
         m_ScanColony->m_AvailPop = GetMatchResultInt(0);
     }
-    else if( Regex("^\\s*Planetary inventory:").Match(s)->Success )
+    else if( Regex("^Planetary inventory:").Match(s)->Success )
         m_Phase = PHASE_COLONY_INVENTORY;
-    else if( Regex("^\\s*Ships at PL [^,;]+:").Match(s)->Success )
+    else if( Regex("^Ships at PL [^,;]+:").Match(s)->Success )
         m_Phase = PHASE_COLONY_SHIPS;
 }
 
@@ -569,7 +606,7 @@ void Report::MatchColonyShipsScan(String ^s)
 
 void Report::MatchOtherPlanetsShipsScan(String ^s)
 {
-    if( MatchWithOutput(s, "^\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+#(\\d+)\\s+PL\\s+(.+)$") )
+    if( MatchWithOutput(s, "^(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+#(\\d+)\\s+PL\\s+(.+)$") )
     {
         m_GameData->AddPlanetName(
             m_Turn,
@@ -581,19 +618,21 @@ void Report::MatchOtherPlanetsShipsScan(String ^s)
     }
 }
 
-void Report::StartLineAggregate(PhaseType phase, String ^s)
+void Report::StartLineAggregate(PhaseType phase, String ^s, int maxLines)
 {
     m_bParsingAggregate = true;
     m_StringAggregate = s;
+    m_AggregateMaxLines = maxLines;
     m_Phase = phase;
 }
 
-String^ Report::FinishLineAggregate()
+String^ Report::FinishLineAggregate(bool resetPhase)
 {
     m_bParsingAggregate = false;
     String ^ret = m_StringAggregate;
     m_StringAggregate = nullptr;
-    m_Phase = PHASE_GLOBAL;
+    if( resetPhase )
+        m_Phase = PHASE_GLOBAL;
     return ret;
 }
 
