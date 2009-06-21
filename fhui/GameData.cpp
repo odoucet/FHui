@@ -3,6 +3,27 @@
 
 // ---------------------------------------------------------
 
+String^ PrintInventory(array<int> ^inv)
+{
+    String ^ret = "";
+
+    for( int i = 0; i < INV_MAX; ++i )
+    {
+        if( inv[i] )
+        {
+            ret = String::Format("{0}{1}{2} {3}",
+                ret,
+                String::IsNullOrEmpty(ret) ? "" : ", ",
+                inv[i],
+                InvToString(static_cast<InventoryType>(i)) );
+        }
+    }
+
+    return ret;
+}
+
+// ---------------------------------------------------------
+
 String^ Alien::PrintHome()
 {
     if( m_HomeSystem == nullptr )
@@ -58,20 +79,20 @@ int Planet::CalculateLSN(AtmosphericReq ^atmReq)
 
 // ---------------------------------------------------------
 
-double StarSystem::CalcDistance(int x, int y, int z)
+double StarSystem::CalcDistance(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo)
 {
-    int dx = Math::Abs(X - x);
-    int dy = Math::Abs(Y - y);
-    int dz = Math::Abs(Z - z);
+    int dx = Math::Abs(xFrom - xTo);
+    int dy = Math::Abs(yFrom - yTo);
+    int dz = Math::Abs(zFrom - zTo);
     return Math::Sqrt(dx * dx + dy * dy + dz * dz);
 }
 
-double StarSystem::CalcMishap(int x, int y, int z, int gv, int age)
+double StarSystem::CalcMishap(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo, int gv, int age)
 {
     if( gv == 0 )
         throw gcnew ArgumentException("GV must not be 0 for mishap calculation!");
 
-    double dist = CalcDistance(x, y, z);
+    double dist = CalcDistance(xFrom, yFrom, zFrom, xTo, yTo, zTo);
     if( dist == 0 )
         return 0.0;
     return (dist * dist) / gv + (age * 2.0);
@@ -134,24 +155,87 @@ String^ StarSystem::PrintScanTurn()
 
 String^ Colony::PrintInventoryShort()
 {
-    String ^ret = "";
+    return PrintInventory(m_Inventory);
+}
 
-    if( m_RMCarried > 0 )
-        ret = String::Format("{0} RM", m_RMCarried);
+// ---------------------------------------------------------
 
-    for( int i = 0; i < INV_MAX; ++i )
+String^ Ship::PrintClass()
+{
+    return String::Format(
+        "{0}{1}{2}",
+        ShipToString( m_Type ),
+        m_Type == SHIP_TR ? m_Size.ToString() : "",
+        m_bSubLight ? "s" : "" );
+}
+
+String^ Ship::PrintLocation()
+{
+    String ^xyz;
+
+    if( m_System )
     {
-        if( m_Inventory[i] )
+        if( m_Planet != -1 )
         {
-            ret = String::Format("{0}{1}{2} {3}",
-                ret,
-                String::IsNullOrEmpty(ret) ? "" : ", ",
-                m_Inventory[i],
-                InvToString(static_cast<InventoryType>(i)) );
+            if( m_Planet <= m_System->m_Planets->Length &&
+                !String::IsNullOrEmpty(m_System->m_Planets[m_Planet - 1]->m_Name) )
+            {
+                xyz = String::Format("PL {0}", m_System->m_Planets[m_Planet - 1]->m_Name);
+            }
+            else
+                xyz = String::Format("[{0} {1}]", m_System->PrintLocation(), m_Planet);
         }
+        else
+           xyz = String::Format("[{0}]", m_System->PrintLocation());
+    }
+    else
+    {
+        if( m_Planet != -1 )
+            xyz = String::Format("[{0,2} {1,2} {2,2} {3}]", m_X, m_Y, m_Z, m_Planet);
+        else
+            xyz = String::Format("[{0,2} {1,2} {2,2}]", m_X, m_Y, m_Z);
     }
 
-    return ret;
+    switch( m_Location )
+    {
+    case SHIP_LOC_DEEP_SPACE:   return String::Format("{0}, DeepSp", xyz);
+    case SHIP_LOC_ORBIT:        return String::Format("{0}, Orbit", xyz);
+    case SHIP_LOC_LANDED:       return String::Format("{0}, Landed", xyz);
+    }
+
+    int l = m_Location;
+    throw gcnew ArgumentException(
+        String::Format("Invalid ship location! ({0})", l) );
+}
+
+String^ Ship::PrintCargo()
+{
+    return PrintInventory(m_Cargo);
+}
+
+void Ship::CalculateCapacity()
+{
+    switch( m_Type )
+    {
+    case SHIP_BAS:  m_Capacity = m_Size / 1000; break;
+    case SHIP_TR:   m_Capacity = (10 + (m_Size / 2)) * m_Size; break;
+    case SHIP_PB:   m_Capacity = 1;     break;
+    case SHIP_CT:   m_Capacity = 2;     break;
+    case SHIP_ES:   m_Capacity = 5;     break;
+    case SHIP_FF:   m_Capacity = 10;    break;
+    case SHIP_DD:   m_Capacity = 15;    break;
+    case SHIP_CL:   m_Capacity = 20;    break;
+    case SHIP_CS:   m_Capacity = 25;    break;
+    case SHIP_CA:   m_Capacity = 30;    break;
+    case SHIP_CC:   m_Capacity = 35;    break;
+    case SHIP_BC:   m_Capacity = 40;    break;
+    case SHIP_BS:   m_Capacity = 45;    break;
+    case SHIP_DN:   m_Capacity = 50;    break;
+    case SHIP_SD:   m_Capacity = 55;    break;
+    case SHIP_BM:   m_Capacity = 60;    break;
+    case SHIP_BW:   m_Capacity = 65;    break;
+    case SHIP_BR:   m_Capacity = 70;    break;
+    }
 }
 
 // ---------------------------------------------------------
@@ -166,6 +250,7 @@ GameData::GameData(void)
     , m_Systems(gcnew array<StarSystem^>(0))
     , m_Colonies(gcnew SortedList)
     , m_PlanetNames(gcnew SortedList)
+    , m_Ships(gcnew SortedList)
     , m_TurnMax(0)
 {
 }
@@ -300,7 +385,25 @@ String^ GameData::GetPlanetsSummary()
 
 String^ GameData::GetShipsSummary()
 {
-    return "Ships summary\r\n - TODO...\r\n";
+    String ^ret = "";
+
+    for each( DictionaryEntry ^entry in m_Ships )
+    {
+        Ship ^ship = safe_cast<Ship^>(entry->Value);
+        if( ship->m_Owner != m_Species )
+            continue;
+
+        ret = String::Format("{0}{1} {2} @{3}\r\n",
+            ret,
+            ship->PrintClass(),
+            ship->m_Name,
+            ship->PrintLocation() );
+    }
+
+    if( String::IsNullOrEmpty(ret) )
+        ret = "You have no ships\r\n";
+
+    return ret;
 }
 
 void GameData::GetFleetCost(int %cost, float %percent)
@@ -361,6 +464,8 @@ bool GameData::TurnCheck(int turn)
 
         // remove planet names
         m_PlanetNames->Clear();
+        // remove ships
+        m_Ships->Clear();
     }
     return turn == m_TurnMax;
 }
@@ -499,7 +604,7 @@ StarSystem^ GameData::GetStarSystem(int x, int y, int z)
     return nullptr;
 }
 
-void GameData::AddStarSystem(int x, int y, int z, String ^type)
+void GameData::AddStarSystem(int x, int y, int z, String ^type, String ^comment)
 {
     StarSystem ^system = GetStarSystem(x, y, z);
     if( system != nullptr )
@@ -507,6 +612,7 @@ void GameData::AddStarSystem(int x, int y, int z, String ^type)
             String::Format("Star system already added: [{0} {1} {2}]", x, y, z) );
 
     system = gcnew StarSystem(x, y, z, type);
+    system->Comment = comment;
     Array::Resize(m_Systems, m_Systems->Length + 1);
     m_Systems[m_Systems->Length - 1] = system;
 }
@@ -627,4 +733,32 @@ void GameData::LinkPlanetNames()
         if( system->m_Planets->Length >= plName->Num )
             system->m_Planets[ plName->Num - 1 ]->m_Name = plName->Name;
     }
+}
+
+Ship^ GameData::AddShip(int turn, Alien ^sp, ShipType type, String ^name, int size, bool subLight)
+{
+    bool createShip = false;
+
+    if( TurnCheck(turn) )
+    {
+        createShip = true;
+    }
+    else if( sp != m_Species )
+    {   // Turn N-1 report scanned after Turn N report
+        // and seeing an alien colony that wasn't seen next turn.
+        /*
+        //tbd: later, when history of seen ships is added this code may come in handy
+        if( m_Colonies->ContainsKey(name->ToLower()) == false )
+            createColony = true;
+        */
+    }
+
+    if( createShip )
+    {
+        Ship ^ship = gcnew Ship(sp, type, name, size, subLight);
+        m_Ships[name->ToLower()] = ship;
+        return ship;
+    }
+
+    return nullptr;
 }

@@ -16,6 +16,7 @@ Report::Report(GameData ^gd)
     , m_ScanHasPlanets(false)
     , m_ScanHome(nullptr)
     , m_ScanColony(nullptr)
+    , m_ScanShip(nullptr)
     , m_EstimateAlien(nullptr)
 {
     m_Content           = gcnew String("");
@@ -267,6 +268,7 @@ bool Report::Parse(String ^s)
         {
             m_Phase = PHASE_GLOBAL;
             m_ScanColony = nullptr;
+            m_ScanShip = nullptr;
         }
         else
             MatchColonyScan(s);
@@ -281,14 +283,21 @@ bool Report::Parse(String ^s)
 
     case PHASE_COLONY_SHIPS:
         if( String::IsNullOrEmpty(s) )
+        {
             m_Phase = PHASE_COLONY;
+            m_ScanShip = nullptr;
+        }
         else
             MatchColonyShipsScan(s);
         break;
 
     case PHASE_OTHER_PLANETS_SHIPS:
         if( MatchSectionEnd(s) )
+        {
             m_Phase = PHASE_GLOBAL;
+            m_ScanColony = nullptr;
+            m_ScanShip = nullptr;
+        }
         else
             MatchOtherPlanetsShipsScan(s);
     }
@@ -511,7 +520,7 @@ void Report::MatchColonyScan(String ^s)
     }
     else if( MatchWithOutput(s, "^Raw Material Units \\(RM,C1\\) carried over from last turn = (\\d+)") )
     {
-        m_ScanColony->m_RMCarried = GetMatchResultInt(0);
+        m_ScanColony->m_Inventory[INV_RM] = GetMatchResultInt(0);
     }
     else if( MatchWithOutput(s, "^Manufacturing base = (\\d+\\.\\d+) \\(") )
     {
@@ -601,21 +610,159 @@ void Report::MatchColonyInventoryScan(String ^s)
 
 void Report::MatchColonyShipsScan(String ^s)
 {
+    MatchShipScan(s, true);
+}
 
+void Report::MatchShipScan(String ^s, bool bColony)
+{
+    ShipType type   = SHIP_MAX;
+    int size        = 0;
+    bool subLight   = false;
+
+    if( MatchWithOutput(s, "BAS\\s+") )
+        type = SHIP_BAS;
+    else if( MatchWithOutput(s, "TR(\\d+)([Ss]?)\\s+") ) 
+    {
+        type = SHIP_TR;
+        size = GetMatchResultInt(0);
+        subLight = 0 == String::Compare( GetMatchResult(1)->ToLower(), "s" );
+    }
+    else
+    {
+        try
+        {
+            if( MatchWithOutput(s, "([A-Za-z]{2})([Ss]?)\\s+") )
+            {
+                type = ShipFromString( GetMatchResult(0) );
+                subLight = 0 == String::Compare( GetMatchResult(1)->ToLower(), "s" );
+            }
+            else
+                return;
+        }
+        catch( ArgumentException^ )
+        {
+            return;
+        }
+    }
+
+    if( MatchWithOutput(s, "([^,;]+) \\(A(\\d+),([DOLdol])") )
+    {
+        String ^name    = GetMatchResult(0);
+        int age         = GetMatchResultInt(1);
+        String ^loc     = GetMatchResult(2)->ToLower();
+
+        m_ScanShip      = m_GameData->AddShip(
+            m_Turn, m_GameData->GetSpecies(), type, name, size, subLight);
+
+        if( m_ScanShip == nullptr )
+            return;
+
+        if( bColony )
+        {
+            m_ScanShip->m_X = m_ScanColony->m_System->X;
+            m_ScanShip->m_Y = m_ScanColony->m_System->Y;
+            m_ScanShip->m_Z = m_ScanColony->m_System->Z;
+            m_ScanShip->m_System = m_ScanColony->m_System;
+        }
+        else
+        {
+            m_ScanShip->m_X = m_ScanX;
+            m_ScanShip->m_Y = m_ScanY;
+            m_ScanShip->m_Z = m_ScanZ;
+            try
+            {
+                m_ScanShip->m_System = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ);
+            }
+            catch( ArgumentException^ )
+            {
+                m_ScanShip->m_System = nullptr;
+            }
+        }
+
+        m_ScanShip->m_Age = age;
+
+        switch( loc[0] )
+        {
+        case 'd':
+            m_ScanShip->m_Location = SHIP_LOC_DEEP_SPACE;
+            break;
+        case 'o':
+            m_ScanShip->m_Location = SHIP_LOC_ORBIT;
+            break;
+        case 'l':
+            m_ScanShip->m_Location = SHIP_LOC_LANDED;
+            break;
+        }
+        if( m_ScanShip->m_Location != SHIP_LOC_DEEP_SPACE )
+        {
+            if( MatchWithOutput(s, "(\\d+)") )
+                m_ScanShip->m_Planet = GetMatchResultInt(0);
+            else
+                throw gcnew ArgumentException(
+                    String::Format("Unable to parse ship '{0}' location.", name));
+        }
+
+        if( type == SHIP_BAS )
+        {
+            if( MatchWithOutput(s, ",(\\d+) tons") )
+                m_ScanShip->m_Size = GetMatchResultInt(0);
+            else
+                throw gcnew ArgumentException(
+                    String::Format("Unable to parse starbase '{0}' size.", name));
+        }
+
+        if( bColony )
+        {
+            if( MatchWithOutput(s, "\\)\\s+(\\d+)\\s*") )
+                m_ScanShip->m_Capacity = GetMatchResultInt(0);
+            else
+                throw gcnew ArgumentException(
+                    String::Format("Unable to parse ship '{0}' capacity.", name));
+        }
+        else
+        {
+            if( !MatchWithOutput(s, "\\)\\s*") )
+                throw gcnew ArgumentException(
+                    String::Format("Unable to parse ship '{0}'.", name));
+            m_ScanShip->CalculateCapacity();
+        }
+
+        while( !String::IsNullOrEmpty(s) )
+        {
+            if( MatchWithOutput(s, ",?\\s*(\\d+)\\s+(\\w+)\\s*") )
+            {
+                int amount = GetMatchResultInt(0);
+                InventoryType inv = InvFromString( GetMatchResult(1) );
+                m_ScanShip->m_Cargo[inv] = amount;
+            }
+            else
+                throw gcnew ArgumentException(
+                    String::Format("Unable to parse ship '{0}' inventory.", name));
+        }
+    }
 }
 
 void Report::MatchOtherPlanetsShipsScan(String ^s)
 {
     if( MatchWithOutput(s, "^(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+#(\\d+)\\s+PL\\s+(.+)$") )
     {
+        m_ScanX = GetMatchResultInt(0);
+        m_ScanY = GetMatchResultInt(1);
+        m_ScanZ = GetMatchResultInt(2);
+
         m_GameData->AddPlanetName(
-            m_Turn,
-            GetMatchResultInt(0),
-            GetMatchResultInt(1),
-            GetMatchResultInt(2),
+            m_Turn, m_ScanX, m_ScanY, m_ScanZ,
             GetMatchResultInt(3),
             GetMatchResult(4) );
     }
+
+    if( MatchWithOutput(s, "^(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+") )
+    {
+        m_ScanX = GetMatchResultInt(0);
+        m_ScanY = GetMatchResultInt(1);
+        m_ScanZ = GetMatchResultInt(2);
+    }
+    MatchShipScan(s, false);
 }
 
 void Report::StartLineAggregate(PhaseType phase, String ^s, int maxLines)

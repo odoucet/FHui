@@ -59,6 +59,7 @@ String^ PlTypeToString(PlanetType);
 
 enum InventoryType
 {
+    INV_RM,
     INV_CU,
     INV_IU,
     INV_AU,
@@ -95,3 +96,38 @@ enum InventoryType
 };
 
 String^ InvToString(InventoryType inv);
+InventoryType InvFromString(String^ inv);
+
+enum ShipType
+{
+    SHIP_BAS,
+    SHIP_TR,
+    SHIP_PB,
+    SHIP_CT,
+    SHIP_ES,
+    SHIP_FF,
+    SHIP_DD,
+    SHIP_CL,
+    SHIP_CS,
+    SHIP_CA,
+    SHIP_CC,
+    SHIP_BC,
+    SHIP_BS,
+    SHIP_DN,
+    SHIP_SD,
+    SHIP_BM,
+    SHIP_BW,
+    SHIP_BR,
+    SHIP_MAX
+};
+
+enum ShipLocType
+{
+    SHIP_LOC_DEEP_SPACE,
+    SHIP_LOC_ORBIT,
+    SHIP_LOC_LANDED,
+    SHIP_LOC_MAX
+};
+
+String^ ShipToString(ShipType ship);
+ShipType ShipFromString(String^ ship);

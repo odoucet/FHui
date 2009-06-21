@@ -113,10 +113,13 @@ public:
         Type = type;
     }
 
-    double      CalcDistance(StarSystem ^s)                  { return CalcDistance(s->X, s->Y, s->Z); }
-    double      CalcMishap(StarSystem ^s, int gv, int age)   { return CalcMishap(s->X, s->Y, s->Z, gv, age); }
-    double      CalcDistance(int x, int y, int z);
-    double      CalcMishap(int x, int y, int z, int gv, int age);
+    static double   CalcDistance(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo);
+    static double   CalcMishap(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo, int gv, int age);
+
+    double      CalcDistance(StarSystem ^s)                         { return CalcDistance(X, Y, Z, s->X, s->Y, s->Z); }
+    double      CalcMishap(StarSystem ^s, int gv, int age)          { return CalcMishap(X, Y, Z, s->X, s->Y, s->Z, gv, age); }
+    double      CalcDistance(int x, int y, int z)                   { return CalcDistance(X, Y, Z, x, y, z); }
+    double      CalcMishap(int x, int y, int z, int gv, int age)    { return CalcMishap(X, Y, Z, x, y, z, gv, age); }
 
     String^     GenerateScan();
     String^     PrintLocation() { return String::Format("{0,2} {1,2} {2,2}", X, Y, Z); }
@@ -126,6 +129,7 @@ public:
     property int        Y;
     property int        Z;
     property String^    Type;
+    property String^    Comment;
 
     array<Planet^>     ^m_Planets;
     int                 m_TurnScanned;
@@ -149,7 +153,6 @@ public:
         , m_MiBase(0)
         , m_MiDiff(0)
         , m_MaBase(0)
-        , m_RMCarried(0)
         , m_Shipyards(0)
     {
         m_Inventory = gcnew array<int>(INV_MAX){0};
@@ -172,7 +175,6 @@ public:
     double          m_MiBase;
     double          m_MiDiff;
     double          m_MaBase;
-    int             m_RMCarried;
     int             m_Shipyards;
     array<int>     ^m_Inventory;
 };
@@ -196,6 +198,53 @@ public:
     property String^ Name;
 };
 
+public ref class Ship
+{
+public:
+    Ship(Alien ^owner, ShipType type, String ^name, int size, bool subLight)
+        : m_Owner(owner)
+        , m_Type(type)
+        , m_Name(name)
+        , m_Size(size)
+        , m_bSubLight(subLight)
+        , m_Age(0)
+        , m_Location(SHIP_LOC_MAX)
+        , m_X(-1)
+        , m_Y(-1)
+        , m_Z(-1)
+        , m_Planet(-1)
+        , m_System(nullptr)
+        , m_Capacity(0)
+    {
+        m_Cargo = gcnew array<int>(INV_MAX){0};
+    }
+
+    String^         PrintClass();
+    String^         PrintLocation();
+    String^         PrintCargo();
+
+    void            CalculateCapacity();
+
+    Alien          ^m_Owner;
+
+    ShipType        m_Type;
+    String         ^m_Name;
+    int             m_Size;
+    bool            m_bSubLight;
+
+    int             m_Age;
+
+    ShipLocType     m_Location;
+    int             m_X;
+    int             m_Y;
+    int             m_Z;
+    int             m_Planet;
+    StarSystem     ^m_System;
+
+    int             m_Capacity;
+    array<int>     ^m_Cargo;
+};
+
 public ref class GameData
 {
 public:
@@ -213,6 +262,7 @@ public:
     array<StarSystem^>^ GetStarSystems()        { return m_Systems; }
     SortedList^     GetColonies()               { return m_Colonies; }
     SortedList^     GetPlanetNames()            { return m_PlanetNames; }
+    SortedList^     GetShips()                  { return m_Ships; }
 
     // ------------------------------------------
     void            SetSpecies(String ^sp);
@@ -223,13 +273,14 @@ public:
     void            SetFleetCost(int turn, int, float);
     Alien^          AddAlien(int turn, String ^sp);
     void            SetAlienRelation(int turn, String ^sp, SPRelType);
-    void            AddStarSystem(int x, int y, int z, String ^type);
+    void            AddStarSystem(int x, int y, int z, String ^type, String ^comment);
     void            AddPlanetScan(int turn, int x, int y, int z, int plNum, Planet ^planet);
     void            SetTurnStartEU(int turn, int eu);
     void            AddTurnProducedEU(int turn, int eu);
     Colony^         AddColony(int turn, Alien^, String^, StarSystem^, int);
     void            AddPlanetName(int turn, int x, int y, int z, int pl, String ^name);
     void            UpdatePlanets();
+    Ship^           AddShip(int turn, Alien ^sp, ShipType type, String ^name, int size, bool subLight);
 
     // ------------------------------------------
 protected:
@@ -257,6 +308,7 @@ protected:
     array<StarSystem^> ^m_Systems;
     SortedList         ^m_Colonies;
     SortedList         ^m_PlanetNames;
+    SortedList         ^m_Ships;
 
     int                 m_TurnMax;
 };

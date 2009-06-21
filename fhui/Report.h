@@ -52,6 +52,7 @@ private:
     void            MatchColonyInventoryScan(String ^s);
     void            MatchColonyShipsScan(String ^s);
     void            MatchOtherPlanetsShipsScan(String ^s);
+    void            MatchShipScan(String ^s, bool bColony);
 
     String^         GetMatchResult(int arg)      { return m_TmpRegexResult[arg]; }
     int             GetMatchResultInt(int arg);
@@ -74,6 +75,7 @@ private:
     bool            m_ScanHasPlanets;
     Alien          ^m_ScanHome;
     Colony         ^m_ScanColony;
+    Ship           ^m_ScanShip;
 
     Alien          ^m_EstimateAlien;
 };

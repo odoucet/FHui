@@ -42,7 +42,7 @@ static GasStr s_GasStrings[GAS_MAX] =
 
 String^ GasToString(GasType gas)
 {
-    if( gas == GAS_MAX )
+    if( gas >= GAS_MAX )
         return "???";
     for( int i = 0; i < GAS_MAX; ++i )
         if( s_GasStrings[i].type == gas )
@@ -79,47 +79,119 @@ String^ PlTypeToString(PlanetType plType)
     }
 }
 
+struct InvStr
+{
+    InventoryType     type;
+    const char *str;
+};
+
+static InvStr s_InvStrings[INV_MAX] =
+{
+    { INV_RM, "RM" },
+    { INV_CU, "CU" },
+    { INV_IU, "IU" },
+    { INV_AU, "AU" },
+    { INV_PD, "PD" },
+    { INV_SU, "SU" },
+    { INV_FD, "FD" },
+    { INV_FS, "FS" },
+    { INV_DR, "DR" },
+    { INV_FM, "FM" },
+    { INV_FJ, "FJ" },
+    { INV_GW, "GW" },
+    { INV_GT, "GT" },
+    { INV_JP, "JP" },
+    { INV_TP, "TP" },
+    { INV_GU1, "GU1" },
+    { INV_GU2, "GU2" },
+    { INV_GU3, "GU3" },
+    { INV_GU4, "GU4" },
+    { INV_GU5, "GU5" },
+    { INV_GU6, "GU6" },
+    { INV_GU7, "GU7" },
+    { INV_GU8, "GU8" },
+    { INV_GU9, "GU9" },
+    { INV_SG1, "SG1" },
+    { INV_SG2, "SG2" },
+    { INV_SG3, "SG3" },
+    { INV_SG4, "SG4" },
+    { INV_SG5, "SG5" },
+    { INV_SG6, "SG6" },
+    { INV_SG7, "SG7" },
+    { INV_SG8, "SG8" },
+    { INV_SG9, "SG9" },
+};
 
 String^ InvToString(InventoryType inv)
 {
-#define INV_TO_STRING(i) case INV_##i: return #i
-    switch( inv )
-    {
-    INV_TO_STRING(CU);
-    INV_TO_STRING(IU);
-    INV_TO_STRING(AU);
-    INV_TO_STRING(PD);
-    INV_TO_STRING(SU);
-    INV_TO_STRING(FD);
-    INV_TO_STRING(FS);
-    INV_TO_STRING(DR);
-    INV_TO_STRING(FM);
-    INV_TO_STRING(FJ);
-    INV_TO_STRING(GW);
-    INV_TO_STRING(GT);
-    INV_TO_STRING(JP);
-    INV_TO_STRING(TP);
-    INV_TO_STRING(GU1);
-    INV_TO_STRING(GU2);
-    INV_TO_STRING(GU3);
-    INV_TO_STRING(GU4);
-    INV_TO_STRING(GU5);
-    INV_TO_STRING(GU6);
-    INV_TO_STRING(GU7);
-    INV_TO_STRING(GU8);
-    INV_TO_STRING(GU9);
-    INV_TO_STRING(SG1);
-    INV_TO_STRING(SG2);
-    INV_TO_STRING(SG3);
-    INV_TO_STRING(SG4);
-    INV_TO_STRING(SG5);
-    INV_TO_STRING(SG6);
-    INV_TO_STRING(SG7);
-    INV_TO_STRING(SG8);
-    INV_TO_STRING(SG9);
-    }
-#undef INV_TO_STRING
+    if( inv >= INV_MAX )
+        return "???";
+    for( int i = 0; i < INV_MAX; ++i )
+        if( s_InvStrings[i].type == inv )
+            return gcnew String(s_InvStrings[i].str);
+    throw gcnew ArgumentException("Invalid inventory type.");
+}
 
-    int i = inv;
-    throw gcnew ArgumentException(String::Format("Invalid inventory type: {0}", i));
+InventoryType InvFromString(String^ inv)
+{
+    for( int i = 0; i < INV_MAX; ++i )
+        if( String::Compare(
+            (gcnew String(s_InvStrings[i].str))->ToLower(),
+            inv->ToLower()) == 0 )
+        {
+            return s_InvStrings[i].type;
+        }
+    throw gcnew ArgumentException(
+        String::Format("Invalid inventory abbreviation: {0}", inv) );
+}
+
+struct ShipStr
+{
+    ShipType    type;
+    const char *str;
+};
+
+static ShipStr s_ShipStrings[SHIP_MAX] =
+{
+    { SHIP_BAS, "BAS" },
+    { SHIP_TR, "TR" },
+    { SHIP_PB, "PB" },
+    { SHIP_CT, "CT" },
+    { SHIP_ES, "ES" },
+    { SHIP_FF, "FF" },
+    { SHIP_DD, "DD" },
+    { SHIP_CL, "CL" },
+    { SHIP_CS, "CS" },
+    { SHIP_CA, "CA" },
+    { SHIP_CC, "CC" },
+    { SHIP_BC, "BC" },
+    { SHIP_BS, "BS" },
+    { SHIP_DN, "DN" },
+    { SHIP_SD, "SD" },
+    { SHIP_BM, "BM" },
+    { SHIP_BW, "BW" },
+    { SHIP_BR, "BR" },
+};
+
+String^ ShipToString(ShipType ship)
+{
+    if( ship >= SHIP_MAX )
+        return "???";
+    for( int i = 0; i < SHIP_MAX; ++i )
+        if( s_ShipStrings[i].type == ship )
+            return gcnew String(s_ShipStrings[i].str);
+    throw gcnew ArgumentException("Invalid ship type.");
+}
+
+ShipType ShipFromString(String^ ship)
+{
+    for( int i = 0; i < SHIP_MAX; ++i )
+        if( String::Compare(
+            (gcnew String(s_ShipStrings[i].str))->ToLower(),
+            ship->ToLower()) == 0 )
+        {
+            return s_ShipStrings[i].type;
+        }
+    throw gcnew ArgumentException(
+        String::Format("Invalid ship abbreviation: {0}", ship) );
 }

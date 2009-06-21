@@ -96,15 +96,16 @@ void Form1::LoadGalaxy()
     String ^line;
     while( (line = sr->ReadLine()) != nullptr ) 
     {
-        Match ^m = Regex("^x\\s+=\\s+(\\d+)\\s*y\\s+=\\s+(\\d+)\\s*z\\s+=\\s+(\\d+)\\s*stellar type =\\s+(\\w+)\\s*$").Match(line);
+        Match ^m = Regex("^x\\s+=\\s+(\\d+)\\s*y\\s+=\\s+(\\d+)\\s*z\\s+=\\s+(\\d+)\\s*stellar type =\\s+(\\w+)\\s*(\\w*)$").Match(line);
         if( m->Success )
         {
             int x = int::Parse(m->Groups[1]->ToString());
             int y = int::Parse(m->Groups[2]->ToString());
             int z = int::Parse(m->Groups[3]->ToString());
             String ^type = m->Groups[4]->ToString();
+            String ^comment = m->Groups[5]->ToString();
 
-            m_GameData->AddStarSystem(x, y, z, type);
+            m_GameData->AddStarSystem(x, y, z, type, comment);
         }
     }
     sr->Close();
@@ -199,6 +200,7 @@ void Form1::SetupSystems()
     dataTable->Columns->Add("Dist.", double::typeid );
     dataTable->Columns->Add("Mishap %", String::typeid );
     dataTable->Columns->Add("Scan", String::typeid );
+    dataTable->Columns->Add("Notes", String::typeid );
 
     Alien ^sp = m_GameData->GetSpecies();
     int gv = sp->m_TechLevels[TECH_GV];
@@ -223,6 +225,7 @@ void Form1::SetupSystems()
         row["Dist."]    = system->CalcDistance(sp->m_HomeSystem);
         row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
         row["Scan"]     = system->PrintScanTurn();
+        row["Notes"]     = system->Comment;
 
         dataTable->Rows->Add(row);
     }
@@ -259,6 +262,7 @@ void Form1::SetupPlanets()
     dataTable->Columns->Add("Dist.", double::typeid );
     dataTable->Columns->Add("Mishap %", String::typeid );
     dataTable->Columns->Add("Scan", String::typeid );
+    dataTable->Columns->Add("Notes", String::typeid );
 
     Alien ^sp = m_GameData->GetSpecies();
     int gv = sp->m_TechLevels[TECH_GV];
@@ -281,6 +285,7 @@ void Form1::SetupPlanets()
             row["Dist."]    = distance;
             row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
             row["Scan"]     = system->PrintScanTurn();
+            row["Notes"]    = planet->m_Comment;
 
             dataTable->Rows->Add(row);
         }
@@ -369,6 +374,9 @@ void Form1::SetupColonies()
                 DataGridViewContentAlignment::MiddleRight;
     }
 
+    // Some columns are not sortable... yet
+    ColoniesGrid->Columns["Mishap %"]->SortMode = DataGridViewColumnSortMode::NotSortable;
+
     // Default sort column
     ColoniesGrid->Sort( ColoniesGrid->Columns["Dist."], ListSortDirection::Ascending );
 }
@@ -381,29 +389,61 @@ void Form1::SetupShips()
     dataTable->Columns->Add("Class", String::typeid );
     dataTable->Columns->Add("Name", String::typeid );
     dataTable->Columns->Add("Location", String::typeid );
+    dataTable->Columns->Add("Age", int::typeid );
+    dataTable->Columns->Add("Capacity", int::typeid );
+    dataTable->Columns->Add("Cargo", String::typeid );
+    dataTable->Columns->Add("Dist.", double::typeid );
+    dataTable->Columns->Add("Mishap %", String::typeid );
 
-    /*
+    Alien ^sp = m_GameData->GetSpecies();
+    int gv = sp->m_TechLevels[TECH_GV];
+
     for each( DictionaryEntry ^entry in m_GameData->GetShips() )
     {
         Ship ^ship = safe_cast<Ship^>(entry->Value);
 
+        double distance = StarSystem::CalcDistance(
+            ship->m_X,
+            ship->m_Y,
+            ship->m_Z,
+            sp->m_HomeSystem->X,
+            sp->m_HomeSystem->Y,
+            sp->m_HomeSystem->Z);
+        double mishap = StarSystem::CalcMishap(
+            ship->m_X,
+            ship->m_Y,
+            ship->m_Z,
+            sp->m_HomeSystem->X,
+            sp->m_HomeSystem->Y,
+            sp->m_HomeSystem->Z,
+            gv,
+            ship->m_Age);
+
         DataRow^ row = dataTable->NewRow();
-        row["Class"]    = ship->m_Class;
+        row["Class"]    = ship->PrintClass();
         row["Name"]     = ship->m_Name;
-        row["Location"] = ship->Location;
+        row["Location"] = ship->PrintLocation();
+        row["Age"]      = ship->m_Age;
+        row["Capacity"] = ship->m_Capacity;
+        row["Cargo"]    = ship->PrintCargo();
+        row["Dist."]    = distance;
+        row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
 
         dataTable->Rows->Add(row);
     }
-    */
     ShipsGrid->DataSource = dataTable;
 
     // Formatting
+    ShipsGrid->Columns["Dist."]->DefaultCellStyle->Format = "F2";
     for each( DataColumn ^col in dataTable->Columns )
     {
         if( col->DataType == double::typeid || col->DataType == int::typeid )
             ShipsGrid->Columns[col->Ordinal]->DefaultCellStyle->Alignment =
                 DataGridViewContentAlignment::MiddleRight;
     }
+
+    // Some columns are not sortable... yet
+    ShipsGrid->Columns["Mishap %"]->SortMode = DataGridViewColumnSortMode::NotSortable;
 
     // Default sort column
     ShipsGrid->Sort( ShipsGrid->Columns["Class"], ListSortDirection::Ascending );
