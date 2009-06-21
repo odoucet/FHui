@@ -31,9 +31,17 @@ String^ Alien::PrintHome()
     String ^plName = nullptr;
     if( m_HomePlanet != -1 &&
         m_HomePlanet <= m_HomeSystem->m_Planets->Length )
-        plName = m_HomeSystem->m_Planets[m_HomePlanet - 1]->m_Name;
+    {
+        String ^n = m_HomeSystem->m_Planets[m_HomePlanet - 1]->m_Name;
+        if( String::IsNullOrEmpty(n) )
+            plName = "-";
+        else
+            plName = String::Format("PL {0}", n);
+    }
     if( plName == nullptr )
+    {
         plName = "?";
+    }
     return String::Format( "{0} {1} ({2})",
         m_HomeSystem->PrintLocation(), m_HomePlanet, plName );
 }
@@ -78,6 +86,18 @@ int Planet::CalculateLSN(AtmosphericReq ^atmReq)
 }
 
 // ---------------------------------------------------------
+
+Planet^ StarSystem::GetPlanet(int plNum)
+{
+    if( plNum < 1 )
+        throw gcnew ArgumentException(
+            String::Format("GetPlanet(): invalid planet number: {0}!", plNum) );
+
+    if( plNum <= m_Planets->Length )
+        return m_Planets[plNum - 1];
+
+    return nullptr;
+}
 
 double StarSystem::CalcDistance(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo)
 {
@@ -430,6 +450,11 @@ Ship^ GameData::GetShip(String ^name)
     return safe_cast<Ship^>(m_Ships[name->ToLower()]);
 }
 
+Colony^ GameData::GetColony(String ^name)
+{
+    return safe_cast<Colony^>(m_Colonies[name->ToLower()]);
+}
+
 // ---------------------------------------------------------
 
 bool GameData::TurnCheck(int turn)
@@ -601,17 +626,24 @@ StarSystem^ GameData::GetStarSystem(int x, int y, int z)
         }
     }
 
-    return nullptr;
+    throw gcnew ArgumentException(
+        String::Format("Trying to get not existing star system: {0} {1} {2}", x, y, z) );
 }
 
 void GameData::AddStarSystem(int x, int y, int z, String ^type, String ^comment)
 {
-    StarSystem ^system = GetStarSystem(x, y, z);
-    if( system != nullptr )
-        throw gcnew ArgumentException(
-            String::Format("Star system already added: [{0} {1} {2}]", x, y, z) );
+    for each( StarSystem ^system in m_Systems )
+    {
+        if( system->X == x &&
+            system->Y == y &&
+            system->Z == z )
+        {
+            throw gcnew ArgumentException(
+                String::Format("Star system already added: [{0} {1} {2}]", x, y, z) );
+        }
+    }
 
-    system = gcnew StarSystem(x, y, z, type);
+    StarSystem ^system = gcnew StarSystem(x, y, z, type);
     system->Comment = comment;
     Array::Resize(m_Systems, m_Systems->Length + 1);
     m_Systems[m_Systems->Length - 1] = system;
@@ -668,6 +700,8 @@ Colony^ GameData::AddColony(int turn, Alien ^sp, String ^name, StarSystem ^syste
         // and seeing an alien colony that wasn't seen next turn.
         if( m_Colonies->ContainsKey(name->ToLower()) == false )
             createColony = true;
+        else
+            return safe_cast<Colony^>(m_Colonies[name->ToLower()]);
     }
 
     if( createColony )
@@ -692,6 +726,7 @@ void GameData::UpdatePlanets()
 {
     CalculateLSN();
     LinkPlanetNames();
+    UpdateHomeWorlds();
 }
 
 void GameData::CalculateLSN()
@@ -732,6 +767,32 @@ void GameData::LinkPlanetNames()
         StarSystem ^system = GetStarSystem( plName->X, plName->Y, plName->Z );
         if( system->m_Planets->Length >= plName->Num )
             system->m_Planets[ plName->Num - 1 ]->m_Name = plName->Name;
+    }
+}
+
+void GameData::UpdateHomeWorlds()
+{
+    for each( DictionaryEntry ^entry in m_Colonies )
+    {
+        Colony ^colony = safe_cast<Colony^>(entry->Value);
+        if( colony->m_PlanetType == PLANET_HOME )
+        {
+            Alien ^sp = colony->m_Owner;
+            if( sp->m_AtmReq->IsValid() )
+                continue;
+
+            Planet ^planet = colony->m_System->GetPlanet(colony->m_PlanetNum);
+            if( planet )
+            {
+                sp->m_AtmReq->m_TempClass = planet->m_TempClass;
+                sp->m_AtmReq->m_PressClass = planet->m_PressClass;
+                for( int i = 0; i < GAS_MAX; ++i )
+                {
+                    if( planet->m_Atmosphere[i] )
+                        sp->m_AtmReq->m_Neutral[i] = true;
+                }
+            }
+        }
     }
 }
 

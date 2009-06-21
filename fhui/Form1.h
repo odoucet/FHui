@@ -60,7 +60,9 @@ namespace fhui {
         void        DisplayReport();
 
         String^     SystemsGetRowTooltip(DataGridViewRow ^row);
+        Color       ColoniesGetRowColor(DataGridViewRow ^row);
         Color       ShipsGetRowColor(DataGridViewRow ^row);
+        Color       AliensGetRowColor(DataGridViewRow ^row);
 
         Color       GetAlienColor(Alien ^sp);
 
@@ -734,6 +736,7 @@ namespace fhui {
             this->ColoniesGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
             this->ColoniesGrid->Size = System::Drawing::Size(549, 504);
             this->ColoniesGrid->TabIndex = 0;
+            this->ColoniesGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::ColoniesGrid_DataBindingComplete);
             // 
             // TabShips
             // 
@@ -879,6 +882,7 @@ namespace fhui {
             this->AliensGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
             this->AliensGrid->Size = System::Drawing::Size(549, 504);
             this->AliensGrid->TabIndex = 0;
+            this->AliensGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::AliensGrid_DataBindingComplete);
             // 
             // TabCommands
             // 
@@ -1076,6 +1080,22 @@ private: System::Void ShipsGrid_DataBindingComplete(System::Object^  sender, Sys
                      cell->Style->BackColor = bgColor;
              }
          }
+private: System::Void ColoniesGrid_DataBindingComplete(System::Object^  sender, System::Windows::Forms::DataGridViewBindingCompleteEventArgs^  e) {
+             for each( DataGridViewRow ^row in ((DataGridView^)sender)->Rows )
+             {
+                 Color bgColor = ColoniesGetRowColor( row );
+                 for each( DataGridViewCell ^cell in row->Cells )
+                     cell->Style->BackColor = bgColor;
+             }
+         }
+private: System::Void AliensGrid_DataBindingComplete(System::Object^  sender, System::Windows::Forms::DataGridViewBindingCompleteEventArgs^  e) {
+             for each( DataGridViewRow ^row in ((DataGridView^)sender)->Rows )
+             {
+                 Color bgColor = AliensGetRowColor( row );
+                 for each( DataGridViewCell ^cell in row->Cells )
+                     cell->Style->BackColor = bgColor;
+             }
+        }
 };
 }
 

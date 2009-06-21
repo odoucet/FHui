@@ -339,15 +339,23 @@ void Form1::SetupPlanets()
 ////////////////////////////////////////////////////////////////
 // Colonies
 
+Color Form1::ColoniesGetRowColor(DataGridViewRow ^row)
+{
+    String ^name = row->Cells[ ColoniesGrid->Columns["Name"]->Index ]->Value->ToString();
+    return GetAlienColor( m_GameData->GetColony(name)->m_Owner );
+}
+
 void Form1::SetupColonies()
 {
     // Put system data in a DataTable so that column sorting works.
     DataTable ^dataTable = gcnew DataTable();
 
+    dataTable->Columns->Add("Owner", String::typeid );
     dataTable->Columns->Add("Name", String::typeid );
     dataTable->Columns->Add("Type", String::typeid );
     dataTable->Columns->Add("Location", String::typeid );
     dataTable->Columns->Add("Size", double::typeid );
+    dataTable->Columns->Add("Seen", int::typeid );
     dataTable->Columns->Add("Prod.", int::typeid );
     dataTable->Columns->Add("Pr[%]", int::typeid );
     dataTable->Columns->Add("Balance", String::typeid );
@@ -366,27 +374,36 @@ void Form1::SetupColonies()
         double mishap = colony->m_System->CalcMishap(sp->m_HomeSystem, gv, 0);
 
         DataRow^ row = dataTable->NewRow();
+        row["Owner"]    = colony->m_Owner == sp ? String::Format("* {0}", sp->m_Name) : colony->m_Owner->m_Name;
         row["Name"]     = colony->m_Name;
         row["Type"]     = PlTypeToString(colony->m_PlanetType);
         row["Location"] = colony->PrintLocation();
         row["Size"]     = colony->m_MiBase + colony->m_MaBase;
-        row["Prod."]    = colony->m_EUProd - colony->m_EUFleet;
-        row["Pr[%]"]    = 100 - colony->m_ProdPenalty;
         row["Dist."]    = distance;
         row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
         row["Inventory"]= colony->PrintInventoryShort();
 
-        if( colony->m_PlanetType == PLANET_HOME ||
-            colony->m_PlanetType == PLANET_COLONY )
+        if( colony->m_Owner == sp )
         {
-            int mi = (int)((sp->m_TechLevels[TECH_MI] * colony->m_MiBase) / colony->m_Planet->m_MiningDiff);
-            int ma = (int)(sp->m_TechLevels[TECH_MA] * colony->m_MaBase);
-            if( mi == ma )
-                row["Balance"] = "Balanced";
-            else if( mi < ma )
-                row["Balance"] = String::Format("+{0} MA cap.", ma - mi);
-            else
-                row["Balance"] = String::Format("-{0} MA cap.", mi - ma);
+            row["Prod."]    = colony->m_EUProd - colony->m_EUFleet;
+            row["Pr[%]"]    = 100 - colony->m_ProdPenalty;
+
+            if( colony->m_PlanetType == PLANET_HOME ||
+                colony->m_PlanetType == PLANET_COLONY )
+            {
+                int mi = (int)((sp->m_TechLevels[TECH_MI] * colony->m_MiBase) / colony->m_Planet->m_MiningDiff);
+                int ma = (int)(sp->m_TechLevels[TECH_MA] * colony->m_MaBase);
+                if( mi == ma )
+                    row["Balance"] = "Balanced";
+                else if( mi < ma )
+                    row["Balance"] = String::Format("+{0} MA cap.", ma - mi);
+                else
+                    row["Balance"] = String::Format("-{0} MA cap.", mi - ma);
+            }
+        }
+        else
+        {
+            row["Seen"]     = colony->m_LastSeen;
         }
 
         dataTable->Rows->Add(row);
@@ -407,7 +424,7 @@ void Form1::SetupColonies()
     ColoniesGrid->Columns["Mishap %"]->SortMode = DataGridViewColumnSortMode::NotSortable;
 
     // Default sort column
-    ColoniesGrid->Sort( ColoniesGrid->Columns["Dist."], ListSortDirection::Ascending );
+    ColoniesGrid->Sort( ColoniesGrid->Columns["Owner"], ListSortDirection::Ascending );
 }
 
 ////////////////////////////////////////////////////////////////
@@ -494,6 +511,12 @@ void Form1::SetupShips()
 ////////////////////////////////////////////////////////////////
 // Aliens
 
+Color Form1::AliensGetRowColor(DataGridViewRow ^row)
+{
+    String ^name = row->Cells[ AliensGrid->Columns["Name"]->Index ]->Value->ToString();
+    return GetAlienColor( m_GameData->GetAlien(name) );
+}
+
 void Form1::SetupAliens()
 {
     // Put system data in a DataTable so that column sorting works.
@@ -503,6 +526,8 @@ void Form1::SetupAliens()
     dataTable->Columns->Add("Relation", String::typeid );
     dataTable->Columns->Add("Home", String::typeid );
     dataTable->Columns->Add("Tech Levels", String::typeid );
+    dataTable->Columns->Add("Temp", int::typeid );
+    dataTable->Columns->Add("Press", int::typeid );
 
     for each( DictionaryEntry ^entry in m_GameData->GetAliens() )
     {
@@ -513,7 +538,12 @@ void Form1::SetupAliens()
         row["Relation"]     = alien->PrintRelation();
         row["Home"]         = alien->PrintHome();
         row["Tech Levels"]  = alien->PrintTechLevels();
-
+        if( alien->m_AtmReq->m_TempClass != -1 &&
+            alien->m_AtmReq->m_PressClass != -1 )
+        {
+            row["Temp"]     = alien->m_AtmReq->m_TempClass;
+            row["Press"]    = alien->m_AtmReq->m_PressClass;
+        }
         dataTable->Rows->Add(row);
     }
     AliensGrid->DataSource = dataTable;

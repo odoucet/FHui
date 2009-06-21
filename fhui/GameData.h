@@ -121,6 +121,8 @@ public:
     double      CalcDistance(int x, int y, int z)                   { return CalcDistance(X, Y, Z, x, y, z); }
     double      CalcMishap(int x, int y, int z, int gv, int age)    { return CalcMishap(X, Y, Z, x, y, z, gv, age); }
 
+    Planet^     GetPlanet(int plNum);
+
     String^     GenerateScan();
     String^     PrintLocation() { return String::Format("{0,2} {1,2} {2,2}", X, Y, Z); }
     String^     PrintScanTurn();
@@ -154,6 +156,7 @@ public:
         , m_MiDiff(0)
         , m_MaBase(0)
         , m_Shipyards(0)
+        , m_LastSeen(-1)
     {
         m_Inventory = gcnew array<int>(INV_MAX){0};
     }
@@ -177,6 +180,7 @@ public:
     double          m_MaBase;
     int             m_Shipyards;
     array<int>     ^m_Inventory;
+    int             m_LastSeen;
 };
 
 public ref class PlanetName
@@ -261,6 +265,7 @@ public:
     StarSystem^     GetStarSystem(int x, int y, int z);
     array<StarSystem^>^ GetStarSystems()        { return m_Systems; }
     SortedList^     GetColonies()               { return m_Colonies; }
+    Colony^         GetColony(String ^name);
     SortedList^     GetPlanetNames()            { return m_PlanetNames; }
     SortedList^     GetShips()                  { return m_Ships; }
     Ship^           GetShip(String ^name);
@@ -290,6 +295,7 @@ protected:
 
     void            CalculateLSN();
     void            LinkPlanetNames();
+    void            UpdateHomeWorlds();
 
     String^         GetSpeciesSummary();
     String^         GetAllTechsSummary();

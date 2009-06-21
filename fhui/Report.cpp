@@ -132,8 +132,8 @@ bool Report::Parse(String ^s)
         else if( MatchWithOutput(s, "Aliens at\\s+x\\s+=\\s+(\\d+), y\\s+=\\s+(\\d+), z\\s+=\\s+(\\d+)") )
         {
             m_ScanX = GetMatchResultInt(0);
-            m_ScanY = GetMatchResultInt(0);
-            m_ScanZ = GetMatchResultInt(0);
+            m_ScanY = GetMatchResultInt(1);
+            m_ScanZ = GetMatchResultInt(2);
             m_Phase = PHASE_ALIENS_REPORT;
         }
         // Tech levels
@@ -798,7 +798,44 @@ void Report::MatchOtherPlanetsShipsScan(String ^s)
 
 void Report::MatchAliensReport(String ^s)
 {
-    MatchShipScan(s, false);
+    PlanetType plType = PLANET_MAX;
+    if( MatchWithOutput(s, "^Home planet PL\\s+") )
+        plType = PLANET_HOME;
+    else if( MatchWithOutput(s, "^Colony planet PL\\s+") )
+        plType = PLANET_COLONY;
+    else if( MatchWithOutput(s, "^Mining colony PL\\s+") )
+        plType = PLANET_COLONY_MINING;
+    else if( MatchWithOutput(s, "^Resort colony PL\\s+") )
+        plType = PLANET_COLONY_RESORT;
+    if( plType != PLANET_MAX )
+    {
+        if( MatchWithOutput(s, "^([^,;]+)\\s+\\(pl #(\\d+)\\)\\s+SP\\s+([^,;]+)\\s*$") )
+        {
+            StarSystem ^system = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ);
+            String ^name = GetMatchResult(0);
+            int plNum    = GetMatchResultInt(1);
+            Alien ^sp    = m_GameData->AddAlien(m_Turn, GetMatchResult(2));
+
+            m_ScanColony = m_GameData->AddColony(m_Turn, sp, name, system, plNum);
+            if( m_ScanColony )
+            {
+                m_ScanColony->m_LastSeen = Math::Max(m_Turn, m_ScanColony->m_LastSeen);
+                m_ScanColony->m_PlanetType = plType;
+
+                if( plType == PLANET_HOME )
+                {
+                    sp->m_HomeSystem = system;
+                    sp->m_HomePlanet = plNum;
+                }
+            }
+        }
+    }
+    else if( m_ScanColony && MatchWithOutput(s, "^\\(Economic base is approximately (\\d+)\\.\\)") )
+        m_ScanColony->m_MiBase = GetMatchResultInt(0);
+    else if( m_ScanColony && MatchWithOutput(s, "^\\(There are (\\d+) Planetary Defense Units on the planet\\.\\)") )
+        m_ScanColony->m_Inventory[INV_PD] = GetMatchResultInt(0);
+    else
+        MatchShipScan(s, false);
 }
 
 void Report::StartLineAggregate(PhaseType phase, String ^s, int maxLines)
