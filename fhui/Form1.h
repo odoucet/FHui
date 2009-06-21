@@ -1,6 +1,7 @@
 #pragma once
 
 ref class GameData;
+ref class Alien;
 ref class PlanetView;
 
 namespace fhui {
@@ -59,6 +60,9 @@ namespace fhui {
         void        DisplayReport();
 
         String^     SystemsGetRowTooltip(DataGridViewRow ^row);
+        Color       ShipsGetRowColor(DataGridViewRow ^row);
+
+        Color       GetAlienColor(Alien ^sp);
 
         GameData   ^m_GameData;
         SortedList ^m_PlanetsView;
@@ -420,7 +424,7 @@ namespace fhui {
             this->TabMap->Location = System::Drawing::Point(4, 22);
             this->TabMap->Name = L"TabMap";
             this->TabMap->Padding = System::Windows::Forms::Padding(3);
-            this->TabMap->Size = System::Drawing::Size(569, 535);
+            this->TabMap->Size = System::Drawing::Size(549, 535);
             this->TabMap->TabIndex = 1;
             this->TabMap->Text = L"Map";
             this->TabMap->UseVisualStyleBackColor = true;
@@ -430,7 +434,7 @@ namespace fhui {
             this->TabSystems->Controls->Add(this->splitContainer2);
             this->TabSystems->Location = System::Drawing::Point(4, 22);
             this->TabSystems->Name = L"TabSystems";
-            this->TabSystems->Size = System::Drawing::Size(569, 535);
+            this->TabSystems->Size = System::Drawing::Size(549, 535);
             this->TabSystems->TabIndex = 2;
             this->TabSystems->Text = L"Systems";
             this->TabSystems->UseVisualStyleBackColor = true;
@@ -454,7 +458,7 @@ namespace fhui {
             // splitContainer2.Panel2
             // 
             this->splitContainer2->Panel2->Controls->Add(this->SystemsGrid);
-            this->splitContainer2->Size = System::Drawing::Size(569, 535);
+            this->splitContainer2->Size = System::Drawing::Size(549, 535);
             this->splitContainer2->SplitterDistance = 30;
             this->splitContainer2->SplitterWidth = 1;
             this->splitContainer2->TabIndex = 0;
@@ -534,7 +538,7 @@ namespace fhui {
             this->SystemsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle2;
             this->SystemsGrid->RowHeadersWidth = 4;
             this->SystemsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
-            this->SystemsGrid->Size = System::Drawing::Size(569, 504);
+            this->SystemsGrid->Size = System::Drawing::Size(549, 504);
             this->SystemsGrid->TabIndex = 0;
             this->SystemsGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::SystemsGrid_DataBindingComplete);
             // 
@@ -543,7 +547,7 @@ namespace fhui {
             this->TabPlanets->Controls->Add(this->splitContainer3);
             this->TabPlanets->Location = System::Drawing::Point(4, 22);
             this->TabPlanets->Name = L"TabPlanets";
-            this->TabPlanets->Size = System::Drawing::Size(569, 535);
+            this->TabPlanets->Size = System::Drawing::Size(549, 535);
             this->TabPlanets->TabIndex = 3;
             this->TabPlanets->Text = L"Planets";
             this->TabPlanets->UseVisualStyleBackColor = true;
@@ -567,7 +571,7 @@ namespace fhui {
             // splitContainer3.Panel2
             // 
             this->splitContainer3->Panel2->Controls->Add(this->PlanetsGrid);
-            this->splitContainer3->Size = System::Drawing::Size(569, 535);
+            this->splitContainer3->Size = System::Drawing::Size(549, 535);
             this->splitContainer3->SplitterDistance = 30;
             this->splitContainer3->SplitterWidth = 1;
             this->splitContainer3->TabIndex = 1;
@@ -656,7 +660,7 @@ namespace fhui {
             this->PlanetsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle4;
             this->PlanetsGrid->RowHeadersWidth = 4;
             this->PlanetsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
-            this->PlanetsGrid->Size = System::Drawing::Size(569, 504);
+            this->PlanetsGrid->Size = System::Drawing::Size(549, 504);
             this->PlanetsGrid->TabIndex = 0;
             // 
             // TabColonies
@@ -664,7 +668,7 @@ namespace fhui {
             this->TabColonies->Controls->Add(this->splitContainer4);
             this->TabColonies->Location = System::Drawing::Point(4, 22);
             this->TabColonies->Name = L"TabColonies";
-            this->TabColonies->Size = System::Drawing::Size(569, 535);
+            this->TabColonies->Size = System::Drawing::Size(549, 535);
             this->TabColonies->TabIndex = 4;
             this->TabColonies->Text = L"Colonies";
             this->TabColonies->UseVisualStyleBackColor = true;
@@ -683,7 +687,7 @@ namespace fhui {
             // splitContainer4.Panel2
             // 
             this->splitContainer4->Panel2->Controls->Add(this->ColoniesGrid);
-            this->splitContainer4->Size = System::Drawing::Size(569, 535);
+            this->splitContainer4->Size = System::Drawing::Size(549, 535);
             this->splitContainer4->SplitterDistance = 30;
             this->splitContainer4->SplitterWidth = 1;
             this->splitContainer4->TabIndex = 2;
@@ -728,7 +732,7 @@ namespace fhui {
             this->ColoniesGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle6;
             this->ColoniesGrid->RowHeadersWidth = 4;
             this->ColoniesGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
-            this->ColoniesGrid->Size = System::Drawing::Size(569, 504);
+            this->ColoniesGrid->Size = System::Drawing::Size(549, 504);
             this->ColoniesGrid->TabIndex = 0;
             // 
             // TabShips
@@ -736,7 +740,7 @@ namespace fhui {
             this->TabShips->Controls->Add(this->splitContainer5);
             this->TabShips->Location = System::Drawing::Point(4, 22);
             this->TabShips->Name = L"TabShips";
-            this->TabShips->Size = System::Drawing::Size(569, 535);
+            this->TabShips->Size = System::Drawing::Size(549, 535);
             this->TabShips->TabIndex = 5;
             this->TabShips->Text = L"Ships";
             this->TabShips->UseVisualStyleBackColor = true;
@@ -755,7 +759,7 @@ namespace fhui {
             // splitContainer5.Panel2
             // 
             this->splitContainer5->Panel2->Controls->Add(this->ShipsGrid);
-            this->splitContainer5->Size = System::Drawing::Size(569, 535);
+            this->splitContainer5->Size = System::Drawing::Size(549, 535);
             this->splitContainer5->SplitterDistance = 30;
             this->splitContainer5->SplitterWidth = 1;
             this->splitContainer5->TabIndex = 2;
@@ -800,15 +804,16 @@ namespace fhui {
             this->ShipsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle8;
             this->ShipsGrid->RowHeadersWidth = 4;
             this->ShipsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
-            this->ShipsGrid->Size = System::Drawing::Size(569, 504);
+            this->ShipsGrid->Size = System::Drawing::Size(549, 504);
             this->ShipsGrid->TabIndex = 0;
+            this->ShipsGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::ShipsGrid_DataBindingComplete);
             // 
             // TabAliens
             // 
             this->TabAliens->Controls->Add(this->splitContainer6);
             this->TabAliens->Location = System::Drawing::Point(4, 22);
             this->TabAliens->Name = L"TabAliens";
-            this->TabAliens->Size = System::Drawing::Size(569, 535);
+            this->TabAliens->Size = System::Drawing::Size(549, 535);
             this->TabAliens->TabIndex = 6;
             this->TabAliens->Text = L"Aliens";
             this->TabAliens->UseVisualStyleBackColor = true;
@@ -827,7 +832,7 @@ namespace fhui {
             // splitContainer6.Panel2
             // 
             this->splitContainer6->Panel2->Controls->Add(this->AliensGrid);
-            this->splitContainer6->Size = System::Drawing::Size(569, 535);
+            this->splitContainer6->Size = System::Drawing::Size(549, 535);
             this->splitContainer6->SplitterDistance = 30;
             this->splitContainer6->SplitterWidth = 1;
             this->splitContainer6->TabIndex = 2;
@@ -872,14 +877,14 @@ namespace fhui {
             this->AliensGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle10;
             this->AliensGrid->RowHeadersWidth = 4;
             this->AliensGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
-            this->AliensGrid->Size = System::Drawing::Size(569, 504);
+            this->AliensGrid->Size = System::Drawing::Size(549, 504);
             this->AliensGrid->TabIndex = 0;
             // 
             // TabCommands
             // 
             this->TabCommands->Location = System::Drawing::Point(4, 22);
             this->TabCommands->Name = L"TabCommands";
-            this->TabCommands->Size = System::Drawing::Size(569, 535);
+            this->TabCommands->Size = System::Drawing::Size(549, 535);
             this->TabCommands->TabIndex = 7;
             this->TabCommands->Text = L"Commands";
             this->TabCommands->UseVisualStyleBackColor = true;
@@ -890,7 +895,7 @@ namespace fhui {
             this->TabAbout->Location = System::Drawing::Point(4, 22);
             this->TabAbout->Name = L"TabAbout";
             this->TabAbout->Padding = System::Windows::Forms::Padding(3);
-            this->TabAbout->Size = System::Drawing::Size(569, 535);
+            this->TabAbout->Size = System::Drawing::Size(549, 535);
             this->TabAbout->TabIndex = 8;
             this->TabAbout->Text = L"About";
             this->TabAbout->UseVisualStyleBackColor = true;
@@ -905,7 +910,7 @@ namespace fhui {
             this->TextAbout->Name = L"TextAbout";
             this->TextAbout->ReadOnly = true;
             this->TextAbout->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
-            this->TextAbout->Size = System::Drawing::Size(563, 529);
+            this->TextAbout->Size = System::Drawing::Size(543, 529);
             this->TextAbout->TabIndex = 0;
             // 
             // label5
@@ -1061,6 +1066,14 @@ private: System::Void SystemsGrid_DataBindingComplete(System::Object^  sender, S
                  String ^scan = SystemsGetRowTooltip( row );
                  for each( DataGridViewCell ^cell in row->Cells )
                      cell->ToolTipText = scan;
+             }
+         }
+private: System::Void ShipsGrid_DataBindingComplete(System::Object^  sender, System::Windows::Forms::DataGridViewBindingCompleteEventArgs^  e) {
+             for each( DataGridViewRow ^row in ((DataGridView^)sender)->Rows )
+             {
+                 Color bgColor = ShipsGetRowColor( row );
+                 for each( DataGridViewCell ^cell in row->Cells )
+                     cell->Style->BackColor = bgColor;
              }
          }
 };

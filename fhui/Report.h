@@ -21,6 +21,7 @@ enum PhaseType
     PHASE_COLONY_INVENTORY,
     PHASE_COLONY_SHIPS,
     PHASE_OTHER_PLANETS_SHIPS,
+    PHASE_ALIENS_REPORT,
     PHASE_ORDERS_TEMPLATE,
     PHASE_TECH_LEVELS,
 };
@@ -53,6 +54,7 @@ private:
     void            MatchColonyShipsScan(String ^s);
     void            MatchOtherPlanetsShipsScan(String ^s);
     void            MatchShipScan(String ^s, bool bColony);
+    void            MatchAliensReport(String ^s);
 
     String^         GetMatchResult(int arg)      { return m_TmpRegexResult[arg]; }
     int             GetMatchResultInt(int arg);
@@ -61,6 +63,7 @@ private:
     GameData       ^m_GameData;
     String         ^m_Content;
     int             m_Turn;
+    int             m_LineCnt;
 
     PhaseType       m_Phase;
     array<String^> ^m_TmpRegexResult;

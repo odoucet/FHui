@@ -7,6 +7,7 @@ Report::Report(GameData ^gd)
     : m_GameData(gd)
     , m_Phase(PHASE_GLOBAL)
     , m_Turn(0)
+    , m_LineCnt(0)
     , m_bParsingAggregate(false)
     , m_StringAggregate(nullptr)
     , m_AggregateMaxLines(-1)
@@ -37,6 +38,8 @@ bool Report::IsValid()
 
 bool Report::Parse(String ^s)
 {
+    ++m_LineCnt;
+
     m_Content = String::Concat(m_Content,
         String::Concat(s, "\r\n") );
 
@@ -126,6 +129,13 @@ bool Report::Parse(String ^s)
             m_GameData->GetSpecies()->m_GovName = GetMatchResult(0);
         else if( MatchWithOutput(s, "^Government type:\\s+(.+)$") )
             m_GameData->GetSpecies()->m_GovType = GetMatchResult(0);
+        else if( MatchWithOutput(s, "Aliens at\\s+x\\s+=\\s+(\\d+), y\\s+=\\s+(\\d+), z\\s+=\\s+(\\d+)") )
+        {
+            m_ScanX = GetMatchResultInt(0);
+            m_ScanY = GetMatchResultInt(0);
+            m_ScanZ = GetMatchResultInt(0);
+            m_Phase = PHASE_ALIENS_REPORT;
+        }
         // Tech levels
         else if( Regex("^Tech Levels:").Match(s)->Success )
             m_Phase = PHASE_TECH_LEVELS;
@@ -300,6 +310,16 @@ bool Report::Parse(String ^s)
         }
         else
             MatchOtherPlanetsShipsScan(s);
+        break;
+
+    case PHASE_ALIENS_REPORT:
+        if( String::IsNullOrEmpty(s) )
+        {
+            m_Phase = PHASE_GLOBAL;
+        }
+        else
+            MatchAliensReport(s);
+        break;
     }
 
     return true;
@@ -727,17 +747,28 @@ void Report::MatchShipScan(String ^s, bool bColony)
             m_ScanShip->CalculateCapacity();
         }
 
-        while( !String::IsNullOrEmpty(s) )
+        if( m_Phase != PHASE_ALIENS_REPORT )
         {
-            if( MatchWithOutput(s, ",?\\s*(\\d+)\\s+(\\w+)\\s*") )
+            while( !String::IsNullOrEmpty(s) )
             {
-                int amount = GetMatchResultInt(0);
-                InventoryType inv = InvFromString( GetMatchResult(1) );
-                m_ScanShip->m_Cargo[inv] = amount;
+                if( MatchWithOutput(s, ",?\\s*(\\d+)\\s+(\\w+)\\s*") )
+                {
+                    int amount = GetMatchResultInt(0);
+                    InventoryType inv = InvFromString( GetMatchResult(1) );
+                    m_ScanShip->m_Cargo[inv] = amount;
+                }
+                else
+                    throw gcnew ArgumentException(
+                        String::Format("Unable to parse ship '{0}' inventory.", name));
             }
-            else
-                throw gcnew ArgumentException(
-                    String::Format("Unable to parse ship '{0}' inventory.", name));
+        }
+        else
+        {   // In aliens report phase read owning species
+            if( MatchWithOutput(s, "SP ([^,;]+)\\s*$") )
+            {
+                Alien ^sp = m_GameData->AddAlien(m_Turn, GetMatchResult(0));
+                m_ScanShip->m_Owner = sp;
+            }
         }
     }
 }
@@ -762,6 +793,11 @@ void Report::MatchOtherPlanetsShipsScan(String ^s)
         m_ScanY = GetMatchResultInt(1);
         m_ScanZ = GetMatchResultInt(2);
     }
+    MatchShipScan(s, false);
+}
+
+void Report::MatchAliensReport(String ^s)
+{
     MatchShipScan(s, false);
 }
 

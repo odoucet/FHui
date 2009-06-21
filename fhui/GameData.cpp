@@ -425,6 +425,11 @@ Alien^ GameData::GetAlien(String ^sp)
         String::Format("Species not found: {0}", sp));
 }
 
+Ship^ GameData::GetShip(String ^name)
+{
+    return safe_cast<Ship^>(m_Ships[name->ToLower()]);
+}
+
 // ---------------------------------------------------------
 
 bool GameData::TurnCheck(int turn)
@@ -502,11 +507,6 @@ Alien^ GameData::AddAlien(int turn, String ^sp)
             ( m_Aliens->GetByIndex( m_Aliens->IndexOfKey(spKey) ) );
 
         alien->m_TurnMet = Math::Min(TurnAlign(turn), alien->m_TurnMet);
-
-        // Reset relation if this is latest turn,
-        // it will self tune while parsing Allies and Enemies.
-        if( turn == m_TurnMax )
-            alien->m_Relation = SP_NEUTRAL;
 
         return alien;
     }

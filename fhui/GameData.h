@@ -263,6 +263,7 @@ public:
     SortedList^     GetColonies()               { return m_Colonies; }
     SortedList^     GetPlanetNames()            { return m_PlanetNames; }
     SortedList^     GetShips()                  { return m_Ships; }
+    Ship^           GetShip(String ^name);
 
     // ------------------------------------------
     void            SetSpecies(String ^sp);

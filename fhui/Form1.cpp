@@ -14,6 +14,8 @@ using namespace System::Text::RegularExpressions;
 #define FHUI_BUILD_INFO() String::Format("{0}{1}{2}", FHUI_REVISION_NUMBER, FHUI_BUILD_INFO_APPENDIX, FHUI_REVISION_MODIFIED ? " (modified)" : "")
 
 
+////////////////////////////////////////////////////////////////
+
 namespace fhui 
 {
 
@@ -177,6 +179,9 @@ void Form1::InitData()
     RepMode->SelectedIndex = 1;
 }
 
+////////////////////////////////////////////////////////////////
+// Systems
+
 String^ Form1::SystemsGetRowTooltip(DataGridViewRow ^row)
 {
     int x = int::Parse(row->Cells[ SystemsGrid->Columns["X"]->Index ]->Value->ToString());
@@ -248,6 +253,27 @@ void Form1::SetupSystems()
     SystemsGrid->Sort( SystemsGrid->Columns["Dist."], ListSortDirection::Ascending );
 }
 
+////////////////////////////////////////////////////////////////
+// GUI misc
+
+Color Form1::GetAlienColor(Alien ^sp)
+{
+    if( sp == m_GameData->GetSpecies() )
+        return Color::FromArgb(225, 255, 255);
+
+    switch( sp->m_Relation )
+    {
+    case SP_NEUTRAL:    return Color::FromArgb(255, 255, 220);
+    case SP_ALLY:       return Color::FromArgb(220, 255, 210);
+    case SP_ENEMY:      return Color::FromArgb(255, 220, 220);
+    }
+
+    return Color::White;
+}
+
+////////////////////////////////////////////////////////////////
+// Planets
+
 void Form1::SetupPlanets()
 {
     // Put system data in a DataTable so that column sorting works.
@@ -309,6 +335,9 @@ void Form1::SetupPlanets()
     // Default sort column
     PlanetsGrid->Sort( PlanetsGrid->Columns["LSN"], ListSortDirection::Ascending );
 }
+
+////////////////////////////////////////////////////////////////
+// Colonies
 
 void Form1::SetupColonies()
 {
@@ -381,16 +410,26 @@ void Form1::SetupColonies()
     ColoniesGrid->Sort( ColoniesGrid->Columns["Dist."], ListSortDirection::Ascending );
 }
 
+////////////////////////////////////////////////////////////////
+// Ships
+
+Color Form1::ShipsGetRowColor(DataGridViewRow ^row)
+{
+    String ^name = row->Cells[ ShipsGrid->Columns["Name"]->Index ]->Value->ToString();
+    return GetAlienColor( m_GameData->GetShip(name)->m_Owner );
+}
+
 void Form1::SetupShips()
 {
     // Put system data in a DataTable so that column sorting works.
     DataTable ^dataTable = gcnew DataTable();
 
+    dataTable->Columns->Add("Owner", String::typeid );
     dataTable->Columns->Add("Class", String::typeid );
     dataTable->Columns->Add("Name", String::typeid );
     dataTable->Columns->Add("Location", String::typeid );
     dataTable->Columns->Add("Age", int::typeid );
-    dataTable->Columns->Add("Capacity", int::typeid );
+    dataTable->Columns->Add("Cap.", int::typeid );
     dataTable->Columns->Add("Cargo", String::typeid );
     dataTable->Columns->Add("Dist.", double::typeid );
     dataTable->Columns->Add("Mishap %", String::typeid );
@@ -420,12 +459,15 @@ void Form1::SetupShips()
             ship->m_Age);
 
         DataRow^ row = dataTable->NewRow();
+        row["Owner"]    = ship->m_Owner == sp ? String::Format("* {0}", sp->m_Name) : ship->m_Owner->m_Name;
         row["Class"]    = ship->PrintClass();
         row["Name"]     = ship->m_Name;
         row["Location"] = ship->PrintLocation();
         row["Age"]      = ship->m_Age;
-        row["Capacity"] = ship->m_Capacity;
-        row["Cargo"]    = ship->PrintCargo();
+        row["Cap."] = ship->m_Capacity;
+        row["Cargo"]    = ( ship->m_Owner == sp )
+            ? ship->PrintCargo()
+            : "n/a";
         row["Dist."]    = distance;
         row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
 
@@ -446,8 +488,11 @@ void Form1::SetupShips()
     ShipsGrid->Columns["Mishap %"]->SortMode = DataGridViewColumnSortMode::NotSortable;
 
     // Default sort column
-    ShipsGrid->Sort( ShipsGrid->Columns["Class"], ListSortDirection::Ascending );
+    ShipsGrid->Sort( ShipsGrid->Columns["Owner"], ListSortDirection::Ascending );
 }
+
+////////////////////////////////////////////////////////////////
+// Aliens
 
 void Form1::SetupAliens()
 {
@@ -484,5 +529,7 @@ void Form1::SetupAliens()
     // Default sort column
     AliensGrid->Sort( AliensGrid->Columns["Relation"], ListSortDirection::Ascending );
 }
+
+////////////////////////////////////////////////////////////////
 
 }
