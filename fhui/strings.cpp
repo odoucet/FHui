@@ -12,7 +12,7 @@ String^ SpRelToString(SPRelType rel)
     default:
         {
             int r = rel;
-            throw gcnew ArgumentException(String::Format("Invalid species relation: {0}", r));
+            throw gcnew FHUIDataIntegrityException(String::Format("Invalid species relation: {0}", r));
         }
     }
 }
@@ -47,7 +47,7 @@ String^ GasToString(GasType gas)
     for( int i = 0; i < GAS_MAX; ++i )
         if( s_GasStrings[i].type == gas )
             return gcnew String(s_GasStrings[i].str);
-    throw gcnew ArgumentException("Invalid atmospheric GAS.");
+    throw gcnew FHUIDataIntegrityException("Invalid atmospheric GAS.");
 }
 
 GasType GasFromString(String^ gas)
@@ -59,7 +59,7 @@ GasType GasFromString(String^ gas)
         {
             return s_GasStrings[i].type;
         }
-    throw gcnew ArgumentException(
+    throw gcnew FHUIParsingException(
         String::Format("Invalid atmospheric GAS: {0}", gas) );
 }
 
@@ -74,7 +74,7 @@ String^ PlTypeToString(PlanetType plType)
     default:
         {
             int t = plType;
-            throw gcnew ArgumentException(String::Format("Invalid planet type: {0}", t));
+            throw gcnew FHUIDataIntegrityException(String::Format("Invalid planet type: {0}", t));
         }
     }
 }
@@ -129,7 +129,10 @@ String^ InvToString(InventoryType inv)
     for( int i = 0; i < INV_MAX; ++i )
         if( s_InvStrings[i].type == inv )
             return gcnew String(s_InvStrings[i].str);
-    throw gcnew ArgumentException("Invalid inventory type.");
+
+    int i = inv;
+    throw gcnew FHUIDataIntegrityException(
+        String::Format("Invalid inventory type: {0}.", i) );
 }
 
 InventoryType InvFromString(String^ inv)
@@ -141,7 +144,7 @@ InventoryType InvFromString(String^ inv)
         {
             return s_InvStrings[i].type;
         }
-    throw gcnew ArgumentException(
+    throw gcnew FHUIParsingException(
         String::Format("Invalid inventory abbreviation: {0}", inv) );
 }
 
@@ -180,7 +183,10 @@ String^ ShipToString(ShipType ship)
     for( int i = 0; i < SHIP_MAX; ++i )
         if( s_ShipStrings[i].type == ship )
             return gcnew String(s_ShipStrings[i].str);
-    throw gcnew ArgumentException("Invalid ship type.");
+
+    int s = ship;
+    throw gcnew FHUIDataIntegrityException(
+        String::Format("Invalid ship type: {0}.", s) );
 }
 
 ShipType ShipFromString(String^ ship)
@@ -192,6 +198,6 @@ ShipType ShipFromString(String^ ship)
         {
             return s_ShipStrings[i].type;
         }
-    throw gcnew ArgumentException(
+    throw gcnew FHUIParsingException(
         String::Format("Invalid ship abbreviation: {0}", ship) );
 }

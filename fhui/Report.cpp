@@ -382,7 +382,7 @@ void Report::MatchPlanetScan(String ^s)
             // just skip from input
         }
         else
-            throw gcnew ArgumentException("Report contains invalid planetary scan (LSN)");
+            throw gcnew FHUIParsingException("Report contains invalid planetary scan (LSN)");
 
         // Scan gases
         if( MatchWithOutput(s, "^No atmosphere\\s*") )
@@ -399,7 +399,7 @@ void Report::MatchPlanetScan(String ^s)
                 planet->m_Atmosphere[gas] = GetMatchResultInt(1);
             }
             if( !bGasMatched )
-                throw gcnew ArgumentException("Report contains invalid planetary scan (atmosphere)");
+                throw gcnew FHUIParsingException("Report contains invalid planetary scan (atmosphere)");
         }
 
         if( !String::IsNullOrEmpty(s) )
@@ -459,7 +459,7 @@ void Report::MatchColonyScan(String ^s)
                 planetType = PLANET_COLONY_RESORT;
         }
         else
-            throw gcnew ArgumentException(
+            throw gcnew FHUIParsingException(
                 String::Format("Unknown colony type in report: {0}", s) );
 
         if( MatchWithOutput(s, "([^,;]+)\\s+Coordinates: x = (\\d+), y = (\\d+), z = (\\d+), planet number (\\d+)") )
@@ -487,7 +487,7 @@ void Report::MatchColonyScan(String ^s)
             m_ScanColony->m_PlanetType = planetType;
         }
         else
-            throw gcnew ArgumentException(
+            throw gcnew FHUIParsingException(
                 String::Format("Unable to parse colony coordinates: {0}", s) );
 
         return;
@@ -659,7 +659,7 @@ void Report::MatchShipScan(String ^s, bool bColony)
             else
                 return;
         }
-        catch( ArgumentException^ )
+        catch( FHUIParsingException^ )
         {
             return;
         }
@@ -693,8 +693,9 @@ void Report::MatchShipScan(String ^s, bool bColony)
             {
                 m_ScanShip->m_System = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ);
             }
-            catch( ArgumentException^ )
-            {
+            catch( FHUIDataIntegrityException^ )
+            {   // When reading other ships and planets,
+                // ship may be outside of any system just in deep, empty space
                 m_ScanShip->m_System = nullptr;
             }
         }
@@ -718,7 +719,7 @@ void Report::MatchShipScan(String ^s, bool bColony)
             if( MatchWithOutput(s, "(\\d+)") )
                 m_ScanShip->m_Planet = GetMatchResultInt(0);
             else
-                throw gcnew ArgumentException(
+                throw gcnew FHUIParsingException(
                     String::Format("Unable to parse ship '{0}' location.", name));
         }
 
@@ -727,7 +728,7 @@ void Report::MatchShipScan(String ^s, bool bColony)
             if( MatchWithOutput(s, ",(\\d+) tons") )
                 m_ScanShip->m_Size = GetMatchResultInt(0);
             else
-                throw gcnew ArgumentException(
+                throw gcnew FHUIParsingException(
                     String::Format("Unable to parse starbase '{0}' size.", name));
         }
 
@@ -736,13 +737,13 @@ void Report::MatchShipScan(String ^s, bool bColony)
             if( MatchWithOutput(s, "\\)\\s+(\\d+)\\s*") )
                 m_ScanShip->m_Capacity = GetMatchResultInt(0);
             else
-                throw gcnew ArgumentException(
+                throw gcnew FHUIParsingException(
                     String::Format("Unable to parse ship '{0}' capacity.", name));
         }
         else
         {
             if( !MatchWithOutput(s, "\\)\\s*") )
-                throw gcnew ArgumentException(
+                throw gcnew FHUIParsingException(
                     String::Format("Unable to parse ship '{0}'.", name));
             m_ScanShip->CalculateCapacity();
         }
@@ -758,7 +759,7 @@ void Report::MatchShipScan(String ^s, bool bColony)
                     m_ScanShip->m_Cargo[inv] = amount;
                 }
                 else
-                    throw gcnew ArgumentException(
+                    throw gcnew FHUIParsingException(
                         String::Format("Unable to parse ship '{0}' inventory.", name));
             }
         }

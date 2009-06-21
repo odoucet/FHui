@@ -3,8 +3,12 @@ Major new features and bug fixes will be listed here.
 + New features
 * Bug fixes
 
+FHUI build 28
+Internal maintenance.
+
 FHUI build 27
 + Show alien colonies.
++ More info on Aliens tab.
 + Color code on Colonies and Aliens tabs.
 
 FHUI build 26

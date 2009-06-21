@@ -90,8 +90,8 @@ int Planet::CalculateLSN(AtmosphericReq ^atmReq)
 Planet^ StarSystem::GetPlanet(int plNum)
 {
     if( plNum < 1 )
-        throw gcnew ArgumentException(
-            String::Format("GetPlanet(): invalid planet number: {0}!", plNum) );
+        throw gcnew FHUIDataIntegrityException(
+            String::Format("Invalid planet number: {0}!", plNum) );
 
     if( plNum <= m_Planets->Length )
         return m_Planets[plNum - 1];
@@ -110,7 +110,7 @@ double StarSystem::CalcDistance(int xFrom, int yFrom, int zFrom, int xTo, int yT
 double StarSystem::CalcMishap(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo, int gv, int age)
 {
     if( gv == 0 )
-        throw gcnew ArgumentException("GV must not be 0 for mishap calculation!");
+        throw gcnew FHUIDataIntegrityException("GV must not be 0 for mishap calculation!");
 
     double dist = CalcDistance(xFrom, yFrom, zFrom, xTo, yTo, zTo);
     if( dist == 0 )
@@ -197,10 +197,10 @@ String^ Ship::PrintLocation()
     {
         if( m_Planet != -1 )
         {
-            if( m_Planet <= m_System->m_Planets->Length &&
-                !String::IsNullOrEmpty(m_System->m_Planets[m_Planet - 1]->m_Name) )
+            Planet ^planet = m_System->GetPlanet(m_Planet);
+            if( !String::IsNullOrEmpty(planet->m_Name) )
             {
-                xyz = String::Format("PL {0}", m_System->m_Planets[m_Planet - 1]->m_Name);
+                xyz = String::Format("PL {0}", planet->m_Name);
             }
             else
                 xyz = String::Format("[{0} {1}]", m_System->PrintLocation(), m_Planet);
@@ -224,7 +224,7 @@ String^ Ship::PrintLocation()
     }
 
     int l = m_Location;
-    throw gcnew ArgumentException(
+    throw gcnew FHUIDataIntegrityException(
         String::Format("Invalid ship location! ({0})", l) );
 }
 
@@ -441,7 +441,7 @@ Alien^ GameData::GetAlien(String ^sp)
             ( m_Aliens->GetByIndex( m_Aliens->IndexOfKey(spKey) ) );
     }
 
-    throw gcnew NullReferenceException(
+    throw gcnew FHUIDataIntegrityException(
         String::Format("Species not found: {0}", sp));
 }
 
@@ -518,7 +518,7 @@ void GameData::SetSpecies(String ^sp)
     }
 
     if( String::Compare(m_Species->m_Name, sp) != 0 )
-        throw gcnew ArgumentException(
+        throw gcnew FHUIDataIntegrityException(
             String::Format("Reports for different species: {0} and {1}",
                 m_Species->m_Name, sp) );
 }
@@ -580,7 +580,7 @@ void GameData::SetAtmosphereReq(GasType gas, int reqMin, int reqMax)
         atm->m_Neutral[gas] ||
         atm->m_Poisonous[gas] )
     {
-        throw gcnew ArgumentException("Inconsistent atmospheric data in reports.");
+        throw gcnew FHUIDataIntegrityException("Inconsistent atmospheric data in reports.");
     }
 
     atm->m_ReqGas = gas;
@@ -595,7 +595,7 @@ void GameData::SetAtmosphereNeutral(GasType gas)
     if( atm->m_ReqGas == gas ||
         atm->m_Poisonous[gas] )
     {
-        throw gcnew ArgumentException("Inconsistent atmospheric data in reports.");
+        throw gcnew FHUIDataIntegrityException("Inconsistent atmospheric data in reports.");
     }
 
     atm->m_Neutral[gas] = true;
@@ -608,7 +608,7 @@ void GameData::SetAtmospherePoisonous(GasType gas)
     if( atm->m_ReqGas == gas ||
         atm->m_Neutral[gas] )
     {
-        throw gcnew ArgumentException("Inconsistent atmospheric data in reports.");
+        throw gcnew FHUIDataIntegrityException("Inconsistent atmospheric data in reports.");
     }
 
     atm->m_Poisonous[gas] = true;
@@ -626,7 +626,7 @@ StarSystem^ GameData::GetStarSystem(int x, int y, int z)
         }
     }
 
-    throw gcnew ArgumentException(
+    throw gcnew FHUIDataIntegrityException(
         String::Format("Trying to get not existing star system: {0} {1} {2}", x, y, z) );
 }
 
@@ -638,7 +638,7 @@ void GameData::AddStarSystem(int x, int y, int z, String ^type, String ^comment)
             system->Y == y &&
             system->Z == z )
         {
-            throw gcnew ArgumentException(
+            throw gcnew FHUIDataIntegrityException(
                 String::Format("Star system already added: [{0} {1} {2}]", x, y, z) );
         }
     }
@@ -653,7 +653,7 @@ void GameData::AddPlanetScan(int turn, int x, int y, int z, int plNum, Planet ^p
 {
     StarSystem ^system = GetStarSystem(x, y, z);
     if( system == nullptr )
-        throw gcnew ArgumentException(
+        throw gcnew FHUIDataIntegrityException(
             String::Format("Star system [{0} {1} {2}] not found in galaxy list!", x, y, z) );
 
     Array::Resize(system->m_Planets, Math::Max(plNum, system->m_Planets->Length));
@@ -750,7 +750,7 @@ void GameData::LinkPlanetNames()
             StarSystem ^system = colony->m_System;
 
             if( system->m_Planets->Length < colony->m_PlanetNum )
-                throw gcnew ArgumentException(
+                throw gcnew FHUIDataIntegrityException(
                     String::Format("Colony PL {0} at [{1} {2} {3} {4}]: Planet not scanned!",
                         colony->m_Name,
                         system->X, system->Y, system->Z,
@@ -765,8 +765,9 @@ void GameData::LinkPlanetNames()
     {
         PlanetName ^plName = safe_cast<PlanetName^>(entry->Value);
         StarSystem ^system = GetStarSystem( plName->X, plName->Y, plName->Z );
-        if( system->m_Planets->Length >= plName->Num )
-            system->m_Planets[ plName->Num - 1 ]->m_Name = plName->Name;
+        Planet ^planet = system->GetPlanet(plName->Num);
+        if( planet )
+            planet->m_Name = plName->Name;
     }
 }
 

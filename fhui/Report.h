@@ -38,6 +38,7 @@ public:
     String^         GetContent()    { return m_Content; }
 
     bool            Parse(String ^s);
+    int             GetLineCount()  { return m_LineCnt; }
 
 private:
     void            StartLineAggregate(PhaseType, String ^s, int aggrMaxLines);

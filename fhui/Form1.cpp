@@ -40,7 +40,7 @@ void Form1::LoadGameData()
             m_GameData->GetLastTurn(),
             FHUI_BUILD_INFO() );
     }
-    catch( SystemException ^e )
+    catch( Exception ^e )
     {
         Summary->Text = "Failed loading game data.";
         RepText->Text = String::Format(
@@ -50,16 +50,16 @@ void Form1::LoadGameData()
             "   {0}.\r\n"
             "---------------------------------------------------------------------------\r\n"
             "FHUI rev.: {1}\r\n"
-            "Message  : {2}\r\n"
-            "Type     : {3}\r\n"
+            "Type     : {2}\r\n"
+            "Message  : {3}\r\n"
             "---------------------------------------------------------------------------\r\n"
             "{4}\r\n"
             "---------------------------------------------------------------------------\r\n",
             FHUI_CONTACT_EMAILS,
             FHUI_BUILD_INFO(),
-            e->Message,
             e->GetType()->ToString(),
-            e->StackTrace );
+            e->Message,
+            e->InnerException == nullptr ? e->StackTrace : e->InnerException->StackTrace );
     }
 }
 
@@ -71,7 +71,7 @@ void Form1::FillAboutBox()
         StreamReader ^sr = File::OpenText("changelog.txt");
         changeLog = sr->ReadToEnd();
     }
-    catch( Exception^ )
+    catch( SystemException^ )
     {
         changeLog = "** Change log file not found or unreadable **";
     }
@@ -148,15 +148,32 @@ void Form1::LoadReport(String ^fileName)
 
     StreamReader ^sr = File::OpenText(fileName);
     String ^line;
-    while( (line = sr->ReadLine()) != nullptr ) 
-    {
-        if( false == report->Parse(line) )
-            break;
-    }
-    sr->Close();
 
-    if( report->IsValid() )
-        m_Reports->Add(report->GetTurn(), report);
+    try
+    {
+        while( (line = sr->ReadLine()) != nullptr ) 
+        {
+            if( false == report->Parse(line) )
+                break;
+        }
+
+        if( report->IsValid() )
+            m_Reports->Add(report->GetTurn(), report);
+    }
+    catch( Exception ^ex )
+    {
+        throw gcnew FHUIParsingException(
+            String::Format("Error occured while parsing report: {0}, line {1}:\r\n{2}\r\nError description:\r\n  {3}",
+                fileName,
+                report->GetLineCount(),
+                line,
+                ex->Message),
+            ex );
+    }
+    finally
+    {
+        sr->Close();
+    }
 }
 
 void Form1::DisplayReport()
