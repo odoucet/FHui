@@ -9,6 +9,7 @@ String^ SpRelToString(SPRelType rel)
     case SP_NEUTRAL:    return "Neutral";
     case SP_ALLY:       return "Ally";
     case SP_ENEMY:      return "Enemy";
+    case SP_PIRATE:     return "Pirate";
     default:
         {
             int r = rel;

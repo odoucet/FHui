@@ -15,9 +15,10 @@ Report::Report(GameData ^gd)
     , m_ScanY(0)
     , m_ScanZ(0)
     , m_ScanHasPlanets(false)
-    , m_ScanHome(nullptr)
+    , m_ScanAlien(nullptr)
     , m_ScanColony(nullptr)
     , m_ScanShip(nullptr)
+    , m_PirateShipsCnt(0)
     , m_EstimateAlien(nullptr)
 {
     m_Content           = gcnew String("");
@@ -120,7 +121,7 @@ bool Report::Parse(String ^s)
         else if( Regex("^Species met:").Match(s)->Success )
             StartLineAggregate(PHASE_SPECIES_MET, s, AGGREGATE_LINES_MAX);
         else if( MatchWithOutput(s, "^Scan of home star system for SP\\s+([^,;]+):$") )
-            m_ScanHome = m_GameData->AddAlien(m_Turn, GetMatchResult(0));
+            m_ScanAlien = m_GameData->AddAlien(m_Turn, GetMatchResult(0));
         else if( Regex("^Allies:").Match(s)->Success )
             StartLineAggregate(PHASE_SPECIES_ALLIES, s, AGGREGATE_LINES_MAX);
         else if( Regex("^Enemies:").Match(s)->Success )
@@ -129,13 +130,15 @@ bool Report::Parse(String ^s)
             m_GameData->GetSpecies()->m_GovName = GetMatchResult(0);
         else if( MatchWithOutput(s, "^Government type:\\s+(.+)$") )
             m_GameData->GetSpecies()->m_GovType = GetMatchResult(0);
-        else if( MatchWithOutput(s, "Aliens at\\s+x\\s+=\\s+(\\d+), y\\s+=\\s+(\\d+), z\\s+=\\s+(\\d+)") )
+        else if( MatchWithOutput(s, "^Aliens at\\s+x\\s+=\\s+(\\d+), y\\s+=\\s+(\\d+), z\\s+=\\s+(\\d+)") )
         {
             m_ScanX = GetMatchResultInt(0);
             m_ScanY = GetMatchResultInt(1);
             m_ScanZ = GetMatchResultInt(2);
             m_Phase = PHASE_ALIENS_REPORT;
         }
+        else if( Regex("^Estimate of the technology of SP ").Match(s)->Success )
+            StartLineAggregate(PHASE_ALIEN_ESTIMATE, s, 1);
         // Tech levels
         else if( Regex("^Tech Levels:").Match(s)->Success )
             m_Phase = PHASE_TECH_LEVELS;
@@ -149,9 +152,25 @@ bool Report::Parse(String ^s)
             m_Phase = PHASE_OTHER_PLANETS_SHIPS;
         else if( Regex("^Combat orders:").Match(s)->Success )
             m_Phase = PHASE_ORDERS_COMBAT;
+        // Message
+        else if( MatchWithOutput(s, "^You received the following message from SP ([^,;]+):") )
+        {
+            m_ScanAlien = m_GameData->AddAlien(m_Turn, GetMatchResult(0));
+            m_Phase = PHASE_MESSAGE;
+        }
         // Parsing ends here
         else if( Regex("^ORDER SECTION.").Match(s)->Success )
             m_Phase = PHASE_ORDERS_TEMPLATE;
+        break;
+
+    case PHASE_MESSAGE:
+        if( Regex("^\\*\\*\\* End of Message \\*\\*\\*$").Match(s)->Success )
+            m_Phase = PHASE_GLOBAL;
+        else if( MatchWithOutput(s, "([a-zA-Z0-9_.]+@[a-zA-Z0-9_.]+\\.[a-zA-Z0-9_]+)") )
+        {
+            m_ScanAlien->m_Email = GetMatchResult(0);
+            m_Phase = PHASE_GLOBAL;
+        }
         break;
 
     case PHASE_SPECIES_MET:
@@ -266,7 +285,7 @@ bool Report::Parse(String ^s)
             if( m_ScanHasPlanets )
             {
                 m_Phase = PHASE_GLOBAL;
-                m_ScanHome = nullptr;
+                m_ScanAlien = nullptr;
             }
         }
         else
@@ -343,8 +362,8 @@ bool Report::MatchSystemScanStart(String ^s)
         m_ScanHasPlanets = false;
 
         // Set the home system
-        if( m_ScanHome )
-            m_ScanHome->m_HomeSystem = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ);
+        if( m_ScanAlien )
+            m_ScanAlien->m_HomeSystem = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ);
 
         return true;
     }
@@ -370,11 +389,11 @@ void Report::MatchPlanetScan(String ^s)
         {
             planet->m_LSN = GetMatchResultInt(0);
 
-            if( m_ScanHome && planet->m_LSN == 0 )
+            if( m_ScanAlien && planet->m_LSN == 0 )
             {
-                m_ScanHome->m_HomePlanet = plNum;
-                m_ScanHome->m_AtmReq->m_TempClass  = planet->m_TempClass;
-                m_ScanHome->m_AtmReq->m_PressClass = planet->m_PressClass;
+                m_ScanAlien->m_HomePlanet = plNum;
+                m_ScanAlien->m_AtmReq->m_TempClass  = planet->m_TempClass;
+                m_ScanAlien->m_AtmReq->m_PressClass = planet->m_PressClass;
             }
         }
         else if( MatchWithOutput(s, "[x?\\-]+\\s+") )
@@ -665,13 +684,30 @@ void Report::MatchShipScan(String ^s, bool bColony)
         }
     }
 
-    if( MatchWithOutput(s, "([^,;]+) \\(A(\\d+),([DOLdol])") )
-    {
-        String ^name    = GetMatchResult(0);
-        int age         = GetMatchResultInt(1);
-        String ^loc     = GetMatchResult(2)->ToLower();
+    bool bMatch     = false;
+    bool bInFD      = false;
+    String ^name    = nullptr;
+    int age         = 0;
+    String ^loc     = nullptr;
 
-        m_ScanShip      = m_GameData->AddShip(
+    if( MatchWithOutput(s, "\\?\\?\\? \\(([DOLdol])") )
+    {
+        bMatch  = true;
+        bInFD   = true;
+        name    = String::Format("??? ({0})", ++m_PirateShipsCnt);
+        loc     = GetMatchResult(0)->ToLower();
+    }
+    else if( MatchWithOutput(s, "([^,;]+) \\(A(\\d+),([DOLdol])") )
+    {
+        bMatch  = true;
+        name    = GetMatchResult(0);
+        age     = GetMatchResultInt(1);
+        loc     = GetMatchResult(2)->ToLower();
+    }
+
+    if( bMatch )
+    {
+        m_ScanShip = m_GameData->AddShip(
             m_Turn, m_GameData->GetSpecies(), type, name, size, subLight);
 
         if( m_ScanShip == nullptr )
@@ -767,7 +803,13 @@ void Report::MatchShipScan(String ^s, bool bColony)
         {   // In aliens report phase read owning species
             if( MatchWithOutput(s, "SP ([^,;]+)\\s*$") )
             {
-                Alien ^sp = m_GameData->AddAlien(m_Turn, GetMatchResult(0));
+                String ^spName = GetMatchResult(0);
+                Alien ^sp = m_GameData->AddAlien(m_Turn, spName);
+                if( bInFD )
+                {
+                    sp->m_Relation  = SP_PIRATE;
+                    m_ScanShip->m_bIsPirate = true;
+                }
                 m_ScanShip->m_Owner = sp;
             }
         }

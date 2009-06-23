@@ -3,6 +3,11 @@ Major new features and bug fixes will be listed here.
 + New features
 * Bug fixes
 
+FHUI build 29
+* Fixed loading alien tech estimates from "report 0".
++ Extract alien emails from messages.
++ Recognize alien ships in distortion field.
+
 FHUI build 28
 Internal maintenance.
 

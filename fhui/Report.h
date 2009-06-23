@@ -12,6 +12,7 @@ enum PhaseType
     PHASE_ORDERS_PROD,
     PHASE_ORDERS_POST_ARRIVAL,
     PHASE_ORDERS_STRIKE,
+    PHASE_MESSAGE,
     PHASE_SPECIES_MET,
     PHASE_SPECIES_ALLIES,
     PHASE_SPECIES_ENEMIES,
@@ -77,9 +78,10 @@ private:
     int             m_ScanY;
     int             m_ScanZ;
     bool            m_ScanHasPlanets;
-    Alien          ^m_ScanHome;
+    Alien          ^m_ScanAlien;
     Colony         ^m_ScanColony;
     Ship           ^m_ScanShip;
+    int             m_PirateShipsCnt;
 
     Alien          ^m_EstimateAlien;
 };

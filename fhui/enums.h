@@ -20,6 +20,7 @@ enum SPRelType
     SP_PLAYER,
     SP_NEUTRAL,
     SP_ALLY,
+    SP_PIRATE,
     SP_ENEMY
 };
 

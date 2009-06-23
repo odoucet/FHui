@@ -52,7 +52,7 @@ String^ Alien::PrintTechLevels()
         return "No estimates.";
 
     return String::Format(
-        "{0,2} {1,2} {2,2} {3,2} {4,2} {5,2} (t.{6})",
+        "Turn {6}: MI:{0} MA:{1} ML:{2} GV:{3} LS:{4} BI:{5}",
         m_TechLevels[TECH_MI],
         m_TechLevels[TECH_MA],
         m_TechLevels[TECH_ML],
@@ -367,7 +367,8 @@ String^ GameData::GetAliensSummary()
     for each( DictionaryEntry ^entry in m_Aliens )
     {
         Alien ^alien = safe_cast<Alien^>(entry->Value);
-        if( alien == m_Species )
+        if( alien == m_Species ||
+            alien->m_Relation == SP_PIRATE )
             continue;
 
         String ^prefix = "N";
@@ -467,7 +468,7 @@ bool GameData::TurnCheck(int turn)
         for each( DictionaryEntry ^entry in m_Aliens )
         {
             Alien ^alien = safe_cast<Alien^>(entry->Value);
-            if( alien != m_Species )
+            if( alien != m_Species && alien->m_Relation != SP_PIRATE )
                 alien->m_Relation = SP_NEUTRAL; // FIXME: default relation may be different...
         }
 

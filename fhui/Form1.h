@@ -58,6 +58,7 @@ namespace fhui {
 
         void        FillAboutBox();
         void        DisplayReport();
+        void        ShowException(Exception ^e);
 
         String^     SystemsGetRowTooltip(DataGridViewRow ^row);
         Color       ColoniesGetRowColor(DataGridViewRow ^row);

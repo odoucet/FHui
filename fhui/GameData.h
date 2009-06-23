@@ -41,9 +41,10 @@ public:
         , m_GovType(nullptr)
         , m_Relation(SP_NEUTRAL)
         , m_TurnMet(turn)
-        , m_AtmReq(gcnew AtmosphericReq)
+        , m_Email(nullptr)
         , m_HomeSystem(nullptr)
         , m_HomePlanet(-1)
+        , m_AtmReq(gcnew AtmosphericReq)
         , m_TechEstimateTurn(-1)
     {
         m_TechLevels        = gcnew array<int>(TECH_MAX){0};
@@ -59,10 +60,11 @@ public:
     String         ^m_GovType;
     SPRelType       m_Relation;
     int             m_TurnMet;
-    AtmosphericReq ^m_AtmReq;
+    String         ^m_Email;
 
     StarSystem     ^m_HomeSystem;
     int             m_HomePlanet;
+    AtmosphericReq ^m_AtmReq;
 
     int             m_TechEstimateTurn;
     array<int>     ^m_TechLevels;
@@ -219,6 +221,7 @@ public:
         , m_Planet(-1)
         , m_System(nullptr)
         , m_Capacity(0)
+        , m_bIsPirate(false)
     {
         m_Cargo = gcnew array<int>(INV_MAX){0};
     }
@@ -247,6 +250,8 @@ public:
 
     int             m_Capacity;
     array<int>     ^m_Cargo;
+
+    bool            m_bIsPirate;
 };
 
 public ref class GameData

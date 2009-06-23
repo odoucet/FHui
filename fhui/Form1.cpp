@@ -43,24 +43,29 @@ void Form1::LoadGameData()
     catch( Exception ^e )
     {
         Summary->Text = "Failed loading game data.";
-        RepText->Text = String::Format(
-            "Fatal Exception !\r\n"
-            "---------------------------------------------------------------------------\r\n"
-            "Please send this message and problem description to:\r\n"
-            "   {0}.\r\n"
-            "---------------------------------------------------------------------------\r\n"
-            "FHUI rev.: {1}\r\n"
-            "Type     : {2}\r\n"
-            "Message  : {3}\r\n"
-            "---------------------------------------------------------------------------\r\n"
-            "{4}\r\n"
-            "---------------------------------------------------------------------------\r\n",
-            FHUI_CONTACT_EMAILS,
-            FHUI_BUILD_INFO(),
-            e->GetType()->ToString(),
-            e->Message,
-            e->InnerException == nullptr ? e->StackTrace : e->InnerException->StackTrace );
+        ShowException(e);
     }
+}
+
+void Form1::ShowException(Exception ^e)
+{
+    RepText->Text = String::Format(
+        "Fatal Exception !\r\n"
+        "---------------------------------------------------------------------------\r\n"
+        "Please send this message and problem description to:\r\n"
+        "   {0}.\r\n"
+        "---------------------------------------------------------------------------\r\n"
+        "FHUI rev.: {1}\r\n"
+        "Type     : {2}\r\n"
+        "Message  : {3}\r\n"
+        "---------------------------------------------------------------------------\r\n"
+        "{4}\r\n"
+        "---------------------------------------------------------------------------\r\n",
+        FHUI_CONTACT_EMAILS,
+        FHUI_BUILD_INFO(),
+        e->GetType()->ToString(),
+        e->Message,
+        e->InnerException == nullptr ? e->StackTrace : e->InnerException->StackTrace );
 }
 
 void Form1::FillAboutBox()
@@ -201,11 +206,20 @@ void Form1::InitData()
 
 String^ Form1::SystemsGetRowTooltip(DataGridViewRow ^row)
 {
-    int x = int::Parse(row->Cells[ SystemsGrid->Columns["X"]->Index ]->Value->ToString());
-    int y = int::Parse(row->Cells[ SystemsGrid->Columns["Y"]->Index ]->Value->ToString());
-    int z = int::Parse(row->Cells[ SystemsGrid->Columns["Z"]->Index ]->Value->ToString());
-    StarSystem ^system = m_GameData->GetStarSystem(x, y, z);
-    return system->GenerateScan();
+    try
+    {
+        int x = int::Parse(row->Cells[ SystemsGrid->Columns["X"]->Index ]->Value->ToString());
+        int y = int::Parse(row->Cells[ SystemsGrid->Columns["Y"]->Index ]->Value->ToString());
+        int z = int::Parse(row->Cells[ SystemsGrid->Columns["Z"]->Index ]->Value->ToString());
+        StarSystem ^system = m_GameData->GetStarSystem(x, y, z);
+        return system->GenerateScan();
+    }
+    catch( Exception ^e )
+    {
+        ShowException(e);
+    }
+
+    return nullptr;
 }
 
 void Form1::SetupSystems()
@@ -275,14 +289,22 @@ void Form1::SetupSystems()
 
 Color Form1::GetAlienColor(Alien ^sp)
 {
-    if( sp == m_GameData->GetSpecies() )
-        return Color::FromArgb(225, 255, 255);
-
-    switch( sp->m_Relation )
+    try
     {
-    case SP_NEUTRAL:    return Color::FromArgb(255, 255, 220);
-    case SP_ALLY:       return Color::FromArgb(220, 255, 210);
-    case SP_ENEMY:      return Color::FromArgb(255, 220, 220);
+        if( sp == m_GameData->GetSpecies() )
+            return Color::FromArgb(225, 255, 255);
+
+        switch( sp->m_Relation )
+        {
+        case SP_NEUTRAL:    return Color::FromArgb(255, 255, 220);
+        case SP_ALLY:       return Color::FromArgb(220, 255, 210);
+        case SP_ENEMY:      return Color::FromArgb(255, 220, 220);
+        case SP_PIRATE:     return Color::FromArgb(230, 230, 230);
+        }
+    }
+    catch( Exception ^e )
+    {
+        ShowException(e);
     }
 
     return Color::White;
@@ -376,6 +398,7 @@ void Form1::SetupColonies()
     dataTable->Columns->Add("Prod.", int::typeid );
     dataTable->Columns->Add("Pr[%]", int::typeid );
     dataTable->Columns->Add("Balance", String::typeid );
+    dataTable->Columns->Add("Pop", int::typeid );
     dataTable->Columns->Add("Dist.", double::typeid );
     dataTable->Columns->Add("Mishap %", String::typeid );
     dataTable->Columns->Add("Inventory", String::typeid );
@@ -395,7 +418,8 @@ void Form1::SetupColonies()
         row["Name"]     = colony->m_Name;
         row["Type"]     = PlTypeToString(colony->m_PlanetType);
         row["Location"] = colony->PrintLocation();
-        row["Size"]     = colony->m_MiBase + colony->m_MaBase;
+        if( colony->m_MaBase != 0 || colony->m_MiBase != 0 )
+            row["Size"]     = colony->m_MiBase + colony->m_MaBase;
         row["Dist."]    = distance;
         row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
         row["Inventory"]= colony->PrintInventoryShort();
@@ -404,6 +428,7 @@ void Form1::SetupColonies()
         {
             row["Prod."]    = colony->m_EUProd - colony->m_EUFleet;
             row["Pr[%]"]    = 100 - colony->m_ProdPenalty;
+            row["Pop"]      = colony->m_AvailPop;
 
             if( colony->m_PlanetType == PLANET_HOME ||
                 colony->m_PlanetType == PLANET_COLONY )
@@ -497,7 +522,8 @@ void Form1::SetupShips()
         row["Class"]    = ship->PrintClass();
         row["Name"]     = ship->m_Name;
         row["Location"] = ship->PrintLocation();
-        row["Age"]      = ship->m_Age;
+        if( !ship->m_bIsPirate )
+            row["Age"]      = ship->m_Age;
         row["Cap."] = ship->m_Capacity;
         row["Cargo"]    = ( ship->m_Owner == sp )
             ? ship->PrintCargo()
@@ -545,6 +571,7 @@ void Form1::SetupAliens()
     dataTable->Columns->Add("Tech Levels", String::typeid );
     dataTable->Columns->Add("Temp", int::typeid );
     dataTable->Columns->Add("Press", int::typeid );
+    dataTable->Columns->Add("EMail", String::typeid );
 
     for each( DictionaryEntry ^entry in m_GameData->GetAliens() )
     {
@@ -561,6 +588,7 @@ void Form1::SetupAliens()
             row["Temp"]     = alien->m_AtmReq->m_TempClass;
             row["Press"]    = alien->m_AtmReq->m_PressClass;
         }
+        row["EMail"]        = alien->m_Email;
         dataTable->Rows->Add(row);
     }
     AliensGrid->DataSource = dataTable;
