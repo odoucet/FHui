@@ -4,7 +4,6 @@
 
 using namespace System;
 using namespace System::Collections;
-using namespace System::Collections::Specialized;
 
 ref class StarSystem;
 
@@ -124,6 +123,9 @@ public:
     double      CalcMishap(int x, int y, int z, int gv, int age)    { return CalcMishap(X, Y, Z, x, y, z, gv, age); }
 
     Planet^     GetPlanet(int plNum);
+
+    bool        IsExplored() { return m_TurnScanned != -1; }
+    int         GetMinLSN();
 
     String^     GenerateScan();
     String^     PrintLocation() { return String::Format("{0,2} {1,2} {2,2}", X, Y, Z); }
@@ -269,11 +271,15 @@ public:
     SortedList^     GetAliens()                 { return m_Aliens; }
     StarSystem^     GetStarSystem(int x, int y, int z);
     array<StarSystem^>^ GetStarSystems()        { return m_Systems; }
-    SortedList^     GetColonies()               { return m_Colonies; }
     Colony^         GetColony(String ^name);
     SortedList^     GetPlanetNames()            { return m_PlanetNames; }
     SortedList^     GetShips()                  { return m_Ships; }
     Ship^           GetShip(String ^name);
+
+    Generic::List<Colony^>^  GetColonies()                      { return GetColonies(nullptr, nullptr); }
+    Generic::List<Colony^>^  GetColonies(Alien ^sp)             { return GetColonies(nullptr, sp); }
+    Generic::List<Colony^>^  GetColonies(StarSystem ^sys)       { return GetColonies(sys, nullptr); }
+    Generic::List<Colony^>^  GetColonies(StarSystem^, Alien^);
 
     // ------------------------------------------
     void            SetSpecies(String ^sp);

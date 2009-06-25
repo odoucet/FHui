@@ -87,6 +87,15 @@ int Planet::CalculateLSN(AtmosphericReq ^atmReq)
 
 // ---------------------------------------------------------
 
+int StarSystem::GetMinLSN()
+{
+    int minLSN = 99999;
+    for each( Planet ^pl in m_Planets )
+        minLSN = Math::Min(minLSN, pl->m_LSN == -1 ? 99999 : pl->m_LSN);
+
+    return minLSN;
+}
+
 Planet^ StarSystem::GetPlanet(int plNum)
 {
     if( plNum < 1 )
@@ -456,6 +465,23 @@ Colony^ GameData::GetColony(String ^name)
     return safe_cast<Colony^>(m_Colonies[name->ToLower()]);
 }
 
+Generic::List<Colony^>^ GameData::GetColonies(StarSystem ^sys, Alien ^sp)
+{
+    Generic::List<Colony^> ^ret = gcnew Generic::List<Colony^>; 
+
+    for each( DictionaryEntry ^entry in m_Colonies )
+    {
+        Colony ^colony = safe_cast<Colony^>(entry->Value);
+        if( sp && colony->m_Owner != sp )
+            continue;
+        if( sys && colony->m_System != sys )
+            continue;
+        ret->Add(colony);
+    }
+
+    return ret;
+}
+
 // ---------------------------------------------------------
 
 bool GameData::TurnCheck(int turn)
@@ -709,6 +735,31 @@ Colony^ GameData::AddColony(int turn, Alien ^sp, String ^name, StarSystem ^syste
     {
         Colony ^colony = gcnew Colony(sp, name, system, plNum);
         m_Colonies[name->ToLower()] = colony;
+
+        // If this is species' own colony, remove alien colonies from this system.
+        // They'll be restored by 'Aliens at...' parsing. If not - it means that alien
+        // colony was destroyed or assymilated.
+        if( sp == m_Species )
+        {
+            bool bRemoved = false;
+            do
+            {
+                bRemoved = false;
+                for each( DictionaryEntry ^entry in m_Colonies )
+                {
+                    Colony ^c = safe_cast<Colony^>(entry->Value);
+                    if( c->m_Owner != m_Species &&
+                        c->m_System == system &&
+                        c->m_PlanetNum == plNum )
+                    {
+                        m_Colonies->Remove(entry->Key);
+                        bRemoved = true;
+                        break; // for each
+                    }
+                }
+            } while( bRemoved );
+        }
+
         return colony;
     }
 

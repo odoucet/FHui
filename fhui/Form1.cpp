@@ -34,6 +34,7 @@ void Form1::LoadGameData()
         SetupColonies();
         SetupShips();
         SetupAliens();
+        SetupMap();
 
         this->Text = String::Format("[SP {0}, Turn {1}] Far Horizons User Interface, build {2}",
             m_GameData->GetSpeciesName(),
@@ -103,6 +104,9 @@ void Form1::LoadGalaxy()
     String ^line;
     while( (line = sr->ReadLine()) != nullptr ) 
     {
+        if( String::IsNullOrEmpty(line) )
+            continue;
+
         Match ^m = Regex("^x\\s+=\\s+(\\d+)\\s*y\\s+=\\s+(\\d+)\\s*z\\s+=\\s+(\\d+)\\s*stellar type =\\s+(\\w+)\\s*(\\w*)$").Match(line);
         if( m->Success )
         {
@@ -113,6 +117,18 @@ void Form1::LoadGalaxy()
             String ^comment = m->Groups[5]->ToString();
 
             m_GameData->AddStarSystem(x, y, z, type, comment);
+        }
+        else
+        {
+            m = Regex("^The galaxy has a radius of (\\d+) parsecs.").Match(line);
+            if( m->Success )
+            {
+                m_GalaxySize = 2 * int::Parse(m->Groups[1]->ToString());
+                break;
+            }
+            else
+                throw gcnew FHUIParsingException(
+                    String::Format("Unrecognized entry in galaxy list: {0}", line) );
         }
     }
     sr->Close();
@@ -198,6 +214,7 @@ void Form1::InitData()
 {
     m_GameData = gcnew GameData;
 
+    m_GalaxySize = 0;
     RepMode->SelectedIndex = 1;
 }
 
@@ -250,13 +267,10 @@ void Form1::SetupSystems()
         row["Y"]        = system->Y;
         row["Z"]        = system->Z;
         row["Type"]     = system->Type;
-        if( system->m_TurnScanned != -1 )
+        if( system->IsExplored() )
         {
-            int minLSN = 99999;
-            for each( Planet ^pl in system->m_Planets )
-                minLSN = Math::Min(minLSN, pl->m_LSN == -1 ? 99999 : pl->m_LSN);
             row["Planets"]  = system->m_Planets->Length;
-            row["MinLSN"]   = minLSN;
+            row["MinLSN"]   = system->GetMinLSN();
         }
         row["Dist."]    = system->CalcDistance(sp->m_HomeSystem);
         row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
@@ -406,10 +420,8 @@ void Form1::SetupColonies()
     Alien ^sp = m_GameData->GetSpecies();
     int gv = sp->m_TechLevels[TECH_GV];
 
-    for each( DictionaryEntry ^entry in m_GameData->GetColonies() )
+    for each( Colony ^colony in m_GameData->GetColonies() )
     {
-        Colony ^colony = safe_cast<Colony^>(entry->Value);
-
         double distance = colony->m_System->CalcDistance(sp->m_HomeSystem);
         double mishap = colony->m_System->CalcMishap(sp->m_HomeSystem, gv, 0);
 
@@ -604,6 +616,7 @@ void Form1::SetupAliens()
     // Default sort column
     AliensGrid->Sort( AliensGrid->Columns["Relation"], ListSortDirection::Ascending );
 }
+
 
 ////////////////////////////////////////////////////////////////
 

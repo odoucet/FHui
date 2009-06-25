@@ -2,6 +2,7 @@
 
 ref class GameData;
 ref class Alien;
+ref class StarSystem;
 ref class PlanetView;
 
 namespace fhui {
@@ -55,6 +56,7 @@ namespace fhui {
         void        SetupColonies();
         void        SetupShips();
         void        SetupAliens();
+        void        SetupMap();
 
         void        FillAboutBox();
         void        DisplayReport();
@@ -67,9 +69,39 @@ namespace fhui {
 
         Color       GetAlienColor(Alien ^sp);
 
+        void        DrawMap();
+        void        MapDrawGrid(Graphics ^g);
+        void        MapDrawDistances(Graphics ^g);
+        void        MapDrawWormholes(Graphics ^g);
+        void        MapDrawSystems(Graphics ^g);
+        void        MapDrawShips(Graphics ^g);
+        void        MapDrawBattles(Graphics ^g);
+
+        void        MapDrawDistance(Graphics ^g, int sp, StarSystem ^sysFrom, StarSystem ^sysTo);
+
+        Alien^      MapGetAlien(int sp);
+        StarSystem^ MapGetRefSystem(int sp);
+        int         MapGetAlienGV(int sp);
+        int         MapSpNumFromPtr(Alien ^sp);
+        Color       MapGetAlienColor(int sp, double dim);
+        PointF      MapGetSystemXY(StarSystem ^sys);
+        RectangleF  MapGetSystemRect( StarSystem ^system, float size );
+        Brush^      MapGetBrushLSN(int lsn);
+
+        Alien^      MapGetAlienFromUI(ComboBox^);
+
+        // --------------------------------------------------
+
         GameData   ^m_GameData;
         SortedList ^m_PlanetsView;
         SortedList ^m_Reports;
+
+        // --------------------------------------------------
+
+        int         m_GalaxySize;
+        float       m_MapSectorSize;
+
+        initonly static int MapMaxSpecies = 4;
 
         // --------------------------------------------------
 
@@ -123,6 +155,47 @@ namespace fhui {
     private: System::Windows::Forms::DataGridView^  dataGridView1;
     private: System::Windows::Forms::SplitContainer^  splitContainer6;
     private: System::Windows::Forms::DataGridView^  AliensGrid;
+private: System::Windows::Forms::Panel^  panel1;
+private: System::Windows::Forms::GroupBox^  MapSPSelf;
+
+
+
+private: System::Windows::Forms::ComboBox^  MapSPSelfSystem;
+private: System::Windows::Forms::ComboBox^  MapSP1;
+private: System::Windows::Forms::ComboBox^  MapSP1System;
+
+private: System::Windows::Forms::ComboBox^  MapSP3;
+private: System::Windows::Forms::ComboBox^  MapSP3System;
+
+private: System::Windows::Forms::ComboBox^  MapSP2;
+private: System::Windows::Forms::ComboBox^  MapSP2System;
+private: System::Windows::Forms::NumericUpDown^  MapSP3GV;
+private: System::Windows::Forms::NumericUpDown^  MapSP2GV;
+private: System::Windows::Forms::NumericUpDown^  MapSP1GV;
+private: System::Windows::Forms::NumericUpDown^  MapSPSelfGV;
+private: System::Windows::Forms::NumericUpDown^  MapLSNVal;
+
+
+
+
+private: System::Windows::Forms::CheckBox^  MapEnJumps;
+
+
+private: System::Windows::Forms::CheckBox^  MapEnLSN;
+
+private: System::Windows::Forms::CheckBox^  MapEnDist;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -171,6 +244,13 @@ namespace fhui {
             System::Windows::Forms::SplitContainer^  splitContainer1;
             System::Windows::Forms::Label^  label1;
             System::Windows::Forms::SplitContainer^  TopSplitCont;
+            System::Windows::Forms::GroupBox^  groupBox3;
+            System::Windows::Forms::Label^  label13;
+            System::Windows::Forms::GroupBox^  groupBox2;
+            System::Windows::Forms::Label^  label12;
+            System::Windows::Forms::GroupBox^  groupBox1;
+            System::Windows::Forms::Label^  label11;
+            System::Windows::Forms::Label^  label7;
             System::Windows::Forms::Label^  label2;
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle1 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle2 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
@@ -199,6 +279,23 @@ namespace fhui {
             this->MenuTabs = (gcnew System::Windows::Forms::TabControl());
             this->TabReports = (gcnew System::Windows::Forms::TabPage());
             this->TabMap = (gcnew System::Windows::Forms::TabPage());
+            this->panel1 = (gcnew System::Windows::Forms::Panel());
+            this->MapLSNVal = (gcnew System::Windows::Forms::NumericUpDown());
+            this->MapEnJumps = (gcnew System::Windows::Forms::CheckBox());
+            this->MapEnLSN = (gcnew System::Windows::Forms::CheckBox());
+            this->MapEnDist = (gcnew System::Windows::Forms::CheckBox());
+            this->MapSP3GV = (gcnew System::Windows::Forms::NumericUpDown());
+            this->MapSP3 = (gcnew System::Windows::Forms::ComboBox());
+            this->MapSP3System = (gcnew System::Windows::Forms::ComboBox());
+            this->MapSP2GV = (gcnew System::Windows::Forms::NumericUpDown());
+            this->MapSP2 = (gcnew System::Windows::Forms::ComboBox());
+            this->MapSP2System = (gcnew System::Windows::Forms::ComboBox());
+            this->MapSP1GV = (gcnew System::Windows::Forms::NumericUpDown());
+            this->MapSP1 = (gcnew System::Windows::Forms::ComboBox());
+            this->MapSP1System = (gcnew System::Windows::Forms::ComboBox());
+            this->MapSPSelf = (gcnew System::Windows::Forms::GroupBox());
+            this->MapSPSelfGV = (gcnew System::Windows::Forms::NumericUpDown());
+            this->MapSPSelfSystem = (gcnew System::Windows::Forms::ComboBox());
             this->TabSystems = (gcnew System::Windows::Forms::TabPage());
             this->splitContainer2 = (gcnew System::Windows::Forms::SplitContainer());
             this->SystemsShipAge = (gcnew System::Windows::Forms::ComboBox());
@@ -233,6 +330,13 @@ namespace fhui {
             splitContainer1 = (gcnew System::Windows::Forms::SplitContainer());
             label1 = (gcnew System::Windows::Forms::Label());
             TopSplitCont = (gcnew System::Windows::Forms::SplitContainer());
+            groupBox3 = (gcnew System::Windows::Forms::GroupBox());
+            label13 = (gcnew System::Windows::Forms::Label());
+            groupBox2 = (gcnew System::Windows::Forms::GroupBox());
+            label12 = (gcnew System::Windows::Forms::Label());
+            groupBox1 = (gcnew System::Windows::Forms::GroupBox());
+            label11 = (gcnew System::Windows::Forms::Label());
+            label7 = (gcnew System::Windows::Forms::Label());
             label2 = (gcnew System::Windows::Forms::Label());
             label3 = (gcnew System::Windows::Forms::Label());
             label4 = (gcnew System::Windows::Forms::Label());
@@ -249,6 +353,17 @@ namespace fhui {
             TopSplitCont->SuspendLayout();
             this->MenuTabs->SuspendLayout();
             this->TabReports->SuspendLayout();
+            this->TabMap->SuspendLayout();
+            this->panel1->SuspendLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapLSNVal))->BeginInit();
+            groupBox3->SuspendLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSP3GV))->BeginInit();
+            groupBox2->SuspendLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSP2GV))->BeginInit();
+            groupBox1->SuspendLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSP1GV))->BeginInit();
+            this->MapSPSelf->SuspendLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSPSelfGV))->BeginInit();
             this->TabSystems->SuspendLayout();
             this->splitContainer2->Panel1->SuspendLayout();
             this->splitContainer2->Panel2->SuspendLayout();
@@ -296,7 +411,7 @@ namespace fhui {
             // splitContainer1.Panel2
             // 
             splitContainer1->Panel2->Controls->Add(this->RepText);
-            splitContainer1->Size = System::Drawing::Size(543, 529);
+            splitContainer1->Size = System::Drawing::Size(677, 557);
             splitContainer1->SplitterDistance = 25;
             splitContainer1->SplitterWidth = 1;
             splitContainer1->TabIndex = 0;
@@ -343,7 +458,7 @@ namespace fhui {
             this->RepText->Name = L"RepText";
             this->RepText->ReadOnly = true;
             this->RepText->ScrollBars = System::Windows::Forms::ScrollBars::Both;
-            this->RepText->Size = System::Drawing::Size(543, 503);
+            this->RepText->Size = System::Drawing::Size(677, 531);
             this->RepText->TabIndex = 0;
             this->RepText->WordWrap = false;
             // 
@@ -374,7 +489,7 @@ namespace fhui {
             // TopSplitCont.Panel2
             // 
             TopSplitCont->Panel2->Controls->Add(this->MenuTabs);
-            TopSplitCont->Size = System::Drawing::Size(793, 565);
+            TopSplitCont->Size = System::Drawing::Size(927, 593);
             TopSplitCont->SplitterDistance = 230;
             TopSplitCont->SplitterWidth = 2;
             TopSplitCont->TabIndex = 0;
@@ -388,7 +503,7 @@ namespace fhui {
             this->Summary->Multiline = true;
             this->Summary->Name = L"Summary";
             this->Summary->ReadOnly = true;
-            this->Summary->Size = System::Drawing::Size(226, 561);
+            this->Summary->Size = System::Drawing::Size(226, 589);
             this->Summary->TabIndex = 0;
             this->Summary->WordWrap = false;
             // 
@@ -407,7 +522,7 @@ namespace fhui {
             this->MenuTabs->Location = System::Drawing::Point(0, 0);
             this->MenuTabs->Name = L"MenuTabs";
             this->MenuTabs->SelectedIndex = 0;
-            this->MenuTabs->Size = System::Drawing::Size(557, 561);
+            this->MenuTabs->Size = System::Drawing::Size(691, 589);
             this->MenuTabs->TabIndex = 0;
             // 
             // TabReports
@@ -417,27 +532,294 @@ namespace fhui {
             this->TabReports->Margin = System::Windows::Forms::Padding(0);
             this->TabReports->Name = L"TabReports";
             this->TabReports->Padding = System::Windows::Forms::Padding(3);
-            this->TabReports->Size = System::Drawing::Size(549, 535);
+            this->TabReports->Size = System::Drawing::Size(683, 563);
             this->TabReports->TabIndex = 0;
             this->TabReports->Text = L"Reports";
             this->TabReports->UseVisualStyleBackColor = true;
             // 
             // TabMap
             // 
+            this->TabMap->BackColor = System::Drawing::Color::Black;
+            this->TabMap->Controls->Add(this->panel1);
             this->TabMap->Location = System::Drawing::Point(4, 22);
+            this->TabMap->Margin = System::Windows::Forms::Padding(0);
             this->TabMap->Name = L"TabMap";
-            this->TabMap->Padding = System::Windows::Forms::Padding(3);
-            this->TabMap->Size = System::Drawing::Size(549, 535);
+            this->TabMap->Size = System::Drawing::Size(683, 563);
             this->TabMap->TabIndex = 1;
             this->TabMap->Text = L"Map";
-            this->TabMap->UseVisualStyleBackColor = true;
+            this->TabMap->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &Form1::MapCanvas_Paint);
+            // 
+            // panel1
+            // 
+            this->panel1->BackColor = System::Drawing::SystemColors::Control;
+            this->panel1->Controls->Add(this->MapLSNVal);
+            this->panel1->Controls->Add(this->MapEnJumps);
+            this->panel1->Controls->Add(this->MapEnLSN);
+            this->panel1->Controls->Add(this->MapEnDist);
+            this->panel1->Controls->Add(groupBox3);
+            this->panel1->Controls->Add(groupBox2);
+            this->panel1->Controls->Add(groupBox1);
+            this->panel1->Controls->Add(this->MapSPSelf);
+            this->panel1->Dock = System::Windows::Forms::DockStyle::Right;
+            this->panel1->Location = System::Drawing::Point(483, 0);
+            this->panel1->Name = L"panel1";
+            this->panel1->Size = System::Drawing::Size(200, 563);
+            this->panel1->TabIndex = 0;
+            // 
+            // MapLSNVal
+            // 
+            this->MapLSNVal->Location = System::Drawing::Point(108, 324);
+            this->MapLSNVal->Name = L"MapLSNVal";
+            this->MapLSNVal->Size = System::Drawing::Size(52, 20);
+            this->MapLSNVal->TabIndex = 2;
+            this->MapLSNVal->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
+            this->MapLSNVal->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {21, 0, 0, 0});
+            this->MapLSNVal->ValueChanged += gcnew System::EventHandler(this, &Form1::MapUpdate);
+            // 
+            // MapEnJumps
+            // 
+            this->MapEnJumps->AutoSize = true;
+            this->MapEnJumps->Enabled = false;
+            this->MapEnJumps->Location = System::Drawing::Point(9, 413);
+            this->MapEnJumps->Name = L"MapEnJumps";
+            this->MapEnJumps->Size = System::Drawing::Size(110, 17);
+            this->MapEnJumps->TabIndex = 1;
+            this->MapEnJumps->Text = L"Show jump orders";
+            this->MapEnJumps->UseVisualStyleBackColor = true;
+            this->MapEnJumps->CheckedChanged += gcnew System::EventHandler(this, &Form1::MapUpdate);
+            // 
+            // MapEnLSN
+            // 
+            this->MapEnLSN->AutoSize = true;
+            this->MapEnLSN->Checked = true;
+            this->MapEnLSN->CheckState = System::Windows::Forms::CheckState::Checked;
+            this->MapEnLSN->Location = System::Drawing::Point(9, 324);
+            this->MapEnLSN->Name = L"MapEnLSN";
+            this->MapEnLSN->Size = System::Drawing::Size(95, 17);
+            this->MapEnLSN->TabIndex = 1;
+            this->MapEnLSN->Text = L"Max LSN filter:";
+            this->MapEnLSN->UseVisualStyleBackColor = true;
+            this->MapEnLSN->CheckedChanged += gcnew System::EventHandler(this, &Form1::MapEnLSN_CheckedChanged);
+            // 
+            // MapEnDist
+            // 
+            this->MapEnDist->AutoSize = true;
+            this->MapEnDist->Checked = true;
+            this->MapEnDist->CheckState = System::Windows::Forms::CheckState::Checked;
+            this->MapEnDist->Location = System::Drawing::Point(9, 345);
+            this->MapEnDist->Name = L"MapEnDist";
+            this->MapEnDist->Size = System::Drawing::Size(73, 17);
+            this->MapEnDist->TabIndex = 1;
+            this->MapEnDist->Text = L"Distances";
+            this->MapEnDist->UseVisualStyleBackColor = true;
+            this->MapEnDist->CheckedChanged += gcnew System::EventHandler(this, &Form1::MapUpdate);
+            // 
+            // groupBox3
+            // 
+            groupBox3->Controls->Add(this->MapSP3GV);
+            groupBox3->Controls->Add(label13);
+            groupBox3->Controls->Add(this->MapSP3);
+            groupBox3->Controls->Add(this->MapSP3System);
+            groupBox3->ForeColor = System::Drawing::Color::DarkBlue;
+            groupBox3->Location = System::Drawing::Point(3, 250);
+            groupBox3->Name = L"groupBox3";
+            groupBox3->Size = System::Drawing::Size(194, 68);
+            groupBox3->TabIndex = 0;
+            groupBox3->TabStop = false;
+            groupBox3->Text = L"Alien #1";
+            // 
+            // MapSP3GV
+            // 
+            this->MapSP3GV->Enabled = false;
+            this->MapSP3GV->ForeColor = System::Drawing::Color::DarkBlue;
+            this->MapSP3GV->Location = System::Drawing::Point(35, 42);
+            this->MapSP3GV->Name = L"MapSP3GV";
+            this->MapSP3GV->Size = System::Drawing::Size(46, 20);
+            this->MapSP3GV->TabIndex = 3;
+            this->MapSP3GV->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
+            this->MapSP3GV->ValueChanged += gcnew System::EventHandler(this, &Form1::MapUpdate);
+            // 
+            // label13
+            // 
+            label13->AutoSize = true;
+            label13->ForeColor = System::Drawing::Color::DarkBlue;
+            label13->Location = System::Drawing::Point(6, 46);
+            label13->Name = L"label13";
+            label13->Size = System::Drawing::Size(25, 13);
+            label13->TabIndex = 2;
+            label13->Text = L"GV:";
+            // 
+            // MapSP3
+            // 
+            this->MapSP3->ForeColor = System::Drawing::Color::DarkBlue;
+            this->MapSP3->FormattingEnabled = true;
+            this->MapSP3->Location = System::Drawing::Point(6, 19);
+            this->MapSP3->Name = L"MapSP3";
+            this->MapSP3->Size = System::Drawing::Size(97, 21);
+            this->MapSP3->TabIndex = 1;
+            // 
+            // MapSP3System
+            // 
+            this->MapSP3System->Enabled = false;
+            this->MapSP3System->ForeColor = System::Drawing::Color::DarkBlue;
+            this->MapSP3System->FormattingEnabled = true;
+            this->MapSP3System->Location = System::Drawing::Point(109, 18);
+            this->MapSP3System->Name = L"MapSP3System";
+            this->MapSP3System->Size = System::Drawing::Size(79, 21);
+            this->MapSP3System->TabIndex = 1;
+            // 
+            // groupBox2
+            // 
+            groupBox2->Controls->Add(this->MapSP2GV);
+            groupBox2->Controls->Add(label12);
+            groupBox2->Controls->Add(this->MapSP2);
+            groupBox2->Controls->Add(this->MapSP2System);
+            groupBox2->ForeColor = System::Drawing::Color::DarkGreen;
+            groupBox2->Location = System::Drawing::Point(3, 176);
+            groupBox2->Name = L"groupBox2";
+            groupBox2->Size = System::Drawing::Size(194, 68);
+            groupBox2->TabIndex = 0;
+            groupBox2->TabStop = false;
+            groupBox2->Text = L"Alien #1";
+            // 
+            // MapSP2GV
+            // 
+            this->MapSP2GV->Enabled = false;
+            this->MapSP2GV->ForeColor = System::Drawing::Color::DarkGreen;
+            this->MapSP2GV->Location = System::Drawing::Point(35, 42);
+            this->MapSP2GV->Name = L"MapSP2GV";
+            this->MapSP2GV->Size = System::Drawing::Size(46, 20);
+            this->MapSP2GV->TabIndex = 3;
+            this->MapSP2GV->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
+            this->MapSP2GV->ValueChanged += gcnew System::EventHandler(this, &Form1::MapUpdate);
+            // 
+            // label12
+            // 
+            label12->AutoSize = true;
+            label12->ForeColor = System::Drawing::Color::DarkGreen;
+            label12->Location = System::Drawing::Point(6, 46);
+            label12->Name = L"label12";
+            label12->Size = System::Drawing::Size(25, 13);
+            label12->TabIndex = 2;
+            label12->Text = L"GV:";
+            // 
+            // MapSP2
+            // 
+            this->MapSP2->ForeColor = System::Drawing::Color::DarkGreen;
+            this->MapSP2->FormattingEnabled = true;
+            this->MapSP2->Location = System::Drawing::Point(6, 19);
+            this->MapSP2->Name = L"MapSP2";
+            this->MapSP2->Size = System::Drawing::Size(97, 21);
+            this->MapSP2->TabIndex = 1;
+            // 
+            // MapSP2System
+            // 
+            this->MapSP2System->Enabled = false;
+            this->MapSP2System->ForeColor = System::Drawing::Color::DarkGreen;
+            this->MapSP2System->FormattingEnabled = true;
+            this->MapSP2System->Location = System::Drawing::Point(109, 18);
+            this->MapSP2System->Name = L"MapSP2System";
+            this->MapSP2System->Size = System::Drawing::Size(79, 21);
+            this->MapSP2System->TabIndex = 1;
+            // 
+            // groupBox1
+            // 
+            groupBox1->Controls->Add(this->MapSP1GV);
+            groupBox1->Controls->Add(label11);
+            groupBox1->Controls->Add(this->MapSP1);
+            groupBox1->Controls->Add(this->MapSP1System);
+            groupBox1->ForeColor = System::Drawing::Color::Maroon;
+            groupBox1->Location = System::Drawing::Point(3, 102);
+            groupBox1->Name = L"groupBox1";
+            groupBox1->Size = System::Drawing::Size(194, 68);
+            groupBox1->TabIndex = 0;
+            groupBox1->TabStop = false;
+            groupBox1->Text = L"Alien #1";
+            // 
+            // MapSP1GV
+            // 
+            this->MapSP1GV->Enabled = false;
+            this->MapSP1GV->ForeColor = System::Drawing::Color::Maroon;
+            this->MapSP1GV->Location = System::Drawing::Point(35, 42);
+            this->MapSP1GV->Name = L"MapSP1GV";
+            this->MapSP1GV->Size = System::Drawing::Size(46, 20);
+            this->MapSP1GV->TabIndex = 3;
+            this->MapSP1GV->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
+            this->MapSP1GV->ValueChanged += gcnew System::EventHandler(this, &Form1::MapUpdate);
+            // 
+            // label11
+            // 
+            label11->AutoSize = true;
+            label11->ForeColor = System::Drawing::Color::Maroon;
+            label11->Location = System::Drawing::Point(6, 46);
+            label11->Name = L"label11";
+            label11->Size = System::Drawing::Size(25, 13);
+            label11->TabIndex = 2;
+            label11->Text = L"GV:";
+            // 
+            // MapSP1
+            // 
+            this->MapSP1->ForeColor = System::Drawing::Color::Maroon;
+            this->MapSP1->FormattingEnabled = true;
+            this->MapSP1->Location = System::Drawing::Point(6, 18);
+            this->MapSP1->Name = L"MapSP1";
+            this->MapSP1->Size = System::Drawing::Size(97, 21);
+            this->MapSP1->TabIndex = 1;
+            // 
+            // MapSP1System
+            // 
+            this->MapSP1System->Enabled = false;
+            this->MapSP1System->ForeColor = System::Drawing::Color::Maroon;
+            this->MapSP1System->FormattingEnabled = true;
+            this->MapSP1System->Location = System::Drawing::Point(109, 18);
+            this->MapSP1System->Name = L"MapSP1System";
+            this->MapSP1System->Size = System::Drawing::Size(79, 21);
+            this->MapSP1System->TabIndex = 1;
+            // 
+            // MapSPSelf
+            // 
+            this->MapSPSelf->Controls->Add(this->MapSPSelfGV);
+            this->MapSPSelf->Controls->Add(label7);
+            this->MapSPSelf->Controls->Add(this->MapSPSelfSystem);
+            this->MapSPSelf->Location = System::Drawing::Point(3, 28);
+            this->MapSPSelf->Name = L"MapSPSelf";
+            this->MapSPSelf->Size = System::Drawing::Size(194, 68);
+            this->MapSPSelf->TabIndex = 0;
+            this->MapSPSelf->TabStop = false;
+            this->MapSPSelf->Text = L"groupBox1";
+            // 
+            // MapSPSelfGV
+            // 
+            this->MapSPSelfGV->Location = System::Drawing::Point(36, 42);
+            this->MapSPSelfGV->Name = L"MapSPSelfGV";
+            this->MapSPSelfGV->Size = System::Drawing::Size(46, 20);
+            this->MapSPSelfGV->TabIndex = 3;
+            this->MapSPSelfGV->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
+            this->MapSPSelfGV->ValueChanged += gcnew System::EventHandler(this, &Form1::MapUpdate);
+            // 
+            // label7
+            // 
+            label7->AutoSize = true;
+            label7->Location = System::Drawing::Point(6, 46);
+            label7->Name = L"label7";
+            label7->Size = System::Drawing::Size(25, 13);
+            label7->TabIndex = 2;
+            label7->Text = L"GV:";
+            // 
+            // MapSPSelfSystem
+            // 
+            this->MapSPSelfSystem->FormattingEnabled = true;
+            this->MapSPSelfSystem->Location = System::Drawing::Point(6, 18);
+            this->MapSPSelfSystem->Name = L"MapSPSelfSystem";
+            this->MapSPSelfSystem->Size = System::Drawing::Size(182, 21);
+            this->MapSPSelfSystem->TabIndex = 1;
             // 
             // TabSystems
             // 
             this->TabSystems->Controls->Add(this->splitContainer2);
             this->TabSystems->Location = System::Drawing::Point(4, 22);
             this->TabSystems->Name = L"TabSystems";
-            this->TabSystems->Size = System::Drawing::Size(549, 535);
+            this->TabSystems->Size = System::Drawing::Size(683, 563);
             this->TabSystems->TabIndex = 2;
             this->TabSystems->Text = L"Systems";
             this->TabSystems->UseVisualStyleBackColor = true;
@@ -461,8 +843,8 @@ namespace fhui {
             // splitContainer2.Panel2
             // 
             this->splitContainer2->Panel2->Controls->Add(this->SystemsGrid);
-            this->splitContainer2->Size = System::Drawing::Size(549, 535);
-            this->splitContainer2->SplitterDistance = 30;
+            this->splitContainer2->Size = System::Drawing::Size(683, 563);
+            this->splitContainer2->SplitterDistance = 31;
             this->splitContainer2->SplitterWidth = 1;
             this->splitContainer2->TabIndex = 0;
             // 
@@ -541,7 +923,7 @@ namespace fhui {
             this->SystemsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle2;
             this->SystemsGrid->RowHeadersWidth = 4;
             this->SystemsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
-            this->SystemsGrid->Size = System::Drawing::Size(549, 504);
+            this->SystemsGrid->Size = System::Drawing::Size(683, 531);
             this->SystemsGrid->TabIndex = 0;
             this->SystemsGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::SystemsGrid_DataBindingComplete);
             // 
@@ -550,7 +932,7 @@ namespace fhui {
             this->TabPlanets->Controls->Add(this->splitContainer3);
             this->TabPlanets->Location = System::Drawing::Point(4, 22);
             this->TabPlanets->Name = L"TabPlanets";
-            this->TabPlanets->Size = System::Drawing::Size(549, 535);
+            this->TabPlanets->Size = System::Drawing::Size(683, 563);
             this->TabPlanets->TabIndex = 3;
             this->TabPlanets->Text = L"Planets";
             this->TabPlanets->UseVisualStyleBackColor = true;
@@ -574,8 +956,8 @@ namespace fhui {
             // splitContainer3.Panel2
             // 
             this->splitContainer3->Panel2->Controls->Add(this->PlanetsGrid);
-            this->splitContainer3->Size = System::Drawing::Size(549, 535);
-            this->splitContainer3->SplitterDistance = 30;
+            this->splitContainer3->Size = System::Drawing::Size(683, 563);
+            this->splitContainer3->SplitterDistance = 31;
             this->splitContainer3->SplitterWidth = 1;
             this->splitContainer3->TabIndex = 1;
             // 
@@ -663,7 +1045,7 @@ namespace fhui {
             this->PlanetsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle4;
             this->PlanetsGrid->RowHeadersWidth = 4;
             this->PlanetsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
-            this->PlanetsGrid->Size = System::Drawing::Size(549, 504);
+            this->PlanetsGrid->Size = System::Drawing::Size(683, 531);
             this->PlanetsGrid->TabIndex = 0;
             // 
             // TabColonies
@@ -671,7 +1053,7 @@ namespace fhui {
             this->TabColonies->Controls->Add(this->splitContainer4);
             this->TabColonies->Location = System::Drawing::Point(4, 22);
             this->TabColonies->Name = L"TabColonies";
-            this->TabColonies->Size = System::Drawing::Size(549, 535);
+            this->TabColonies->Size = System::Drawing::Size(683, 563);
             this->TabColonies->TabIndex = 4;
             this->TabColonies->Text = L"Colonies";
             this->TabColonies->UseVisualStyleBackColor = true;
@@ -690,8 +1072,8 @@ namespace fhui {
             // splitContainer4.Panel2
             // 
             this->splitContainer4->Panel2->Controls->Add(this->ColoniesGrid);
-            this->splitContainer4->Size = System::Drawing::Size(549, 535);
-            this->splitContainer4->SplitterDistance = 30;
+            this->splitContainer4->Size = System::Drawing::Size(683, 563);
+            this->splitContainer4->SplitterDistance = 31;
             this->splitContainer4->SplitterWidth = 1;
             this->splitContainer4->TabIndex = 2;
             // 
@@ -735,7 +1117,7 @@ namespace fhui {
             this->ColoniesGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle6;
             this->ColoniesGrid->RowHeadersWidth = 4;
             this->ColoniesGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
-            this->ColoniesGrid->Size = System::Drawing::Size(549, 504);
+            this->ColoniesGrid->Size = System::Drawing::Size(683, 531);
             this->ColoniesGrid->TabIndex = 0;
             this->ColoniesGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::ColoniesGrid_DataBindingComplete);
             // 
@@ -744,7 +1126,7 @@ namespace fhui {
             this->TabShips->Controls->Add(this->splitContainer5);
             this->TabShips->Location = System::Drawing::Point(4, 22);
             this->TabShips->Name = L"TabShips";
-            this->TabShips->Size = System::Drawing::Size(549, 535);
+            this->TabShips->Size = System::Drawing::Size(683, 563);
             this->TabShips->TabIndex = 5;
             this->TabShips->Text = L"Ships";
             this->TabShips->UseVisualStyleBackColor = true;
@@ -763,8 +1145,8 @@ namespace fhui {
             // splitContainer5.Panel2
             // 
             this->splitContainer5->Panel2->Controls->Add(this->ShipsGrid);
-            this->splitContainer5->Size = System::Drawing::Size(549, 535);
-            this->splitContainer5->SplitterDistance = 30;
+            this->splitContainer5->Size = System::Drawing::Size(683, 563);
+            this->splitContainer5->SplitterDistance = 31;
             this->splitContainer5->SplitterWidth = 1;
             this->splitContainer5->TabIndex = 2;
             // 
@@ -808,7 +1190,7 @@ namespace fhui {
             this->ShipsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle8;
             this->ShipsGrid->RowHeadersWidth = 4;
             this->ShipsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
-            this->ShipsGrid->Size = System::Drawing::Size(549, 504);
+            this->ShipsGrid->Size = System::Drawing::Size(683, 531);
             this->ShipsGrid->TabIndex = 0;
             this->ShipsGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::ShipsGrid_DataBindingComplete);
             // 
@@ -817,7 +1199,7 @@ namespace fhui {
             this->TabAliens->Controls->Add(this->splitContainer6);
             this->TabAliens->Location = System::Drawing::Point(4, 22);
             this->TabAliens->Name = L"TabAliens";
-            this->TabAliens->Size = System::Drawing::Size(549, 535);
+            this->TabAliens->Size = System::Drawing::Size(683, 563);
             this->TabAliens->TabIndex = 6;
             this->TabAliens->Text = L"Aliens";
             this->TabAliens->UseVisualStyleBackColor = true;
@@ -836,8 +1218,8 @@ namespace fhui {
             // splitContainer6.Panel2
             // 
             this->splitContainer6->Panel2->Controls->Add(this->AliensGrid);
-            this->splitContainer6->Size = System::Drawing::Size(549, 535);
-            this->splitContainer6->SplitterDistance = 30;
+            this->splitContainer6->Size = System::Drawing::Size(683, 563);
+            this->splitContainer6->SplitterDistance = 31;
             this->splitContainer6->SplitterWidth = 1;
             this->splitContainer6->TabIndex = 2;
             // 
@@ -881,7 +1263,7 @@ namespace fhui {
             this->AliensGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle10;
             this->AliensGrid->RowHeadersWidth = 4;
             this->AliensGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
-            this->AliensGrid->Size = System::Drawing::Size(549, 504);
+            this->AliensGrid->Size = System::Drawing::Size(683, 531);
             this->AliensGrid->TabIndex = 0;
             this->AliensGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::AliensGrid_DataBindingComplete);
             // 
@@ -889,7 +1271,7 @@ namespace fhui {
             // 
             this->TabCommands->Location = System::Drawing::Point(4, 22);
             this->TabCommands->Name = L"TabCommands";
-            this->TabCommands->Size = System::Drawing::Size(549, 535);
+            this->TabCommands->Size = System::Drawing::Size(683, 563);
             this->TabCommands->TabIndex = 7;
             this->TabCommands->Text = L"Commands";
             this->TabCommands->UseVisualStyleBackColor = true;
@@ -900,7 +1282,7 @@ namespace fhui {
             this->TabAbout->Location = System::Drawing::Point(4, 22);
             this->TabAbout->Name = L"TabAbout";
             this->TabAbout->Padding = System::Windows::Forms::Padding(3);
-            this->TabAbout->Size = System::Drawing::Size(549, 535);
+            this->TabAbout->Size = System::Drawing::Size(683, 563);
             this->TabAbout->TabIndex = 8;
             this->TabAbout->Text = L"About";
             this->TabAbout->UseVisualStyleBackColor = true;
@@ -915,7 +1297,7 @@ namespace fhui {
             this->TextAbout->Name = L"TextAbout";
             this->TextAbout->ReadOnly = true;
             this->TextAbout->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
-            this->TextAbout->Size = System::Drawing::Size(543, 529);
+            this->TextAbout->Size = System::Drawing::Size(677, 557);
             this->TextAbout->TabIndex = 0;
             // 
             // label5
@@ -1009,7 +1391,7 @@ namespace fhui {
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
             this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-            this->ClientSize = System::Drawing::Size(793, 565);
+            this->ClientSize = System::Drawing::Size(927, 593);
             this->Controls->Add(TopSplitCont);
             this->Name = L"Form1";
             this->Text = L"FarHorizons User Interface";
@@ -1025,6 +1407,22 @@ namespace fhui {
             TopSplitCont->ResumeLayout(false);
             this->MenuTabs->ResumeLayout(false);
             this->TabReports->ResumeLayout(false);
+            this->TabMap->ResumeLayout(false);
+            this->panel1->ResumeLayout(false);
+            this->panel1->PerformLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapLSNVal))->EndInit();
+            groupBox3->ResumeLayout(false);
+            groupBox3->PerformLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSP3GV))->EndInit();
+            groupBox2->ResumeLayout(false);
+            groupBox2->PerformLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSP2GV))->EndInit();
+            groupBox1->ResumeLayout(false);
+            groupBox1->PerformLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSP1GV))->EndInit();
+            this->MapSPSelf->ResumeLayout(false);
+            this->MapSPSelf->PerformLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSPSelfGV))->EndInit();
             this->TabSystems->ResumeLayout(false);
             this->splitContainer2->Panel1->ResumeLayout(false);
             this->splitContainer2->Panel1->PerformLayout();
@@ -1097,6 +1495,16 @@ private: System::Void AliensGrid_DataBindingComplete(System::Object^  sender, Sy
                      cell->Style->BackColor = bgColor;
              }
         }
+private: System::Void MapCanvas_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e) {
+             DrawMap();
+         }
+private: System::Void MapEnLSN_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
+             MapLSNVal->Enabled = MapEnLSN->Checked;
+             DrawMap();
+         }
+private: System::Void MapUpdate(System::Object^  sender, System::EventArgs^  e) {
+             DrawMap();
+         }
 };
 }
 

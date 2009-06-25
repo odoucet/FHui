@@ -1,2 +1,3 @@
 * tekst tooltipow nad gridem Systems moglby sie wyswietlac courierem zamiast defaultowym fontem.
 * estymaty technologii w raporcie 0 musza byc parsowane tez bez sekcji production.
+* przelaczac na tab z opisem wyjatku gdy go zlapiemy np. na mapie
