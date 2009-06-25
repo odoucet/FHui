@@ -4,6 +4,7 @@ ref class GameData;
 ref class Alien;
 ref class StarSystem;
 ref class PlanetView;
+ref class Report;
 
 namespace fhui {
 
@@ -27,7 +28,7 @@ namespace fhui {
 	{
 	public:
 		Form1(void)
-            : m_Reports(gcnew SortedList)
+            : m_Reports(gcnew Generic::SortedList<int, Report^>)
 		{
             InitializeComponent();
             LoadGameData();
@@ -93,8 +94,7 @@ namespace fhui {
         // --------------------------------------------------
 
         GameData   ^m_GameData;
-        SortedList ^m_PlanetsView;
-        SortedList ^m_Reports;
+        Generic::SortedList<int, Report^> ^m_Reports;
 
         // --------------------------------------------------
 

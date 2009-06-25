@@ -150,11 +150,10 @@ void Form1::LoadReports()
         Summary->Text = m_GameData->GetSummary();
 
         // Setup combo box with list of loaded reports
-        array<String^> ^arr = gcnew array<String^>(m_Reports->Count);
-        for( int n = 0, i = m_Reports->Count - 1; i >= 0; --i, ++n )
-        {
-            arr[n] = String::Format("Turn {0}", m_Reports->GetKey(i));
-        }
+        int n = m_Reports->Count;
+        array<String^> ^arr = gcnew array<String^>(n);
+        for each( int key in m_Reports->Keys )
+            arr[--n] = "Turn " + key.ToString();
         RepTurnNr->DataSource = arr;
     }
     else
@@ -202,8 +201,7 @@ void Form1::DisplayReport()
     String ^sel = RepTurnNr->SelectedItem->ToString();
     int key = int::Parse(sel->Substring(5));    // Skip 'Turn '
 
-    Report ^report = safe_cast<Report^>(m_Reports[key]);
-    RepText->Text = report->GetContent();
+    RepText->Text = m_Reports[key]->GetContent();
 }
 
 void Form1::LoadCommands()
@@ -256,11 +254,11 @@ void Form1::SetupSystems()
     dataTable->Columns->Add("Notes", String::typeid );
 
     Alien ^sp = m_GameData->GetSpecies();
-    int gv = sp->m_TechLevels[TECH_GV];
+    int gv = sp->TechLevels[TECH_GV];
 
     for each( StarSystem ^system in m_GameData->GetStarSystems() )
     {
-        double mishap = system->CalcMishap(sp->m_HomeSystem, gv, 0);
+        double mishap = system->CalcMishap(sp->HomeSystem, gv, 0);
 
         DataRow^ row = dataTable->NewRow();
         row["X"]        = system->X;
@@ -269,10 +267,10 @@ void Form1::SetupSystems()
         row["Type"]     = system->Type;
         if( system->IsExplored() )
         {
-            row["Planets"]  = system->m_Planets->Length;
+            row["Planets"]  = system->PlanetsCount;
             row["MinLSN"]   = system->GetMinLSN();
         }
-        row["Dist."]    = system->CalcDistance(sp->m_HomeSystem);
+        row["Dist."]    = system->CalcDistance(sp->HomeSystem);
         row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
         row["Scan"]     = system->PrintScanTurn();
         row["Notes"]     = system->Comment;
@@ -308,7 +306,7 @@ Color Form1::GetAlienColor(Alien ^sp)
         if( sp == m_GameData->GetSpecies() )
             return Color::FromArgb(225, 255, 255);
 
-        switch( sp->m_Relation )
+        switch( sp->Relation )
         {
         case SP_NEUTRAL:    return Color::FromArgb(255, 255, 220);
         case SP_ALLY:       return Color::FromArgb(220, 255, 210);
@@ -344,27 +342,27 @@ void Form1::SetupPlanets()
     dataTable->Columns->Add("Notes", String::typeid );
 
     Alien ^sp = m_GameData->GetSpecies();
-    int gv = sp->m_TechLevels[TECH_GV];
+    int gv = sp->TechLevels[TECH_GV];
 
     for each( StarSystem ^system in m_GameData->GetStarSystems() )
     {
-        double distance = system->CalcDistance(sp->m_HomeSystem);
-        double mishap = system->CalcMishap(sp->m_HomeSystem, gv, 0);
+        double distance = system->CalcDistance(sp->HomeSystem);
+        double mishap = system->CalcMishap(sp->HomeSystem, gv, 0);
 
-        for each( Planet ^planet in system->m_Planets )
+        for each( Planet ^planet in system->GetPlanets() )
         {
             DataRow^ row = dataTable->NewRow();
-            row["Name"]     = planet->m_Name;
+            row["Name"]     = planet->Name;
             row["Coords"]   = String::Format("{0,2} {1,2} {2,2} {3}",
-                system->X, system->Y, system->Z, planet->m_Number);
-            row["Temp"]     = planet->m_TempClass;
-            row["Press"]    = planet->m_PressClass;
-            row["MD"]       = planet->m_MiningDiff;
-            row["LSN"]      = planet->m_LSN;
+                system->X, system->Y, system->Z, planet->Number);
+            row["Temp"]     = planet->TempClass;
+            row["Press"]    = planet->PressClass;
+            row["MD"]       = planet->MiningDiff;
+            row["LSN"]      = planet->LSN;
             row["Dist."]    = distance;
             row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
             row["Scan"]     = system->PrintScanTurn();
-            row["Notes"]    = planet->m_Comment;
+            row["Notes"]    = planet->Comment;
 
             dataTable->Rows->Add(row);
         }
@@ -395,7 +393,7 @@ void Form1::SetupPlanets()
 Color Form1::ColoniesGetRowColor(DataGridViewRow ^row)
 {
     String ^name = row->Cells[ ColoniesGrid->Columns["Name"]->Index ]->Value->ToString();
-    return GetAlienColor( m_GameData->GetColony(name)->m_Owner );
+    return GetAlienColor( m_GameData->GetColony(name)->Owner );
 }
 
 void Form1::SetupColonies()
@@ -418,35 +416,35 @@ void Form1::SetupColonies()
     dataTable->Columns->Add("Inventory", String::typeid );
 
     Alien ^sp = m_GameData->GetSpecies();
-    int gv = sp->m_TechLevels[TECH_GV];
+    int gv = sp->TechLevels[TECH_GV];
 
     for each( Colony ^colony in m_GameData->GetColonies() )
     {
-        double distance = colony->m_System->CalcDistance(sp->m_HomeSystem);
-        double mishap = colony->m_System->CalcMishap(sp->m_HomeSystem, gv, 0);
+        double distance = colony->System->CalcDistance(sp->HomeSystem);
+        double mishap = colony->System->CalcMishap(sp->HomeSystem, gv, 0);
 
         DataRow^ row = dataTable->NewRow();
-        row["Owner"]    = colony->m_Owner == sp ? String::Format("* {0}", sp->m_Name) : colony->m_Owner->m_Name;
-        row["Name"]     = colony->m_Name;
-        row["Type"]     = PlTypeToString(colony->m_PlanetType);
+        row["Owner"]    = colony->Owner == sp ? String::Format("* {0}", sp->Name) : colony->Owner->Name;
+        row["Name"]     = colony->Name;
+        row["Type"]     = PlTypeToString(colony->PlanetType);
         row["Location"] = colony->PrintLocation();
-        if( colony->m_MaBase != 0 || colony->m_MiBase != 0 )
-            row["Size"]     = colony->m_MiBase + colony->m_MaBase;
+        if( colony->MaBase != 0 || colony->MiBase != 0 )
+            row["Size"]     = colony->MiBase + colony->MaBase;
         row["Dist."]    = distance;
         row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
         row["Inventory"]= colony->PrintInventoryShort();
 
-        if( colony->m_Owner == sp )
+        if( colony->Owner == sp )
         {
-            row["Prod."]    = colony->m_EUProd - colony->m_EUFleet;
-            row["Pr[%]"]    = 100 - colony->m_ProdPenalty;
-            row["Pop"]      = colony->m_AvailPop;
+            row["Prod."]    = colony->EUProd - colony->EUFleet;
+            row["Pr[%]"]    = 100 - colony->ProdPenalty;
+            row["Pop"]      = colony->AvailPop;
 
-            if( colony->m_PlanetType == PLANET_HOME ||
-                colony->m_PlanetType == PLANET_COLONY )
+            if( colony->PlanetType == PLANET_HOME ||
+                colony->PlanetType == PLANET_COLONY )
             {
-                int mi = (int)((sp->m_TechLevels[TECH_MI] * colony->m_MiBase) / colony->m_Planet->m_MiningDiff);
-                int ma = (int)(sp->m_TechLevels[TECH_MA] * colony->m_MaBase);
+                int mi = (int)((sp->TechLevels[TECH_MI] * colony->MiBase) / colony->Planet->MiningDiff);
+                int ma = (int)(sp->TechLevels[TECH_MA] * colony->MaBase);
                 if( mi == ma )
                     row["Balance"] = "Balanced";
                 else if( mi < ma )
@@ -457,7 +455,7 @@ void Form1::SetupColonies()
         }
         else
         {
-            row["Seen"]     = colony->m_LastSeen;
+            row["Seen"]     = colony->LastSeen;
         }
 
         dataTable->Rows->Add(row);
@@ -487,7 +485,7 @@ void Form1::SetupColonies()
 Color Form1::ShipsGetRowColor(DataGridViewRow ^row)
 {
     String ^name = row->Cells[ ShipsGrid->Columns["Name"]->Index ]->Value->ToString();
-    return GetAlienColor( m_GameData->GetShip(name)->m_Owner );
+    return GetAlienColor( m_GameData->GetShip(name)->Owner );
 }
 
 void Form1::SetupShips()
@@ -506,38 +504,36 @@ void Form1::SetupShips()
     dataTable->Columns->Add("Mishap %", String::typeid );
 
     Alien ^sp = m_GameData->GetSpecies();
-    int gv = sp->m_TechLevels[TECH_GV];
+    int gv = sp->TechLevels[TECH_GV];
 
-    for each( DictionaryEntry ^entry in m_GameData->GetShips() )
+    for each( Ship ^ship in m_GameData->GetShips() )
     {
-        Ship ^ship = safe_cast<Ship^>(entry->Value);
-
         double distance = StarSystem::CalcDistance(
-            ship->m_X,
-            ship->m_Y,
-            ship->m_Z,
-            sp->m_HomeSystem->X,
-            sp->m_HomeSystem->Y,
-            sp->m_HomeSystem->Z);
+            ship->X,
+            ship->Y,
+            ship->Z,
+            sp->HomeSystem->X,
+            sp->HomeSystem->Y,
+            sp->HomeSystem->Z);
         double mishap = StarSystem::CalcMishap(
-            ship->m_X,
-            ship->m_Y,
-            ship->m_Z,
-            sp->m_HomeSystem->X,
-            sp->m_HomeSystem->Y,
-            sp->m_HomeSystem->Z,
+            ship->X,
+            ship->Y,
+            ship->Z,
+            sp->HomeSystem->X,
+            sp->HomeSystem->Y,
+            sp->HomeSystem->Z,
             gv,
-            ship->m_Age);
+            ship->Age);
 
         DataRow^ row = dataTable->NewRow();
-        row["Owner"]    = ship->m_Owner == sp ? String::Format("* {0}", sp->m_Name) : ship->m_Owner->m_Name;
+        row["Owner"]    = ship->Owner == sp ? String::Format("* {0}", sp->Name) : ship->Owner->Name;
         row["Class"]    = ship->PrintClass();
-        row["Name"]     = ship->m_Name;
+        row["Name"]     = ship->Name;
         row["Location"] = ship->PrintLocation();
-        if( !ship->m_bIsPirate )
-            row["Age"]      = ship->m_Age;
-        row["Cap."] = ship->m_Capacity;
-        row["Cargo"]    = ( ship->m_Owner == sp )
+        if( !ship->IsPirate )
+            row["Age"]  = ship->Age;
+        row["Cap."]     = ship->Capacity;
+        row["Cargo"]    = ( ship->Owner == sp )
             ? ship->PrintCargo()
             : "n/a";
         row["Dist."]    = distance;
@@ -585,22 +581,20 @@ void Form1::SetupAliens()
     dataTable->Columns->Add("Press", int::typeid );
     dataTable->Columns->Add("EMail", String::typeid );
 
-    for each( DictionaryEntry ^entry in m_GameData->GetAliens() )
+    for each( Alien ^alien in m_GameData->GetAliens() )
     {
-        Alien ^alien = safe_cast<Alien^>(entry->Value);
-
         DataRow^ row = dataTable->NewRow();
-        row["Name"]         = alien->m_Name;
+        row["Name"]         = alien->Name;
         row["Relation"]     = alien->PrintRelation();
         row["Home"]         = alien->PrintHome();
         row["Tech Levels"]  = alien->PrintTechLevels();
-        if( alien->m_AtmReq->m_TempClass != -1 &&
-            alien->m_AtmReq->m_PressClass != -1 )
+        if( alien->AtmReq->TempClass != -1 &&
+            alien->AtmReq->PressClass != -1 )
         {
-            row["Temp"]     = alien->m_AtmReq->m_TempClass;
-            row["Press"]    = alien->m_AtmReq->m_PressClass;
+            row["Temp"]     = alien->AtmReq->TempClass;
+            row["Press"]    = alien->AtmReq->PressClass;
         }
-        row["EMail"]        = alien->m_Email;
+        row["EMail"]        = alien->Email;
         dataTable->Rows->Add(row);
     }
     AliensGrid->DataSource = dataTable;

@@ -3,7 +3,7 @@
 #include "enums.h"
 
 using namespace System;
-using namespace System::Collections;
+using namespace System::Collections::Generic;
 
 ref class StarSystem;
 
@@ -11,61 +11,84 @@ public ref class AtmosphericReq
 {
 public:
     AtmosphericReq()
-        : m_ReqGas(GAS_MAX)
-        , m_ReqMin(0)
-        , m_Neutral(gcnew array<bool>(GAS_MAX) )
-        , m_Poisonous(gcnew array<bool>(GAS_MAX) )
-        , m_TempClass(-1)
-        , m_PressClass(-1)
-    {}
+    {
+        GasRequired = GAS_MAX;
+        ReqMin = 0;
+        ReqMax = 0;
+        TempClass = -1;
+        PressClass = -1;
 
-    bool IsValid() { return m_ReqGas != GAS_MAX && m_TempClass != -1 && m_PressClass != -1; }
+        m_Neutral = gcnew array<bool>(GAS_MAX){false};
+        m_Poisonous = gcnew array<bool>(GAS_MAX){false};
+    }
 
-    GasType             m_ReqGas;
-    int                 m_ReqMin;
-    int                 m_ReqMax;
+    bool IsValid() { return GasRequired != GAS_MAX && TempClass != -1 && PressClass != -1; }
+
+    property GasType    GasRequired;
+    property int        ReqMin;
+    property int        ReqMax;
+    property int        TempClass;
+    property int        PressClass;
+    property bool       Neutral [int] {
+        bool get(int gas)           { return m_Neutral[gas]; }
+        void set(int gas, bool val) { m_Neutral[gas] = val; }
+    }
+    property bool       Poisonous [int] {
+        bool get(int gas)           { return m_Poisonous[gas]; }
+        void set(int gas, bool val) { m_Poisonous[gas] = val; }
+    }
+
+protected:
     array<bool>        ^m_Neutral;
     array<bool>        ^m_Poisonous;
-
-    int                 m_TempClass;
-    int                 m_PressClass;
 };
 
 public ref class Alien
 {
 public:
     Alien(String ^name, int turn)
-        : m_Name(name)
-        , m_GovName(nullptr)
-        , m_GovType(nullptr)
-        , m_Relation(SP_NEUTRAL)
-        , m_TurnMet(turn)
-        , m_Email(nullptr)
-        , m_HomeSystem(nullptr)
-        , m_HomePlanet(-1)
-        , m_AtmReq(gcnew AtmosphericReq)
-        , m_TechEstimateTurn(-1)
     {
+        Name = name;
+        GovName = nullptr;
+        GovType = nullptr;
+        Relation = SP_NEUTRAL;
+        TurnMet = turn;
+        Email = nullptr;
+        HomeSystem = nullptr;
+        HomePlanet = -1;
+        AtmReq = gcnew AtmosphericReq;
+        TechEstimateTurn = -1;
+
         m_TechLevels        = gcnew array<int>(TECH_MAX){0};
         m_TechLevelsTeach   = gcnew array<int>(TECH_MAX){0};
     }
 
-    String^         PrintRelation() { return SpRelToString(m_Relation); }
+    String^         PrintRelation() { return SpRelToString(Relation); }
     String^         PrintHome();
     String^         PrintTechLevels();
 
-    String         ^m_Name;
-    String         ^m_GovName;
-    String         ^m_GovType;
-    SPRelType       m_Relation;
-    int             m_TurnMet;
-    String         ^m_Email;
+    property String^            Name;
+    property String^            GovName;
+    property String^            GovType;
+    property SPRelType          Relation;
+    property int                TurnMet;
+    property String^            Email;
 
-    StarSystem     ^m_HomeSystem;
-    int             m_HomePlanet;
-    AtmosphericReq ^m_AtmReq;
+    property StarSystem^        HomeSystem;
+    property int                HomePlanet;
+    property AtmosphericReq^    AtmReq;
 
-    int             m_TechEstimateTurn;
+    property int                TechEstimateTurn;
+    property int                TechLevels [int] {
+        int  get(int tech)          { return m_TechLevels[tech]; }
+        void set(int tech, int val) { m_TechLevels[tech] = val; }
+    }
+    property int                TechLevelsTeach [int] {
+        int  get(int tech)          { return m_TechLevelsTeach[tech]; }
+        void set(int tech, int val) { m_TechLevelsTeach[tech] = val; }
+    }
+
+protected:
     array<int>     ^m_TechLevels;
     array<int>     ^m_TechLevelsTeach;
 };
@@ -74,31 +97,37 @@ public ref class Planet
 {
 public:
     Planet(int nr, int dia, float gv, int tc, int pc, float md)
-        : m_Number(nr)
-        , m_Diameter(dia)
-        , m_Grav(gv)
-        , m_TempClass(tc)
-        , m_PressClass(pc)
-        , m_MiningDiff(md)
-        , m_LSN(-1)
-        , m_Atmosphere(gcnew array<int>(GAS_MAX))
-        , m_Name(nullptr)
-        , m_Comment(nullptr)
-    {}
+    {
+        Number = nr;
+        Name = nullptr;
+        Comment = nullptr;
+        Diameter = dia;
+        Grav = gv;
+        TempClass = tc;
+        PressClass = pc;
+        MiningDiff = md;
+        LSN = -1;
+        m_Atmosphere = gcnew array<int>(GAS_MAX) {false};
+    }
 
     int         CalculateLSN(AtmosphericReq^);
 
-    int         m_Number;
-    int         m_Diameter;
-    float       m_Grav;
-    int         m_TempClass;
-    int         m_PressClass;
-    float       m_MiningDiff;
-    int         m_LSN;
-    array<int> ^m_Atmosphere;
+    property int         Number;
+    property String^     Name;
+    property String^     Comment;
+    property int         Diameter;
+    property float       Grav;
+    property int         TempClass;
+    property int         PressClass;
+    property float       MiningDiff;
+    property int         LSN;
+    property int         Atmosphere [int] {
+        int  get(int gas)           { return m_Atmosphere[gas]; }
+        void set(int gas, int val)  { m_Atmosphere[gas] = val; }
+    }
 
-    String     ^m_Name;
-    String     ^m_Comment;
+protected:
+    array<int> ^m_Atmosphere;
 };
 
 public ref class StarSystem
@@ -106,12 +135,12 @@ public ref class StarSystem
 public:
     StarSystem(int x, int y, int z, String ^type)
         : m_Planets(gcnew array<Planet^>(0))
-        , m_TurnScanned(-1)
     {
         X = x;
         Y = y;
         Z = z;
         Type = type;
+        TurnScanned = -1;
     }
 
     static double   CalcDistance(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo);
@@ -124,7 +153,7 @@ public:
 
     Planet^     GetPlanet(int plNum);
 
-    bool        IsExplored() { return m_TurnScanned != -1; }
+    bool        IsExplored() { return TurnScanned != -1; }
     int         GetMinLSN();
 
     String^     GenerateScan();
@@ -136,55 +165,71 @@ public:
     property int        Z;
     property String^    Type;
     property String^    Comment;
+    property int        TurnScanned;
 
+    property int        PlanetsCount { int get() { return m_Planets->Length; } }
+    property Planet^    Planets [int] {
+        Planet^ get(int i) { return m_Planets[i]; }
+        void    set(int i, Planet^);
+    }
+
+    array<Planet^>^     GetPlanets()        { return m_Planets; }
+
+protected:
     array<Planet^>     ^m_Planets;
-    int                 m_TurnScanned;
 };
 
 public ref class Colony
 {
 public:
     Colony(Alien ^owner, String ^name, StarSystem ^system, int planetNum)
-        : m_Owner(owner)
-        , m_Name(name)
-        , m_PlanetType(PLANET_HOME)
-        , m_System(system)
-        , m_Planet(nullptr)
-        , m_PlanetNum(planetNum)
-        , m_AvailPop(0)
-        , m_EconomicEff(0)
-        , m_ProdPenalty(0)
-        , m_EUProd(0)
-        , m_EUFleet(0)
-        , m_MiBase(0)
-        , m_MiDiff(0)
-        , m_MaBase(0)
-        , m_Shipyards(0)
-        , m_LastSeen(-1)
     {
+        Owner = owner;
+        Name = name;
+        PlanetType = PLANET_HOME;
+        System = system;
+        Planet = nullptr;
+        PlanetNum = planetNum;
+        AvailPop = 0;
+        EconomicEff = 0;
+        ProdPenalty = 0;
+        EUProd = 0;
+        EUFleet = 0;
+        MiBase = 0;
+        MiDiff = 0;
+        MaBase = 0;
+        Shipyards = 0;
+        LastSeen = -1;
         m_Inventory = gcnew array<int>(INV_MAX){0};
     }
 
-    String^     PrintLocation() { return String::Format("{0} {1}", m_System->PrintLocation(), m_PlanetNum); }
+    String^     PrintLocation() { return String::Format("{0} {1}", System->PrintLocation(), PlanetNum); }
     String^     PrintInventoryShort();
 
-    Alien          ^m_Owner;
-    String         ^m_Name;
-    PlanetType      m_PlanetType;
-    StarSystem     ^m_System;
-    Planet         ^m_Planet;
-    int             m_PlanetNum;
-    int             m_AvailPop;
-    int             m_EconomicEff;
-    int             m_ProdPenalty;
-    int             m_EUProd;
-    int             m_EUFleet;
-    double          m_MiBase;
-    double          m_MiDiff;
-    double          m_MaBase;
-    int             m_Shipyards;
+    Alien^          Owner;
+    String^         Name;
+    PlanetType      PlanetType;
+    StarSystem^     System;
+    Planet^         Planet;
+    int             PlanetNum;
+    int             AvailPop;
+    int             EconomicEff;
+    int             ProdPenalty;
+    int             EUProd;
+    int             EUFleet;
+    double          MiBase;
+    double          MiDiff;
+    double          MaBase;
+    int             Shipyards;
+    int             LastSeen;
+
+    property int            Inventory [int] {
+        int  get(int inv)           { return m_Inventory[inv]; }
+        void set(int inv, int val)  { m_Inventory[inv] = val; }
+    }
+
+protected:
     array<int>     ^m_Inventory;
-    int             m_LastSeen;
 };
 
 public ref class PlanetName
@@ -210,21 +255,21 @@ public ref class Ship
 {
 public:
     Ship(Alien ^owner, ShipType type, String ^name, int size, bool subLight)
-        : m_Owner(owner)
-        , m_Type(type)
-        , m_Name(name)
-        , m_Size(size)
-        , m_bSubLight(subLight)
-        , m_Age(0)
-        , m_Location(SHIP_LOC_MAX)
-        , m_X(-1)
-        , m_Y(-1)
-        , m_Z(-1)
-        , m_Planet(-1)
-        , m_System(nullptr)
-        , m_Capacity(0)
-        , m_bIsPirate(false)
     {
+        Owner = owner;
+        Type = type;
+        Name = name;
+        Size = size;
+        SubLight = subLight;
+        Age = 0;
+        Location = SHIP_LOC_MAX;
+        X = -1;
+        Y = -1;
+        Z = -1;
+        PlanetNum = -1;
+        System = nullptr;
+        Capacity = 0;
+        IsPirate = false;
         m_Cargo = gcnew array<int>(INV_MAX){0};
     }
 
@@ -234,26 +279,28 @@ public:
 
     void            CalculateCapacity();
 
-    Alien          ^m_Owner;
+    property Alien^          Owner;
+    property ShipType        Type;
+    property String^         Name;
+    property int             Size;
+    property bool            SubLight;
+    property int             Age;
+    property ShipLocType     Location;
+    property int             X;
+    property int             Y;
+    property int             Z;
+    property int             PlanetNum;
+    property StarSystem^     System;
+    property int             Capacity;
+    property bool            IsPirate;
 
-    ShipType        m_Type;
-    String         ^m_Name;
-    int             m_Size;
-    bool            m_bSubLight;
+    property int            Cargo [int] {
+        int  get(int inv)           { return m_Cargo[inv]; }
+        void set(int inv, int val)  { m_Cargo[inv] = val; }
+    }
 
-    int             m_Age;
-
-    ShipLocType     m_Location;
-    int             m_X;
-    int             m_Y;
-    int             m_Z;
-    int             m_Planet;
-    StarSystem     ^m_System;
-
-    int             m_Capacity;
+protected:
     array<int>     ^m_Cargo;
-
-    bool            m_bIsPirate;
 };
 
 public ref class GameData
@@ -265,21 +312,22 @@ public:
     int             GetLastTurn()               { return m_TurnMax; }
 
     Alien^          GetSpecies()                { return m_Species; }
-    String^         GetSpeciesName()            { return m_Species->m_Name; }
+    String^         GetSpeciesName()            { return m_Species->Name; }
     void            GetFleetCost(int%, float%);
     Alien^          GetAlien(String ^sp);
-    SortedList^     GetAliens()                 { return m_Aliens; }
     StarSystem^     GetStarSystem(int x, int y, int z);
-    array<StarSystem^>^ GetStarSystems()        { return m_Systems; }
     Colony^         GetColony(String ^name);
-    SortedList^     GetPlanetNames()            { return m_PlanetNames; }
-    SortedList^     GetShips()                  { return m_Ships; }
     Ship^           GetShip(String ^name);
 
-    Generic::List<Colony^>^  GetColonies()                      { return GetColonies(nullptr, nullptr); }
-    Generic::List<Colony^>^  GetColonies(Alien ^sp)             { return GetColonies(nullptr, sp); }
-    Generic::List<Colony^>^  GetColonies(StarSystem ^sys)       { return GetColonies(sys, nullptr); }
-    Generic::List<Colony^>^  GetColonies(StarSystem^, Alien^);
+    IList<Alien^>^          GetAliens()                         { return m_Aliens->Values; }
+    array<StarSystem^>^     GetStarSystems()                    { return Systems; }
+    IList<PlanetName^>^     GetPlanetNames()                    { return m_PlanetNames->Values; }
+    IList<Ship^>^           GetShips()                          { return m_Ships->Values; }
+
+    IList<Colony^>^         GetColonies()                       { return m_Colonies->Values; }
+    List<Colony^>^          GetColonies(Alien ^sp)              { return GetColonies(nullptr, sp); }
+    List<Colony^>^          GetColonies(StarSystem ^sys)        { return GetColonies(sys, nullptr); }
+    List<Colony^>^          GetColonies(StarSystem^, Alien^);
 
     // ------------------------------------------
     void            SetSpecies(String ^sp);
@@ -291,7 +339,7 @@ public:
     Alien^          AddAlien(int turn, String ^sp);
     void            SetAlienRelation(int turn, String ^sp, SPRelType);
     void            AddStarSystem(int x, int y, int z, String ^type, String ^comment);
-    void            AddPlanetScan(int turn, int x, int y, int z, int plNum, Planet ^planet);
+    void            AddPlanetScan(int turn, int x, int y, int z, Planet ^planet);
     void            SetTurnStartEU(int turn, int eu);
     void            AddTurnProducedEU(int turn, int eu);
     Colony^         AddColony(int turn, Alien^, String^, StarSystem^, int);
@@ -322,11 +370,11 @@ protected:
     int                 m_TurnEUProduced;
     int                 m_FleetCost;
     float               m_FleetCostPercent;
-    SortedList         ^m_Aliens;
-    array<StarSystem^> ^m_Systems;
-    SortedList         ^m_Colonies;
-    SortedList         ^m_PlanetNames;
-    SortedList         ^m_Ships;
+    array<StarSystem^>                 ^Systems;
+    SortedList<String^, Alien^>        ^m_Aliens;
+    SortedList<String^, Colony^>       ^m_Colonies;
+    SortedList<String^, PlanetName^>   ^m_PlanetNames;
+    SortedList<String^, Ship^>         ^m_Ships;
 
     int                 m_TurnMax;
 };

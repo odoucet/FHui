@@ -26,13 +26,13 @@ String^ PrintInventory(array<int> ^inv)
 
 String^ Alien::PrintHome()
 {
-    if( m_HomeSystem == nullptr )
+    if( HomeSystem == nullptr )
         return "???";
     String ^plName = nullptr;
-    if( m_HomePlanet != -1 &&
-        m_HomePlanet <= m_HomeSystem->m_Planets->Length )
+    if( HomePlanet != -1 &&
+        HomePlanet <= HomeSystem->PlanetsCount )
     {
-        String ^n = m_HomeSystem->m_Planets[m_HomePlanet - 1]->m_Name;
+        String ^n = HomeSystem->GetPlanets()[HomePlanet - 1]->Name;
         if( String::IsNullOrEmpty(n) )
             plName = "-";
         else
@@ -43,23 +43,23 @@ String^ Alien::PrintHome()
         plName = "?";
     }
     return String::Format( "{0} {1} ({2})",
-        m_HomeSystem->PrintLocation(), m_HomePlanet, plName );
+        HomeSystem->PrintLocation(), HomePlanet, plName );
 }
 
 String^ Alien::PrintTechLevels()
 {
-    if( m_TechEstimateTurn == -1 )
+    if( TechEstimateTurn == -1 )
         return "No estimates.";
 
     return String::Format(
         "Turn {6}: MI:{0} MA:{1} ML:{2} GV:{3} LS:{4} BI:{5}",
-        m_TechLevels[TECH_MI],
-        m_TechLevels[TECH_MA],
-        m_TechLevels[TECH_ML],
-        m_TechLevels[TECH_GV],
-        m_TechLevels[TECH_LS],
-        m_TechLevels[TECH_BI],
-        m_TechEstimateTurn );
+        TechLevels[TECH_MI],
+        TechLevels[TECH_MA],
+        TechLevels[TECH_ML],
+        TechLevels[TECH_GV],
+        TechLevels[TECH_LS],
+        TechLevels[TECH_BI],
+        TechEstimateTurn );
 }
 
 // ---------------------------------------------------------
@@ -67,17 +67,17 @@ String^ Alien::PrintTechLevels()
 int Planet::CalculateLSN(AtmosphericReq ^atmReq)
 {
     int lsn =
-        3 * Math::Abs(m_PressClass - atmReq->m_PressClass) +
-        3 * Math::Abs(m_TempClass - atmReq->m_TempClass);
+        3 * Math::Abs(PressClass - atmReq->PressClass) +
+        3 * Math::Abs(TempClass - atmReq->TempClass);
 
     for( int i = 0; i < GAS_MAX; ++i )
     {
-        if( m_Atmosphere[i] > 0 && atmReq->m_Poisonous[i] )
+        if( m_Atmosphere[i] > 0 && atmReq->Poisonous[i] )
             lsn += 3;
     }
 
-    if( m_Atmosphere[atmReq->m_ReqGas] < atmReq->m_ReqMin ||
-        m_Atmosphere[atmReq->m_ReqGas] > atmReq->m_ReqMax )
+    if( m_Atmosphere[atmReq->GasRequired] < atmReq->ReqMin ||
+        m_Atmosphere[atmReq->GasRequired] > atmReq->ReqMax )
     {
         lsn += 3;
     }
@@ -91,7 +91,7 @@ int StarSystem::GetMinLSN()
 {
     int minLSN = 99999;
     for each( Planet ^pl in m_Planets )
-        minLSN = Math::Min(minLSN, pl->m_LSN == -1 ? 99999 : pl->m_LSN);
+        minLSN = Math::Min(minLSN, pl->LSN == -1 ? 99999 : pl->LSN);
 
     return minLSN;
 }
@@ -143,23 +143,23 @@ String^ StarSystem::GenerateScan()
         String ^plStr = String::Format(
             "{0,3}{1,5}{2,7:F2}{3,4}{4,6}{5,8:F2}{6,5}  ",
             i + 1,
-            planet->m_Diameter,
-            planet->m_Grav,
-            planet->m_TempClass,
-            planet->m_PressClass,
-            planet->m_MiningDiff,
-            planet->m_LSN );
+            planet->Diameter,
+            planet->Grav,
+            planet->TempClass,
+            planet->PressClass,
+            planet->MiningDiff,
+            planet->LSN );
         bool anyGas = false;
         for( int gas = 0; gas < GAS_MAX; ++gas )
         {
-            if( planet->m_Atmosphere[gas] )
+            if( planet->Atmosphere[gas] )
             {
                 plStr = String::Concat( plStr,
                     String::Format(
                         "{0}{1}({2}%)",
                         anyGas ? "," : "",
                         GasToString(static_cast<GasType>(gas)),
-                        planet->m_Atmosphere[gas] ) );
+                        planet->Atmosphere[gas] ) );
                 anyGas = true;
             }
         }
@@ -175,9 +175,15 @@ String^ StarSystem::GenerateScan()
 
 String^ StarSystem::PrintScanTurn()
 {
-    if( m_TurnScanned == -1 )       return "Not scanned";
-    else if( m_TurnScanned == 0 )   return "Received";
-    else                            return String::Format("Scanned, {0}", m_TurnScanned);
+    if( TurnScanned == -1 )       return "Not scanned";
+    else if( TurnScanned == 0 )   return "Received";
+    else                            return String::Format("Scanned, {0}", TurnScanned);
+}
+
+void StarSystem::Planets::set(int plNum, Planet ^pl)
+{
+    Array::Resize(m_Planets, Math::Max(plNum + 1, m_Planets->Length));
+    m_Planets[plNum] = pl;
 }
 
 // ---------------------------------------------------------
@@ -193,46 +199,47 @@ String^ Ship::PrintClass()
 {
     return String::Format(
         "{0}{1}{2}",
-        ShipToString( m_Type ),
-        m_Type == SHIP_TR ? m_Size.ToString() : "",
-        m_bSubLight ? "s" : "" );
+        ShipToString( Type ),
+        Type == SHIP_TR ? Size.ToString() : "",
+        SubLight ? "s" : "" );
 }
 
 String^ Ship::PrintLocation()
 {
     String ^xyz;
 
-    if( m_System )
+    if( System )
     {
-        if( m_Planet != -1 )
+        if( PlanetNum != -1 )
         {
-            Planet ^planet = m_System->GetPlanet(m_Planet);
-            if( !String::IsNullOrEmpty(planet->m_Name) )
+            Planet ^planet = System->Planets[PlanetNum - 1];
+            if( planet != nullptr &&
+                !String::IsNullOrEmpty(planet->Name) )
             {
-                xyz = String::Format("PL {0}", planet->m_Name);
+                xyz = String::Format("PL {0}", planet->Name);
             }
             else
-                xyz = String::Format("[{0} {1}]", m_System->PrintLocation(), m_Planet);
+                xyz = String::Format("[{0} {1}]", System->PrintLocation(), PlanetNum);
         }
         else
-           xyz = String::Format("[{0}]", m_System->PrintLocation());
+           xyz = String::Format("[{0}]", System->PrintLocation());
     }
     else
     {
-        if( m_Planet != -1 )
-            xyz = String::Format("[{0,2} {1,2} {2,2} {3}]", m_X, m_Y, m_Z, m_Planet);
+        if( PlanetNum != -1 )
+            xyz = String::Format("[{0,2} {1,2} {2,2} {3}]", X, Y, Z, PlanetNum);
         else
-            xyz = String::Format("[{0,2} {1,2} {2,2}]", m_X, m_Y, m_Z);
+            xyz = String::Format("[{0,2} {1,2} {2,2}]", X, Y, Z);
     }
 
-    switch( m_Location )
+    switch( Location )
     {
     case SHIP_LOC_DEEP_SPACE:   return String::Format("{0}, DeepSp", xyz);
     case SHIP_LOC_ORBIT:        return String::Format("{0}, Orbit", xyz);
     case SHIP_LOC_LANDED:       return String::Format("{0}, Landed", xyz);
     }
 
-    int l = m_Location;
+    int l = Location;
     throw gcnew FHUIDataIntegrityException(
         String::Format("Invalid ship location! ({0})", l) );
 }
@@ -244,26 +251,26 @@ String^ Ship::PrintCargo()
 
 void Ship::CalculateCapacity()
 {
-    switch( m_Type )
+    switch( Type )
     {
-    case SHIP_BAS:  m_Capacity = m_Size / 1000; break;
-    case SHIP_TR:   m_Capacity = (10 + (m_Size / 2)) * m_Size; break;
-    case SHIP_PB:   m_Capacity = 1;     break;
-    case SHIP_CT:   m_Capacity = 2;     break;
-    case SHIP_ES:   m_Capacity = 5;     break;
-    case SHIP_FF:   m_Capacity = 10;    break;
-    case SHIP_DD:   m_Capacity = 15;    break;
-    case SHIP_CL:   m_Capacity = 20;    break;
-    case SHIP_CS:   m_Capacity = 25;    break;
-    case SHIP_CA:   m_Capacity = 30;    break;
-    case SHIP_CC:   m_Capacity = 35;    break;
-    case SHIP_BC:   m_Capacity = 40;    break;
-    case SHIP_BS:   m_Capacity = 45;    break;
-    case SHIP_DN:   m_Capacity = 50;    break;
-    case SHIP_SD:   m_Capacity = 55;    break;
-    case SHIP_BM:   m_Capacity = 60;    break;
-    case SHIP_BW:   m_Capacity = 65;    break;
-    case SHIP_BR:   m_Capacity = 70;    break;
+    case SHIP_BAS:  Capacity = Size / 1000; break;
+    case SHIP_TR:   Capacity = (10 + (Size / 2)) * Size; break;
+    case SHIP_PB:   Capacity = 1;       break;
+    case SHIP_CT:   Capacity = 2;       break;
+    case SHIP_ES:   Capacity = 5;       break;
+    case SHIP_FF:   Capacity = 10;      break;
+    case SHIP_DD:   Capacity = 15;      break;
+    case SHIP_CL:   Capacity = 20;      break;
+    case SHIP_CS:   Capacity = 25;      break;
+    case SHIP_CA:   Capacity = 30;      break;
+    case SHIP_CC:   Capacity = 35;      break;
+    case SHIP_BC:   Capacity = 40;      break;
+    case SHIP_BS:   Capacity = 45;      break;
+    case SHIP_DN:   Capacity = 50;      break;
+    case SHIP_SD:   Capacity = 55;      break;
+    case SHIP_BM:   Capacity = 60;      break;
+    case SHIP_BW:   Capacity = 65;      break;
+    case SHIP_BR:   Capacity = 70;      break;
     }
 }
 
@@ -275,11 +282,11 @@ GameData::GameData(void)
     , m_TurnEUProduced(0)
     , m_FleetCost(0)
     , m_FleetCostPercent(0.0)
-    , m_Aliens(gcnew SortedList)
-    , m_Systems(gcnew array<StarSystem^>(0))
-    , m_Colonies(gcnew SortedList)
-    , m_PlanetNames(gcnew SortedList)
-    , m_Ships(gcnew SortedList)
+    , m_Aliens(gcnew SortedList<String^, Alien^>)
+    , Systems(gcnew array<StarSystem^>(0))
+    , m_Colonies(gcnew SortedList<String^, Colony^>)
+    , m_PlanetNames(gcnew SortedList<String^, PlanetName^>)
+    , m_Ships(gcnew SortedList<String^, Ship^>)
     , m_TurnMax(0)
 {
 }
@@ -311,22 +318,22 @@ String^ GameData::GetSummary()
 
 String^ GameData::GetSpeciesSummary()
 {
-    AtmosphericReq ^atm = m_Species->m_AtmReq;
+    AtmosphericReq ^atm = m_Species->AtmReq;
 
     return String::Format(
         "Species: {0}\r\n"
         "Home: [{1} {2} {3} {4}]\r\n"
         "Temp:{5} Press:{6}  Atm:{7} {8}-{9}%\r\n",
         GetSpeciesName(),
-        m_Species->m_HomeSystem->X,
-        m_Species->m_HomeSystem->Y,
-        m_Species->m_HomeSystem->Z,
-        m_Species->m_HomePlanet,
-        atm->m_TempClass == -1 ? "??" : atm->m_TempClass.ToString(),
-        atm->m_PressClass == -1 ? "??" : atm->m_PressClass.ToString(),
-        GasToString( atm->m_ReqGas ),
-        atm->m_ReqMin,
-        atm->m_ReqMax );
+        m_Species->HomeSystem->X,
+        m_Species->HomeSystem->Y,
+        m_Species->HomeSystem->Z,
+        m_Species->HomePlanet,
+        atm->TempClass == -1 ? "??" : atm->TempClass.ToString(),
+        atm->PressClass == -1 ? "??" : atm->PressClass.ToString(),
+        GasToString( atm->GasRequired ),
+        atm->ReqMin,
+        atm->ReqMax );
 }
 
 String^ GameData::GetAllTechsSummary()
@@ -358,8 +365,8 @@ String^ GameData::GetEconomicSummary()
 
 String^ GameData::GetTechSummary(TechType tech)
 {
-    int lev = m_Species->m_TechLevels[tech];
-    int levTeach = m_Species->m_TechLevelsTeach[tech];
+    int lev = m_Species->TechLevels[tech];
+    int levTeach = m_Species->TechLevelsTeach[tech];
 
     if( lev != levTeach )
     {
@@ -373,21 +380,20 @@ String^ GameData::GetAliensSummary()
 {
     String ^ret = "";
 
-    for each( DictionaryEntry ^entry in m_Aliens )
+    for each( Alien ^alien in GetAliens() )
     {
-        Alien ^alien = safe_cast<Alien^>(entry->Value);
         if( alien == m_Species ||
-            alien->m_Relation == SP_PIRATE )
+            alien->Relation == SP_PIRATE )
             continue;
 
         String ^prefix = "N";
-        if( alien->m_Relation == SP_ALLY )
+        if( alien->Relation == SP_ALLY )
             prefix = "A";
-        else if( alien->m_Relation == SP_ENEMY )
+        else if( alien->Relation == SP_ENEMY )
             prefix = "E";
 
         ret = String::Format("{0}{1}: SP {2}\r\n",
-            ret, prefix, alien->m_Name );
+            ret, prefix, alien->Name );
     }
 
     return ret;
@@ -417,16 +423,15 @@ String^ GameData::GetShipsSummary()
 {
     String ^ret = "";
 
-    for each( DictionaryEntry ^entry in m_Ships )
+    for each( Ship ^ship in GetShips() )
     {
-        Ship ^ship = safe_cast<Ship^>(entry->Value);
-        if( ship->m_Owner != m_Species )
+        if( ship->Owner != m_Species )
             continue;
 
         ret = String::Format("{0}{1} {2} @{3}\r\n",
             ret,
             ship->PrintClass(),
-            ship->m_Name,
+            ship->Name,
             ship->PrintLocation() );
     }
 
@@ -446,10 +451,7 @@ Alien^ GameData::GetAlien(String ^sp)
 {
     String ^spKey = sp->ToLower();
     if( m_Aliens->ContainsKey(spKey) )
-    {
-        return safe_cast<Alien^>
-            ( m_Aliens->GetByIndex( m_Aliens->IndexOfKey(spKey) ) );
-    }
+        return m_Aliens[spKey];
 
     throw gcnew FHUIDataIntegrityException(
         String::Format("Species not found: {0}", sp));
@@ -465,16 +467,15 @@ Colony^ GameData::GetColony(String ^name)
     return safe_cast<Colony^>(m_Colonies[name->ToLower()]);
 }
 
-Generic::List<Colony^>^ GameData::GetColonies(StarSystem ^sys, Alien ^sp)
+List<Colony^>^ GameData::GetColonies(StarSystem ^sys, Alien ^sp)
 {
-    Generic::List<Colony^> ^ret = gcnew Generic::List<Colony^>; 
+    List<Colony^> ^ret = gcnew List<Colony^>; 
 
-    for each( DictionaryEntry ^entry in m_Colonies )
+    for each( Colony ^colony in GetColonies() )
     {
-        Colony ^colony = safe_cast<Colony^>(entry->Value);
-        if( sp && colony->m_Owner != sp )
+        if( sp && colony->Owner != sp )
             continue;
-        if( sys && colony->m_System != sys )
+        if( sys && colony->System != sys )
             continue;
         ret->Add(colony);
     }
@@ -491,11 +492,10 @@ bool GameData::TurnCheck(int turn)
         m_TurnMax = turn;
 
         // New turn cleanup
-        for each( DictionaryEntry ^entry in m_Aliens )
+        for each( Alien ^alien in GetAliens() )
         {
-            Alien ^alien = safe_cast<Alien^>(entry->Value);
-            if( alien != m_Species && alien->m_Relation != SP_PIRATE )
-                alien->m_Relation = SP_NEUTRAL; // FIXME: default relation may be different...
+            if( alien != m_Species && alien->Relation != SP_PIRATE )
+                alien->Relation = SP_NEUTRAL; // FIXME: default relation may be different...
         }
 
         m_TurnEUStart       = 0;
@@ -507,12 +507,11 @@ bool GameData::TurnCheck(int turn)
         bool removed = false;
         do {
             removed = false;
-            for each( DictionaryEntry ^entry in m_Colonies )
+            for each( KeyValuePair<String^, Colony^> ^iter in m_Colonies )
             {
-                Colony ^colony = safe_cast<Colony^>(entry->Value);
-                if( colony->m_Owner == m_Species )
+                if( iter->Value->Owner == m_Species )
                 {
-                    m_Colonies->Remove(entry->Key);
+                    m_Colonies->Remove(iter->Key);
                     removed = true;
                     break;
                 }
@@ -541,13 +540,13 @@ void GameData::SetSpecies(String ^sp)
     if( m_Species == nullptr )
     {
         m_Species = AddAlien(0, sp);
-        m_Species->m_Relation = SP_PLAYER;
+        m_Species->Relation = SP_PLAYER;
     }
 
-    if( String::Compare(m_Species->m_Name, sp) != 0 )
+    if( String::Compare(m_Species->Name, sp) != 0 )
         throw gcnew FHUIDataIntegrityException(
             String::Format("Reports for different species: {0} and {1}",
-                m_Species->m_Name, sp) );
+                m_Species->Name, sp) );
 }
 
 Alien^ GameData::AddAlien(int turn, String ^sp)
@@ -555,10 +554,8 @@ Alien^ GameData::AddAlien(int turn, String ^sp)
     String ^spKey = sp->ToLower();
     if( m_Aliens->ContainsKey(spKey) )
     {
-        Alien ^alien = safe_cast<Alien^>
-            ( m_Aliens->GetByIndex( m_Aliens->IndexOfKey(spKey) ) );
-
-        alien->m_TurnMet = Math::Min(TurnAlign(turn), alien->m_TurnMet);
+        Alien ^alien = m_Aliens[spKey];
+        alien->TurnMet = Math::Min(TurnAlign(turn), alien->TurnMet);
 
         return alien;
     }
@@ -574,19 +571,19 @@ void GameData::SetAlienRelation(int turn, String ^sp, SPRelType rel)
     if( TurnCheck(turn) )
     {
         Alien ^alien = AddAlien(turn, sp);
-        alien->m_Relation = rel;
+        alien->Relation = rel;
     }
 }
 
 void GameData::SetTechLevel(int turn, Alien ^sp, TechType tech, int lev, int levTeach)
 {
-    if( TurnCheck(turn) || sp->m_TechEstimateTurn == -1 )
+    if( TurnCheck(turn) || sp->TechEstimateTurn == -1 )
     {
         m_TurnMax = turn;
 
-        sp->m_TechEstimateTurn      = turn;
-        sp->m_TechLevels[tech]      = lev;
-        sp->m_TechLevelsTeach[tech] = levTeach;
+        sp->TechEstimateTurn      = turn;
+        sp->TechLevels[tech]      = lev;
+        sp->TechLevelsTeach[tech] = levTeach;
     }
 }
 
@@ -601,49 +598,49 @@ void GameData::SetFleetCost(int turn, int cost, float percent)
 
 void GameData::SetAtmosphereReq(GasType gas, int reqMin, int reqMax)
 {
-    AtmosphericReq ^atm = GetSpecies()->m_AtmReq;
+    AtmosphericReq ^atm = GetSpecies()->AtmReq;
 
-    if( (atm->m_ReqGas != GAS_MAX && atm->m_ReqGas != gas) ||
-        atm->m_Neutral[gas] ||
-        atm->m_Poisonous[gas] )
+    if( (atm->GasRequired != GAS_MAX && atm->GasRequired != gas) ||
+        atm->Neutral[gas] ||
+        atm->Poisonous[gas] )
     {
         throw gcnew FHUIDataIntegrityException("Inconsistent atmospheric data in reports.");
     }
 
-    atm->m_ReqGas = gas;
-    atm->m_ReqMin = reqMin;
-    atm->m_ReqMax = reqMax;
+    atm->GasRequired = gas;
+    atm->ReqMin = reqMin;
+    atm->ReqMax = reqMax;
 }
 
 void GameData::SetAtmosphereNeutral(GasType gas)
 {
-    AtmosphericReq ^atm = GetSpecies()->m_AtmReq;
+    AtmosphericReq ^atm = GetSpecies()->AtmReq;
 
-    if( atm->m_ReqGas == gas ||
-        atm->m_Poisonous[gas] )
+    if( atm->GasRequired == gas ||
+        atm->Poisonous[gas] )
     {
         throw gcnew FHUIDataIntegrityException("Inconsistent atmospheric data in reports.");
     }
 
-    atm->m_Neutral[gas] = true;
+    atm->Neutral[gas] = true;
 }
 
 void GameData::SetAtmospherePoisonous(GasType gas)
 {
-    AtmosphericReq ^atm = GetSpecies()->m_AtmReq;
+    AtmosphericReq ^atm = GetSpecies()->AtmReq;
 
-    if( atm->m_ReqGas == gas ||
-        atm->m_Neutral[gas] )
+    if( atm->GasRequired == gas ||
+        atm->Neutral[gas] )
     {
         throw gcnew FHUIDataIntegrityException("Inconsistent atmospheric data in reports.");
     }
 
-    atm->m_Poisonous[gas] = true;
+    atm->Poisonous[gas] = true;
 }
 
 StarSystem^ GameData::GetStarSystem(int x, int y, int z)
 {
-    for each( StarSystem ^system in m_Systems )
+    for each( StarSystem ^system in Systems )
     {
         if( system->X == x &&
             system->Y == y &&
@@ -659,7 +656,7 @@ StarSystem^ GameData::GetStarSystem(int x, int y, int z)
 
 void GameData::AddStarSystem(int x, int y, int z, String ^type, String ^comment)
 {
-    for each( StarSystem ^system in m_Systems )
+    for each( StarSystem ^system in Systems )
     {
         if( system->X == x &&
             system->Y == y &&
@@ -672,29 +669,30 @@ void GameData::AddStarSystem(int x, int y, int z, String ^type, String ^comment)
 
     StarSystem ^system = gcnew StarSystem(x, y, z, type);
     system->Comment = comment;
-    Array::Resize(m_Systems, m_Systems->Length + 1);
-    m_Systems[m_Systems->Length - 1] = system;
+    Array::Resize(Systems, Systems->Length + 1);
+    Systems[Systems->Length - 1] = system;
 }
 
-void GameData::AddPlanetScan(int turn, int x, int y, int z, int plNum, Planet ^planet)
+void GameData::AddPlanetScan(int turn, int x, int y, int z, Planet ^planet)
 {
     StarSystem ^system = GetStarSystem(x, y, z);
     if( system == nullptr )
         throw gcnew FHUIDataIntegrityException(
             String::Format("Star system [{0} {1} {2}] not found in galaxy list!", x, y, z) );
 
-    Array::Resize(system->m_Planets, Math::Max(plNum, system->m_Planets->Length));
-    --plNum;
-    if( system->m_Planets[plNum] == nullptr ||
+    int plNum = planet->Number - 1;
+    if( system->PlanetsCount < planet->Number ||
+        system->Planets[plNum] == nullptr ||
         turn == m_TurnMax )
     {
-        if( system->m_Planets[plNum] != nullptr &&
-            String::IsNullOrEmpty(planet->m_Comment) )
+        if( system->PlanetsCount >= planet->Number &&
+            system->Planets[plNum] != nullptr &&
+            String::IsNullOrEmpty(planet->Comment) )
         {
-            planet->m_Comment = system->m_Planets[plNum]->m_Comment;
+            planet->Comment = system->Planets[plNum]->Comment;
         }
-        system->m_Planets[plNum] = planet;
-        system->m_TurnScanned = Math::Max(system->m_TurnScanned, turn);
+        system->Planets[plNum] = planet;
+        system->TurnScanned   = Math::Max(system->TurnScanned, turn);
     }
 }
 
@@ -745,14 +743,14 @@ Colony^ GameData::AddColony(int turn, Alien ^sp, String ^name, StarSystem ^syste
             do
             {
                 bRemoved = false;
-                for each( DictionaryEntry ^entry in m_Colonies )
+                for each( KeyValuePair<String^, Colony^> ^iter in m_Colonies )
                 {
-                    Colony ^c = safe_cast<Colony^>(entry->Value);
-                    if( c->m_Owner != m_Species &&
-                        c->m_System == system &&
-                        c->m_PlanetNum == plNum )
+                    Colony ^c = iter->Value;
+                    if( c->Owner != m_Species &&
+                        c->System == system &&
+                        c->PlanetNum == plNum )
                     {
-                        m_Colonies->Remove(entry->Key);
+                        m_Colonies->Remove(iter->Key);
                         bRemoved = true;
                         break; // for each
                     }
@@ -783,66 +781,63 @@ void GameData::UpdatePlanets()
 
 void GameData::CalculateLSN()
 {
-    for each( StarSystem ^system in m_Systems )
+    for each( StarSystem ^system in Systems )
     {
-        for each( Planet ^planet in system->m_Planets )
+        for each( Planet ^planet in system->GetPlanets() )
         {
-            planet->m_LSN = planet->CalculateLSN(m_Species->m_AtmReq);
+            planet->LSN = planet->CalculateLSN(m_Species->AtmReq);
         }
     }
 }
 
 void GameData::LinkPlanetNames()
 {
-    for each( DictionaryEntry ^entry in m_Colonies )
+    for each( Colony ^colony in GetColonies() )
     {
-        Colony ^colony = safe_cast<Colony^>(entry->Value);
-        if( colony->m_Owner == m_Species )
+        if( colony->Owner == m_Species )
         {
-            StarSystem ^system = colony->m_System;
+            StarSystem ^system = colony->System;
 
-            if( system->m_Planets->Length < colony->m_PlanetNum )
+            if( system->GetPlanets()->Length < colony->PlanetNum )
                 throw gcnew FHUIDataIntegrityException(
                     String::Format("Colony PL {0} at [{1} {2} {3} {4}]: Planet not scanned!",
-                        colony->m_Name,
+                        colony->Name,
                         system->X, system->Y, system->Z,
-                        colony->m_PlanetNum ) );
+                        colony->PlanetNum ) );
 
-            colony->m_Planet = system->m_Planets[ colony->m_PlanetNum - 1 ];
-            colony->m_Planet->m_Name = colony->m_Name;
+            colony->Planet = system->GetPlanets()[ colony->PlanetNum - 1 ];
+            colony->Planet->Name = colony->Name;
         }
     }
 
-    for each( DictionaryEntry ^entry in m_PlanetNames )
+    for each( PlanetName ^plName in m_PlanetNames->Values )
     {
-        PlanetName ^plName = safe_cast<PlanetName^>(entry->Value);
         StarSystem ^system = GetStarSystem( plName->X, plName->Y, plName->Z );
-        Planet ^planet = system->GetPlanet(plName->Num);
+        Planet ^planet = system->GetPlanet( plName->Num );
         if( planet )
-            planet->m_Name = plName->Name;
+            planet->Name = plName->Name;
     }
 }
 
 void GameData::UpdateHomeWorlds()
 {
-    for each( DictionaryEntry ^entry in m_Colonies )
+    for each( Colony ^colony in GetColonies() )
     {
-        Colony ^colony = safe_cast<Colony^>(entry->Value);
-        if( colony->m_PlanetType == PLANET_HOME )
+        if( colony->PlanetType == PLANET_HOME )
         {
-            Alien ^sp = colony->m_Owner;
-            if( sp->m_AtmReq->IsValid() )
+            Alien ^sp = colony->Owner;
+            if( sp->AtmReq->IsValid() )
                 continue;
 
-            Planet ^planet = colony->m_System->GetPlanet(colony->m_PlanetNum);
+            Planet ^planet = colony->System->GetPlanet(colony->PlanetNum);
             if( planet )
             {
-                sp->m_AtmReq->m_TempClass = planet->m_TempClass;
-                sp->m_AtmReq->m_PressClass = planet->m_PressClass;
+                sp->AtmReq->TempClass = planet->TempClass;
+                sp->AtmReq->PressClass = planet->PressClass;
                 for( int i = 0; i < GAS_MAX; ++i )
                 {
-                    if( planet->m_Atmosphere[i] )
-                        sp->m_AtmReq->m_Neutral[i] = true;
+                    if( planet->Atmosphere[i] )
+                        sp->AtmReq->Neutral[i] = true;
                 }
             }
         }

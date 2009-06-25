@@ -30,7 +30,7 @@ bool Report::IsValid()
     return
         m_GameData->GetSpecies() != nullptr &&
         m_GameData->GetSpeciesName() != nullptr &&
-        m_GameData->GetSpecies()->m_AtmReq->IsValid() &&
+        m_GameData->GetSpecies()->AtmReq->IsValid() &&
         m_Phase == PHASE_ORDERS_TEMPLATE;
 }
 
@@ -127,9 +127,9 @@ bool Report::Parse(String ^s)
         else if( Regex("^Enemies:").Match(s)->Success )
             StartLineAggregate(PHASE_SPECIES_ENEMIES, s, AGGREGATE_LINES_MAX);
         else if( MatchWithOutput(s, "^Government name:\\s+(.+)$") )
-            m_GameData->GetSpecies()->m_GovName = GetMatchResult(0);
+            m_GameData->GetSpecies()->GovName = GetMatchResult(0);
         else if( MatchWithOutput(s, "^Government type:\\s+(.+)$") )
-            m_GameData->GetSpecies()->m_GovType = GetMatchResult(0);
+            m_GameData->GetSpecies()->GovType = GetMatchResult(0);
         else if( MatchWithOutput(s, "^Aliens at\\s+x\\s+=\\s+(\\d+), y\\s+=\\s+(\\d+), z\\s+=\\s+(\\d+)") )
         {
             m_ScanX = GetMatchResultInt(0);
@@ -168,7 +168,7 @@ bool Report::Parse(String ^s)
             m_Phase = PHASE_GLOBAL;
         else if( MatchWithOutput(s, "([a-zA-Z0-9_.]+@[a-zA-Z0-9_.]+\\.[a-zA-Z0-9_]+)") )
         {
-            m_ScanAlien->m_Email = GetMatchResult(0);
+            m_ScanAlien->Email = GetMatchResult(0);
             m_Phase = PHASE_GLOBAL;
         }
         break;
@@ -258,21 +258,21 @@ bool Report::Parse(String ^s)
         if( MatchWithOutput(s, "^Estimate of the technology of SP\\s+([^,;]+)\\s+\\(government name '([^']+)', government type '([^']+)'\\)") )
         {
             m_EstimateAlien = m_GameData->AddAlien(m_Turn, GetMatchResult(0));
-            m_EstimateAlien->m_GovName = GetMatchResult(1);
-            m_EstimateAlien->m_GovType = GetMatchResult(2);
+            m_EstimateAlien->GovName = GetMatchResult(1);
+            m_EstimateAlien->GovType = GetMatchResult(2);
         }
         else if( m_EstimateAlien != nullptr &&
             MatchWithOutput(s, "MI =\\s+(\\d+), MA =\\s+(\\d+), ML =\\s+(\\d+), GV =\\s+(\\d+), LS =\\s+(\\d+), BI =\\s+(\\d+)\\.") )
         {
-            if( m_Turn > m_EstimateAlien->m_TechEstimateTurn )
+            if( m_Turn > m_EstimateAlien->TechEstimateTurn )
             {
-                m_EstimateAlien->m_TechLevels[TECH_MI] = GetMatchResultInt(0);
-                m_EstimateAlien->m_TechLevels[TECH_MA] = GetMatchResultInt(1);
-                m_EstimateAlien->m_TechLevels[TECH_ML] = GetMatchResultInt(2);
-                m_EstimateAlien->m_TechLevels[TECH_GV] = GetMatchResultInt(3);
-                m_EstimateAlien->m_TechLevels[TECH_LS] = GetMatchResultInt(4);
-                m_EstimateAlien->m_TechLevels[TECH_BI] = GetMatchResultInt(5);
-                m_EstimateAlien->m_TechEstimateTurn = m_Turn;
+                m_EstimateAlien->TechLevels[TECH_MI] = GetMatchResultInt(0);
+                m_EstimateAlien->TechLevels[TECH_MA] = GetMatchResultInt(1);
+                m_EstimateAlien->TechLevels[TECH_ML] = GetMatchResultInt(2);
+                m_EstimateAlien->TechLevels[TECH_GV] = GetMatchResultInt(3);
+                m_EstimateAlien->TechLevels[TECH_LS] = GetMatchResultInt(4);
+                m_EstimateAlien->TechLevels[TECH_BI] = GetMatchResultInt(5);
+                m_EstimateAlien->TechEstimateTurn = m_Turn;
             }
         }
         else
@@ -363,7 +363,7 @@ bool Report::MatchSystemScanStart(String ^s)
 
         // Set the home system
         if( m_ScanAlien )
-            m_ScanAlien->m_HomeSystem = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ);
+            m_ScanAlien->HomeSystem = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ);
 
         return true;
     }
@@ -387,13 +387,13 @@ void Report::MatchPlanetScan(String ^s)
         // Try reading LSN
         if( MatchWithOutput(s, "(\\d+)\\s+") )
         {
-            planet->m_LSN = GetMatchResultInt(0);
+            planet->LSN = GetMatchResultInt(0);
 
-            if( m_ScanAlien && planet->m_LSN == 0 )
+            if( m_ScanAlien && planet->LSN == 0 )
             {
-                m_ScanAlien->m_HomePlanet = plNum;
-                m_ScanAlien->m_AtmReq->m_TempClass  = planet->m_TempClass;
-                m_ScanAlien->m_AtmReq->m_PressClass = planet->m_PressClass;
+                m_ScanAlien->HomePlanet = plNum;
+                m_ScanAlien->AtmReq->TempClass  = planet->TempClass;
+                m_ScanAlien->AtmReq->PressClass = planet->PressClass;
             }
         }
         else if( MatchWithOutput(s, "[x?\\-]+\\s+") )
@@ -415,16 +415,16 @@ void Report::MatchPlanetScan(String ^s)
             {
                 bGasMatched = true;
                 int gas = GasFromString(GetMatchResult(0));
-                planet->m_Atmosphere[gas] = GetMatchResultInt(1);
+                planet->Atmosphere[gas] = GetMatchResultInt(1);
             }
             if( !bGasMatched )
                 throw gcnew FHUIParsingException("Report contains invalid planetary scan (atmosphere)");
         }
 
         if( !String::IsNullOrEmpty(s) )
-            planet->m_Comment = s;
+            planet->Comment = s;
 
-        m_GameData->AddPlanetScan( m_Turn, m_ScanX, m_ScanY, m_ScanZ, plNum, planet );
+        m_GameData->AddPlanetScan( m_Turn, m_ScanX, m_ScanY, m_ScanZ, planet );
         m_ScanHasPlanets = true;
     }
 }
@@ -503,7 +503,7 @@ void Report::MatchColonyScan(String ^s)
                 return;
             }
 
-            m_ScanColony->m_PlanetType = planetType;
+            m_ScanColony->PlanetType = planetType;
         }
         else
             throw gcnew FHUIParsingException(
@@ -513,65 +513,65 @@ void Report::MatchColonyScan(String ^s)
     }
 
     // Remaining entries
-    switch( m_ScanColony->m_PlanetType )
+    switch( m_ScanColony->PlanetType )
     {
     case PLANET_HOME:
     case PLANET_COLONY:
         if( MatchWithOutput(s, "^Total available for spending this turn = (\\d+) - (\\d+) = \\d+") )
         {
-            m_ScanColony->m_EUProd  = GetMatchResultInt(0);
-            m_ScanColony->m_EUFleet = GetMatchResultInt(1);
-            m_GameData->AddTurnProducedEU( m_Turn, m_ScanColony->m_EUProd );
+            m_ScanColony->EUProd  = GetMatchResultInt(0);
+            m_ScanColony->EUFleet = GetMatchResultInt(1);
+            m_GameData->AddTurnProducedEU( m_Turn, m_ScanColony->EUProd );
         }
         break;
 
     case PLANET_COLONY_MINING:
         if( MatchWithOutput(s, "^This mining colony will generate (\\d+) - (\\d+) = \\d+ economic units this turn\\.") )
         {
-            m_ScanColony->m_EUProd  = GetMatchResultInt(0);
-            m_ScanColony->m_EUFleet = GetMatchResultInt(1);
-            m_GameData->AddTurnProducedEU( m_Turn, m_ScanColony->m_EUProd );
+            m_ScanColony->EUProd  = GetMatchResultInt(0);
+            m_ScanColony->EUFleet = GetMatchResultInt(1);
+            m_GameData->AddTurnProducedEU( m_Turn, m_ScanColony->EUProd );
         }
         break;
 
     case PLANET_COLONY_RESORT:
         if( MatchWithOutput(s, "^This resort colony will generate (\\d+) - (\\d+) = \\d+ economic units this turn\\.") )
         {
-            m_ScanColony->m_EUProd  = GetMatchResultInt(0);
-            m_ScanColony->m_EUFleet = GetMatchResultInt(1);
-            m_GameData->AddTurnProducedEU( m_Turn, m_ScanColony->m_EUProd );
+            m_ScanColony->EUProd  = GetMatchResultInt(0);
+            m_ScanColony->EUFleet = GetMatchResultInt(1);
+            m_GameData->AddTurnProducedEU( m_Turn, m_ScanColony->EUProd );
         }
         break;
     }
 
     if( MatchWithOutput(s, "^Economic efficiency = (\\d+)%") )
     {
-        m_ScanColony->m_EconomicEff = GetMatchResultInt(0);
+        m_ScanColony->EconomicEff = GetMatchResultInt(0);
     }
     else if( MatchWithOutput(s, "^Production penalty = (\\d+)% \\(") )
     {
-        m_ScanColony->m_ProdPenalty = GetMatchResultInt(0);
+        m_ScanColony->ProdPenalty = GetMatchResultInt(0);
     }
     else if( MatchWithOutput(s, "^Mining base = (\\d+\\.\\d+) \\(MI = \\d+, MD = (\\d+\\.\\d+)\\)") )
     {
-        m_ScanColony->m_MiBase = GetMatchResultFloat(0);
-        m_ScanColony->m_MiDiff = GetMatchResultFloat(1);
+        m_ScanColony->MiBase = GetMatchResultFloat(0);
+        m_ScanColony->MiDiff = GetMatchResultFloat(1);
     }
     else if( MatchWithOutput(s, "^Raw Material Units \\(RM,C1\\) carried over from last turn = (\\d+)") )
     {
-        m_ScanColony->m_Inventory[INV_RM] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_RM] = GetMatchResultInt(0);
     }
     else if( MatchWithOutput(s, "^Manufacturing base = (\\d+\\.\\d+) \\(") )
     {
-        m_ScanColony->m_MaBase = GetMatchResultFloat(0);
+        m_ScanColony->MaBase = GetMatchResultFloat(0);
     }
     else if( MatchWithOutput(s, "^Shipyard capacity = (\\d+)") )
     {
-        m_ScanColony->m_Shipyards = GetMatchResultInt(0);
+        m_ScanColony->Shipyards = GetMatchResultInt(0);
     }
     else if( MatchWithOutput(s, "^Available population units = (\\d+)") )
     {
-        m_ScanColony->m_AvailPop = GetMatchResultInt(0);
+        m_ScanColony->AvailPop = GetMatchResultInt(0);
     }
     else if( Regex("^Planetary inventory:").Match(s)->Success )
         m_Phase = PHASE_COLONY_INVENTORY;
@@ -582,69 +582,69 @@ void Report::MatchColonyScan(String ^s)
 void Report::MatchColonyInventoryScan(String ^s)
 {
     if( MatchWithOutput(s, "^[\\w\\s.-]+\\(PD,C3\\) = (\\d+) (warship equivalence = \\d+ tons)") )
-        m_ScanColony->m_Inventory[INV_PD] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_PD] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(SU,C20\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_SU] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_SU] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(CU,C1\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_CU] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_CU] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(IU,C1\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_IU] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_IU] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(AU,C1\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_AU] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_AU] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(FS,C1\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_FS] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_FS] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(FD,C1\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_FD] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_FD] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(DR,C1\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_DR] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_DR] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(FM,C5\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_FM] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_FM] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(FJ,C5\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_FJ] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_FJ] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(GW,C100\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_GW] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_GW] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(GT,C20\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_GT] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_GT] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(JP,C10\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_JP] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_JP] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(TP,C100\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_TP] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_TP] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(GU1,C5\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_GU1] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_GU1] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(GU2,C10\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_GU2] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_GU2] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(GU3,C15\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_GU3] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_GU3] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(GU4,C20\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_GU4] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_GU4] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(GU5,C25\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_GU5] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_GU5] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(GU6,C30\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_GU6] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_GU6] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(GU7,C35\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_GU7] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_GU7] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(GU8,C40\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_GU8] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_GU8] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(GU9,C45\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_GU9] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_GU9] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(SG1,C5\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_SG1] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_SG1] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(SG2,C10\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_SG2] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_SG2] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(SG3,C15\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_SG3] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_SG3] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(SG4,C20\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_SG4] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_SG4] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(SG5,C25\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_SG5] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_SG5] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(SG6,C30\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_SG6] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_SG6] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(SG7,C35\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_SG7] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_SG7] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(SG8,C40\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_SG8] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_SG8] = GetMatchResultInt(0);
     else if( MatchWithOutput(s, "^[\\w\\s.-]+\\(SG9,C45\\) = (\\d+)") )
-        m_ScanColony->m_Inventory[INV_SG9] = GetMatchResultInt(0);
+        m_ScanColony->Inventory[INV_SG9] = GetMatchResultInt(0);
 }
 
 void Report::MatchColonyShipsScan(String ^s)
@@ -715,45 +715,45 @@ void Report::MatchShipScan(String ^s, bool bColony)
 
         if( bColony )
         {
-            m_ScanShip->m_X = m_ScanColony->m_System->X;
-            m_ScanShip->m_Y = m_ScanColony->m_System->Y;
-            m_ScanShip->m_Z = m_ScanColony->m_System->Z;
-            m_ScanShip->m_System = m_ScanColony->m_System;
+            m_ScanShip->X = m_ScanColony->System->X;
+            m_ScanShip->Y = m_ScanColony->System->Y;
+            m_ScanShip->Z = m_ScanColony->System->Z;
+            m_ScanShip->System = m_ScanColony->System;
         }
         else
         {
-            m_ScanShip->m_X = m_ScanX;
-            m_ScanShip->m_Y = m_ScanY;
-            m_ScanShip->m_Z = m_ScanZ;
+            m_ScanShip->X = m_ScanX;
+            m_ScanShip->Y = m_ScanY;
+            m_ScanShip->Z = m_ScanZ;
             try
             {
-                m_ScanShip->m_System = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ);
+                m_ScanShip->System = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ);
             }
             catch( FHUIDataIntegrityException^ )
             {   // When reading other ships and planets,
                 // ship may be outside of any system just in deep, empty space
-                m_ScanShip->m_System = nullptr;
+                m_ScanShip->System = nullptr;
             }
         }
 
-        m_ScanShip->m_Age = age;
+        m_ScanShip->Age = age;
 
         switch( loc[0] )
         {
         case 'd':
-            m_ScanShip->m_Location = SHIP_LOC_DEEP_SPACE;
+            m_ScanShip->Location = SHIP_LOC_DEEP_SPACE;
             break;
         case 'o':
-            m_ScanShip->m_Location = SHIP_LOC_ORBIT;
+            m_ScanShip->Location = SHIP_LOC_ORBIT;
             break;
         case 'l':
-            m_ScanShip->m_Location = SHIP_LOC_LANDED;
+            m_ScanShip->Location = SHIP_LOC_LANDED;
             break;
         }
-        if( m_ScanShip->m_Location != SHIP_LOC_DEEP_SPACE )
+        if( m_ScanShip->Location != SHIP_LOC_DEEP_SPACE )
         {
             if( MatchWithOutput(s, "(\\d+)") )
-                m_ScanShip->m_Planet = GetMatchResultInt(0);
+                m_ScanShip->PlanetNum = GetMatchResultInt(0);
             else
                 throw gcnew FHUIParsingException(
                     String::Format("Unable to parse ship '{0}' location.", name));
@@ -762,7 +762,7 @@ void Report::MatchShipScan(String ^s, bool bColony)
         if( type == SHIP_BAS )
         {
             if( MatchWithOutput(s, ",(\\d+) tons") )
-                m_ScanShip->m_Size = GetMatchResultInt(0);
+                m_ScanShip->Size = GetMatchResultInt(0);
             else
                 throw gcnew FHUIParsingException(
                     String::Format("Unable to parse starbase '{0}' size.", name));
@@ -771,7 +771,7 @@ void Report::MatchShipScan(String ^s, bool bColony)
         if( bColony )
         {
             if( MatchWithOutput(s, "\\)\\s+(\\d+)\\s*") )
-                m_ScanShip->m_Capacity = GetMatchResultInt(0);
+                m_ScanShip->Capacity = GetMatchResultInt(0);
             else
                 throw gcnew FHUIParsingException(
                     String::Format("Unable to parse ship '{0}' capacity.", name));
@@ -792,7 +792,7 @@ void Report::MatchShipScan(String ^s, bool bColony)
                 {
                     int amount = GetMatchResultInt(0);
                     InventoryType inv = InvFromString( GetMatchResult(1) );
-                    m_ScanShip->m_Cargo[inv] = amount;
+                    m_ScanShip->Cargo[inv] = amount;
                 }
                 else
                     throw gcnew FHUIParsingException(
@@ -807,10 +807,10 @@ void Report::MatchShipScan(String ^s, bool bColony)
                 Alien ^sp = m_GameData->AddAlien(m_Turn, spName);
                 if( bInFD )
                 {
-                    sp->m_Relation  = SP_PIRATE;
-                    m_ScanShip->m_bIsPirate = true;
+                    sp->Relation  = SP_PIRATE;
+                    m_ScanShip->IsPirate = true;
                 }
-                m_ScanShip->m_Owner = sp;
+                m_ScanShip->Owner = sp;
             }
         }
     }
@@ -862,26 +862,26 @@ void Report::MatchAliensReport(String ^s)
             m_ScanColony = m_GameData->AddColony(m_Turn, sp, name, system, plNum);
             if( m_ScanColony )
             {
-                m_ScanColony->m_LastSeen = Math::Max(m_Turn, m_ScanColony->m_LastSeen);
-                m_ScanColony->m_PlanetType = plType;
+                m_ScanColony->LastSeen = Math::Max(m_Turn, m_ScanColony->LastSeen);
+                m_ScanColony->PlanetType = plType;
 
                 if( plType == PLANET_HOME )
                 {
-                    sp->m_HomeSystem = system;
-                    sp->m_HomePlanet = plNum;
+                    sp->HomeSystem = system;
+                    sp->HomePlanet = plNum;
                 }
             }
         }
     }
     else if( m_ScanColony && MatchWithOutput(s, "^\\(Economic base is approximately (\\d+)\\.\\)") )
     {
-        if( m_ScanColony->m_LastSeen == m_Turn )
-            m_ScanColony->m_MiBase = GetMatchResultInt(0);
+        if( m_ScanColony->LastSeen == m_Turn )
+            m_ScanColony->MiBase = GetMatchResultInt(0);
     }
     else if( m_ScanColony && MatchWithOutput(s, "^\\(There are (\\d+) Planetary Defense Units on the planet\\.\\)") )
     {
-        if( m_ScanColony->m_LastSeen == m_Turn )
-            m_ScanColony->m_Inventory[INV_PD] = GetMatchResultInt(0);
+        if( m_ScanColony->LastSeen == m_Turn )
+            m_ScanColony->Inventory[INV_PD] = GetMatchResultInt(0);
     }
     else
         MatchShipScan(s, false);
