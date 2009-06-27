@@ -5,8 +5,8 @@ using namespace System::Text::RegularExpressions;
 
 Report::Report(GameData ^gd)
     : m_GameData(gd)
-    , m_Phase(PHASE_GLOBAL)
-    , m_Turn(0)
+    , m_Phase(gd == nullptr ? PHASE_FILE_DETECT : PHASE_GLOBAL)
+    , m_Turn(-1)
     , m_LineCnt(0)
     , m_bParsingAggregate(false)
     , m_StringAggregate(nullptr)
@@ -41,25 +41,36 @@ bool Report::Parse(String ^s)
 {
     ++m_LineCnt;
 
-    m_Content = String::Concat(m_Content,
-        String::Concat(s, "\r\n") );
+    if( m_GameData != nullptr )
+    {
+        m_Content = String::Concat(m_Content,
+            String::Concat(s, "\r\n") );
+    }
 
     s = s->Trim(' ');
     s = s->Trim('\t');
 
     if( m_Phase == PHASE_FILE_DETECT )
-    {
+    {   // Turn scan mode only
         if( String::IsNullOrEmpty(s) )
             return true;
 
-        if( Regex("^EVENT LOG FOR TURN \\d+").Match(s)->Success )
+        if( MatchWithOutput(s, "^EVENT LOG FOR TURN (\\d+)") )
         {
-            m_Phase = PHASE_GLOBAL;
-            return true;
+            int turn = GetMatchResultInt(0);
+            if( turn == 0 )
+            {   // only turn 0 may be recognized by "event log..."
+                // because it can't contain meaningfull 'start of turn'
+                m_Turn = 0;
+            }
         }
-
-        return false;
+        if( MatchWithOutput(s, "^START OF TURN (\\d+)") )
+        {
+            m_Turn = GetMatchResultInt(0);
+        }
+        return true;
     }
+
     if( m_Phase == PHASE_ORDERS_TEMPLATE )
         return true;
 

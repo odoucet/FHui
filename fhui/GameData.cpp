@@ -720,14 +720,6 @@ Colony^ GameData::AddColony(int turn, Alien ^sp, String ^name, StarSystem ^syste
     {
         createColony = true;
     }
-    else if( sp != m_Species )
-    {   // Turn N-1 report scanned after Turn N report
-        // and seeing an alien colony that wasn't seen next turn.
-        if( m_Colonies->ContainsKey(name->ToLower()) == false )
-            createColony = true;
-        else
-            return safe_cast<Colony^>(m_Colonies[name->ToLower()]);
-    }
 
     if( createColony )
     {

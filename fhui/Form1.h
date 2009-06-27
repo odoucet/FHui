@@ -49,6 +49,7 @@ namespace fhui {
         void        LoadGameData();
         void        LoadGalaxy();
         void        LoadReports();
+        int         CheckReport(String ^fileName);
         void        LoadReport(String ^fileName);
         void        LoadCommands();
         void        InitData();

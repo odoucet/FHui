@@ -3,41 +3,29 @@ Major new features and bug fixes will be listed here.
 + New features
 * Bug fixes
 
-FHUI build 31
-Internal maintenance.
+FHUI build ...
 
-FHUI build 30
+FHUI build 32
 * Fixed parsing planetary inventory.
 * Fixed minor bug regarding parsing alien colonies.
   (still not a final fix)
 + MAP draft - initial view.
-
-FHUI build 29
 * Fixed loading alien tech estimates from "report 0".
 + Extract alien emails from messages.
 + Recognize alien ships in distortion field.
 
 FHUI build 28
-Internal maintenance.
-
-FHUI build 27
 + Show alien colonies.
 + More info on Aliens tab.
 + Color code on Colonies and Aliens tabs.
-
-FHUI build 26
 * Fixed allies/enemies parsing.
 + Show other species' ships.
 + Color code for ships on Ships tab.
-
-FHUI build 25
 + Systems and planets notes.
 + Ships tab show owned ships.
 
 FHUI build 24
 + Tech level estimates displayed on Aliens tab.
-
-FHUI build 23
 * Fixed incorrect spacing of species names.
 + More data on Colonies tab.
 + Several display formating improvements.

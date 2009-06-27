@@ -67,6 +67,9 @@ void Form1::ShowException(Exception ^e)
         e->GetType()->ToString(),
         e->Message,
         e->InnerException == nullptr ? e->StackTrace : e->InnerException->StackTrace );
+
+    // Bring up the first tab
+    MenuTabs->SelectedTab = MenuTabs->TabPages[0];
 }
 
 void Form1::FillAboutBox()
@@ -137,10 +140,21 @@ void Form1::LoadGalaxy()
 void Form1::LoadReports()
 {
     DirectoryInfo ^dir = gcnew DirectoryInfo("reports");
+    Generic::SortedList<int, String^> ^repFiles =
+        gcnew Generic::SortedList<int, String^>;
+
     for each( FileInfo ^f in dir->GetFiles("*"))
-    {
-        LoadReport( f->FullName );
+    {   // First check each file if it is a report and find out for which turn.
+        // Then reports will be loaded in chronological order.
+        int turn = CheckReport(f->FullName);
+        if( turn != -1 )
+        {
+            repFiles[turn] = f->FullName;
+        }
     }
+
+    for each( int turn in repFiles->Keys )
+        LoadReport( repFiles[turn] );
 
     if( m_Reports->Count > 0 )
     {
@@ -160,6 +174,40 @@ void Form1::LoadReports()
     {
         RepText->Text = "No report successfully loaded.";
     }
+}
+
+int Form1::CheckReport(String ^fileName)
+{
+    Report ^report = gcnew Report(nullptr); // turn scan mode
+
+    StreamReader ^sr = File::OpenText(fileName);
+    String ^line;
+
+    try
+    {
+        while( (line = sr->ReadLine()) != nullptr ) 
+        {
+            if( false == report->Parse(line) )
+                break;
+            if( report->GetTurn() != -1 )
+                return report->GetTurn();
+        }
+    }
+    catch( Exception ^ex )
+    {
+        throw gcnew FHUIParsingException(
+            String::Format("Error occured while parsing report: {0}, line {1}:\r\n{2}\r\nError description:\r\n  {3}",
+                fileName,
+                report->GetLineCount(),
+                line,
+                ex->Message),
+            ex );
+    }
+    finally
+    {
+        sr->Close();
+    }
+    return -1;
 }
 
 void Form1::LoadReport(String ^fileName)

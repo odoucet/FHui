@@ -1,2 +1,1 @@
 * tekst tooltipow nad gridem Systems moglby sie wyswietlac courierem zamiast defaultowym fontem.
-* przelaczac na tab z opisem wyjatku gdy go zlapiemy np. na mapie
