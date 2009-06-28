@@ -6,7 +6,8 @@ Major new features and bug fixes will be listed here.
 FHUI build ??
 + New info in summary text box: species poisonous gases, planets, ships sorted by location.
 * Fixed loading alien colonies on planets where player also has a colony.
-+ It is now possible to switch display for any turn played.
++ It is now possible to switch display to any turn played.
++ 'Visited' column added on Systems tab - shows turn when system was visited for the last time.
 
 FHUI build 32
 * Fixed parsing planetary inventory.
