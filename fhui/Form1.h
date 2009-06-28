@@ -28,7 +28,9 @@ namespace fhui {
 	{
 	public:
 		Form1(void)
-            : m_Reports(gcnew Generic::SortedList<int, Report^>)
+            : m_GameTurns(gcnew Generic::SortedList<int, GameData^>)
+            , m_Reports(gcnew Generic::SortedList<int, String^>)
+            , m_RepFiles(gcnew Generic::SortedList<int, String^>)
 		{
             InitializeComponent();
             LoadGameData();
@@ -47,9 +49,10 @@ namespace fhui {
 		}
 
         void        LoadGameData();
-        void        LoadGalaxy();
-        void        LoadReports();
+        void        ScanReports();
         int         CheckReport(String ^fileName);
+        void        LoadGalaxy();
+        void        LoadGameTurn(int turn);
         void        LoadReport(String ^fileName);
         void        LoadCommands();
         void        InitData();
@@ -62,6 +65,7 @@ namespace fhui {
 
         void        FillAboutBox();
         void        DisplayReport();
+        void        DisplayTurn();
         void        ShowException(Exception ^e);
 
         String^     SystemsGetRowTooltip(DataGridViewRow ^row);
@@ -69,6 +73,7 @@ namespace fhui {
         Color       ShipsGetRowColor(DataGridViewRow ^row);
         Color       AliensGetRowColor(DataGridViewRow ^row);
 
+        void        ApplyDataAndFormat(DataGridView^, DataTable^);
         Color       GetAlienColor(Alien ^sp);
 
         void        DrawMap();
@@ -95,7 +100,9 @@ namespace fhui {
         // --------------------------------------------------
 
         GameData   ^m_GameData;
-        Generic::SortedList<int, Report^> ^m_Reports;
+        Generic::SortedList<int, GameData^> ^m_GameTurns;
+        Generic::SortedList<int, String^>   ^m_Reports;
+        Generic::SortedList<int, String^>   ^m_RepFiles;
 
         // --------------------------------------------------
 
@@ -106,7 +113,7 @@ namespace fhui {
 
         // --------------------------------------------------
 
-    private: System::Windows::Forms::TextBox^  Summary;
+
     private: System::Windows::Forms::TabControl^  MenuTabs;
     private: System::Windows::Forms::TabPage^  TabReports;
 
@@ -185,6 +192,13 @@ private: System::Windows::Forms::CheckBox^  MapEnJumps;
 private: System::Windows::Forms::CheckBox^  MapEnLSN;
 
 private: System::Windows::Forms::CheckBox^  MapEnDist;
+private: System::Windows::Forms::ComboBox^  TurnSelect;
+
+private: System::Windows::Forms::TextBox^  Summary;
+
+
+
+
 
 
 
@@ -245,6 +259,7 @@ private: System::Windows::Forms::CheckBox^  MapEnDist;
             System::Windows::Forms::SplitContainer^  splitContainer1;
             System::Windows::Forms::Label^  label1;
             System::Windows::Forms::SplitContainer^  TopSplitCont;
+            System::Windows::Forms::SplitContainer^  splitContainer7;
             System::Windows::Forms::GroupBox^  groupBox3;
             System::Windows::Forms::Label^  label13;
             System::Windows::Forms::GroupBox^  groupBox2;
@@ -276,6 +291,7 @@ private: System::Windows::Forms::CheckBox^  MapEnDist;
             this->RepMode = (gcnew System::Windows::Forms::ComboBox());
             this->RepTurnNr = (gcnew System::Windows::Forms::ComboBox());
             this->RepText = (gcnew System::Windows::Forms::TextBox());
+            this->TurnSelect = (gcnew System::Windows::Forms::ComboBox());
             this->Summary = (gcnew System::Windows::Forms::TextBox());
             this->MenuTabs = (gcnew System::Windows::Forms::TabControl());
             this->TabReports = (gcnew System::Windows::Forms::TabPage());
@@ -331,6 +347,7 @@ private: System::Windows::Forms::CheckBox^  MapEnDist;
             splitContainer1 = (gcnew System::Windows::Forms::SplitContainer());
             label1 = (gcnew System::Windows::Forms::Label());
             TopSplitCont = (gcnew System::Windows::Forms::SplitContainer());
+            splitContainer7 = (gcnew System::Windows::Forms::SplitContainer());
             groupBox3 = (gcnew System::Windows::Forms::GroupBox());
             label13 = (gcnew System::Windows::Forms::Label());
             groupBox2 = (gcnew System::Windows::Forms::GroupBox());
@@ -352,6 +369,9 @@ private: System::Windows::Forms::CheckBox^  MapEnDist;
             TopSplitCont->Panel1->SuspendLayout();
             TopSplitCont->Panel2->SuspendLayout();
             TopSplitCont->SuspendLayout();
+            splitContainer7->Panel1->SuspendLayout();
+            splitContainer7->Panel2->SuspendLayout();
+            splitContainer7->SuspendLayout();
             this->MenuTabs->SuspendLayout();
             this->TabReports->SuspendLayout();
             this->TabMap->SuspendLayout();
@@ -477,7 +497,6 @@ private: System::Windows::Forms::CheckBox^  MapEnDist;
             TopSplitCont->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
             TopSplitCont->Dock = System::Windows::Forms::DockStyle::Fill;
             TopSplitCont->FixedPanel = System::Windows::Forms::FixedPanel::Panel1;
-            TopSplitCont->IsSplitterFixed = true;
             TopSplitCont->Location = System::Drawing::Point(0, 0);
             TopSplitCont->Margin = System::Windows::Forms::Padding(0);
             TopSplitCont->Name = L"TopSplitCont";
@@ -485,7 +504,7 @@ private: System::Windows::Forms::CheckBox^  MapEnDist;
             // TopSplitCont.Panel1
             // 
             TopSplitCont->Panel1->AutoScroll = true;
-            TopSplitCont->Panel1->Controls->Add(this->Summary);
+            TopSplitCont->Panel1->Controls->Add(splitContainer7);
             // 
             // TopSplitCont.Panel2
             // 
@@ -494,6 +513,40 @@ private: System::Windows::Forms::CheckBox^  MapEnDist;
             TopSplitCont->SplitterDistance = 230;
             TopSplitCont->SplitterWidth = 2;
             TopSplitCont->TabIndex = 0;
+            // 
+            // splitContainer7
+            // 
+            splitContainer7->Dock = System::Windows::Forms::DockStyle::Fill;
+            splitContainer7->FixedPanel = System::Windows::Forms::FixedPanel::Panel1;
+            splitContainer7->IsSplitterFixed = true;
+            splitContainer7->Location = System::Drawing::Point(0, 0);
+            splitContainer7->Margin = System::Windows::Forms::Padding(0);
+            splitContainer7->Name = L"splitContainer7";
+            splitContainer7->Orientation = System::Windows::Forms::Orientation::Horizontal;
+            // 
+            // splitContainer7.Panel1
+            // 
+            splitContainer7->Panel1->Controls->Add(this->TurnSelect);
+            splitContainer7->Panel1MinSize = 21;
+            // 
+            // splitContainer7.Panel2
+            // 
+            splitContainer7->Panel2->Controls->Add(this->Summary);
+            splitContainer7->Size = System::Drawing::Size(226, 589);
+            splitContainer7->SplitterDistance = 21;
+            splitContainer7->SplitterWidth = 1;
+            splitContainer7->TabIndex = 0;
+            // 
+            // TurnSelect
+            // 
+            this->TurnSelect->Dock = System::Windows::Forms::DockStyle::Fill;
+            this->TurnSelect->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+            this->TurnSelect->FormattingEnabled = true;
+            this->TurnSelect->Location = System::Drawing::Point(0, 0);
+            this->TurnSelect->Name = L"TurnSelect";
+            this->TurnSelect->Size = System::Drawing::Size(226, 21);
+            this->TurnSelect->TabIndex = 0;
+            this->TurnSelect->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::TurnSelect_SelectedIndexChanged);
             // 
             // Summary
             // 
@@ -504,8 +557,8 @@ private: System::Windows::Forms::CheckBox^  MapEnDist;
             this->Summary->Multiline = true;
             this->Summary->Name = L"Summary";
             this->Summary->ReadOnly = true;
-            this->Summary->Size = System::Drawing::Size(226, 589);
-            this->Summary->TabIndex = 0;
+            this->Summary->Size = System::Drawing::Size(226, 567);
+            this->Summary->TabIndex = 3;
             this->Summary->WordWrap = false;
             // 
             // MenuTabs
@@ -1403,9 +1456,12 @@ private: System::Windows::Forms::CheckBox^  MapEnDist;
             splitContainer1->Panel2->PerformLayout();
             splitContainer1->ResumeLayout(false);
             TopSplitCont->Panel1->ResumeLayout(false);
-            TopSplitCont->Panel1->PerformLayout();
             TopSplitCont->Panel2->ResumeLayout(false);
             TopSplitCont->ResumeLayout(false);
+            splitContainer7->Panel1->ResumeLayout(false);
+            splitContainer7->Panel2->ResumeLayout(false);
+            splitContainer7->Panel2->PerformLayout();
+            splitContainer7->ResumeLayout(false);
             this->MenuTabs->ResumeLayout(false);
             this->TabReports->ResumeLayout(false);
             this->TabMap->ResumeLayout(false);
@@ -1463,6 +1519,9 @@ private: System::Windows::Forms::CheckBox^  MapEnDist;
 #pragma endregion
 private: System::Void RepTurnNr_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
              DisplayReport();
+         }
+private: System::Void TurnSelect_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
+             DisplayTurn();
          }
 private: System::Void SystemsGrid_DataBindingComplete(System::Object^  sender, System::Windows::Forms::DataGridViewBindingCompleteEventArgs^  e) {
              for each( DataGridViewRow ^row in ((DataGridView^)sender)->Rows )

@@ -85,6 +85,11 @@ int Planet::CalculateLSN(AtmosphericReq ^atmReq)
     return lsn;
 }
 
+String^ Planet::PrintLocation()
+{
+    return String::Format("{0} {1}", System->PrintLocation(), Number);
+}
+
 // ---------------------------------------------------------
 
 int StarSystem::GetMinLSN()
@@ -274,6 +279,44 @@ void Ship::CalculateCapacity()
     }
 }
 
+void Ship::SetupTonnage()
+{
+    switch( Type )
+    {
+    case SHIP_BAS:  Tonnage = Size; break;
+    case SHIP_TR:   Tonnage = Size * 10000; break;
+    case SHIP_PB:   Tonnage = 10000;  break;
+    case SHIP_CT:   Tonnage = 20000;  break;
+    case SHIP_ES:   Tonnage = 50000;  break;
+    case SHIP_FF:   Tonnage = 100000; break;
+    case SHIP_DD:   Tonnage = 150000; break;
+    case SHIP_CL:   Tonnage = 200000; break;
+    case SHIP_CS:   Tonnage = 250000; break;
+    case SHIP_CA:   Tonnage = 300000; break;
+    case SHIP_CC:   Tonnage = 350000; break;
+    case SHIP_BC:   Tonnage = 400000; break;
+    case SHIP_BS:   Tonnage = 450000; break;
+    case SHIP_DN:   Tonnage = 500000; break;
+    case SHIP_SD:   Tonnage = 550000; break;
+    case SHIP_BM:   Tonnage = 600000; break;
+    case SHIP_BW:   Tonnage = 650000; break;
+    case SHIP_BR:   Tonnage = 700000; break;
+    }
+
+    OriginalCost = Tonnage / 100;
+    if( SubLight )
+        OriginalCost = (3 * OriginalCost) / 4;
+}
+
+int Ship::GetMaintenanceCost()
+{
+    if( Type == SHIP_BAS )
+        return OriginalCost / 10;
+    if( Type == SHIP_TR )
+        return OriginalCost / 25;
+    return OriginalCost / 5;
+}
+
 // ---------------------------------------------------------
 
 GameData::GameData(void)
@@ -320,10 +363,18 @@ String^ GameData::GetSpeciesSummary()
 {
     AtmosphericReq ^atm = m_Species->AtmReq;
 
+    String ^toxicGases = "";
+    for( int gas = 0; gas < GAS_MAX; ++gas )
+    {
+        if( atm->Poisonous[gas] )
+            toxicGases = toxicGases + String::Format(",{0}", GasToString(static_cast<GasType>(gas)));
+    }
+
     return String::Format(
         "Species: {0}\r\n"
         "Home: [{1} {2} {3} {4}]\r\n"
-        "Temp:{5} Press:{6}  Atm:{7} {8}-{9}%\r\n",
+        "Temp:{5} Press:{6}  Atm:{7} {8}-{9}%\r\n"
+        "Poisons:{10}\r\n",
         GetSpeciesName(),
         m_Species->HomeSystem->X,
         m_Species->HomeSystem->Y,
@@ -333,7 +384,8 @@ String^ GameData::GetSpeciesSummary()
         atm->PressClass == -1 ? "??" : atm->PressClass.ToString(),
         GasToString( atm->GasRequired ),
         atm->ReqMin,
-        atm->ReqMax );
+        atm->ReqMax,
+        toxicGases->Substring(1));
 }
 
 String^ GameData::GetAllTechsSummary()
@@ -401,42 +453,50 @@ String^ GameData::GetAliensSummary()
 
 String^ GameData::GetPlanetsSummary()
 {
-    return "Planets summary\r\n - TODO...\r\n";
-    /*
     String ^ret = "";
 
-    for each( DictionaryEntry ^entry in m_PlanetNames )
+    for each( StarSystem ^system in GetStarSystems() )
     {
-        PlanetName ^plName = safe_cast<PlanetName^>(entry->Value);
-        String ^prefix = "  ";
-        //TODO: prefix: home, colony, alien, etc...
-        ret = String::Format("{0}{1} PL {2} {3} {4} {5} {6}\r\n",
-            ret, prefix, plName->Name,
-            plName->X, plName->Y, plName->Z, plName->Num);
+        for each( Planet ^planet in system->GetPlanets() )
+        {
+            if( String::IsNullOrEmpty(planet->Name) )
+                continue;
+
+            ret += String::Format("PL {0} @{1}\r\n",
+                planet->Name,
+                planet->PrintLocation() );
+        }
     }
 
     return ret;
-    */
 }
+
+private ref class ShipLocComparer : public IComparer<Ship^>
+{
+public:
+    virtual int Compare(Ship ^s1, Ship ^s2)
+    {
+        if( s1->X != s2->X ) return s1->X - s2->X;
+        if( s1->Y != s2->Y ) return s1->Y - s2->Y;
+        if( s1->Z != s2->Z ) return s1->Z - s2->Z;
+        return s1->Location - s2->Location;
+    }
+};
 
 String^ GameData::GetShipsSummary()
 {
+    List<Ship^> ^ships = GetShips(m_Species);
+    if( ships->Count == 0 )
+        return "You have no ships\r\n";
+
+    ships->Sort( gcnew ShipLocComparer );
+
     String ^ret = "";
-
-    for each( Ship ^ship in GetShips() )
-    {
-        if( ship->Owner != m_Species )
-            continue;
-
-        ret = String::Format("{0}{1} {2} @{3}\r\n",
-            ret,
+    for each( Ship ^ship in ships )
+        ret += String::Format("{0} {1} @{2}\r\n",
             ship->PrintClass(),
             ship->Name,
             ship->PrintLocation() );
-    }
-
-    if( String::IsNullOrEmpty(ret) )
-        ret = "You have no ships\r\n";
 
     return ret;
 }
@@ -460,6 +520,20 @@ Alien^ GameData::GetAlien(String ^sp)
 Ship^ GameData::GetShip(String ^name)
 {
     return safe_cast<Ship^>(m_Ships[name->ToLower()]);
+}
+
+List<Ship^>^ GameData::GetShips(Alien ^sp)
+{
+    List<Ship^> ^ret = gcnew List<Ship^>; 
+
+    for each( Ship ^ship in GetShips() )
+    {
+        if( sp && ship->Owner != sp )
+            continue;
+        ret->Add(ship);
+    }
+
+    return ret;
 }
 
 Colony^ GameData::GetColony(String ^name)

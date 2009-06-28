@@ -25,21 +25,8 @@ void Form1::LoadGameData()
     {
         FillAboutBox();
         InitData();
-        LoadGalaxy();
-        LoadReports();
+        ScanReports();
         LoadCommands();
-
-        SetupSystems();
-        SetupPlanets();
-        SetupColonies();
-        SetupShips();
-        SetupAliens();
-        SetupMap();
-
-        this->Text = String::Format("[SP {0}, Turn {1}] Far Horizons User Interface, build {2}",
-            m_GameData->GetSpeciesName(),
-            m_GameData->GetLastTurn(),
-            FHUI_BUILD_INFO() );
     }
     catch( Exception ^e )
     {
@@ -137,11 +124,9 @@ void Form1::LoadGalaxy()
     sr->Close();
 }
 
-void Form1::LoadReports()
+void Form1::ScanReports()
 {
     DirectoryInfo ^dir = gcnew DirectoryInfo("reports");
-    Generic::SortedList<int, String^> ^repFiles =
-        gcnew Generic::SortedList<int, String^>;
 
     for each( FileInfo ^f in dir->GetFiles("*"))
     {   // First check each file if it is a report and find out for which turn.
@@ -149,31 +134,92 @@ void Form1::LoadReports()
         int turn = CheckReport(f->FullName);
         if( turn != -1 )
         {
-            repFiles[turn] = f->FullName;
+            m_RepFiles[turn] = f->FullName;
         }
     }
 
-    for each( int turn in repFiles->Keys )
-        LoadReport( repFiles[turn] );
-
-    if( m_Reports->Count > 0 )
+    if( m_RepFiles->Count > 0 )
     {
-        m_GameData->UpdatePlanets();
-
-        // Display summary
-        Summary->Text = m_GameData->GetSummary();
-
         // Setup combo box with list of loaded reports
-        int n = m_Reports->Count;
-        array<String^> ^arr = gcnew array<String^>(n);
-        for each( int key in m_Reports->Keys )
-            arr[--n] = "Turn " + key.ToString();
-        RepTurnNr->DataSource = arr;
+        int n0 = m_RepFiles->Count;
+        int n1 = n0 - (m_RepFiles->ContainsKey(0) ? 1 : 0);
+        array<String^> ^arrN0 = gcnew array<String^>(n0);
+        array<String^> ^arrN1 = gcnew array<String^>(n1);
+        for each( int key in m_RepFiles->Keys )
+        {
+            String ^text = "Turn " + key.ToString();
+            arrN0[--n0] = text;
+            if( key != 0 )
+                arrN1[--n1] = "Status for " + text;
+        }
+
+        TurnSelect->DataSource = arrN1;
+        RepTurnNr->DataSource = arrN0;
     }
     else
     {
         RepText->Text = "No report successfully loaded.";
     }
+}
+
+void Form1::DisplayTurn()
+{
+    try
+    {
+        String ^sel = TurnSelect->SelectedItem->ToString();
+        int turn = int::Parse(sel->Substring(16));    // Skip 'Status for Turn '
+
+        LoadGameTurn(turn);
+
+        SetupSystems();
+        SetupPlanets();
+        SetupColonies();
+        SetupShips();
+        SetupAliens();
+        SetupMap();
+
+        // Display summary
+        Summary->Text = m_GameData->GetSummary();
+
+        this->Text = String::Format("[SP {0}, Turn {1}] Far Horizons User Interface, build {2}",
+            m_GameData->GetSpeciesName(),
+            m_GameData->GetLastTurn(),
+            FHUI_BUILD_INFO() );
+
+        // FIXME: find out "map" tab index on the fly
+        if( MenuTabs->SelectedIndex == 1 )
+            DrawMap();
+
+        //RepText->Text = m_Reports[turn];
+    }
+    catch( Exception ^e )
+    {
+        Summary->Text = "Failed loading game data.";
+        ShowException(e);
+    }
+}
+
+void Form1::LoadGameTurn(int turn)
+{
+    if( m_GameTurns->ContainsKey(turn) )
+    {
+        m_GameData = m_GameTurns[turn];
+        return;
+    }
+
+    m_GameData = gcnew GameData;
+    LoadGalaxy();
+
+    for each( int t in m_RepFiles->Keys )
+    {
+        if( t <= turn )
+            LoadReport( m_RepFiles[t] );
+        else
+            break;
+    }
+
+    m_GameData->UpdatePlanets();
+    m_GameTurns[turn] = m_GameData;
 }
 
 int Form1::CheckReport(String ^fileName)
@@ -225,8 +271,11 @@ void Form1::LoadReport(String ^fileName)
                 break;
         }
 
-        if( report->IsValid() )
-            m_Reports->Add(report->GetTurn(), report);
+        if( report->GetTurn() > 0 &&
+            !report->IsValid() )
+            throw gcnew FHUIParsingException("File is not a valid FH report.");
+
+        m_Reports[report->GetTurn()] = report->GetContent();
     }
     catch( Exception ^ex )
     {
@@ -249,7 +298,7 @@ void Form1::DisplayReport()
     String ^sel = RepTurnNr->SelectedItem->ToString();
     int key = int::Parse(sel->Substring(5));    // Skip 'Turn '
 
-    RepText->Text = m_Reports[key]->GetContent();
+    RepText->Text = m_Reports[key];
 }
 
 void Form1::LoadCommands()
@@ -258,10 +307,51 @@ void Form1::LoadCommands()
 
 void Form1::InitData()
 {
-    m_GameData = gcnew GameData;
+    System::Text::RegularExpressions::Regex::CacheSize = 256;
 
     m_GalaxySize = 0;
     RepMode->SelectedIndex = 1;
+}
+
+////////////////////////////////////////////////////////////////
+// GUI misc
+
+void Form1::ApplyDataAndFormat(DataGridView ^grid, DataTable ^data)
+{
+    grid->DataSource = data;
+
+    // Formatting
+    for each( DataColumn ^col in data->Columns )
+    {
+        if( col->DataType == double::typeid )
+            grid->Columns[col->Ordinal]->DefaultCellStyle->Format = "F2";
+        if( col->DataType == double::typeid || col->DataType == int::typeid )
+            grid->Columns[col->Ordinal]->DefaultCellStyle->Alignment =
+                DataGridViewContentAlignment::MiddleRight;
+    }
+}
+
+Color Form1::GetAlienColor(Alien ^sp)
+{
+    try
+    {
+        if( sp == m_GameData->GetSpecies() )
+            return Color::FromArgb(225, 255, 255);
+
+        switch( sp->Relation )
+        {
+        case SP_NEUTRAL:    return Color::FromArgb(255, 255, 220);
+        case SP_ALLY:       return Color::FromArgb(220, 255, 210);
+        case SP_ENEMY:      return Color::FromArgb(255, 220, 220);
+        case SP_PIRATE:     return Color::FromArgb(230, 230, 230);
+        }
+    }
+    catch( Exception ^e )
+    {
+        ShowException(e);
+    }
+
+    return Color::White;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -325,16 +415,8 @@ void Form1::SetupSystems()
 
         dataTable->Rows->Add(row);
     }
-    SystemsGrid->DataSource = dataTable;
 
-    // Formatting
-    SystemsGrid->Columns["Dist."]->DefaultCellStyle->Format = "F2";
-    for each( DataColumn ^col in dataTable->Columns )
-    {
-        if( col->DataType == double::typeid || col->DataType == int::typeid )
-            SystemsGrid->Columns[col->Ordinal]->DefaultCellStyle->Alignment =
-                DataGridViewContentAlignment::MiddleRight;
-    }
+    ApplyDataAndFormat(SystemsGrid, dataTable);
 
     // Some columns are not sortable... yet
     SystemsGrid->Columns["Scan"]->SortMode = DataGridViewColumnSortMode::NotSortable;
@@ -342,32 +424,6 @@ void Form1::SetupSystems()
 
     // Default sort column
     SystemsGrid->Sort( SystemsGrid->Columns["Dist."], ListSortDirection::Ascending );
-}
-
-////////////////////////////////////////////////////////////////
-// GUI misc
-
-Color Form1::GetAlienColor(Alien ^sp)
-{
-    try
-    {
-        if( sp == m_GameData->GetSpecies() )
-            return Color::FromArgb(225, 255, 255);
-
-        switch( sp->Relation )
-        {
-        case SP_NEUTRAL:    return Color::FromArgb(255, 255, 220);
-        case SP_ALLY:       return Color::FromArgb(220, 255, 210);
-        case SP_ENEMY:      return Color::FromArgb(255, 220, 220);
-        case SP_PIRATE:     return Color::FromArgb(230, 230, 230);
-        }
-    }
-    catch( Exception ^e )
-    {
-        ShowException(e);
-    }
-
-    return Color::White;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -401,8 +457,7 @@ void Form1::SetupPlanets()
         {
             DataRow^ row = dataTable->NewRow();
             row["Name"]     = planet->Name;
-            row["Coords"]   = String::Format("{0,2} {1,2} {2,2} {3}",
-                system->X, system->Y, system->Z, planet->Number);
+            row["Coords"]   = planet->PrintLocation();
             row["Temp"]     = planet->TempClass;
             row["Press"]    = planet->PressClass;
             row["MD"]       = planet->MiningDiff;
@@ -415,17 +470,8 @@ void Form1::SetupPlanets()
             dataTable->Rows->Add(row);
         }
     }
-    PlanetsGrid->DataSource = dataTable;
 
-    // Formatting
-    PlanetsGrid->Columns["MD"]->DefaultCellStyle->Format = "F2";
-    PlanetsGrid->Columns["Dist."]->DefaultCellStyle->Format = "F2";
-    for each( DataColumn ^col in dataTable->Columns )
-    {
-        if( col->DataType == double::typeid || col->DataType == int::typeid )
-            PlanetsGrid->Columns[col->Ordinal]->DefaultCellStyle->Alignment =
-                DataGridViewContentAlignment::MiddleRight;
-    }
+    ApplyDataAndFormat(PlanetsGrid, dataTable);
 
     // Some columns are not sortable... yet
     PlanetsGrid->Columns["Scan"]->SortMode = DataGridViewColumnSortMode::NotSortable;
@@ -508,17 +554,11 @@ void Form1::SetupColonies()
 
         dataTable->Rows->Add(row);
     }
-    ColoniesGrid->DataSource = dataTable;
+
+    ApplyDataAndFormat(ColoniesGrid, dataTable);
 
     // Formatting
-    ColoniesGrid->Columns["Dist."]->DefaultCellStyle->Format = "F2";
     ColoniesGrid->Columns["Size"]->DefaultCellStyle->Format = "F1";
-    for each( DataColumn ^col in dataTable->Columns )
-    {
-        if( col->DataType == double::typeid || col->DataType == int::typeid )
-            ColoniesGrid->Columns[col->Ordinal]->DefaultCellStyle->Alignment =
-                DataGridViewContentAlignment::MiddleRight;
-    }
 
     // Some columns are not sortable... yet
     ColoniesGrid->Columns["Mishap %"]->SortMode = DataGridViewColumnSortMode::NotSortable;
@@ -550,9 +590,14 @@ void Form1::SetupShips()
     dataTable->Columns->Add("Cargo", String::typeid );
     dataTable->Columns->Add("Dist.", double::typeid );
     dataTable->Columns->Add("Mishap %", String::typeid );
+    dataTable->Columns->Add("Maint", double::typeid );
+    dataTable->Columns->Add("Upg.Cost", int::typeid );
+    dataTable->Columns->Add("Rec.Val", int::typeid );
 
     Alien ^sp = m_GameData->GetSpecies();
     int gv = sp->TechLevels[TECH_GV];
+    int ml = sp->TechLevels[TECH_ML];
+    double discount = (100.0 - (ml / 2)) / 100.0;
 
     for each( Ship ^ship in m_GameData->GetShips() )
     {
@@ -581,24 +626,19 @@ void Form1::SetupShips()
         if( !ship->IsPirate )
             row["Age"]  = ship->Age;
         row["Cap."]     = ship->Capacity;
-        row["Cargo"]    = ( ship->Owner == sp )
-            ? ship->PrintCargo()
-            : "n/a";
         row["Dist."]    = distance;
         row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
-
+        if( sp == ship->Owner )
+        {
+            row["Cargo"]    = ship->PrintCargo();
+            row["Maint"]    = ship->GetMaintenanceCost() * discount;
+            row["Upg.Cost"] = ship->GetUpgradeCost();
+            row["Rec.Val"]  = ship->GetRecycleValue();
+        }
         dataTable->Rows->Add(row);
     }
-    ShipsGrid->DataSource = dataTable;
 
-    // Formatting
-    ShipsGrid->Columns["Dist."]->DefaultCellStyle->Format = "F2";
-    for each( DataColumn ^col in dataTable->Columns )
-    {
-        if( col->DataType == double::typeid || col->DataType == int::typeid )
-            ShipsGrid->Columns[col->Ordinal]->DefaultCellStyle->Alignment =
-                DataGridViewContentAlignment::MiddleRight;
-    }
+    ApplyDataAndFormat(ShipsGrid, dataTable);
 
     // Some columns are not sortable... yet
     ShipsGrid->Columns["Mishap %"]->SortMode = DataGridViewColumnSortMode::NotSortable;
@@ -645,15 +685,8 @@ void Form1::SetupAliens()
         row["EMail"]        = alien->Email;
         dataTable->Rows->Add(row);
     }
-    AliensGrid->DataSource = dataTable;
 
-    // Formatting
-    for each( DataColumn ^col in dataTable->Columns )
-    {
-        if( col->DataType == double::typeid || col->DataType == int::typeid )
-            AliensGrid->Columns[col->Ordinal]->DefaultCellStyle->Alignment =
-                DataGridViewContentAlignment::MiddleRight;
-    }
+    ApplyDataAndFormat(AliensGrid, dataTable);
 
     // Default sort column
     AliensGrid->Sort( AliensGrid->Columns["Relation"], ListSortDirection::Ascending );

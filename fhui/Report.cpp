@@ -388,6 +388,7 @@ void Report::MatchPlanetScan(String ^s)
     {
         int plNum = GetMatchResultInt(0);
         Planet ^planet = gcnew Planet(
+            m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ),
             plNum,
             GetMatchResultInt(1),
             GetMatchResultFloat(2),

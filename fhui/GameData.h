@@ -96,8 +96,9 @@ protected:
 public ref class Planet
 {
 public:
-    Planet(int nr, int dia, float gv, int tc, int pc, float md)
+    Planet(StarSystem ^s, int nr, int dia, float gv, int tc, int pc, float md)
     {
+        System = s;
         Number = nr;
         Name = nullptr;
         Comment = nullptr;
@@ -112,6 +113,9 @@ public:
 
     int         CalculateLSN(AtmosphericReq^);
 
+    String^     PrintLocation();
+
+    property StarSystem^ System;
     property int         Number;
     property String^     Name;
     property String^     Comment;
@@ -259,7 +263,6 @@ public:
         Owner = owner;
         Type = type;
         Name = name;
-        Size = size;
         SubLight = subLight;
         Age = 0;
         Location = SHIP_LOC_MAX;
@@ -270,6 +273,10 @@ public:
         System = nullptr;
         Capacity = 0;
         IsPirate = false;
+
+        m_Size = size;
+        Size = m_Size;
+
         m_Cargo = gcnew array<int>(INV_MAX){0};
     }
 
@@ -277,22 +284,32 @@ public:
     String^         PrintLocation();
     String^         PrintCargo();
 
+    int             GetMaintenanceCost();
+    int             GetUpgradeCost()        { return Age * OriginalCost / 40; }
+    int             GetRecycleValue()       { return ((3 * OriginalCost) / 4) * ((60 - Age) / 50); }
+
     void            CalculateCapacity();
 
-    property Alien^          Owner;
-    property ShipType        Type;
-    property String^         Name;
-    property int             Size;
-    property bool            SubLight;
-    property int             Age;
-    property ShipLocType     Location;
-    property int             X;
-    property int             Y;
-    property int             Z;
-    property int             PlanetNum;
-    property StarSystem^     System;
-    property int             Capacity;
-    property bool            IsPirate;
+    property Alien^         Owner;
+    property ShipType       Type;
+    property String^        Name;
+    property bool           SubLight;
+    property int            Age;
+    property ShipLocType    Location;
+    property int            X;
+    property int            Y;
+    property int            Z;
+    property int            PlanetNum;
+    property StarSystem^    System;
+    property int            Capacity;
+    property bool           IsPirate;
+    property int            Tonnage;
+    property int            OriginalCost;
+
+    property int            Size {
+        int get() { return m_Size; }
+        void set(int val) { m_Size = val; SetupTonnage(); }
+    }
 
     property int            Cargo [int] {
         int  get(int inv)           { return m_Cargo[inv]; }
@@ -300,6 +317,9 @@ public:
     }
 
 protected:
+    void            SetupTonnage();
+
+    int             m_Size;
     array<int>     ^m_Cargo;
 };
 
@@ -323,6 +343,7 @@ public:
     array<StarSystem^>^     GetStarSystems()                    { return Systems; }
     IList<PlanetName^>^     GetPlanetNames()                    { return m_PlanetNames->Values; }
     IList<Ship^>^           GetShips()                          { return m_Ships->Values; }
+    List<Ship^>^            GetShips(Alien ^sp);
 
     IList<Colony^>^         GetColonies()                       { return m_Colonies->Values; }
     List<Colony^>^          GetColonies(Alien ^sp)              { return GetColonies(nullptr, sp); }
