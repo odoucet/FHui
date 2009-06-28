@@ -389,6 +389,7 @@ void Form1::SetupSystems()
     dataTable->Columns->Add("Dist.", double::typeid );
     dataTable->Columns->Add("Mishap %", String::typeid );
     dataTable->Columns->Add("Scan", String::typeid );
+    dataTable->Columns->Add("Visited", int::typeid );
     dataTable->Columns->Add("Notes", String::typeid );
 
     Alien ^sp = m_GameData->GetSpecies();
@@ -411,7 +412,9 @@ void Form1::SetupSystems()
         row["Dist."]    = system->CalcDistance(sp->HomeSystem);
         row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
         row["Scan"]     = system->PrintScanTurn();
-        row["Notes"]     = system->Comment;
+        if( system->LastVisited != -1 )
+            row["Visited"] = system->LastVisited;
+        row["Notes"]    = system->Comment;
 
         dataTable->Rows->Add(row);
     }

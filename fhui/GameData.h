@@ -145,6 +145,7 @@ public:
         Z = z;
         Type = type;
         TurnScanned = -1;
+        LastVisited = -1;
     }
 
     static double   CalcDistance(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo);
@@ -170,6 +171,7 @@ public:
     property String^    Type;
     property String^    Comment;
     property int        TurnScanned;
+    property int        LastVisited;
 
     property int        PlanetsCount { int get() { return m_Planets->Length; } }
     property Planet^    Planets [int] {

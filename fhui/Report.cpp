@@ -509,6 +509,9 @@ void Report::MatchColonyScan(String ^s)
                 system,
                 GetMatchResultInt(4) );
 
+            // Species have colony here, so system is visited
+            system->LastVisited = m_Turn;
+
             if( m_ScanColony == nullptr )
             {
                 m_Phase = PHASE_GLOBAL;
@@ -740,6 +743,7 @@ void Report::MatchShipScan(String ^s, bool bColony)
             try
             {
                 m_ScanShip->System = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ);
+                m_ScanShip->System->LastVisited = m_Turn;
             }
             catch( FHUIDataIntegrityException^ )
             {   // When reading other ships and planets,
