@@ -244,7 +244,7 @@ void Form1::MapDrawSystems(Graphics ^g)
 
     for each( StarSystem ^system in galaxy )
     {
-        Generic::List<Colony^> ^colonies = m_GameData->GetColonies(system);
+        Generic::List<Colony^> ^colonies = system->Colonies;
 
         bool bIsHome = false;
         int homeSp = MapMaxSpecies;

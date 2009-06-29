@@ -3,9 +3,10 @@ Major new features and bug fixes will be listed here.
 + New features
 * Bug fixes
 
-FHUI build ??
+FHUI build 38
 + Reload button allows reloading entire data presented in FHUI.
 + Files found in 'orders' dir may be displayed on Reports tab.
++ Show colonies on Systems tab.
 
 FHUI build 36
 + New info in summary text box: species poisonous gases, planets, ships sorted by location.

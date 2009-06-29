@@ -20,8 +20,9 @@ enum SPRelType
     SP_PLAYER,
     SP_NEUTRAL,
     SP_ALLY,
+    SP_ENEMY,
     SP_PIRATE,
-    SP_ENEMY
+    SP_MIXED
 };
 
 String^ SpRelToString(SPRelType);

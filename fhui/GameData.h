@@ -6,6 +6,8 @@ using namespace System;
 using namespace System::Collections::Generic;
 
 ref class StarSystem;
+ref class Ship;
+ref class Colony;
 
 public ref class AtmosphericReq
 {
@@ -78,6 +80,9 @@ public:
     property int                HomePlanet;
     property AtmosphericReq^    AtmReq;
 
+    property List<Ship^>^       Ships;
+    property List<Colony^>^     Colonies;
+
     property int                TechEstimateTurn;
     property int                TechLevels [int] {
         int  get(int tech)          { return m_TechLevels[tech]; }
@@ -146,6 +151,7 @@ public:
         Type = type;
         TurnScanned = -1;
         LastVisited = -1;
+        Master = nullptr;
     }
 
     static double   CalcDistance(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo);
@@ -164,6 +170,8 @@ public:
     String^     GenerateScan();
     String^     PrintLocation() { return String::Format("{0,2} {1,2} {2,2}", X, Y, Z); }
     String^     PrintScanTurn();
+    String^     PrintColonies();
+    //String^     PrintShips();
 
     property int        X;
     property int        Y;
@@ -172,6 +180,10 @@ public:
     property String^    Comment;
     property int        TurnScanned;
     property int        LastVisited;
+
+    property List<Ship^>^   Ships;
+    property List<Colony^>^ Colonies;
+    property Alien^         Master;
 
     property int        PlanetsCount { int get() { return m_Planets->Length; } }
     property Planet^    Planets [int] {
@@ -342,17 +354,13 @@ public:
     Ship^           GetShip(String ^name);
 
     IList<Alien^>^          GetAliens()                         { return m_Aliens->Values; }
-    array<StarSystem^>^     GetStarSystems()                    { return Systems; }
+    array<StarSystem^>^     GetStarSystems()                    { return m_Systems; }
     IList<PlanetName^>^     GetPlanetNames()                    { return m_PlanetNames->Values; }
     IList<Ship^>^           GetShips()                          { return m_Ships->Values; }
-    List<Ship^>^            GetShips(Alien ^sp);
-
     IList<Colony^>^         GetColonies()                       { return m_Colonies->Values; }
-    List<Colony^>^          GetColonies(Alien ^sp)              { return GetColonies(nullptr, sp); }
-    List<Colony^>^          GetColonies(StarSystem ^sys)        { return GetColonies(sys, nullptr); }
-    List<Colony^>^          GetColonies(StarSystem^, Alien^);
 
     // ------------------------------------------
+    void            Update();
     void            SetSpecies(String ^sp);
     void            SetAtmosphereReq(GasType gas, int, int);
     void            SetAtmosphereNeutral(GasType gas);
@@ -367,7 +375,6 @@ public:
     void            AddTurnProducedEU(int turn, int eu);
     Colony^         AddColony(int turn, Alien^, String^, StarSystem^, int);
     void            AddPlanetName(int turn, int x, int y, int z, int pl, String ^name);
-    void            UpdatePlanets();
     Ship^           AddShip(int turn, Alien ^sp, ShipType type, String ^name, int size, bool subLight);
 
     // ------------------------------------------
@@ -375,7 +382,8 @@ protected:
     bool            TurnCheck(int turn);
     int             TurnAlign(int turn);
 
-    void            CalculateLSN();
+    void            UpdateAliens();
+    void            UpdateSystems();
     void            LinkPlanetNames();
     void            UpdateHomeWorlds();
 
@@ -387,13 +395,20 @@ protected:
     String^         GetPlanetsSummary();
     String^         GetShipsSummary();
 
+    List<Ship^>^            GetShips(Alien ^sp)                 { return GetShips(nullptr, sp); }
+    List<Ship^>^            GetShips(StarSystem ^sys)           { return GetShips(sys, nullptr); }
+    List<Ship^>^            GetShips(StarSystem^, Alien^);
+    List<Colony^>^          GetColonies(Alien ^sp)              { return GetColonies(nullptr, sp); }
+    List<Colony^>^          GetColonies(StarSystem ^sys)        { return GetColonies(sys, nullptr); }
+    List<Colony^>^          GetColonies(StarSystem^, Alien^);
+
     // ------------------------------------------
     Alien              ^m_Species;
     int                 m_TurnEUStart;
     int                 m_TurnEUProduced;
     int                 m_FleetCost;
     float               m_FleetCostPercent;
-    array<StarSystem^>                 ^Systems;
+    array<StarSystem^>                 ^m_Systems;
     SortedList<String^, Alien^>        ^m_Aliens;
     SortedList<String^, Colony^>       ^m_Colonies;
     SortedList<String^, PlanetName^>   ^m_PlanetNames;

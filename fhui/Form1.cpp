@@ -218,7 +218,7 @@ void Form1::LoadGameTurn(int turn)
             break;
     }
 
-    m_GameData->UpdatePlanets();
+    m_GameData->Update();
     m_GameTurns[turn] = m_GameData;
 }
 
@@ -394,6 +394,7 @@ Color Form1::GetAlienColor(Alien ^sp)
         case SP_ALLY:       return Color::FromArgb(220, 255, 210);
         case SP_ENEMY:      return Color::FromArgb(255, 220, 220);
         case SP_PIRATE:     return Color::FromArgb(230, 230, 230);
+        case SP_MIXED:      return Color::FromArgb(235, 235, 235);
         }
     }
     catch( Exception ^e )
@@ -407,15 +408,14 @@ Color Form1::GetAlienColor(Alien ^sp)
 ////////////////////////////////////////////////////////////////
 // Systems
 
-String^ Form1::SystemsGetRowTooltip(DataGridViewRow ^row)
+StarSystem^ Form1::SystemsGetRowStarSystem(DataGridViewRow ^row)
 {
     try
     {
         int x = int::Parse(row->Cells[ SystemsGrid->Columns["X"]->Index ]->Value->ToString());
         int y = int::Parse(row->Cells[ SystemsGrid->Columns["Y"]->Index ]->Value->ToString());
         int z = int::Parse(row->Cells[ SystemsGrid->Columns["Z"]->Index ]->Value->ToString());
-        StarSystem ^system = m_GameData->GetStarSystem(x, y, z);
-        return system->GenerateScan();
+        return m_GameData->GetStarSystem(x, y, z);
     }
     catch( Exception ^e )
     {
@@ -423,6 +423,18 @@ String^ Form1::SystemsGetRowTooltip(DataGridViewRow ^row)
     }
 
     return nullptr;
+}
+
+String^ Form1::SystemsGetRowTooltip(StarSystem ^system)
+{
+    return system->GenerateScan();
+}
+
+Color Form1::SystemsGetRowColor(StarSystem ^system)
+{
+    if( system->Master == nullptr )
+        return Color::White;
+    return GetAlienColor( system->Master );
 }
 
 void Form1::SetupSystems()
@@ -440,6 +452,7 @@ void Form1::SetupSystems()
     dataTable->Columns->Add("Mishap %", String::typeid );
     dataTable->Columns->Add("Scan", String::typeid );
     dataTable->Columns->Add("Visited", int::typeid );
+    dataTable->Columns->Add("Colonies", String::typeid );
     dataTable->Columns->Add("Notes", String::typeid );
 
     Alien ^sp = m_GameData->GetSpecies();
@@ -463,7 +476,8 @@ void Form1::SetupSystems()
         row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
         row["Scan"]     = system->PrintScanTurn();
         if( system->LastVisited != -1 )
-            row["Visited"] = system->LastVisited;
+            row["Visited"]  = system->LastVisited;
+        row["Colonies"] = system->PrintColonies();
         row["Notes"]    = system->Comment;
 
         dataTable->Rows->Add(row);
@@ -481,6 +495,13 @@ void Form1::SetupSystems()
 
 ////////////////////////////////////////////////////////////////
 // Planets
+
+Color Form1::PlanetsGetRowColor(DataGridViewRow ^row)
+{
+    return Color::White;
+    //String ^name = row->Cells[ ColoniesGrid->Columns["Name"]->Index ]->Value->ToString();
+    //return GetAlienColor( m_GameData->GetColony(name)->Owner );
+}
 
 void Form1::SetupPlanets()
 {

@@ -67,7 +67,10 @@ namespace fhui {
         void        DisplayTurn();
         void        ShowException(Exception ^e);
 
-        String^     SystemsGetRowTooltip(DataGridViewRow ^row);
+        StarSystem^ SystemsGetRowStarSystem(DataGridViewRow ^row);
+        String^     SystemsGetRowTooltip(StarSystem ^system);
+        Color       SystemsGetRowColor(StarSystem ^system);
+        Color       PlanetsGetRowColor(DataGridViewRow ^row);
         Color       ColoniesGetRowColor(DataGridViewRow ^row);
         Color       ShipsGetRowColor(DataGridViewRow ^row);
         Color       AliensGetRowColor(DataGridViewRow ^row);
@@ -1562,9 +1565,17 @@ private: System::Void TurnSelect_SelectedIndexChanged(System::Object^  sender, S
 private: System::Void SystemsGrid_DataBindingComplete(System::Object^  sender, System::Windows::Forms::DataGridViewBindingCompleteEventArgs^  e) {
              for each( DataGridViewRow ^row in ((DataGridView^)sender)->Rows )
              {
-                 String ^scan = SystemsGetRowTooltip( row );
-                 for each( DataGridViewCell ^cell in row->Cells )
-                     cell->ToolTipText = scan;
+                 StarSystem ^system = SystemsGetRowStarSystem( row );
+                 if( system )
+                 {
+                     String ^scan = SystemsGetRowTooltip( system );
+                     Color bgColor = SystemsGetRowColor( system );
+                     for each( DataGridViewCell ^cell in row->Cells )
+                     {
+                         cell->ToolTipText = scan;
+                         cell->Style->BackColor = bgColor;
+                     }
+                 }
              }
          }
 private: System::Void ShipsGrid_DataBindingComplete(System::Object^  sender, System::Windows::Forms::DataGridViewBindingCompleteEventArgs^  e) {

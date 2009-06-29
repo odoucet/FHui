@@ -185,6 +185,44 @@ String^ StarSystem::PrintScanTurn()
     else                            return String::Format("Scanned, {0}", TurnScanned);
 }
 
+String^ StarSystem::PrintColonies()
+{
+    String ^ret = "";
+
+    for each( Colony ^colony in Colonies )
+    {
+        ret += String::Format("{0}#{1} {2}{3}",
+            String::IsNullOrEmpty(ret) ? "" : ", ",
+            colony->PlanetNum,
+            colony->Owner->Name,
+            colony->PlanetType == PLANET_HOME ? " (HOME)" : "" );
+
+        if( Master == nullptr )
+            Master = colony->Owner;
+        else if( Master != colony->Owner &&
+                 Master->Relation != SP_MIXED )
+        {
+            Master = gcnew Alien("", 0);
+            Master->Relation = SP_MIXED;
+        }
+    }
+
+    return ret;
+}
+
+/*
+String^ StarSystem::PrintShips()
+{
+    String ^ret = "";
+
+    for each( Ship ^ship in Ships )
+    {
+    }
+
+    return ret;
+}
+*/
+
 void StarSystem::Planets::set(int plNum, Planet ^pl)
 {
     Array::Resize(m_Planets, Math::Max(plNum + 1, m_Planets->Length));
@@ -326,7 +364,7 @@ GameData::GameData(void)
     , m_FleetCost(0)
     , m_FleetCostPercent(0.0)
     , m_Aliens(gcnew SortedList<String^, Alien^>)
-    , Systems(gcnew array<StarSystem^>(0))
+    , m_Systems(gcnew array<StarSystem^>(0))
     , m_Colonies(gcnew SortedList<String^, Colony^>)
     , m_PlanetNames(gcnew SortedList<String^, PlanetName^>)
     , m_Ships(gcnew SortedList<String^, Ship^>)
@@ -522,13 +560,15 @@ Ship^ GameData::GetShip(String ^name)
     return safe_cast<Ship^>(m_Ships[name->ToLower()]);
 }
 
-List<Ship^>^ GameData::GetShips(Alien ^sp)
+List<Ship^>^ GameData::GetShips(StarSystem ^sys, Alien ^sp)
 {
     List<Ship^> ^ret = gcnew List<Ship^>; 
 
     for each( Ship ^ship in GetShips() )
     {
         if( sp && ship->Owner != sp )
+            continue;
+        if( sys && ship->System != sys )
             continue;
         ret->Add(ship);
     }
@@ -714,7 +754,7 @@ void GameData::SetAtmospherePoisonous(GasType gas)
 
 StarSystem^ GameData::GetStarSystem(int x, int y, int z)
 {
-    for each( StarSystem ^system in Systems )
+    for each( StarSystem ^system in m_Systems )
     {
         if( system->X == x &&
             system->Y == y &&
@@ -730,7 +770,7 @@ StarSystem^ GameData::GetStarSystem(int x, int y, int z)
 
 void GameData::AddStarSystem(int x, int y, int z, String ^type, String ^comment)
 {
-    for each( StarSystem ^system in Systems )
+    for each( StarSystem ^system in m_Systems )
     {
         if( system->X == x &&
             system->Y == y &&
@@ -743,8 +783,8 @@ void GameData::AddStarSystem(int x, int y, int z, String ^type, String ^comment)
 
     StarSystem ^system = gcnew StarSystem(x, y, z, type);
     system->Comment = comment;
-    Array::Resize(Systems, Systems->Length + 1);
-    Systems[Systems->Length - 1] = system;
+    Array::Resize(m_Systems, m_Systems->Length + 1);
+    m_Systems[m_Systems->Length - 1] = system;
 }
 
 void GameData::AddPlanetScan(int turn, int x, int y, int z, Planet ^planet)
@@ -838,17 +878,31 @@ void GameData::AddPlanetName(int turn, int x, int y, int z, int pl, String ^name
     }
 }
 
-void GameData::UpdatePlanets()
+void GameData::Update()
 {
-    CalculateLSN();
+    UpdateAliens();
+    UpdateSystems();
     LinkPlanetNames();
     UpdateHomeWorlds();
 }
 
-void GameData::CalculateLSN()
+void GameData::UpdateAliens()
 {
-    for each( StarSystem ^system in Systems )
+    for each( Alien ^alien in GetAliens() )
     {
+        alien->Colonies = GetColonies(nullptr, alien);
+        alien->Ships    = GetShips(nullptr, alien);
+    }
+}
+
+void GameData::UpdateSystems()
+{
+    for each( StarSystem ^system in m_Systems )
+    {
+        system->Colonies = GetColonies(system, nullptr);
+        system->Ships    = GetShips(system, nullptr);
+
+        // Calculate LSN
         for each( Planet ^planet in system->GetPlanets() )
         {
             planet->LSN = planet->CalculateLSN(m_Species->AtmReq);
