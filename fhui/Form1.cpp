@@ -332,18 +332,30 @@ void Form1::DisplayReport()
 
 void Form1::LoadCommands()
 {
-    DirectoryInfo ^dir = gcnew DirectoryInfo("orders");
+    m_CmdFiles->Clear();
 
-    for each( FileInfo ^f in dir->GetFiles("*"))
+    try
     {
-        if( f->Length <= 0x10000 ) // 64 KB, more than enough for any commands
+        DirectoryInfo ^dir = gcnew DirectoryInfo("orders");
+
+        for each( FileInfo ^f in dir->GetFiles("*"))
         {
-            m_CmdFiles[f->Name] = File::OpenText(f->FullName)->ReadToEnd();
+            if( f->Length <= 0x10000 ) // 64 KB, more than enough for any commands
+            {
+                m_CmdFiles[f->Name] = File::OpenText(f->FullName)->ReadToEnd();
+            }
+            else
+            {
+                m_CmdFiles[f->Name] = "File too large (limit is 64KB).";
+            }
         }
-        else
-        {
-            m_CmdFiles[f->Name] = "File too large (limit is 64KB).";
-        }
+    }
+    catch( DirectoryNotFoundException^ )
+    {
+    }
+    finally
+    {
+        RepModeCommands->Enabled = m_CmdFiles->Count > 0;
     }
 }
 
