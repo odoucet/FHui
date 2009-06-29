@@ -21,12 +21,18 @@ namespace fhui
 
 void Form1::LoadGameData()
 {
+    FillAboutBox();
+    TurnReload();
+}
+
+void Form1::TurnReload()
+{
     try
     {
-        FillAboutBox();
         InitData();
         ScanReports();
         LoadCommands();
+        RepModeChanged();
     }
     catch( Exception ^e )
     {
@@ -154,7 +160,7 @@ void Form1::ScanReports()
         }
 
         TurnSelect->DataSource = arrN1;
-        RepTurnNr->DataSource = arrN0;
+        m_RepTurnNrData = arrN0;
     }
     else
     {
@@ -171,13 +177,6 @@ void Form1::DisplayTurn()
 
         LoadGameTurn(turn);
 
-        SetupSystems();
-        SetupPlanets();
-        SetupColonies();
-        SetupShips();
-        SetupAliens();
-        SetupMap();
-
         // Display summary
         Summary->Text = m_GameData->GetSummary();
 
@@ -186,11 +185,12 @@ void Form1::DisplayTurn()
             m_GameData->GetLastTurn(),
             FHUI_BUILD_INFO() );
 
-        // FIXME: find out "map" tab index on the fly
-        if( MenuTabs->SelectedIndex == 1 )
-            DrawMap();
-
-        //RepText->Text = m_Reports[turn];
+        SetupMap();
+        SetupSystems();
+        SetupPlanets();
+        SetupColonies();
+        SetupShips();
+        SetupAliens();
     }
     catch( Exception ^e )
     {
@@ -293,16 +293,58 @@ void Form1::LoadReport(String ^fileName)
     }
 }
 
+void Form1::RepModeChanged()
+{
+    if( RepModeReports->Checked )
+    {
+        RepTurnNr->DataSource = m_RepTurnNrData;
+    }
+    else if( RepModeCommands->Checked )
+    {
+        List<String^> ^items = gcnew List<String^>;
+        for each( String ^s in m_CmdFiles->Keys )
+            items->Add(s);
+        items->Sort(StringComparer::CurrentCultureIgnoreCase);
+        RepTurnNr->DataSource = items;
+    }
+}
+
 void Form1::DisplayReport()
 {
-    String ^sel = RepTurnNr->SelectedItem->ToString();
-    int key = int::Parse(sel->Substring(5));    // Skip 'Turn '
+    if( RepTurnNr->SelectedItem == nullptr )
+    {
+        RepText->Text = "";
+        return;
+    }
 
-    RepText->Text = m_Reports[key];
+    if( RepModeReports->Checked )
+    {
+        String ^sel = RepTurnNr->SelectedItem->ToString();
+        int key = int::Parse(sel->Substring(5));    // Skip 'Turn '
+
+        RepText->Text = m_Reports[key];
+    }
+    else if( RepModeCommands->Checked )
+    {
+        RepText->Text = m_CmdFiles[ RepTurnNr->SelectedItem->ToString() ];
+    }
 }
 
 void Form1::LoadCommands()
 {
+    DirectoryInfo ^dir = gcnew DirectoryInfo("orders");
+
+    for each( FileInfo ^f in dir->GetFiles("*"))
+    {
+        if( f->Length <= 0x10000 ) // 64 KB, more than enough for any commands
+        {
+            m_CmdFiles[f->Name] = File::OpenText(f->FullName)->ReadToEnd();
+        }
+        else
+        {
+            m_CmdFiles[f->Name] = "File too large (limit is 64KB).";
+        }
+    }
 }
 
 void Form1::InitData()
@@ -310,7 +352,15 @@ void Form1::InitData()
     System::Text::RegularExpressions::Regex::CacheSize = 256;
 
     m_GalaxySize = 0;
-    RepMode->SelectedIndex = 1;
+
+    m_RepTurnNrData = nullptr;
+
+    m_GameTurns = gcnew Generic::SortedList<int, GameData^>;
+    m_Reports   = gcnew Generic::SortedList<int, String^>;
+    m_RepFiles  = gcnew Generic::SortedList<int, String^>;
+    m_CmdFiles  = gcnew Generic::SortedList<String^, String^>;
+
+    RepModeReports->Checked = true;
 }
 
 ////////////////////////////////////////////////////////////////
