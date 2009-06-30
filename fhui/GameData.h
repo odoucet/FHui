@@ -1,6 +1,7 @@
 #pragma once
 
 #include "enums.h"
+#include "IGridData.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -45,7 +46,7 @@ protected:
     array<bool>        ^m_Poisonous;
 };
 
-public ref class Alien
+public ref class Alien : public IGridDataSrc
 {
 public:
     Alien(String ^name, int turn)
@@ -64,6 +65,9 @@ public:
         m_TechLevels        = gcnew array<int>(TECH_MAX){0};
         m_TechLevelsTeach   = gcnew array<int>(TECH_MAX){0};
     }
+
+    virtual Alien^  GetAlienForBgColor()    { return this; }
+    virtual String^ GetTooltipText()        { return "<TODO...>"; }
 
     String^         PrintRelation() { return SpRelToString(Relation); }
     String^         PrintHome();
@@ -98,7 +102,7 @@ protected:
     array<int>     ^m_TechLevelsTeach;
 };
 
-public ref class Planet
+public ref class Planet : public IGridDataSrc
 {
 public:
     Planet(StarSystem ^s, int nr, int dia, float gv, int tc, int pc, float md)
@@ -113,24 +117,29 @@ public:
         PressClass = pc;
         MiningDiff = md;
         LSN = -1;
+        Master = nullptr;
         m_Atmosphere = gcnew array<int>(GAS_MAX) {false};
     }
+
+    virtual Alien^  GetAlienForBgColor()    { return Master; }
+    virtual String^ GetTooltipText()        { return "<TODO...>"; }
 
     int         CalculateLSN(AtmosphericReq^);
 
     String^     PrintLocation();
 
-    property StarSystem^ System;
-    property int         Number;
-    property String^     Name;
-    property String^     Comment;
-    property int         Diameter;
-    property float       Grav;
-    property int         TempClass;
-    property int         PressClass;
-    property float       MiningDiff;
-    property int         LSN;
-    property int         Atmosphere [int] {
+    property StarSystem^    System;
+    property int            Number;
+    property String^        Name;
+    property String^        Comment;
+    property int            Diameter;
+    property float          Grav;
+    property int            TempClass;
+    property int            PressClass;
+    property float          MiningDiff;
+    property int            LSN;
+    property Alien^         Master;
+    property int            Atmosphere [int] {
         int  get(int gas)           { return m_Atmosphere[gas]; }
         void set(int gas, int val)  { m_Atmosphere[gas] = val; }
     }
@@ -139,7 +148,7 @@ protected:
     array<int> ^m_Atmosphere;
 };
 
-public ref class StarSystem
+public ref class StarSystem : public IGridDataSrc
 {
 public:
     StarSystem(int x, int y, int z, String ^type)
@@ -153,6 +162,9 @@ public:
         LastVisited = -1;
         Master = nullptr;
     }
+
+    virtual Alien^  GetAlienForBgColor()    { return Master; }
+    virtual String^ GetTooltipText()        { return GenerateScan(); }
 
     static double   CalcDistance(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo);
     static double   CalcMishap(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo, int gv, int age);
@@ -170,7 +182,7 @@ public:
     String^     GenerateScan();
     String^     PrintLocation() { return String::Format("{0,2} {1,2} {2,2}", X, Y, Z); }
     String^     PrintScanTurn();
-    String^     PrintColonies();
+    String^     PrintColonies(int planetNum);   // -1 for all colonies in system
     //String^     PrintShips();
 
     property int        X;
@@ -187,7 +199,7 @@ public:
 
     property int        PlanetsCount { int get() { return m_Planets->Length; } }
     property Planet^    Planets [int] {
-        Planet^ get(int i) { return m_Planets[i]; }
+        Planet^ get(int i) { return i < m_Planets->Length ? m_Planets[i] : nullptr; }
         void    set(int i, Planet^);
     }
 
@@ -197,7 +209,7 @@ protected:
     array<Planet^>     ^m_Planets;
 };
 
-public ref class Colony
+public ref class Colony : public IGridDataSrc
 {
 public:
     Colony(Alien ^owner, String ^name, StarSystem ^system, int planetNum)
@@ -220,6 +232,9 @@ public:
         LastSeen = -1;
         m_Inventory = gcnew array<int>(INV_MAX){0};
     }
+
+    virtual Alien^  GetAlienForBgColor()    { return Owner; }
+    virtual String^ GetTooltipText()        { return "<TODO...>"; }
 
     String^     PrintLocation() { return String::Format("{0} {1}", System->PrintLocation(), PlanetNum); }
     String^     PrintInventoryShort();
@@ -269,7 +284,7 @@ public:
     property String^ Name;
 };
 
-public ref class Ship
+public ref class Ship : public IGridDataSrc
 {
 public:
     Ship(Alien ^owner, ShipType type, String ^name, int size, bool subLight)
@@ -293,6 +308,9 @@ public:
 
         m_Cargo = gcnew array<int>(INV_MAX){0};
     }
+
+    virtual Alien^  GetAlienForBgColor()    { return Owner; }
+    virtual String^ GetTooltipText()        { return "<TODO...>"; }
 
     String^         PrintClass();
     String^         PrintLocation();

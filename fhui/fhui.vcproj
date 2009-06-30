@@ -277,6 +277,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\IGridData.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Report.h"
 				>
 			</File>

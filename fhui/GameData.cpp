@@ -185,17 +185,22 @@ String^ StarSystem::PrintScanTurn()
     else                            return String::Format("Scanned, {0}", TurnScanned);
 }
 
-String^ StarSystem::PrintColonies()
+String^ StarSystem::PrintColonies(int planetNum)
 {
     String ^ret = "";
 
     for each( Colony ^colony in Colonies )
     {
-        ret += String::Format("{0}#{1} {2}{3}",
-            String::IsNullOrEmpty(ret) ? "" : ", ",
-            colony->PlanetNum,
-            colony->Owner->Name,
-            colony->PlanetType == PLANET_HOME ? " (HOME)" : "" );
+        if( planetNum != -1 &&
+            colony->PlanetNum != planetNum )
+            continue;
+
+        if( String::IsNullOrEmpty(ret) == false )
+            ret += ", ";
+        if( planetNum == -1 )
+            ret += ("#" + colony->PlanetNum.ToString() + " ");
+        ret += colony->Owner->Name;
+        ret += (colony->PlanetType == PLANET_HOME ? " (HOME)" : "");
 
         if( Master == nullptr )
             Master = colony->Owner;
@@ -204,6 +209,18 @@ String^ StarSystem::PrintColonies()
         {
             Master = gcnew Alien("", 0);
             Master->Relation = SP_MIXED;
+        }
+
+        Planet ^planet = Planets[colony->PlanetNum - 1];
+        if( planet )
+        {
+            if( planet->Master == nullptr )
+                planet->Master = colony->Owner;
+            else if( planet->Master != colony->Owner &&
+                     planet->Master->Relation != SP_MIXED )
+            {
+                planet->Master = Master;
+            }
         }
     }
 

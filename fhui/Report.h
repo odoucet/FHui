@@ -68,6 +68,7 @@ private:
     int             m_LineCnt;
 
     PhaseType       m_Phase;
+    PhaseType       m_PhasePreAggregate;
     array<String^> ^m_TmpRegexResult;
 
     bool            m_bParsingAggregate;

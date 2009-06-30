@@ -43,6 +43,8 @@ void Form1::TurnReload()
 
 void Form1::ShowException(Exception ^e)
 {
+    m_HadException = true;
+
     RepText->Text = String::Format(
         "Fatal Exception !\r\n"
         "---------------------------------------------------------------------------\r\n"
@@ -63,6 +65,10 @@ void Form1::ShowException(Exception ^e)
 
     // Bring up the first tab
     MenuTabs->SelectedTab = MenuTabs->TabPages[0];
+
+    // Disable some critical controls
+    TurnSelect->Enabled = false;
+    MenuTabs->Enabled = false;
 }
 
 void Form1::FillAboutBox()
@@ -295,6 +301,9 @@ void Form1::LoadReport(String ^fileName)
 
 void Form1::RepModeChanged()
 {
+    if( m_HadException )
+        return;
+
     if( RepModeReports->Checked )
     {
         RepTurnNr->DataSource = m_RepTurnNrData;
@@ -363,6 +372,7 @@ void Form1::InitData()
 {
     System::Text::RegularExpressions::Regex::CacheSize = 256;
 
+    m_HadException = false;
     m_GalaxySize = 0;
 
     m_RepTurnNrData = nullptr;
@@ -378,9 +388,13 @@ void Form1::InitData()
 ////////////////////////////////////////////////////////////////
 // GUI misc
 
-void Form1::ApplyDataAndFormat(DataGridView ^grid, DataTable ^data)
+void Form1::ApplyDataAndFormat(DataGridView ^grid, DataTable ^data, DataColumn ^objColumn)
 {
+    // Setup data source
     grid->DataSource = data;
+
+    // Make object link column invisible
+    grid->Columns[objColumn->Ordinal]->Visible = false;
 
     // Formatting
     for each( DataColumn ^col in data->Columns )
@@ -395,77 +409,69 @@ void Form1::ApplyDataAndFormat(DataGridView ^grid, DataTable ^data)
 
 Color Form1::GetAlienColor(Alien ^sp)
 {
+    if( sp == nullptr )
+        return Color::White;
+
+    if( sp == m_GameData->GetSpecies() )
+        return Color::FromArgb(225, 255, 255);
+
+    switch( sp->Relation )
+    {
+    case SP_NEUTRAL:    return Color::FromArgb(255, 255, 210);
+    case SP_ALLY:       return Color::FromArgb(220, 255, 210);
+    case SP_ENEMY:      return Color::FromArgb(255, 220, 220);
+    case SP_PIRATE:     return Color::FromArgb(230, 230, 230);
+    case SP_MIXED:      return Color::FromArgb(235, 235, 235);
+    }
+
+    return Color::White;
+}
+
+void Form1::SetGridBgAndTooltip(DataGridView ^grid)
+{
     try
     {
-        if( sp == m_GameData->GetSpecies() )
-            return Color::FromArgb(225, 255, 255);
+        int index = grid->Columns[0]->Index;
 
-        switch( sp->Relation )
+        for each( DataGridViewRow ^row in grid->Rows )
         {
-        case SP_NEUTRAL:    return Color::FromArgb(255, 255, 220);
-        case SP_ALLY:       return Color::FromArgb(220, 255, 210);
-        case SP_ENEMY:      return Color::FromArgb(255, 220, 220);
-        case SP_PIRATE:     return Color::FromArgb(230, 230, 230);
-        case SP_MIXED:      return Color::FromArgb(235, 235, 235);
+            IGridDataSrc ^iDataSrc = safe_cast<IGridDataSrc^>(row->Cells[index]->Value);
+            String ^tooltip = iDataSrc->GetTooltipText();
+            Color bgColor = GetAlienColor( iDataSrc->GetAlienForBgColor() );
+            for each( DataGridViewCell ^cell in row->Cells )
+            {
+                cell->ToolTipText = tooltip;
+                cell->Style->BackColor = bgColor;
+            }
         }
     }
     catch( Exception ^e )
     {
         ShowException(e);
     }
-
-    return Color::White;
 }
 
 ////////////////////////////////////////////////////////////////
 // Systems
-
-StarSystem^ Form1::SystemsGetRowStarSystem(DataGridViewRow ^row)
-{
-    try
-    {
-        int x = int::Parse(row->Cells[ SystemsGrid->Columns["X"]->Index ]->Value->ToString());
-        int y = int::Parse(row->Cells[ SystemsGrid->Columns["Y"]->Index ]->Value->ToString());
-        int z = int::Parse(row->Cells[ SystemsGrid->Columns["Z"]->Index ]->Value->ToString());
-        return m_GameData->GetStarSystem(x, y, z);
-    }
-    catch( Exception ^e )
-    {
-        ShowException(e);
-    }
-
-    return nullptr;
-}
-
-String^ Form1::SystemsGetRowTooltip(StarSystem ^system)
-{
-    return system->GenerateScan();
-}
-
-Color Form1::SystemsGetRowColor(StarSystem ^system)
-{
-    if( system->Master == nullptr )
-        return Color::White;
-    return GetAlienColor( system->Master );
-}
 
 void Form1::SetupSystems()
 {
     // Put system data in a DataTable so that column sorting works.
     DataTable ^dataTable = gcnew DataTable();
 
-    dataTable->Columns->Add("X", int::typeid );
-    dataTable->Columns->Add("Y", int::typeid );
-    dataTable->Columns->Add("Z", int::typeid );
-    dataTable->Columns->Add("Type", String::typeid );
-    dataTable->Columns->Add("Planets", int::typeid );
-    dataTable->Columns->Add("MinLSN", int::typeid );
-    dataTable->Columns->Add("Dist.", double::typeid );
-    dataTable->Columns->Add("Mishap %", String::typeid );
-    dataTable->Columns->Add("Scan", String::typeid );
-    dataTable->Columns->Add("Visited", int::typeid );
-    dataTable->Columns->Add("Colonies", String::typeid );
-    dataTable->Columns->Add("Notes", String::typeid );
+    DataColumn ^colObject   = dataTable->Columns->Add("system",     StarSystem::typeid );
+    DataColumn ^colX        = dataTable->Columns->Add("X",          int::typeid );
+    DataColumn ^colY        = dataTable->Columns->Add("Y",          int::typeid );
+    DataColumn ^colZ        = dataTable->Columns->Add("Z",          int::typeid );
+    DataColumn ^colType     = dataTable->Columns->Add("Type",       String::typeid );
+    DataColumn ^colPlanets  = dataTable->Columns->Add("Planets",    int::typeid );
+    DataColumn ^colLSN      = dataTable->Columns->Add("MinLSN",     int::typeid );
+    DataColumn ^colDist     = dataTable->Columns->Add("Dist.",      double::typeid );
+    DataColumn ^colMishap   = dataTable->Columns->Add("Mishap %",   String::typeid );
+    DataColumn ^colScan     = dataTable->Columns->Add("Scan",       String::typeid );
+    DataColumn ^colVisited  = dataTable->Columns->Add("Visited",    int::typeid );
+    DataColumn ^colColonies = dataTable->Columns->Add("Colonies",   String::typeid );
+    DataColumn ^colNotes    = dataTable->Columns->Add("Notes",      String::typeid );
 
     Alien ^sp = m_GameData->GetSpecies();
     int gv = sp->TechLevels[TECH_GV];
@@ -475,61 +481,57 @@ void Form1::SetupSystems()
         double mishap = system->CalcMishap(sp->HomeSystem, gv, 0);
 
         DataRow^ row = dataTable->NewRow();
-        row["X"]        = system->X;
-        row["Y"]        = system->Y;
-        row["Z"]        = system->Z;
-        row["Type"]     = system->Type;
+        row[colObject]      = system;
+        row[colX]           = system->X;
+        row[colY]           = system->Y;
+        row[colZ]           = system->Z;
+        row[colType]        = system->Type;
         if( system->IsExplored() )
         {
-            row["Planets"]  = system->PlanetsCount;
-            row["MinLSN"]   = system->GetMinLSN();
+            row[colPlanets] = system->PlanetsCount;
+            row[colLSN]     = system->GetMinLSN();
         }
-        row["Dist."]    = system->CalcDistance(sp->HomeSystem);
-        row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
-        row["Scan"]     = system->PrintScanTurn();
+        row[colDist]        = system->CalcDistance(sp->HomeSystem);
+        row[colMishap]      = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
+        row[colScan]        = system->PrintScanTurn();
         if( system->LastVisited != -1 )
-            row["Visited"]  = system->LastVisited;
-        row["Colonies"] = system->PrintColonies();
-        row["Notes"]    = system->Comment;
+            row[colVisited] = system->LastVisited;
+        row[colColonies]    = system->PrintColonies( -1 );
+        row[colNotes]       = system->Comment;
 
         dataTable->Rows->Add(row);
     }
 
-    ApplyDataAndFormat(SystemsGrid, dataTable);
+    ApplyDataAndFormat(SystemsGrid, dataTable, colObject);
 
     // Some columns are not sortable... yet
-    SystemsGrid->Columns["Scan"]->SortMode = DataGridViewColumnSortMode::NotSortable;
-    SystemsGrid->Columns["Mishap %"]->SortMode = DataGridViewColumnSortMode::NotSortable;
+    SystemsGrid->Columns[colScan->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
+    SystemsGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
 
     // Default sort column
-    SystemsGrid->Sort( SystemsGrid->Columns["Dist."], ListSortDirection::Ascending );
+    SystemsGrid->Sort( SystemsGrid->Columns[colDist->Ordinal], ListSortDirection::Ascending );
 }
 
 ////////////////////////////////////////////////////////////////
 // Planets
-
-Color Form1::PlanetsGetRowColor(DataGridViewRow ^row)
-{
-    return Color::White;
-    //String ^name = row->Cells[ ColoniesGrid->Columns["Name"]->Index ]->Value->ToString();
-    //return GetAlienColor( m_GameData->GetColony(name)->Owner );
-}
 
 void Form1::SetupPlanets()
 {
     // Put system data in a DataTable so that column sorting works.
     DataTable ^dataTable = gcnew DataTable();
 
-    dataTable->Columns->Add("Name", String::typeid );
-    dataTable->Columns->Add("Coords", String::typeid );
-    dataTable->Columns->Add("Temp", int::typeid );
-    dataTable->Columns->Add("Press", int::typeid );
-    dataTable->Columns->Add("MD", double::typeid );
-    dataTable->Columns->Add("LSN", int::typeid );
-    dataTable->Columns->Add("Dist.", double::typeid );
-    dataTable->Columns->Add("Mishap %", String::typeid );
-    dataTable->Columns->Add("Scan", String::typeid );
-    dataTable->Columns->Add("Notes", String::typeid );
+    DataColumn ^colObject   = dataTable->Columns->Add("planet",     Planet::typeid );
+    DataColumn ^colName     = dataTable->Columns->Add("Name",       String::typeid );
+    DataColumn ^colCoords   = dataTable->Columns->Add("Coords",     String::typeid );
+    DataColumn ^colTemp     = dataTable->Columns->Add("Temp",       int::typeid );
+    DataColumn ^colPress    = dataTable->Columns->Add("Press",      int::typeid );
+    DataColumn ^colMD       = dataTable->Columns->Add("MD",         double::typeid );
+    DataColumn ^colLSN      = dataTable->Columns->Add("LSN",        int::typeid );
+    DataColumn ^colDist     = dataTable->Columns->Add("Dist.",      double::typeid );
+    DataColumn ^colMishap   = dataTable->Columns->Add("Mishap %",   String::typeid );
+    DataColumn ^colScan     = dataTable->Columns->Add("Scan",       String::typeid );
+    DataColumn ^colColonies = dataTable->Columns->Add("Colonies",   String::typeid );
+    DataColumn ^colNotes    = dataTable->Columns->Add("Notes",      String::typeid );
 
     Alien ^sp = m_GameData->GetSpecies();
     int gv = sp->TechLevels[TECH_GV];
@@ -542,58 +544,55 @@ void Form1::SetupPlanets()
         for each( Planet ^planet in system->GetPlanets() )
         {
             DataRow^ row = dataTable->NewRow();
-            row["Name"]     = planet->Name;
-            row["Coords"]   = planet->PrintLocation();
-            row["Temp"]     = planet->TempClass;
-            row["Press"]    = planet->PressClass;
-            row["MD"]       = planet->MiningDiff;
-            row["LSN"]      = planet->LSN;
-            row["Dist."]    = distance;
-            row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
-            row["Scan"]     = system->PrintScanTurn();
-            row["Notes"]    = planet->Comment;
+            row[colObject]   = planet;
+            row[colName]     = planet->Name;
+            row[colCoords]   = planet->PrintLocation();
+            row[colTemp]     = planet->TempClass;
+            row[colPress]    = planet->PressClass;
+            row[colMD]       = planet->MiningDiff;
+            row[colLSN]      = planet->LSN;
+            row[colDist]     = distance;
+            row[colMishap]   = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
+            row[colScan]     = system->PrintScanTurn();
+            row[colColonies] = system->PrintColonies( planet->Number );
+            row[colNotes]    = planet->Comment;
 
             dataTable->Rows->Add(row);
         }
     }
 
-    ApplyDataAndFormat(PlanetsGrid, dataTable);
+    ApplyDataAndFormat(PlanetsGrid, dataTable, colObject);
 
     // Some columns are not sortable... yet
-    PlanetsGrid->Columns["Scan"]->SortMode = DataGridViewColumnSortMode::NotSortable;
-    PlanetsGrid->Columns["Mishap %"]->SortMode = DataGridViewColumnSortMode::NotSortable;
+    PlanetsGrid->Columns[colScan->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
+    PlanetsGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
 
     // Default sort column
-    PlanetsGrid->Sort( PlanetsGrid->Columns["LSN"], ListSortDirection::Ascending );
+    PlanetsGrid->Sort( PlanetsGrid->Columns[colLSN->Ordinal], ListSortDirection::Ascending );
 }
 
 ////////////////////////////////////////////////////////////////
 // Colonies
-
-Color Form1::ColoniesGetRowColor(DataGridViewRow ^row)
-{
-    String ^name = row->Cells[ ColoniesGrid->Columns["Name"]->Index ]->Value->ToString();
-    return GetAlienColor( m_GameData->GetColony(name)->Owner );
-}
 
 void Form1::SetupColonies()
 {
     // Put system data in a DataTable so that column sorting works.
     DataTable ^dataTable = gcnew DataTable();
 
-    dataTable->Columns->Add("Owner", String::typeid );
-    dataTable->Columns->Add("Name", String::typeid );
-    dataTable->Columns->Add("Type", String::typeid );
-    dataTable->Columns->Add("Location", String::typeid );
-    dataTable->Columns->Add("Size", double::typeid );
-    dataTable->Columns->Add("Seen", int::typeid );
-    dataTable->Columns->Add("Prod.", int::typeid );
-    dataTable->Columns->Add("Pr[%]", int::typeid );
-    dataTable->Columns->Add("Balance", String::typeid );
-    dataTable->Columns->Add("Pop", int::typeid );
-    dataTable->Columns->Add("Dist.", double::typeid );
-    dataTable->Columns->Add("Mishap %", String::typeid );
-    dataTable->Columns->Add("Inventory", String::typeid );
+    DataColumn ^colObject       = dataTable->Columns->Add("colony",     Colony::typeid );
+    DataColumn ^colOwner        = dataTable->Columns->Add("Owner",      String::typeid );
+    DataColumn ^colName         = dataTable->Columns->Add("Name",       String::typeid );
+    DataColumn ^colType         = dataTable->Columns->Add("Type",       String::typeid );
+    DataColumn ^colLocation     = dataTable->Columns->Add("Location",   String::typeid );
+    DataColumn ^colSize         = dataTable->Columns->Add("Size",       double::typeid );
+    DataColumn ^colSeen         = dataTable->Columns->Add("Seen",       int::typeid );
+    DataColumn ^colProd         = dataTable->Columns->Add("Prod.",      int::typeid );
+    DataColumn ^colProdPerc     = dataTable->Columns->Add("Pr[%]",      int::typeid );
+    DataColumn ^colBalance      = dataTable->Columns->Add("Balance",    String::typeid );
+    DataColumn ^colPop          = dataTable->Columns->Add("Pop",        int::typeid );
+    DataColumn ^colDist         = dataTable->Columns->Add("Dist.",      double::typeid );
+    DataColumn ^colMishap       = dataTable->Columns->Add("Mishap %",   String::typeid );
+    DataColumn ^colInventory    = dataTable->Columns->Add("Inventory",  String::typeid );
 
     Alien ^sp = m_GameData->GetSpecies();
     int gv = sp->TechLevels[TECH_GV];
@@ -604,21 +603,22 @@ void Form1::SetupColonies()
         double mishap = colony->System->CalcMishap(sp->HomeSystem, gv, 0);
 
         DataRow^ row = dataTable->NewRow();
-        row["Owner"]    = colony->Owner == sp ? String::Format("* {0}", sp->Name) : colony->Owner->Name;
-        row["Name"]     = colony->Name;
-        row["Type"]     = PlTypeToString(colony->PlanetType);
-        row["Location"] = colony->PrintLocation();
+        row[colObject]      = colony;
+        row[colOwner]       = colony->Owner == sp ? String::Format("* {0}", sp->Name) : colony->Owner->Name;
+        row[colName]        = colony->Name;
+        row[colType]        = PlTypeToString(colony->PlanetType);
+        row[colLocation]    = colony->PrintLocation();
         if( colony->MaBase != 0 || colony->MiBase != 0 )
-            row["Size"]     = colony->MiBase + colony->MaBase;
-        row["Dist."]    = distance;
-        row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
-        row["Inventory"]= colony->PrintInventoryShort();
+            row[colSize]    = colony->MiBase + colony->MaBase;
+        row[colDist]        = distance;
+        row[colMishap]      = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
+        row[colInventory]   = colony->PrintInventoryShort();
 
         if( colony->Owner == sp )
         {
-            row["Prod."]    = colony->EUProd - colony->EUFleet;
-            row["Pr[%]"]    = 100 - colony->ProdPenalty;
-            row["Pop"]      = colony->AvailPop;
+            row[colProd]    = colony->EUProd - colony->EUFleet;
+            row[colProdPerc]= 100 - colony->ProdPenalty;
+            row[colPop]     = colony->AvailPop;
 
             if( colony->PlanetType == PLANET_HOME ||
                 colony->PlanetType == PLANET_COLONY )
@@ -626,59 +626,54 @@ void Form1::SetupColonies()
                 int mi = (int)((sp->TechLevels[TECH_MI] * colony->MiBase) / colony->Planet->MiningDiff);
                 int ma = (int)(sp->TechLevels[TECH_MA] * colony->MaBase);
                 if( mi == ma )
-                    row["Balance"] = "Balanced";
+                    row[colBalance] = "Balanced";
                 else if( mi < ma )
-                    row["Balance"] = String::Format("+{0} MA cap.", ma - mi);
+                    row[colBalance] = String::Format("+{0} MA cap.", ma - mi);
                 else
-                    row["Balance"] = String::Format("-{0} MA cap.", mi - ma);
+                    row[colBalance] = String::Format("-{0} MA cap.", mi - ma);
             }
         }
         else
         {
-            row["Seen"]     = colony->LastSeen;
+            row[colSeen] = colony->LastSeen;
         }
 
         dataTable->Rows->Add(row);
     }
 
-    ApplyDataAndFormat(ColoniesGrid, dataTable);
+    ApplyDataAndFormat(ColoniesGrid, dataTable, colObject);
 
     // Formatting
-    ColoniesGrid->Columns["Size"]->DefaultCellStyle->Format = "F1";
+    ColoniesGrid->Columns[colSize->Ordinal]->DefaultCellStyle->Format = "F1";
 
     // Some columns are not sortable... yet
-    ColoniesGrid->Columns["Mishap %"]->SortMode = DataGridViewColumnSortMode::NotSortable;
+    ColoniesGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
 
     // Default sort column
-    ColoniesGrid->Sort( ColoniesGrid->Columns["Owner"], ListSortDirection::Ascending );
+    ColoniesGrid->Sort( ColoniesGrid->Columns[colOwner->Ordinal], ListSortDirection::Ascending );
 }
 
 ////////////////////////////////////////////////////////////////
 // Ships
-
-Color Form1::ShipsGetRowColor(DataGridViewRow ^row)
-{
-    String ^name = row->Cells[ ShipsGrid->Columns["Name"]->Index ]->Value->ToString();
-    return GetAlienColor( m_GameData->GetShip(name)->Owner );
-}
 
 void Form1::SetupShips()
 {
     // Put system data in a DataTable so that column sorting works.
     DataTable ^dataTable = gcnew DataTable();
 
-    dataTable->Columns->Add("Owner", String::typeid );
-    dataTable->Columns->Add("Class", String::typeid );
-    dataTable->Columns->Add("Name", String::typeid );
-    dataTable->Columns->Add("Location", String::typeid );
-    dataTable->Columns->Add("Age", int::typeid );
-    dataTable->Columns->Add("Cap.", int::typeid );
-    dataTable->Columns->Add("Cargo", String::typeid );
-    dataTable->Columns->Add("Dist.", double::typeid );
-    dataTable->Columns->Add("Mishap %", String::typeid );
-    dataTable->Columns->Add("Maint", double::typeid );
-    dataTable->Columns->Add("Upg.Cost", int::typeid );
-    dataTable->Columns->Add("Rec.Val", int::typeid );
+    DataColumn ^colObject   = dataTable->Columns->Add("ship",       Ship::typeid );
+    DataColumn ^colOwner    = dataTable->Columns->Add("Owner",      String::typeid );
+    DataColumn ^colClass    = dataTable->Columns->Add("Class",      String::typeid );
+    DataColumn ^colName     = dataTable->Columns->Add("Name",       String::typeid );
+    DataColumn ^colLocation = dataTable->Columns->Add("Location",   String::typeid );
+    DataColumn ^colAge      = dataTable->Columns->Add("Age",        int::typeid );
+    DataColumn ^colCap      = dataTable->Columns->Add("Cap.",       int::typeid );
+    DataColumn ^colCargo    = dataTable->Columns->Add("Cargo",      String::typeid );
+    DataColumn ^colDist     = dataTable->Columns->Add("Dist.",      double::typeid );
+    DataColumn ^colMishap   = dataTable->Columns->Add("Mishap %",   String::typeid );
+    DataColumn ^colMaint    = dataTable->Columns->Add("Maint",      double::typeid );
+    DataColumn ^colUpgCost  = dataTable->Columns->Add("Upg.Cost",   int::typeid );
+    DataColumn ^colRecVal   = dataTable->Columns->Add("Rec.Val",    int::typeid );
 
     Alien ^sp = m_GameData->GetSpecies();
     int gv = sp->TechLevels[TECH_GV];
@@ -705,77 +700,74 @@ void Form1::SetupShips()
             ship->Age);
 
         DataRow^ row = dataTable->NewRow();
-        row["Owner"]    = ship->Owner == sp ? String::Format("* {0}", sp->Name) : ship->Owner->Name;
-        row["Class"]    = ship->PrintClass();
-        row["Name"]     = ship->Name;
-        row["Location"] = ship->PrintLocation();
+        row[colObject]      = ship;
+        row[colOwner]       = ship->Owner == sp ? String::Format("* {0}", sp->Name) : ship->Owner->Name;
+        row[colClass]       = ship->PrintClass();
+        row[colName]        = ship->Name;
+        row[colLocation]    = ship->PrintLocation();
         if( !ship->IsPirate )
-            row["Age"]  = ship->Age;
-        row["Cap."]     = ship->Capacity;
-        row["Dist."]    = distance;
-        row["Mishap %"] = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
+            row[colAge]     = ship->Age;
+        row[colCap]         = ship->Capacity;
+        row[colDist]        = distance;
+        row[colMishap]      = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
         if( sp == ship->Owner )
         {
-            row["Cargo"]    = ship->PrintCargo();
-            row["Maint"]    = ship->GetMaintenanceCost() * discount;
-            row["Upg.Cost"] = ship->GetUpgradeCost();
-            row["Rec.Val"]  = ship->GetRecycleValue();
+            row[colCargo]   = ship->PrintCargo();
+            row[colMaint]   = ship->GetMaintenanceCost() * discount;
+            row[colUpgCost] = ship->GetUpgradeCost();
+            row[colRecVal]  = ship->GetRecycleValue();
         }
         dataTable->Rows->Add(row);
     }
 
-    ApplyDataAndFormat(ShipsGrid, dataTable);
+    ApplyDataAndFormat(ShipsGrid, dataTable, colObject);
 
     // Some columns are not sortable... yet
-    ShipsGrid->Columns["Mishap %"]->SortMode = DataGridViewColumnSortMode::NotSortable;
+    ShipsGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
 
     // Default sort column
-    ShipsGrid->Sort( ShipsGrid->Columns["Owner"], ListSortDirection::Ascending );
+    ShipsGrid->Sort( ShipsGrid->Columns[colOwner->Ordinal], ListSortDirection::Ascending );
 }
 
 ////////////////////////////////////////////////////////////////
 // Aliens
-
-Color Form1::AliensGetRowColor(DataGridViewRow ^row)
-{
-    String ^name = row->Cells[ AliensGrid->Columns["Name"]->Index ]->Value->ToString();
-    return GetAlienColor( m_GameData->GetAlien(name) );
-}
 
 void Form1::SetupAliens()
 {
     // Put system data in a DataTable so that column sorting works.
     DataTable ^dataTable = gcnew DataTable();
 
-    dataTable->Columns->Add("Name", String::typeid );
-    dataTable->Columns->Add("Relation", String::typeid );
-    dataTable->Columns->Add("Home", String::typeid );
-    dataTable->Columns->Add("Tech Levels", String::typeid );
-    dataTable->Columns->Add("Temp", int::typeid );
-    dataTable->Columns->Add("Press", int::typeid );
-    dataTable->Columns->Add("EMail", String::typeid );
+    DataColumn ^colObject   = dataTable->Columns->Add("alien",          Alien::typeid );
+    DataColumn ^colName     = dataTable->Columns->Add("Name",           String::typeid );
+    DataColumn ^colRelation = dataTable->Columns->Add("Relation",       String::typeid );
+    DataColumn ^colHome     = dataTable->Columns->Add("Home",           String::typeid );
+    DataColumn ^colTechLev  = dataTable->Columns->Add("Tech Levels",    String::typeid );
+    DataColumn ^colTemp     = dataTable->Columns->Add("Temp",           int::typeid );
+    DataColumn ^colPress    = dataTable->Columns->Add("Press",          int::typeid );
+    DataColumn ^colEMail    = dataTable->Columns->Add("EMail",          String::typeid );
 
     for each( Alien ^alien in m_GameData->GetAliens() )
     {
         DataRow^ row = dataTable->NewRow();
-        row["Name"]         = alien->Name;
-        row["Relation"]     = alien->PrintRelation();
-        row["Home"]         = alien->PrintHome();
-        row["Tech Levels"]  = alien->PrintTechLevels();
+        row[colObject]      = alien;
+        row[colName]        = alien->Name;
+        row[colRelation]    = alien->PrintRelation();
+        row[colHome]        = alien->PrintHome();
+        row[colTechLev]     = alien->PrintTechLevels();
         if( alien->AtmReq->TempClass != -1 &&
             alien->AtmReq->PressClass != -1 )
         {
-            row["Temp"]     = alien->AtmReq->TempClass;
-            row["Press"]    = alien->AtmReq->PressClass;
+            row[colTemp]    = alien->AtmReq->TempClass;
+            row[colPress]   = alien->AtmReq->PressClass;
         }
-        row["EMail"]        = alien->Email;
+        row[colEMail]       = alien->Email;
         dataTable->Rows->Add(row);
     }
 
-    ApplyDataAndFormat(AliensGrid, dataTable);
+    ApplyDataAndFormat(AliensGrid, dataTable, colObject);
 
     // Default sort column
-    AliensGrid->Sort( AliensGrid->Columns["Relation"], ListSortDirection::Ascending );
+    AliensGrid->Sort( AliensGrid->Columns[colRelation->Ordinal], ListSortDirection::Ascending );
 }
 
 

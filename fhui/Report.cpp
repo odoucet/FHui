@@ -6,6 +6,7 @@ using namespace System::Text::RegularExpressions;
 Report::Report(GameData ^gd)
     : m_GameData(gd)
     , m_Phase(gd == nullptr ? PHASE_FILE_DETECT : PHASE_GLOBAL)
+    , m_PhasePreAggregate(PHASE_GLOBAL)
     , m_Turn(-1)
     , m_LineCnt(0)
     , m_bParsingAggregate(false)
@@ -149,7 +150,10 @@ bool Report::Parse(String ^s)
             m_Phase = PHASE_ALIENS_REPORT;
         }
         else if( Regex("^Estimate of the technology of SP ").Match(s)->Success )
+        {
+            m_EstimateAlien = nullptr;
             StartLineAggregate(PHASE_ALIEN_ESTIMATE, s, 1);
+        }
         // Tech levels
         else if( Regex("^Tech Levels:").Match(s)->Success )
             m_Phase = PHASE_TECH_LEVELS;
@@ -233,7 +237,10 @@ bool Report::Parse(String ^s)
         if( Regex("^Post-arrival orders:").Match(s)->Success )
             m_Phase = PHASE_ORDERS_POST_ARRIVAL;
         else if( Regex("^Estimate of the technology of SP ").Match(s)->Success )
+        {
+            m_EstimateAlien = nullptr;
             StartLineAggregate(PHASE_ALIEN_ESTIMATE, s, 1);
+        }
         break;
 
     case PHASE_ORDERS_POST_ARRIVAL:
@@ -266,28 +273,42 @@ bool Report::Parse(String ^s)
         if( m_bParsingAggregate )
             s = FinishLineAggregate(false);
 
-        if( MatchWithOutput(s, "^Estimate of the technology of SP\\s+([^,;]+)\\s+\\(government name '([^']+)', government type '([^']+)'\\)") )
+        if( m_EstimateAlien != nullptr )
         {
-            m_EstimateAlien = m_GameData->AddAlien(m_Turn, GetMatchResult(0));
-            m_EstimateAlien->GovName = GetMatchResult(1);
-            m_EstimateAlien->GovType = GetMatchResult(2);
-        }
-        else if( m_EstimateAlien != nullptr &&
-            MatchWithOutput(s, "MI =\\s+(\\d+), MA =\\s+(\\d+), ML =\\s+(\\d+), GV =\\s+(\\d+), LS =\\s+(\\d+), BI =\\s+(\\d+)\\.") )
-        {
-            if( m_Turn > m_EstimateAlien->TechEstimateTurn )
+            if( MatchWithOutput(s, "MI =\\s+(\\d+), MA =\\s+(\\d+), ML =\\s+(\\d+), GV =\\s+(\\d+), LS =\\s+(\\d+), BI =\\s+(\\d+)\\.") )
             {
-                m_EstimateAlien->TechLevels[TECH_MI] = GetMatchResultInt(0);
-                m_EstimateAlien->TechLevels[TECH_MA] = GetMatchResultInt(1);
-                m_EstimateAlien->TechLevels[TECH_ML] = GetMatchResultInt(2);
-                m_EstimateAlien->TechLevels[TECH_GV] = GetMatchResultInt(3);
-                m_EstimateAlien->TechLevels[TECH_LS] = GetMatchResultInt(4);
-                m_EstimateAlien->TechLevels[TECH_BI] = GetMatchResultInt(5);
-                m_EstimateAlien->TechEstimateTurn = m_Turn;
+                if( m_Turn > m_EstimateAlien->TechEstimateTurn )
+                {
+                    m_EstimateAlien->TechLevels[TECH_MI] = GetMatchResultInt(0);
+                    m_EstimateAlien->TechLevels[TECH_MA] = GetMatchResultInt(1);
+                    m_EstimateAlien->TechLevels[TECH_ML] = GetMatchResultInt(2);
+                    m_EstimateAlien->TechLevels[TECH_GV] = GetMatchResultInt(3);
+                    m_EstimateAlien->TechLevels[TECH_LS] = GetMatchResultInt(4);
+                    m_EstimateAlien->TechLevels[TECH_BI] = GetMatchResultInt(5);
+                    m_EstimateAlien->TechEstimateTurn = m_Turn;
+                    m_EstimateAlien = nullptr;
+                    m_Phase = m_PhasePreAggregate;
+                }
             }
+            else
+                m_Phase = m_PhasePreAggregate;
         }
         else
-            m_Phase = PHASE_ORDERS_PROD;
+        {
+            if( MatchWithOutput(s, "^Estimate of the technology of SP\\s+([^,;]+)\\s+\\(government name '([^']+)', government type '([^']+)'\\)") )
+            {
+                m_EstimateAlien = m_GameData->AddAlien(m_Turn, GetMatchResult(0));
+                m_EstimateAlien->GovName = GetMatchResult(1);
+                m_EstimateAlien->GovType = GetMatchResult(2);
+            }
+            else if( Regex("^Estimate of the technology of SP\\s+").Match(s)->Success )
+            {
+                m_Phase = m_PhasePreAggregate;
+                StartLineAggregate(PHASE_ALIEN_ESTIMATE, s, 1);
+            }
+            else
+                m_Phase = m_PhasePreAggregate;
+        }
         break;
 
     case PHASE_SYSTEM_SCAN:
@@ -514,7 +535,7 @@ void Report::MatchColonyScan(String ^s)
 
             if( m_ScanColony == nullptr )
             {
-                m_Phase = PHASE_GLOBAL;
+                m_Phase = m_PhasePreAggregate;
                 return;
             }
 
@@ -908,6 +929,7 @@ void Report::StartLineAggregate(PhaseType phase, String ^s, int maxLines)
     m_bParsingAggregate = true;
     m_StringAggregate = s;
     m_AggregateMaxLines = maxLines;
+    m_PhasePreAggregate = m_Phase;
     m_Phase = phase;
 }
 
@@ -917,7 +939,7 @@ String^ Report::FinishLineAggregate(bool resetPhase)
     String ^ret = m_StringAggregate;
     m_StringAggregate = nullptr;
     if( resetPhase )
-        m_Phase = PHASE_GLOBAL;
+        m_Phase = m_PhasePreAggregate;
     return ret;
 }
 
