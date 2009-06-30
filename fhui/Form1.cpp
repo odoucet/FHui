@@ -21,8 +21,27 @@ namespace fhui
 
 void Form1::LoadGameData()
 {
+    InitControls();
     FillAboutBox();
     TurnReload();
+}
+
+void Form1::InitControls()
+{
+    System::Text::RegularExpressions::Regex::CacheSize = 500;
+
+    // -- Systems --
+    BtnTooltip->SetToolTip(SystemsRef,      "Select reference system for distance and mishap calculation.");
+    BtnTooltip->SetToolTip(SystemsGV,       "Set reference GV technology level for distance and mishap calculation.");
+    BtnTooltip->SetToolTip(SystemsShipAge,  "Select ship or ship age for mishap calculation.");
+    BtnTooltip->SetToolTip(SystemsMaxDist,  "Don't show systems farther from reference system than this distance.");
+    BtnTooltip->SetToolTip(SystemsMaxLSN,   "Don't show systems with best planet's LSN above this value.");
+    BtnTooltip->SetToolTip(SystemsFiltVisA, "Show all systems, visited or not.");
+    BtnTooltip->SetToolTip(SystemsFiltVisV, "Show only VISITED systems.");
+    BtnTooltip->SetToolTip(SystemsFiltVisN, "Show only NOT VISITED systems.");
+    BtnTooltip->SetToolTip(SystemsFiltColA, "Show all systems, colonized or not.");
+    BtnTooltip->SetToolTip(SystemsFiltColC, "Show only COLONIZED systems.");
+    BtnTooltip->SetToolTip(SystemsFiltColN, "Show only NOT COLONIZED systems.");
 }
 
 void Form1::TurnReload()
@@ -33,12 +52,77 @@ void Form1::TurnReload()
         ScanReports();
         LoadCommands();
         RepModeChanged();
+        UpdateControls();
     }
     catch( Exception ^e )
     {
         Summary->Text = "Failed loading game data.";
         ShowException(e);
     }
+}
+
+void Form1::InitData()
+{
+    m_HadException = false;
+    m_GalaxySize = 0;
+
+    m_RepTurnNrData = nullptr;
+
+    m_GameTurns = gcnew SortedList<int, GameData^>;
+    m_Reports   = gcnew SortedList<int, String^>;
+    m_RepFiles  = gcnew SortedList<int, String^>;
+    m_CmdFiles  = gcnew SortedList<String^, String^>;
+}
+
+void Form1::InitRefLists()
+{
+    m_RefSystems    = gcnew List<String^>;
+    m_RefPlanets    = gcnew List<String^>;
+    m_RefColonies   = gcnew List<String^>;
+    m_RefAliens     = gcnew List<String^>;
+    m_RefShipAge    = gcnew List<String^>;
+
+    Alien ^sp = m_GameData->GetSpecies();
+
+    // -- ref systems:
+        // home systems:
+        m_RefSystems->Add( "HOME " + sp->Name );
+        for each( Alien ^alien in m_GameData->GetAliens() )
+            if( alien != sp && alien->HomeSystem )
+                m_RefSystems->Add( "HOME " + alien->Name );
+        // colonies:
+        for each( Colony ^colony in sp->Colonies )
+            if( colony->PlanetType != PLANET_HOME )
+                m_RefSystems->Add( "PL " + colony->Name );
+        // entire galaxy:
+        for each( StarSystem ^system in m_GameData->GetStarSystems() )
+            m_RefSystems->Add( system->PrintLocation() );
+
+    // -- ref ship age:
+        // player ships:
+        for each( Ship ^ship in sp->Ships )
+            m_RefShipAge->Add( ship->PrintClass() + " " + ship->Name );
+        // numbers:
+        for( int i = 0; i < 50; ++i )
+            m_RefShipAge->Add( i.ToString() );
+}
+
+void Form1::UpdateControls()
+{
+    InitRefLists();
+
+    TurnSelect->Enabled = true;
+    MenuTabs->Enabled   = true;
+
+    RepModeReports->Checked = true;
+
+    // -- Systems --
+    SystemsGV->Value            = Math::Max(1, m_GameData->GetSpecies()->TechLevels[TECH_GV]);
+    SystemsMaxDist->Maximum     = m_GalaxySize + 1;
+    SystemsMaxDist->Value       = m_GalaxySize + 1;
+    SystemsRef->DataSource      = m_RefSystems;
+    SystemsShipAge->DataSource  = m_RefShipAge;
+    SystemsShipAge->Text        = "0";
 }
 
 void Form1::ShowException(Exception ^e)
@@ -366,23 +450,6 @@ void Form1::LoadCommands()
     {
         RepModeCommands->Enabled = m_CmdFiles->Count > 0;
     }
-}
-
-void Form1::InitData()
-{
-    System::Text::RegularExpressions::Regex::CacheSize = 256;
-
-    m_HadException = false;
-    m_GalaxySize = 0;
-
-    m_RepTurnNrData = nullptr;
-
-    m_GameTurns = gcnew Generic::SortedList<int, GameData^>;
-    m_Reports   = gcnew Generic::SortedList<int, String^>;
-    m_RepFiles  = gcnew Generic::SortedList<int, String^>;
-    m_CmdFiles  = gcnew Generic::SortedList<String^, String^>;
-
-    RepModeReports->Checked = true;
 }
 
 ////////////////////////////////////////////////////////////////
