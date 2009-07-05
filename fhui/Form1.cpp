@@ -14,6 +14,7 @@ using namespace System::Text::RegularExpressions;
 #define FHUI_BUILD_INFO_APPENDIX ""
 #define FHUI_BUILD_INFO() String::Format("{0}{1}{2}", FHUI_REVISION_NUMBER, FHUI_BUILD_INFO_APPENDIX, FHUI_REVISION_MODIFIED ? " (modified)" : "")
 
+#define OPTIMAL_ROW_HEIGHT 18
 
 ////////////////////////////////////////////////////////////////
 
@@ -710,6 +711,9 @@ void Form1::SystemsSetup()
     // Default sort column
     SystemsGrid->Sort( SystemsGrid->Columns[colDist->Ordinal], ListSortDirection::Ascending );
 
+    // Adjust row height
+    SystemsGrid->RowTemplate->Height = OPTIMAL_ROW_HEIGHT;
+
     SystemsGrid->ClearSelection();
 
     // Enable filters
@@ -809,6 +813,9 @@ void Form1::PlanetsSetup()
     // Default sort column
     PlanetsGrid->Sort( PlanetsGrid->Columns[colLSN->Ordinal], ListSortDirection::Ascending );
     
+    // Adjust row height
+    PlanetsGrid->RowTemplate->Height = OPTIMAL_ROW_HEIGHT;
+
     PlanetsGrid->ClearSelection();
 
     // Enable filters
@@ -940,6 +947,9 @@ void Form1::ColoniesSetup()
     // Default sort column
     ColoniesGrid->Sort( ColoniesGrid->Columns[colOwner->Ordinal], ListSortDirection::Ascending );
 
+    // Adjust row height
+    ColoniesGrid->RowTemplate->Height = OPTIMAL_ROW_HEIGHT;
+
     ColoniesGrid->ClearSelection();
 
     // Enable filters
@@ -1045,6 +1055,9 @@ void Form1::ShipsSetup()
     // Default sort column
     ShipsGrid->Sort( ShipsGrid->Columns[colOwner->Ordinal], ListSortDirection::Ascending );
 
+    // Adjust row height
+    ShipsGrid->RowTemplate->Height = OPTIMAL_ROW_HEIGHT;
+
     ShipsGrid->ClearSelection();
 
     // Enable filters
@@ -1099,6 +1112,9 @@ void Form1::AliensSetup()
 
     // Default sort column
     AliensGrid->Sort( AliensGrid->Columns[colRelation->Ordinal], ListSortDirection::Ascending );
+
+    // Adjust row height
+    AliensGrid->RowTemplate->Height = OPTIMAL_ROW_HEIGHT;
 
     AliensGrid->ClearSelection();
 
