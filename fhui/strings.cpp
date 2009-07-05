@@ -72,6 +72,7 @@ String^ PlTypeToString(PlanetType plType)
     case PLANET_COLONY:         return "Colony";
     case PLANET_COLONY_MINING:  return "Mining";
     case PLANET_COLONY_RESORT:  return "Resort";
+    case PLANET_UNCOLONIZED:    return "Empty";
     default:
         {
             int t = plType;

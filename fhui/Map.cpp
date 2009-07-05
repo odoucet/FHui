@@ -31,12 +31,12 @@ private ref struct MapConstants
 ////////////////////////////////////////////////////////////////
 // Map
 
-void Form1::SetupMap()
+void Form1::MapSetup()
 {
     MapSPSelf->Text = m_GameData->GetSpeciesName();
 }
 
-void Form1::DrawMap()
+void Form1::MapDraw()
 {
     try
     {
@@ -216,7 +216,7 @@ void Form1::MapDrawDistance(Graphics ^g, int sp, StarSystem ^sysFrom, StarSystem
         return;
 
     if( MapEnLSN->Checked &&
-        sysTo->GetMinLSN() > MapLSNVal->Value )
+        sysTo->MinLSN > MapLSNVal->Value )
         return;
 
     int gv = MapGetAlienGV(sp);
@@ -282,7 +282,7 @@ void Form1::MapDrawSystems(Graphics ^g)
 
         Brush ^brush;
         if( system->IsExplored() )
-            brush = MapGetBrushLSN( system->GetMinLSN() );
+            brush = MapGetBrushLSN( system->MinLSN );
         else
             brush = gcnew SolidBrush( MapColors::SystemNotExplored );
 

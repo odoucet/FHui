@@ -66,8 +66,12 @@ public:
         m_TechLevelsTeach   = gcnew array<int>(TECH_MAX){0};
     }
 
-    virtual Alien^  GetAlienForBgColor()    { return this; }
-    virtual String^ GetTooltipText()        { return "<TODO...>"; }
+    virtual Alien^      GetAlienForBgColor()    { return this; }
+    virtual String^     GetTooltipText()        { return "<TODO...>"; }
+
+    virtual StarSystem^ GetFilterSystem()       { return nullptr; }
+    virtual int         GetFilterLSN()          { return 99999; }
+    virtual int         GetFilterNumColonies()  { return 0; }
 
     String^         PrintRelation() { return SpRelToString(Relation); }
     String^         PrintHome();
@@ -118,11 +122,16 @@ public:
         MiningDiff = md;
         LSN = -1;
         Master = nullptr;
+        NumColonies = 0;
         m_Atmosphere = gcnew array<int>(GAS_MAX) {false};
     }
 
-    virtual Alien^  GetAlienForBgColor()    { return Master; }
-    virtual String^ GetTooltipText()        { return "<TODO...>"; }
+    virtual Alien^      GetAlienForBgColor()    { return Master; }
+    virtual String^     GetTooltipText()        { return "<TODO...>"; }
+
+    virtual StarSystem^ GetFilterSystem()       { return System; }
+    virtual int         GetFilterLSN()          { return LSN; }
+    virtual int         GetFilterNumColonies()  { return NumColonies; }
 
     int         CalculateLSN(AtmosphericReq^);
 
@@ -139,6 +148,7 @@ public:
     property float          MiningDiff;
     property int            LSN;
     property Alien^         Master;
+    property int            NumColonies;
     property int            Atmosphere [int] {
         int  get(int gas)           { return m_Atmosphere[gas]; }
         void set(int gas, int val)  { m_Atmosphere[gas] = val; }
@@ -160,14 +170,20 @@ public:
         Type = type;
         TurnScanned = -1;
         LastVisited = -1;
+        MinLSN = 99999;
+        MinLSNAvail = 99999;
         Master = nullptr;
     }
 
-    virtual Alien^  GetAlienForBgColor()    { return Master; }
-    virtual String^ GetTooltipText()        { return GenerateScan(); }
+    virtual Alien^      GetAlienForBgColor()    { return Master; }
+    virtual String^     GetTooltipText()        { return GenerateScan(); }
 
-    static double   CalcDistance(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo);
-    static double   CalcMishap(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo, int gv, int age);
+    virtual StarSystem^ GetFilterSystem()       { return this; }
+    virtual int         GetFilterLSN()          { return MinLSN; }
+    virtual int         GetFilterNumColonies()  { return Colonies->Count; }
+
+    static double       CalcDistance(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo);
+    static double       CalcMishap(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo, int gv, int age);
 
     double      CalcDistance(StarSystem ^s)                         { return CalcDistance(X, Y, Z, s->X, s->Y, s->Z); }
     double      CalcMishap(StarSystem ^s, int gv, int age)          { return CalcMishap(X, Y, Z, s->X, s->Y, s->Z, gv, age); }
@@ -177,11 +193,10 @@ public:
     Planet^     GetPlanet(int plNum);
 
     bool        IsExplored() { return TurnScanned != -1; }
-    int         GetMinLSN();
 
     String^     GenerateScan();
     String^     PrintLocation() { return String::Format("{0,2} {1,2} {2,2}", X, Y, Z); }
-    String^     PrintScanTurn();
+    String^     PrintScanStatus();
     String^     PrintColonies(int planetNum);   // -1 for all colonies in system
     //String^     PrintShips();
 
@@ -192,6 +207,8 @@ public:
     property String^    Comment;
     property int        TurnScanned;
     property int        LastVisited;
+    property int        MinLSN;
+    property int        MinLSNAvail;
 
     property List<Ship^>^   Ships;
     property List<Colony^>^ Colonies;
@@ -207,6 +224,10 @@ public:
 
 protected:
     array<Planet^>     ^m_Planets;
+
+    initonly static String^ s_ScanNone = "Not scanned";
+    initonly static String^ s_ScanDipl = "Received";
+    initonly static String^ s_ScanSelf = "Scanned";
 };
 
 public ref class Colony : public IGridDataSrc
@@ -225,19 +246,23 @@ public:
         ProdPenalty = 0;
         EUProd = 0;
         EUFleet = 0;
-        MiBase = 0;
+        MiBase = -1;
         MiDiff = 0;
-        MaBase = 0;
+        MaBase = -1;
         Shipyards = 0;
         LastSeen = -1;
         m_Inventory = gcnew array<int>(INV_MAX){0};
     }
 
-    virtual Alien^  GetAlienForBgColor()    { return Owner; }
-    virtual String^ GetTooltipText()        { return "<TODO...>"; }
+    virtual Alien^      GetAlienForBgColor()    { return Owner; }
+    virtual String^     GetTooltipText()        { return "<TODO...>"; }
 
-    String^     PrintLocation() { return String::Format("{0} {1}", System->PrintLocation(), PlanetNum); }
-    String^     PrintInventoryShort();
+    virtual StarSystem^ GetFilterSystem()       { return System; }
+    virtual int         GetFilterLSN()          { return Planet ? Planet->LSN : 99999; }
+    virtual int         GetFilterNumColonies()  { return 1; }
+
+    String^         PrintLocation() { return String::Format("{0} {1}", System->PrintLocation(), PlanetNum); }
+    String^         PrintInventoryShort();
 
     Alien^          Owner;
     String^         Name;
@@ -255,6 +280,8 @@ public:
     double          MaBase;
     int             Shipyards;
     int             LastSeen;
+
+    property double EconomicBase    { double get() { return Math::Max(-1.0, MiBase + MaBase); } }
 
     property int            Inventory [int] {
         int  get(int inv)           { return m_Inventory[inv]; }
@@ -309,8 +336,12 @@ public:
         m_Cargo = gcnew array<int>(INV_MAX){0};
     }
 
-    virtual Alien^  GetAlienForBgColor()    { return Owner; }
-    virtual String^ GetTooltipText()        { return "<TODO...>"; }
+    virtual Alien^      GetAlienForBgColor()    { return Owner; }
+    virtual String^     GetTooltipText()        { return "<TODO...>"; }
+
+    virtual StarSystem^ GetFilterSystem()       { return System; }
+    virtual int         GetFilterLSN()          { return 99999; }
+    virtual int         GetFilterNumColonies()  { return 0; }
 
     String^         PrintClass();
     String^         PrintLocation();
@@ -318,7 +349,7 @@ public:
 
     int             GetMaintenanceCost();
     int             GetUpgradeCost()        { return Age * OriginalCost / 40; }
-    int             GetRecycleValue()       { return ((3 * OriginalCost) / 4) * ((60 - Age) / 50); }
+    int             GetRecycleValue()       { return (int)Math::Floor(((3 * OriginalCost) / 4.0) * ((60 - Age) / 50.0)); }
 
     void            CalculateCapacity();
 

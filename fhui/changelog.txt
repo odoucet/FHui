@@ -3,8 +3,13 @@ Major new features and bug fixes will be listed here.
 + New features
 * Bug fixes
 
-FHUI build ??
+FHUI build 42
 * Fixed parsing alien technology estimates.
+* Fixed ship recycle value calculation.
++ Show colonies on Planets tab.
++ Data filtering on Systems and Planets tabs (coords edit box not yet functional).
++ Min Available LSN shown on systems tab (best not inhabitated planet).
++ LSN displayed on Colonies tab. Also show colonies of size 0.
 
 FHUI build 39
 + Reload button allows reloading entire data presented in FHUI.

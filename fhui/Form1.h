@@ -1,8 +1,11 @@
 #pragma once
 
+#include "IGridData.h"
+
 ref class GameData;
 ref class Alien;
 ref class StarSystem;
+ref class Ship;
 ref class PlanetView;
 ref class Report;
 
@@ -52,17 +55,11 @@ namespace fhui {
         void        LoadGameTurn(int turn);
         void        LoadReport(String ^fileName);
         void        LoadCommands();
+        void        TurnReload();
         void        InitData();
         void        InitRefLists();
         void        InitControls();
         void        UpdateControls();
-        void        TurnReload();
-        void        SetupSystems();
-        void        SetupPlanets();
-        void        SetupColonies();
-        void        SetupShips();
-        void        SetupAliens();
-        void        SetupMap();
 
         void        FillAboutBox();
         void        RepModeChanged();
@@ -70,11 +67,66 @@ namespace fhui {
         void        DisplayTurn();
         void        ShowException(Exception ^e);
 
+        // -- Data grids formatting
         void        ApplyDataAndFormat(DataGridView ^grid, DataTable ^dataTable, DataColumn ^objColumn);
         Color       GetAlienColor(Alien ^sp);
         void        SetGridBgAndTooltip(DataGridView ^grid);
 
-        void        DrawMap();
+        // ==================================================
+
+        GameData   ^m_GameData;
+        SortedList<int, GameData^>     ^m_GameTurns;
+        SortedList<int, String^>       ^m_Reports;
+        SortedList<int, String^>       ^m_RepFiles;
+        SortedList<String^, String^>   ^m_CmdFiles;
+
+        array<String^>     ^m_RepTurnNrData;
+
+        List<String^>      ^m_RefListSystemsXYZ;
+        List<String^>      ^m_RefListHomes;
+        List<String^>      ^m_RefListColonies;
+        List<String^>      ^m_RefListShips;
+
+        bool                m_HadException;
+        bool               ^m_bGridUpdateEnabled;
+
+        // ==================================================
+        // --- SYSTEMS ---
+        void        SystemsUpdateControls();
+        void        SystemsSetup();
+        void        SystemsSelectPlanets( int rowIndex );
+
+        IGridFilter        ^m_SystemsFilter;
+
+        // ==================================================
+        // --- PLANETS ---
+        void        PlanetsUpdateControls();
+        void        PlanetsSetup();
+
+        IGridFilter        ^m_PlanetsFilter;
+
+        // ==================================================
+        // --- COLONIES ---
+        void        ColoniesUpdateControls();
+        void        ColoniesSetup();
+        void        ColoniesApplyFilters();
+
+        // ==================================================
+        // --- SHIPS ---
+        void        ShipsUpdateControls();
+        void        ShipsSetup();
+        void        ShipsApplyFilters();
+
+        // ==================================================
+        // --- ALIENS ---
+        void        AliensSetup();
+        void        AliensUpdateControls();
+        void        AliensApplyFilters();
+
+        // ==================================================
+        // --- MAP ---
+        void        MapSetup();
+        void        MapDraw();
         void        MapDrawGrid(Graphics ^g);
         void        MapDrawDistances(Graphics ^g);
         void        MapDrawWormholes(Graphics ^g);
@@ -95,32 +147,49 @@ namespace fhui {
 
         Alien^      MapGetAlienFromUI(ComboBox^);
 
-        // --------------------------------------------------
-
-        GameData   ^m_GameData;
-        SortedList<int, GameData^>     ^m_GameTurns;
-        SortedList<int, String^>       ^m_Reports;
-        SortedList<int, String^>       ^m_RepFiles;
-        SortedList<String^, String^>   ^m_CmdFiles;
-
-        array<String^>     ^m_RepTurnNrData;
-
-        List<String^>      ^m_RefSystems;
-        List<String^>      ^m_RefPlanets;
-        List<String^>      ^m_RefColonies;
-        List<String^>      ^m_RefAliens;
-        List<String^>      ^m_RefShipAge;
-
-        bool                m_HadException;
-
-        // --------------------------------------------------
 
         int                 m_GalaxySize;
         float               m_MapSectorSize;
 
         initonly static int MapMaxSpecies = 4;
 
+        // ==================================================
+        // ==================================================
+        // Auto-generated code below this point
         // --------------------------------------------------
+
+    private: System::Windows::Forms::Button^  SystemsFiltersReset;
+    private: System::Windows::Forms::Button^  PlanetsFiltersReset;
+
+    private: System::Windows::Forms::TextBox^  PlanetsRefEdit;
+    private: System::Windows::Forms::NumericUpDown^  PlanetsMaxLSN;
+
+
+    private: System::Windows::Forms::NumericUpDown^  PlanetsMaxMishap;
+
+
+    private: System::Windows::Forms::NumericUpDown^  PlanetsShipAge;
+    private: System::Windows::Forms::NumericUpDown^  PlanetsGV;
+    private: System::Windows::Forms::ComboBox^  PlanetsRefShip;
+    private: System::Windows::Forms::ComboBox^  PlanetsRefColony;
+
+    private: System::Windows::Forms::ComboBox^  PlanetsRefHome;
+
+    private: System::Windows::Forms::ComboBox^  PlanetsRefXYZ;
+private: System::Windows::Forms::Label^  PlanetsRef;
+
+
+    private: System::Windows::Forms::RadioButton^  PlanetsFiltColN;
+
+    private: System::Windows::Forms::RadioButton^  PlanetsFiltColC;
+
+    private: System::Windows::Forms::RadioButton^  PlanetsFiltColA;
+
+    private: System::Windows::Forms::RadioButton^  PlanetsFiltVisN;
+
+    private: System::Windows::Forms::RadioButton^  PlanetsFiltVisV;
+
+    private: System::Windows::Forms::RadioButton^  PlanetsFiltVisA;
 
 
     private: System::Windows::Forms::TabControl^  MenuTabs;
@@ -135,29 +204,17 @@ namespace fhui {
     private: System::Windows::Forms::TabPage^  TabAliens;
     private: System::Windows::Forms::TabPage^  TabCommands;
     private: System::Windows::Forms::Label^  RepStatus;
-
     private: System::Windows::Forms::ComboBox^  RepTurnNr;
-
-
-
-
     private: System::Windows::Forms::TextBox^  RepText;
+    private: System::Windows::Forms::ComboBox^  SystemsRefXYZ;
 
-
-
-    private: System::Windows::Forms::ComboBox^  SystemsRef;
-
-    private: System::Windows::Forms::SplitContainer^  splitContainer2;
-    private: System::Windows::Forms::ComboBox^  SystemsShipAge;
-
-
+    private: System::Windows::Forms::ComboBox^  SystemsRefShip;
     private: System::Windows::Forms::DataGridView^  SystemsGrid;
-    private: System::Windows::Forms::SplitContainer^  splitContainer3;
-    private: System::Windows::Forms::ComboBox^  PlanetsShipAge;
 
-    private: System::Windows::Forms::CheckBox^  PlanetsGV;
-    private: System::Windows::Forms::TextBox^  PlanetsGVVal;
-    private: System::Windows::Forms::ComboBox^  PlanetsRef;
+
+
+
+
     private: System::Windows::Forms::DataGridView^  PlanetsGrid;
     private: System::Windows::Forms::TabPage^  TabAbout;
     private: System::Windows::Forms::TextBox^  TextAbout;
@@ -212,80 +269,23 @@ private: System::Windows::Forms::RadioButton^  RepModeCommands;
 private: System::Windows::Forms::RadioButton^  RepModeReports;
 
 private: System::Windows::Forms::NumericUpDown^  SystemsGV;
-
-
-
-private: System::Windows::Forms::NumericUpDown^  SystemsMaxDist;
+private: System::Windows::Forms::NumericUpDown^  SystemsMaxMishap;
 private: System::Windows::Forms::RadioButton^  SystemsFiltVisN;
-
 private: System::Windows::Forms::RadioButton^  SystemsFiltVisV;
-
 private: System::Windows::Forms::RadioButton^  SystemsFiltVisA;
 private: System::Windows::Forms::RadioButton^  SystemsFiltColN;
-
-
 private: System::Windows::Forms::RadioButton^  SystemsFiltColC;
-
 private: System::Windows::Forms::RadioButton^  SystemsFiltColA;
 private: System::Windows::Forms::ToolTip^  BtnTooltip;
 private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+private: System::Windows::Forms::NumericUpDown^  SystemsShipAge;
+private: System::Windows::Forms::TextBox^  SystemsRefEdit;
+private: System::Windows::Forms::ComboBox^  SystemsRefColony;
+private: System::Windows::Forms::ComboBox^  SystemsRefHome;
+private: System::Windows::Forms::Label^  SystemsRef;
 
 
     private: System::ComponentModel::IContainer^  components;
-
-
-
-
-
-    protected: 
-
-    protected: 
-
-
-
-
 
 	private:
 		/// <summary>
@@ -302,7 +302,6 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
 		{
             this->components = (gcnew System::ComponentModel::Container());
             System::Windows::Forms::SplitContainer^  splitContainer1;
-            System::Windows::Forms::Label^  label1;
             System::Windows::Forms::SplitContainer^  TopSplitCont;
             System::Windows::Forms::SplitContainer^  splitContainer7;
             System::Windows::Forms::GroupBox^  groupBox3;
@@ -312,31 +311,39 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             System::Windows::Forms::GroupBox^  groupBox1;
             System::Windows::Forms::Label^  label11;
             System::Windows::Forms::Label^  label7;
+            System::Windows::Forms::SplitContainer^  splitContainer2;
             System::Windows::Forms::Label^  label16;
             System::Windows::Forms::Label^  label15;
             System::Windows::Forms::Label^  label14;
             System::Windows::Forms::Label^  label2;
+            System::Windows::Forms::Label^  label17;
             System::Windows::Forms::GroupBox^  groupBox5;
             System::Windows::Forms::GroupBox^  groupBox4;
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle13 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle14 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle1 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle2 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::SplitContainer^  splitContainer3;
+            System::Windows::Forms::Label^  label1;
             System::Windows::Forms::Label^  label3;
             System::Windows::Forms::Label^  label4;
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle15 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle16 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::Label^  label18;
+            System::Windows::Forms::Label^  label20;
+            System::Windows::Forms::GroupBox^  groupBox6;
+            System::Windows::Forms::GroupBox^  groupBox7;
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle3 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle4 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::Label^  label8;
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle17 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle18 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle5 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle6 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::Label^  label9;
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle19 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle20 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle7 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle8 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::Label^  label10;
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle21 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle22 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle9 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle10 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::Label^  label5;
             System::Windows::Forms::Label^  label6;
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle23 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle24 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle11 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle12 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             this->RepModeCommands = (gcnew System::Windows::Forms::RadioButton());
             this->RepModeReports = (gcnew System::Windows::Forms::RadioButton());
             this->RepStatus = (gcnew System::Windows::Forms::Label());
@@ -366,12 +373,17 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             this->MapSPSelfGV = (gcnew System::Windows::Forms::NumericUpDown());
             this->MapSPSelfSystem = (gcnew System::Windows::Forms::ComboBox());
             this->TabSystems = (gcnew System::Windows::Forms::TabPage());
-            this->splitContainer2 = (gcnew System::Windows::Forms::SplitContainer());
+            this->SystemsFiltersReset = (gcnew System::Windows::Forms::Button());
+            this->SystemsRefEdit = (gcnew System::Windows::Forms::TextBox());
             this->SystemsMaxLSN = (gcnew System::Windows::Forms::NumericUpDown());
-            this->SystemsMaxDist = (gcnew System::Windows::Forms::NumericUpDown());
+            this->SystemsMaxMishap = (gcnew System::Windows::Forms::NumericUpDown());
+            this->SystemsShipAge = (gcnew System::Windows::Forms::NumericUpDown());
             this->SystemsGV = (gcnew System::Windows::Forms::NumericUpDown());
-            this->SystemsShipAge = (gcnew System::Windows::Forms::ComboBox());
-            this->SystemsRef = (gcnew System::Windows::Forms::ComboBox());
+            this->SystemsRefShip = (gcnew System::Windows::Forms::ComboBox());
+            this->SystemsRefColony = (gcnew System::Windows::Forms::ComboBox());
+            this->SystemsRefHome = (gcnew System::Windows::Forms::ComboBox());
+            this->SystemsRefXYZ = (gcnew System::Windows::Forms::ComboBox());
+            this->SystemsRef = (gcnew System::Windows::Forms::Label());
             this->SystemsFiltColN = (gcnew System::Windows::Forms::RadioButton());
             this->SystemsFiltColC = (gcnew System::Windows::Forms::RadioButton());
             this->SystemsFiltColA = (gcnew System::Windows::Forms::RadioButton());
@@ -380,11 +392,23 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             this->SystemsFiltVisA = (gcnew System::Windows::Forms::RadioButton());
             this->SystemsGrid = (gcnew System::Windows::Forms::DataGridView());
             this->TabPlanets = (gcnew System::Windows::Forms::TabPage());
-            this->splitContainer3 = (gcnew System::Windows::Forms::SplitContainer());
-            this->PlanetsShipAge = (gcnew System::Windows::Forms::ComboBox());
-            this->PlanetsGV = (gcnew System::Windows::Forms::CheckBox());
-            this->PlanetsGVVal = (gcnew System::Windows::Forms::TextBox());
-            this->PlanetsRef = (gcnew System::Windows::Forms::ComboBox());
+            this->PlanetsFiltersReset = (gcnew System::Windows::Forms::Button());
+            this->PlanetsRefEdit = (gcnew System::Windows::Forms::TextBox());
+            this->PlanetsMaxLSN = (gcnew System::Windows::Forms::NumericUpDown());
+            this->PlanetsMaxMishap = (gcnew System::Windows::Forms::NumericUpDown());
+            this->PlanetsShipAge = (gcnew System::Windows::Forms::NumericUpDown());
+            this->PlanetsGV = (gcnew System::Windows::Forms::NumericUpDown());
+            this->PlanetsRefShip = (gcnew System::Windows::Forms::ComboBox());
+            this->PlanetsRefColony = (gcnew System::Windows::Forms::ComboBox());
+            this->PlanetsRefHome = (gcnew System::Windows::Forms::ComboBox());
+            this->PlanetsRefXYZ = (gcnew System::Windows::Forms::ComboBox());
+            this->PlanetsRef = (gcnew System::Windows::Forms::Label());
+            this->PlanetsFiltColN = (gcnew System::Windows::Forms::RadioButton());
+            this->PlanetsFiltColC = (gcnew System::Windows::Forms::RadioButton());
+            this->PlanetsFiltColA = (gcnew System::Windows::Forms::RadioButton());
+            this->PlanetsFiltVisN = (gcnew System::Windows::Forms::RadioButton());
+            this->PlanetsFiltVisV = (gcnew System::Windows::Forms::RadioButton());
+            this->PlanetsFiltVisA = (gcnew System::Windows::Forms::RadioButton());
             this->PlanetsGrid = (gcnew System::Windows::Forms::DataGridView());
             this->TabColonies = (gcnew System::Windows::Forms::TabPage());
             this->splitContainer4 = (gcnew System::Windows::Forms::SplitContainer());
@@ -405,7 +429,6 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             this->dataGridView1 = (gcnew System::Windows::Forms::DataGridView());
             this->BtnTooltip = (gcnew System::Windows::Forms::ToolTip(this->components));
             splitContainer1 = (gcnew System::Windows::Forms::SplitContainer());
-            label1 = (gcnew System::Windows::Forms::Label());
             TopSplitCont = (gcnew System::Windows::Forms::SplitContainer());
             splitContainer7 = (gcnew System::Windows::Forms::SplitContainer());
             groupBox3 = (gcnew System::Windows::Forms::GroupBox());
@@ -415,14 +438,22 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             groupBox1 = (gcnew System::Windows::Forms::GroupBox());
             label11 = (gcnew System::Windows::Forms::Label());
             label7 = (gcnew System::Windows::Forms::Label());
+            splitContainer2 = (gcnew System::Windows::Forms::SplitContainer());
             label16 = (gcnew System::Windows::Forms::Label());
             label15 = (gcnew System::Windows::Forms::Label());
             label14 = (gcnew System::Windows::Forms::Label());
             label2 = (gcnew System::Windows::Forms::Label());
+            label17 = (gcnew System::Windows::Forms::Label());
             groupBox5 = (gcnew System::Windows::Forms::GroupBox());
             groupBox4 = (gcnew System::Windows::Forms::GroupBox());
+            splitContainer3 = (gcnew System::Windows::Forms::SplitContainer());
+            label1 = (gcnew System::Windows::Forms::Label());
             label3 = (gcnew System::Windows::Forms::Label());
             label4 = (gcnew System::Windows::Forms::Label());
+            label18 = (gcnew System::Windows::Forms::Label());
+            label20 = (gcnew System::Windows::Forms::Label());
+            groupBox6 = (gcnew System::Windows::Forms::GroupBox());
+            groupBox7 = (gcnew System::Windows::Forms::GroupBox());
             label8 = (gcnew System::Windows::Forms::Label());
             label9 = (gcnew System::Windows::Forms::Label());
             label10 = (gcnew System::Windows::Forms::Label());
@@ -451,19 +482,26 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             this->MapSPSelf->SuspendLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSPSelfGV))->BeginInit();
             this->TabSystems->SuspendLayout();
-            this->splitContainer2->Panel1->SuspendLayout();
-            this->splitContainer2->Panel2->SuspendLayout();
-            this->splitContainer2->SuspendLayout();
+            splitContainer2->Panel1->SuspendLayout();
+            splitContainer2->Panel2->SuspendLayout();
+            splitContainer2->SuspendLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsMaxLSN))->BeginInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsMaxDist))->BeginInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsMaxMishap))->BeginInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsShipAge))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsGV))->BeginInit();
             groupBox5->SuspendLayout();
             groupBox4->SuspendLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsGrid))->BeginInit();
             this->TabPlanets->SuspendLayout();
-            this->splitContainer3->Panel1->SuspendLayout();
-            this->splitContainer3->Panel2->SuspendLayout();
-            this->splitContainer3->SuspendLayout();
+            splitContainer3->Panel1->SuspendLayout();
+            splitContainer3->Panel2->SuspendLayout();
+            splitContainer3->SuspendLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsMaxLSN))->BeginInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsMaxMishap))->BeginInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsShipAge))->BeginInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsGV))->BeginInit();
+            groupBox6->SuspendLayout();
+            groupBox7->SuspendLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsGrid))->BeginInit();
             this->TabColonies->SuspendLayout();
             this->splitContainer4->Panel1->SuspendLayout();
@@ -567,15 +605,6 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             this->RepText->TabIndex = 0;
             this->RepText->WordWrap = false;
             // 
-            // label1
-            // 
-            label1->AutoSize = true;
-            label1->Location = System::Drawing::Point(4, 7);
-            label1->Name = L"label1";
-            label1->Size = System::Drawing::Size(60, 13);
-            label1->TabIndex = 0;
-            label1->Text = L"Reference:";
-            // 
             // TopSplitCont
             // 
             TopSplitCont->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
@@ -676,6 +705,7 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             // 
             // TabReports
             // 
+            this->TabReports->BackColor = System::Drawing::SystemColors::Control;
             this->TabReports->Controls->Add(splitContainer1);
             this->TabReports->Location = System::Drawing::Point(4, 22);
             this->TabReports->Margin = System::Windows::Forms::Padding(0);
@@ -684,7 +714,6 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             this->TabReports->Size = System::Drawing::Size(683, 563);
             this->TabReports->TabIndex = 0;
             this->TabReports->Text = L"Reports";
-            this->TabReports->UseVisualStyleBackColor = true;
             // 
             // TabMap
             // 
@@ -965,65 +994,100 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             // 
             // TabSystems
             // 
-            this->TabSystems->Controls->Add(this->splitContainer2);
+            this->TabSystems->BackColor = System::Drawing::SystemColors::Control;
+            this->TabSystems->Controls->Add(splitContainer2);
             this->TabSystems->Location = System::Drawing::Point(4, 22);
             this->TabSystems->Name = L"TabSystems";
             this->TabSystems->Size = System::Drawing::Size(683, 563);
             this->TabSystems->TabIndex = 2;
             this->TabSystems->Text = L"Systems";
-            this->TabSystems->UseVisualStyleBackColor = true;
             // 
             // splitContainer2
             // 
-            this->splitContainer2->Dock = System::Windows::Forms::DockStyle::Fill;
-            this->splitContainer2->Location = System::Drawing::Point(0, 0);
-            this->splitContainer2->Name = L"splitContainer2";
-            this->splitContainer2->Orientation = System::Windows::Forms::Orientation::Horizontal;
+            splitContainer2->Dock = System::Windows::Forms::DockStyle::Fill;
+            splitContainer2->FixedPanel = System::Windows::Forms::FixedPanel::Panel1;
+            splitContainer2->IsSplitterFixed = true;
+            splitContainer2->Location = System::Drawing::Point(0, 0);
+            splitContainer2->Name = L"splitContainer2";
+            splitContainer2->Orientation = System::Windows::Forms::Orientation::Horizontal;
             // 
             // splitContainer2.Panel1
             // 
-            this->splitContainer2->Panel1->Controls->Add(this->SystemsMaxLSN);
-            this->splitContainer2->Panel1->Controls->Add(this->SystemsMaxDist);
-            this->splitContainer2->Panel1->Controls->Add(label16);
-            this->splitContainer2->Panel1->Controls->Add(label15);
-            this->splitContainer2->Panel1->Controls->Add(this->SystemsGV);
-            this->splitContainer2->Panel1->Controls->Add(this->SystemsShipAge);
-            this->splitContainer2->Panel1->Controls->Add(label14);
-            this->splitContainer2->Panel1->Controls->Add(label2);
-            this->splitContainer2->Panel1->Controls->Add(this->SystemsRef);
-            this->splitContainer2->Panel1->Controls->Add(label1);
-            this->splitContainer2->Panel1->Controls->Add(groupBox5);
-            this->splitContainer2->Panel1->Controls->Add(groupBox4);
+            splitContainer2->Panel1->BackColor = System::Drawing::SystemColors::Control;
+            splitContainer2->Panel1->Controls->Add(this->SystemsFiltersReset);
+            splitContainer2->Panel1->Controls->Add(this->SystemsRefEdit);
+            splitContainer2->Panel1->Controls->Add(this->SystemsMaxLSN);
+            splitContainer2->Panel1->Controls->Add(this->SystemsMaxMishap);
+            splitContainer2->Panel1->Controls->Add(label16);
+            splitContainer2->Panel1->Controls->Add(label15);
+            splitContainer2->Panel1->Controls->Add(this->SystemsShipAge);
+            splitContainer2->Panel1->Controls->Add(this->SystemsGV);
+            splitContainer2->Panel1->Controls->Add(this->SystemsRefShip);
+            splitContainer2->Panel1->Controls->Add(label14);
+            splitContainer2->Panel1->Controls->Add(label2);
+            splitContainer2->Panel1->Controls->Add(this->SystemsRefColony);
+            splitContainer2->Panel1->Controls->Add(this->SystemsRefHome);
+            splitContainer2->Panel1->Controls->Add(this->SystemsRefXYZ);
+            splitContainer2->Panel1->Controls->Add(this->SystemsRef);
+            splitContainer2->Panel1->Controls->Add(label17);
+            splitContainer2->Panel1->Controls->Add(groupBox5);
+            splitContainer2->Panel1->Controls->Add(groupBox4);
             // 
             // splitContainer2.Panel2
             // 
-            this->splitContainer2->Panel2->Controls->Add(this->SystemsGrid);
-            this->splitContainer2->Size = System::Drawing::Size(683, 563);
-            this->splitContainer2->SplitterDistance = 64;
-            this->splitContainer2->SplitterWidth = 1;
-            this->splitContainer2->TabIndex = 0;
+            splitContainer2->Panel2->Controls->Add(this->SystemsGrid);
+            splitContainer2->Size = System::Drawing::Size(683, 563);
+            splitContainer2->SplitterDistance = 82;
+            splitContainer2->SplitterWidth = 1;
+            splitContainer2->TabIndex = 0;
+            // 
+            // SystemsFiltersReset
+            // 
+            this->SystemsFiltersReset->Location = System::Drawing::Point(558, 51);
+            this->SystemsFiltersReset->Name = L"SystemsFiltersReset";
+            this->SystemsFiltersReset->Size = System::Drawing::Size(59, 23);
+            this->SystemsFiltersReset->TabIndex = 12;
+            this->SystemsFiltersReset->Text = L"<- Reset";
+            this->SystemsFiltersReset->UseVisualStyleBackColor = true;
+            this->SystemsFiltersReset->Click += gcnew System::EventHandler(this, &Form1::SystemsFiltersReset_Click);
+            // 
+            // SystemsRefEdit
+            // 
+            this->SystemsRefEdit->Location = System::Drawing::Point(50, 27);
+            this->SystemsRefEdit->MaxLength = 12;
+            this->SystemsRefEdit->Name = L"SystemsRefEdit";
+            this->SystemsRefEdit->Size = System::Drawing::Size(82, 20);
+            this->SystemsRefEdit->TabIndex = 4;
+            this->BtnTooltip->SetToolTip(this->SystemsRefEdit, L"Enter reference system coordinates in form: X Y Z");
+            this->SystemsRefEdit->WordWrap = false;
+            this->SystemsRefEdit->TextChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
             // 
             // SystemsMaxLSN
             // 
             this->SystemsMaxLSN->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {3, 0, 0, 0});
-            this->SystemsMaxLSN->Location = System::Drawing::Point(193, 34);
-            this->SystemsMaxLSN->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {201, 0, 0, 0});
+            this->SystemsMaxLSN->Location = System::Drawing::Point(193, 53);
+            this->SystemsMaxLSN->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {99, 0, 0, 0});
             this->SystemsMaxLSN->Name = L"SystemsMaxLSN";
-            this->SystemsMaxLSN->Size = System::Drawing::Size(59, 20);
-            this->SystemsMaxLSN->TabIndex = 4;
-            this->SystemsMaxLSN->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {201, 0, 0, 0});
+            this->SystemsMaxLSN->Size = System::Drawing::Size(48, 20);
+            this->SystemsMaxLSN->TabIndex = 9;
+            this->BtnTooltip->SetToolTip(this->SystemsMaxLSN, L"Maximum LSN systems filter.");
+            this->SystemsMaxLSN->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {99, 0, 0, 0});
+            this->SystemsMaxLSN->ValueChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
             // 
-            // SystemsMaxDist
+            // SystemsMaxMishap
             // 
-            this->SystemsMaxDist->Location = System::Drawing::Point(60, 34);
-            this->SystemsMaxDist->Name = L"SystemsMaxDist";
-            this->SystemsMaxDist->Size = System::Drawing::Size(59, 20);
-            this->SystemsMaxDist->TabIndex = 4;
+            this->SystemsMaxMishap->Location = System::Drawing::Point(80, 53);
+            this->SystemsMaxMishap->Name = L"SystemsMaxMishap";
+            this->SystemsMaxMishap->Size = System::Drawing::Size(52, 20);
+            this->SystemsMaxMishap->TabIndex = 8;
+            this->BtnTooltip->SetToolTip(this->SystemsMaxMishap, L"Maximum acceptable mishap chance systems filter.");
+            this->SystemsMaxMishap->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {100, 0, 0, 0});
+            this->SystemsMaxMishap->ValueChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
             // 
             // label16
             // 
             label16->AutoSize = true;
-            label16->Location = System::Drawing::Point(137, 37);
+            label16->Location = System::Drawing::Point(138, 56);
             label16->Name = L"label16";
             label16->Size = System::Drawing::Size(54, 13);
             label16->TabIndex = 9;
@@ -1032,35 +1096,49 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             // label15
             // 
             label15->AutoSize = true;
-            label15->Location = System::Drawing::Point(4, 37);
+            label15->Location = System::Drawing::Point(4, 56);
             label15->Name = L"label15";
-            label15->Size = System::Drawing::Size(54, 13);
+            label15->Size = System::Drawing::Size(75, 13);
             label15->TabIndex = 9;
-            label15->Text = L"Max Dist.:";
+            label15->Text = L"Max Mishap%:";
+            // 
+            // SystemsShipAge
+            // 
+            this->SystemsShipAge->Location = System::Drawing::Point(422, 3);
+            this->SystemsShipAge->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {50, 0, 0, 0});
+            this->SystemsShipAge->Name = L"SystemsShipAge";
+            this->SystemsShipAge->Size = System::Drawing::Size(47, 20);
+            this->SystemsShipAge->TabIndex = 2;
+            this->BtnTooltip->SetToolTip(this->SystemsShipAge, L"Select ship age for mishap calculation.");
+            this->SystemsShipAge->ValueChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
             // 
             // SystemsGV
             // 
-            this->SystemsGV->Location = System::Drawing::Point(256, 5);
+            this->SystemsGV->Location = System::Drawing::Point(311, 3);
             this->SystemsGV->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {200, 0, 0, 0});
             this->SystemsGV->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
             this->SystemsGV->Name = L"SystemsGV";
             this->SystemsGV->Size = System::Drawing::Size(47, 20);
-            this->SystemsGV->TabIndex = 2;
+            this->SystemsGV->TabIndex = 1;
+            this->BtnTooltip->SetToolTip(this->SystemsGV, L"Set reference GV technology level for distance and mishap calculation.");
             this->SystemsGV->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+            this->SystemsGV->ValueChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
             // 
-            // SystemsShipAge
+            // SystemsRefShip
             // 
-            this->SystemsShipAge->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
-            this->SystemsShipAge->FormattingEnabled = true;
-            this->SystemsShipAge->Location = System::Drawing::Point(376, 5);
-            this->SystemsShipAge->Name = L"SystemsShipAge";
-            this->SystemsShipAge->Size = System::Drawing::Size(135, 21);
-            this->SystemsShipAge->TabIndex = 3;
+            this->SystemsRefShip->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+            this->SystemsRefShip->FormattingEnabled = true;
+            this->SystemsRefShip->Location = System::Drawing::Point(482, 3);
+            this->SystemsRefShip->Name = L"SystemsRefShip";
+            this->SystemsRefShip->Size = System::Drawing::Size(135, 21);
+            this->SystemsRefShip->TabIndex = 3;
+            this->BtnTooltip->SetToolTip(this->SystemsRefShip, L"Select ship reference for mishap calculation.");
+            this->SystemsRefShip->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
             // 
             // label14
             // 
             label14->AutoSize = true;
-            label14->Location = System::Drawing::Point(225, 8);
+            label14->Location = System::Drawing::Point(284, 6);
             label14->Name = L"label14";
             label14->Size = System::Drawing::Size(25, 13);
             label14->TabIndex = 5;
@@ -1069,27 +1147,71 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             // label2
             // 
             label2->AutoSize = true;
-            label2->Location = System::Drawing::Point(317, 8);
+            label2->Location = System::Drawing::Point(367, 6);
             label2->Name = L"label2";
             label2->Size = System::Drawing::Size(53, 13);
             label2->TabIndex = 5;
             label2->Text = L"Ship Age:";
             // 
+            // SystemsRefColony
+            // 
+            this->SystemsRefColony->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+            this->SystemsRefColony->FormattingEnabled = true;
+            this->SystemsRefColony->Location = System::Drawing::Point(447, 26);
+            this->SystemsRefColony->Name = L"SystemsRefColony";
+            this->SystemsRefColony->Size = System::Drawing::Size(170, 21);
+            this->SystemsRefColony->TabIndex = 7;
+            this->BtnTooltip->SetToolTip(this->SystemsRefColony, L"Select reference colony for distance and mishap calculation.");
+            this->SystemsRefColony->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
+            // 
+            // SystemsRefHome
+            // 
+            this->SystemsRefHome->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+            this->SystemsRefHome->FormattingEnabled = true;
+            this->SystemsRefHome->Location = System::Drawing::Point(272, 26);
+            this->SystemsRefHome->Name = L"SystemsRefHome";
+            this->SystemsRefHome->Size = System::Drawing::Size(170, 21);
+            this->SystemsRefHome->TabIndex = 6;
+            this->BtnTooltip->SetToolTip(this->SystemsRefHome, L"Select reference home system for distance and mishap calculation.");
+            this->SystemsRefHome->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
+            // 
+            // SystemsRefXYZ
+            // 
+            this->SystemsRefXYZ->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+            this->SystemsRefXYZ->FormattingEnabled = true;
+            this->SystemsRefXYZ->Location = System::Drawing::Point(141, 26);
+            this->SystemsRefXYZ->Name = L"SystemsRefXYZ";
+            this->SystemsRefXYZ->Size = System::Drawing::Size(126, 21);
+            this->SystemsRefXYZ->TabIndex = 5;
+            this->BtnTooltip->SetToolTip(this->SystemsRefXYZ, L"Select reference system for distance and mishap calculation.");
+            this->SystemsRefXYZ->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
+            // 
             // SystemsRef
             // 
-            this->SystemsRef->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
-            this->SystemsRef->FormattingEnabled = true;
-            this->SystemsRef->Location = System::Drawing::Point(66, 4);
+            this->SystemsRef->BackColor = System::Drawing::Color::AliceBlue;
+            this->SystemsRef->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
+            this->SystemsRef->Location = System::Drawing::Point(4, 3);
             this->SystemsRef->Name = L"SystemsRef";
-            this->SystemsRef->Size = System::Drawing::Size(147, 21);
-            this->SystemsRef->TabIndex = 1;
+            this->SystemsRef->Size = System::Drawing::Size(260, 17);
+            this->SystemsRef->TabIndex = 0;
+            this->SystemsRef->Text = L"Ref. system:";
+            this->BtnTooltip->SetToolTip(this->SystemsRef, L"Reference system for distance and mishap % calculation.");
+            // 
+            // label17
+            // 
+            label17->AutoSize = true;
+            label17->Location = System::Drawing::Point(4, 30);
+            label17->Name = L"label17";
+            label17->Size = System::Drawing::Size(43, 13);
+            label17->TabIndex = 0;
+            label17->Text = L"Coords:";
             // 
             // groupBox5
             // 
             groupBox5->Controls->Add(this->SystemsFiltColN);
             groupBox5->Controls->Add(this->SystemsFiltColC);
             groupBox5->Controls->Add(this->SystemsFiltColA);
-            groupBox5->Location = System::Drawing::Point(362, 25);
+            groupBox5->Location = System::Drawing::Point(360, 44);
             groupBox5->Name = L"groupBox5";
             groupBox5->Size = System::Drawing::Size(83, 36);
             groupBox5->TabIndex = 10;
@@ -1105,7 +1227,9 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             this->SystemsFiltColN->TabIndex = 11;
             this->SystemsFiltColN->Text = L"N";
             this->SystemsFiltColN->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->SystemsFiltColN, L"Show only NOT COLONIZED systems.");
             this->SystemsFiltColN->UseVisualStyleBackColor = true;
+            this->SystemsFiltColN->CheckedChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
             // 
             // SystemsFiltColC
             // 
@@ -1117,7 +1241,9 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             this->SystemsFiltColC->TabIndex = 11;
             this->SystemsFiltColC->Text = L"C";
             this->SystemsFiltColC->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->SystemsFiltColC, L"Show only COLONIZED systems.");
             this->SystemsFiltColC->UseVisualStyleBackColor = true;
+            this->SystemsFiltColC->CheckedChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
             // 
             // SystemsFiltColA
             // 
@@ -1131,14 +1257,16 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             this->SystemsFiltColA->TabStop = true;
             this->SystemsFiltColA->Text = L"A";
             this->SystemsFiltColA->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->SystemsFiltColA, L"Show all systems, colonized or not.");
             this->SystemsFiltColA->UseVisualStyleBackColor = true;
+            this->SystemsFiltColA->CheckedChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
             // 
             // groupBox4
             // 
             groupBox4->Controls->Add(this->SystemsFiltVisN);
             groupBox4->Controls->Add(this->SystemsFiltVisV);
             groupBox4->Controls->Add(this->SystemsFiltVisA);
-            groupBox4->Location = System::Drawing::Point(273, 25);
+            groupBox4->Location = System::Drawing::Point(271, 44);
             groupBox4->Name = L"groupBox4";
             groupBox4->Size = System::Drawing::Size(83, 36);
             groupBox4->TabIndex = 10;
@@ -1154,7 +1282,9 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             this->SystemsFiltVisN->TabIndex = 11;
             this->SystemsFiltVisN->Text = L"N";
             this->SystemsFiltVisN->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->SystemsFiltVisN, L"Show only NOT VISITED systems.");
             this->SystemsFiltVisN->UseVisualStyleBackColor = true;
+            this->SystemsFiltVisN->CheckedChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
             // 
             // SystemsFiltVisV
             // 
@@ -1166,7 +1296,9 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             this->SystemsFiltVisV->TabIndex = 11;
             this->SystemsFiltVisV->Text = L"V";
             this->SystemsFiltVisV->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->SystemsFiltVisV, L"Show only VISITED systems.");
             this->SystemsFiltVisV->UseVisualStyleBackColor = true;
+            this->SystemsFiltVisV->CheckedChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
             // 
             // SystemsFiltVisA
             // 
@@ -1176,11 +1308,13 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             this->SystemsFiltVisA->Location = System::Drawing::Point(4, 9);
             this->SystemsFiltVisA->Name = L"SystemsFiltVisA";
             this->SystemsFiltVisA->Size = System::Drawing::Size(24, 23);
-            this->SystemsFiltVisA->TabIndex = 11;
+            this->SystemsFiltVisA->TabIndex = 10;
             this->SystemsFiltVisA->TabStop = true;
             this->SystemsFiltVisA->Text = L"A";
             this->SystemsFiltVisA->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->SystemsFiltVisA, L"Show all systems, visited or not.");
             this->SystemsFiltVisA->UseVisualStyleBackColor = true;
+            this->SystemsFiltVisA->CheckedChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
             // 
             // SystemsGrid
             // 
@@ -1189,120 +1323,355 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             this->SystemsGrid->AllowUserToOrderColumns = true;
             this->SystemsGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
             this->SystemsGrid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-            dataGridViewCellStyle13->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle13->BackColor = System::Drawing::SystemColors::Window;
-            dataGridViewCellStyle13->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle1->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle1->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle1->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle13->ForeColor = System::Drawing::SystemColors::ControlText;
-            dataGridViewCellStyle13->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle13->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle13->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
-            this->SystemsGrid->DefaultCellStyle = dataGridViewCellStyle13;
+            dataGridViewCellStyle1->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle1->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle1->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle1->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->SystemsGrid->DefaultCellStyle = dataGridViewCellStyle1;
             this->SystemsGrid->Dock = System::Windows::Forms::DockStyle::Fill;
             this->SystemsGrid->Location = System::Drawing::Point(0, 0);
             this->SystemsGrid->Name = L"SystemsGrid";
             this->SystemsGrid->ReadOnly = true;
-            dataGridViewCellStyle14->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle14->BackColor = System::Drawing::SystemColors::Control;
-            dataGridViewCellStyle14->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle2->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle2->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle2->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle14->ForeColor = System::Drawing::SystemColors::WindowText;
-            dataGridViewCellStyle14->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle14->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle14->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
-            this->SystemsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle14;
+            dataGridViewCellStyle2->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle2->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle2->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle2->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->SystemsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle2;
             this->SystemsGrid->RowHeadersWidth = 4;
             this->SystemsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
-            this->SystemsGrid->Size = System::Drawing::Size(683, 498);
+            this->SystemsGrid->Size = System::Drawing::Size(683, 480);
             this->SystemsGrid->TabIndex = 0;
+            this->SystemsGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::SystemsGrid_CellMouseDoubleClick);
             this->SystemsGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
             // 
             // TabPlanets
             // 
-            this->TabPlanets->Controls->Add(this->splitContainer3);
+            this->TabPlanets->BackColor = System::Drawing::SystemColors::Control;
+            this->TabPlanets->Controls->Add(splitContainer3);
             this->TabPlanets->Location = System::Drawing::Point(4, 22);
             this->TabPlanets->Name = L"TabPlanets";
             this->TabPlanets->Size = System::Drawing::Size(683, 563);
             this->TabPlanets->TabIndex = 3;
             this->TabPlanets->Text = L"Planets";
-            this->TabPlanets->UseVisualStyleBackColor = true;
             // 
             // splitContainer3
             // 
-            this->splitContainer3->Dock = System::Windows::Forms::DockStyle::Fill;
-            this->splitContainer3->Location = System::Drawing::Point(0, 0);
-            this->splitContainer3->Name = L"splitContainer3";
-            this->splitContainer3->Orientation = System::Windows::Forms::Orientation::Horizontal;
+            splitContainer3->Dock = System::Windows::Forms::DockStyle::Fill;
+            splitContainer3->FixedPanel = System::Windows::Forms::FixedPanel::Panel1;
+            splitContainer3->Location = System::Drawing::Point(0, 0);
+            splitContainer3->Name = L"splitContainer3";
+            splitContainer3->Orientation = System::Windows::Forms::Orientation::Horizontal;
             // 
             // splitContainer3.Panel1
             // 
-            this->splitContainer3->Panel1->Controls->Add(this->PlanetsShipAge);
-            this->splitContainer3->Panel1->Controls->Add(label3);
-            this->splitContainer3->Panel1->Controls->Add(this->PlanetsGV);
-            this->splitContainer3->Panel1->Controls->Add(this->PlanetsGVVal);
-            this->splitContainer3->Panel1->Controls->Add(this->PlanetsRef);
-            this->splitContainer3->Panel1->Controls->Add(label4);
+            splitContainer3->Panel1->Controls->Add(this->PlanetsFiltersReset);
+            splitContainer3->Panel1->Controls->Add(this->PlanetsRefEdit);
+            splitContainer3->Panel1->Controls->Add(this->PlanetsMaxLSN);
+            splitContainer3->Panel1->Controls->Add(this->PlanetsMaxMishap);
+            splitContainer3->Panel1->Controls->Add(label1);
+            splitContainer3->Panel1->Controls->Add(label3);
+            splitContainer3->Panel1->Controls->Add(this->PlanetsShipAge);
+            splitContainer3->Panel1->Controls->Add(this->PlanetsGV);
+            splitContainer3->Panel1->Controls->Add(this->PlanetsRefShip);
+            splitContainer3->Panel1->Controls->Add(label4);
+            splitContainer3->Panel1->Controls->Add(label18);
+            splitContainer3->Panel1->Controls->Add(this->PlanetsRefColony);
+            splitContainer3->Panel1->Controls->Add(this->PlanetsRefHome);
+            splitContainer3->Panel1->Controls->Add(this->PlanetsRefXYZ);
+            splitContainer3->Panel1->Controls->Add(this->PlanetsRef);
+            splitContainer3->Panel1->Controls->Add(label20);
+            splitContainer3->Panel1->Controls->Add(groupBox6);
+            splitContainer3->Panel1->Controls->Add(groupBox7);
             // 
             // splitContainer3.Panel2
             // 
-            this->splitContainer3->Panel2->Controls->Add(this->PlanetsGrid);
-            this->splitContainer3->Size = System::Drawing::Size(683, 563);
-            this->splitContainer3->SplitterDistance = 31;
-            this->splitContainer3->SplitterWidth = 1;
-            this->splitContainer3->TabIndex = 1;
+            splitContainer3->Panel2->Controls->Add(this->PlanetsGrid);
+            splitContainer3->Size = System::Drawing::Size(683, 563);
+            splitContainer3->SplitterDistance = 82;
+            splitContainer3->SplitterWidth = 1;
+            splitContainer3->TabIndex = 1;
             // 
-            // PlanetsShipAge
+            // PlanetsFiltersReset
             // 
-            this->PlanetsShipAge->FormattingEnabled = true;
-            this->PlanetsShipAge->Location = System::Drawing::Point(415, 5);
-            this->PlanetsShipAge->Name = L"PlanetsShipAge";
-            this->PlanetsShipAge->Size = System::Drawing::Size(135, 21);
-            this->PlanetsShipAge->TabIndex = 6;
+            this->PlanetsFiltersReset->Location = System::Drawing::Point(558, 51);
+            this->PlanetsFiltersReset->Name = L"PlanetsFiltersReset";
+            this->PlanetsFiltersReset->Size = System::Drawing::Size(59, 23);
+            this->PlanetsFiltersReset->TabIndex = 30;
+            this->PlanetsFiltersReset->Text = L"<- Reset";
+            this->PlanetsFiltersReset->UseVisualStyleBackColor = true;
+            this->PlanetsFiltersReset->Click += gcnew System::EventHandler(this, &Form1::PlanetsFiltersReset_Click);
+            // 
+            // PlanetsRefEdit
+            // 
+            this->PlanetsRefEdit->Location = System::Drawing::Point(50, 27);
+            this->PlanetsRefEdit->MaxLength = 12;
+            this->PlanetsRefEdit->Name = L"PlanetsRefEdit";
+            this->PlanetsRefEdit->Size = System::Drawing::Size(82, 20);
+            this->PlanetsRefEdit->TabIndex = 18;
+            this->BtnTooltip->SetToolTip(this->PlanetsRefEdit, L"Enter reference system coordinates in form: X Y Z");
+            this->PlanetsRefEdit->WordWrap = false;
+            // 
+            // PlanetsMaxLSN
+            // 
+            this->PlanetsMaxLSN->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {3, 0, 0, 0});
+            this->PlanetsMaxLSN->Location = System::Drawing::Point(193, 53);
+            this->PlanetsMaxLSN->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {99, 0, 0, 0});
+            this->PlanetsMaxLSN->Name = L"PlanetsMaxLSN";
+            this->PlanetsMaxLSN->Size = System::Drawing::Size(48, 20);
+            this->PlanetsMaxLSN->TabIndex = 27;
+            this->BtnTooltip->SetToolTip(this->PlanetsMaxLSN, L"Maximum LSN systems filter.");
+            this->PlanetsMaxLSN->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {99, 0, 0, 0});
+            this->PlanetsMaxLSN->ValueChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
+            // 
+            // PlanetsMaxMishap
+            // 
+            this->PlanetsMaxMishap->Location = System::Drawing::Point(80, 53);
+            this->PlanetsMaxMishap->Name = L"PlanetsMaxMishap";
+            this->PlanetsMaxMishap->Size = System::Drawing::Size(52, 20);
+            this->PlanetsMaxMishap->TabIndex = 24;
+            this->BtnTooltip->SetToolTip(this->PlanetsMaxMishap, L"Maximum acceptable mishap chance systems filter.");
+            this->PlanetsMaxMishap->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {100, 0, 0, 0});
+            this->PlanetsMaxMishap->ValueChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
+            // 
+            // label1
+            // 
+            label1->AutoSize = true;
+            label1->Location = System::Drawing::Point(138, 56);
+            label1->Name = L"label1";
+            label1->Size = System::Drawing::Size(54, 13);
+            label1->TabIndex = 25;
+            label1->Text = L"Max LSN:";
             // 
             // label3
             // 
             label3->AutoSize = true;
-            label3->Location = System::Drawing::Point(356, 8);
+            label3->Location = System::Drawing::Point(4, 56);
             label3->Name = L"label3";
-            label3->Size = System::Drawing::Size(53, 13);
-            label3->TabIndex = 5;
-            label3->Text = L"Ship Age:";
+            label3->Size = System::Drawing::Size(75, 13);
+            label3->TabIndex = 26;
+            label3->Text = L"Max Mishap%:";
+            // 
+            // PlanetsShipAge
+            // 
+            this->PlanetsShipAge->Location = System::Drawing::Point(422, 3);
+            this->PlanetsShipAge->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {50, 0, 0, 0});
+            this->PlanetsShipAge->Name = L"PlanetsShipAge";
+            this->PlanetsShipAge->Size = System::Drawing::Size(47, 20);
+            this->PlanetsShipAge->TabIndex = 16;
+            this->BtnTooltip->SetToolTip(this->PlanetsShipAge, L"Select ship age for mishap calculation.");
+            this->PlanetsShipAge->ValueChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
             // 
             // PlanetsGV
             // 
-            this->PlanetsGV->AutoSize = true;
-            this->PlanetsGV->Location = System::Drawing::Point(258, 7);
+            this->PlanetsGV->Location = System::Drawing::Point(311, 3);
+            this->PlanetsGV->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {200, 0, 0, 0});
+            this->PlanetsGV->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
             this->PlanetsGV->Name = L"PlanetsGV";
-            this->PlanetsGV->Size = System::Drawing::Size(44, 17);
-            this->PlanetsGV->TabIndex = 4;
-            this->PlanetsGV->Text = L"GV:";
-            this->PlanetsGV->UseVisualStyleBackColor = true;
+            this->PlanetsGV->Size = System::Drawing::Size(47, 20);
+            this->PlanetsGV->TabIndex = 15;
+            this->BtnTooltip->SetToolTip(this->PlanetsGV, L"Set reference GV technology level for distance and mishap calculation.");
+            this->PlanetsGV->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+            this->PlanetsGV->ValueChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
             // 
-            // PlanetsGVVal
+            // PlanetsRefShip
             // 
-            this->PlanetsGVVal->Location = System::Drawing::Point(305, 5);
-            this->PlanetsGVVal->MaxLength = 4;
-            this->PlanetsGVVal->Name = L"PlanetsGVVal";
-            this->PlanetsGVVal->Size = System::Drawing::Size(45, 20);
-            this->PlanetsGVVal->TabIndex = 2;
-            this->PlanetsGVVal->Text = L"0";
-            // 
-            // PlanetsRef
-            // 
-            this->PlanetsRef->FormattingEnabled = true;
-            this->PlanetsRef->Location = System::Drawing::Point(105, 4);
-            this->PlanetsRef->Name = L"PlanetsRef";
-            this->PlanetsRef->Size = System::Drawing::Size(147, 21);
-            this->PlanetsRef->TabIndex = 1;
+            this->PlanetsRefShip->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+            this->PlanetsRefShip->FormattingEnabled = true;
+            this->PlanetsRefShip->Location = System::Drawing::Point(482, 3);
+            this->PlanetsRefShip->Name = L"PlanetsRefShip";
+            this->PlanetsRefShip->Size = System::Drawing::Size(135, 21);
+            this->PlanetsRefShip->TabIndex = 17;
+            this->BtnTooltip->SetToolTip(this->PlanetsRefShip, L"Select ship reference for mishap calculation.");
+            this->PlanetsRefShip->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
             // 
             // label4
             // 
             label4->AutoSize = true;
-            label4->Location = System::Drawing::Point(4, 7);
+            label4->Location = System::Drawing::Point(284, 6);
             label4->Name = L"label4";
-            label4->Size = System::Drawing::Size(95, 13);
-            label4->TabIndex = 0;
-            label4->Text = L"Reference system:";
+            label4->Size = System::Drawing::Size(25, 13);
+            label4->TabIndex = 19;
+            label4->Text = L"GV:";
+            // 
+            // label18
+            // 
+            label18->AutoSize = true;
+            label18->Location = System::Drawing::Point(367, 6);
+            label18->Name = L"label18";
+            label18->Size = System::Drawing::Size(53, 13);
+            label18->TabIndex = 20;
+            label18->Text = L"Ship Age:";
+            // 
+            // PlanetsRefColony
+            // 
+            this->PlanetsRefColony->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+            this->PlanetsRefColony->FormattingEnabled = true;
+            this->PlanetsRefColony->Location = System::Drawing::Point(447, 26);
+            this->PlanetsRefColony->Name = L"PlanetsRefColony";
+            this->PlanetsRefColony->Size = System::Drawing::Size(170, 21);
+            this->PlanetsRefColony->TabIndex = 23;
+            this->BtnTooltip->SetToolTip(this->PlanetsRefColony, L"Select reference colony for distance and mishap calculation.");
+            this->PlanetsRefColony->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
+            // 
+            // PlanetsRefHome
+            // 
+            this->PlanetsRefHome->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+            this->PlanetsRefHome->FormattingEnabled = true;
+            this->PlanetsRefHome->Location = System::Drawing::Point(272, 26);
+            this->PlanetsRefHome->Name = L"PlanetsRefHome";
+            this->PlanetsRefHome->Size = System::Drawing::Size(170, 21);
+            this->PlanetsRefHome->TabIndex = 22;
+            this->BtnTooltip->SetToolTip(this->PlanetsRefHome, L"Select reference home system for distance and mishap calculation.");
+            this->PlanetsRefHome->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
+            // 
+            // PlanetsRefXYZ
+            // 
+            this->PlanetsRefXYZ->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+            this->PlanetsRefXYZ->FormattingEnabled = true;
+            this->PlanetsRefXYZ->Location = System::Drawing::Point(141, 26);
+            this->PlanetsRefXYZ->Name = L"PlanetsRefXYZ";
+            this->PlanetsRefXYZ->Size = System::Drawing::Size(126, 21);
+            this->PlanetsRefXYZ->TabIndex = 21;
+            this->BtnTooltip->SetToolTip(this->PlanetsRefXYZ, L"Select reference system for distance and mishap calculation.");
+            this->PlanetsRefXYZ->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
+            // 
+            // PlanetsRef
+            // 
+            this->PlanetsRef->BackColor = System::Drawing::Color::AliceBlue;
+            this->PlanetsRef->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
+            this->PlanetsRef->Location = System::Drawing::Point(4, 3);
+            this->PlanetsRef->Name = L"PlanetsRef";
+            this->PlanetsRef->Size = System::Drawing::Size(260, 17);
+            this->PlanetsRef->TabIndex = 13;
+            this->PlanetsRef->Text = L"Ref. system:";
+            this->BtnTooltip->SetToolTip(this->PlanetsRef, L"Reference system for distance and mishap % calculation.");
+            // 
+            // label20
+            // 
+            label20->AutoSize = true;
+            label20->Location = System::Drawing::Point(4, 30);
+            label20->Name = L"label20";
+            label20->Size = System::Drawing::Size(43, 13);
+            label20->TabIndex = 14;
+            label20->Text = L"Coords:";
+            // 
+            // groupBox6
+            // 
+            groupBox6->Controls->Add(this->PlanetsFiltColN);
+            groupBox6->Controls->Add(this->PlanetsFiltColC);
+            groupBox6->Controls->Add(this->PlanetsFiltColA);
+            groupBox6->Location = System::Drawing::Point(360, 44);
+            groupBox6->Name = L"groupBox6";
+            groupBox6->Size = System::Drawing::Size(83, 36);
+            groupBox6->TabIndex = 28;
+            groupBox6->TabStop = false;
+            // 
+            // PlanetsFiltColN
+            // 
+            this->PlanetsFiltColN->Appearance = System::Windows::Forms::Appearance::Button;
+            this->PlanetsFiltColN->AutoSize = true;
+            this->PlanetsFiltColN->Location = System::Drawing::Point(54, 9);
+            this->PlanetsFiltColN->Name = L"PlanetsFiltColN";
+            this->PlanetsFiltColN->Size = System::Drawing::Size(25, 23);
+            this->PlanetsFiltColN->TabIndex = 11;
+            this->PlanetsFiltColN->Text = L"N";
+            this->PlanetsFiltColN->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->PlanetsFiltColN, L"Show only NOT COLONIZED systems.");
+            this->PlanetsFiltColN->UseVisualStyleBackColor = true;
+            this->PlanetsFiltColN->CheckedChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
+            // 
+            // PlanetsFiltColC
+            // 
+            this->PlanetsFiltColC->Appearance = System::Windows::Forms::Appearance::Button;
+            this->PlanetsFiltColC->AutoSize = true;
+            this->PlanetsFiltColC->Location = System::Drawing::Point(29, 9);
+            this->PlanetsFiltColC->Name = L"PlanetsFiltColC";
+            this->PlanetsFiltColC->Size = System::Drawing::Size(24, 23);
+            this->PlanetsFiltColC->TabIndex = 11;
+            this->PlanetsFiltColC->Text = L"C";
+            this->PlanetsFiltColC->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->PlanetsFiltColC, L"Show only COLONIZED systems.");
+            this->PlanetsFiltColC->UseVisualStyleBackColor = true;
+            this->PlanetsFiltColC->CheckedChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
+            // 
+            // PlanetsFiltColA
+            // 
+            this->PlanetsFiltColA->Appearance = System::Windows::Forms::Appearance::Button;
+            this->PlanetsFiltColA->AutoSize = true;
+            this->PlanetsFiltColA->Checked = true;
+            this->PlanetsFiltColA->Location = System::Drawing::Point(4, 9);
+            this->PlanetsFiltColA->Name = L"PlanetsFiltColA";
+            this->PlanetsFiltColA->Size = System::Drawing::Size(24, 23);
+            this->PlanetsFiltColA->TabIndex = 11;
+            this->PlanetsFiltColA->TabStop = true;
+            this->PlanetsFiltColA->Text = L"A";
+            this->PlanetsFiltColA->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->PlanetsFiltColA, L"Show all systems, colonized or not.");
+            this->PlanetsFiltColA->UseVisualStyleBackColor = true;
+            this->PlanetsFiltColA->CheckedChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
+            // 
+            // groupBox7
+            // 
+            groupBox7->Controls->Add(this->PlanetsFiltVisN);
+            groupBox7->Controls->Add(this->PlanetsFiltVisV);
+            groupBox7->Controls->Add(this->PlanetsFiltVisA);
+            groupBox7->Location = System::Drawing::Point(271, 44);
+            groupBox7->Name = L"groupBox7";
+            groupBox7->Size = System::Drawing::Size(83, 36);
+            groupBox7->TabIndex = 29;
+            groupBox7->TabStop = false;
+            // 
+            // PlanetsFiltVisN
+            // 
+            this->PlanetsFiltVisN->Appearance = System::Windows::Forms::Appearance::Button;
+            this->PlanetsFiltVisN->AutoSize = true;
+            this->PlanetsFiltVisN->Location = System::Drawing::Point(54, 9);
+            this->PlanetsFiltVisN->Name = L"PlanetsFiltVisN";
+            this->PlanetsFiltVisN->Size = System::Drawing::Size(25, 23);
+            this->PlanetsFiltVisN->TabIndex = 11;
+            this->PlanetsFiltVisN->Text = L"N";
+            this->PlanetsFiltVisN->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->PlanetsFiltVisN, L"Show only NOT VISITED systems.");
+            this->PlanetsFiltVisN->UseVisualStyleBackColor = true;
+            this->PlanetsFiltVisN->CheckedChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
+            // 
+            // PlanetsFiltVisV
+            // 
+            this->PlanetsFiltVisV->Appearance = System::Windows::Forms::Appearance::Button;
+            this->PlanetsFiltVisV->AutoSize = true;
+            this->PlanetsFiltVisV->Location = System::Drawing::Point(29, 9);
+            this->PlanetsFiltVisV->Name = L"PlanetsFiltVisV";
+            this->PlanetsFiltVisV->Size = System::Drawing::Size(24, 23);
+            this->PlanetsFiltVisV->TabIndex = 11;
+            this->PlanetsFiltVisV->Text = L"V";
+            this->PlanetsFiltVisV->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->PlanetsFiltVisV, L"Show only VISITED systems.");
+            this->PlanetsFiltVisV->UseVisualStyleBackColor = true;
+            this->PlanetsFiltVisV->CheckedChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
+            // 
+            // PlanetsFiltVisA
+            // 
+            this->PlanetsFiltVisA->Appearance = System::Windows::Forms::Appearance::Button;
+            this->PlanetsFiltVisA->AutoSize = true;
+            this->PlanetsFiltVisA->Checked = true;
+            this->PlanetsFiltVisA->Location = System::Drawing::Point(4, 9);
+            this->PlanetsFiltVisA->Name = L"PlanetsFiltVisA";
+            this->PlanetsFiltVisA->Size = System::Drawing::Size(24, 23);
+            this->PlanetsFiltVisA->TabIndex = 10;
+            this->PlanetsFiltVisA->TabStop = true;
+            this->PlanetsFiltVisA->Text = L"A";
+            this->PlanetsFiltVisA->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->PlanetsFiltVisA, L"Show all systems, visited or not.");
+            this->PlanetsFiltVisA->UseVisualStyleBackColor = true;
+            this->PlanetsFiltVisA->CheckedChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
             // 
             // PlanetsGrid
             // 
@@ -1311,43 +1680,43 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             this->PlanetsGrid->AllowUserToOrderColumns = true;
             this->PlanetsGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
             this->PlanetsGrid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-            dataGridViewCellStyle15->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle15->BackColor = System::Drawing::SystemColors::Window;
-            dataGridViewCellStyle15->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle3->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle3->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle3->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle15->ForeColor = System::Drawing::SystemColors::ControlText;
-            dataGridViewCellStyle15->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle15->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle15->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
-            this->PlanetsGrid->DefaultCellStyle = dataGridViewCellStyle15;
+            dataGridViewCellStyle3->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle3->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle3->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle3->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->PlanetsGrid->DefaultCellStyle = dataGridViewCellStyle3;
             this->PlanetsGrid->Dock = System::Windows::Forms::DockStyle::Fill;
             this->PlanetsGrid->Location = System::Drawing::Point(0, 0);
             this->PlanetsGrid->Name = L"PlanetsGrid";
             this->PlanetsGrid->ReadOnly = true;
-            dataGridViewCellStyle16->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle16->BackColor = System::Drawing::SystemColors::Control;
-            dataGridViewCellStyle16->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle4->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle4->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle4->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle16->ForeColor = System::Drawing::SystemColors::WindowText;
-            dataGridViewCellStyle16->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle16->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle16->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
-            this->PlanetsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle16;
+            dataGridViewCellStyle4->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle4->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle4->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle4->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->PlanetsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle4;
             this->PlanetsGrid->RowHeadersWidth = 4;
             this->PlanetsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
-            this->PlanetsGrid->Size = System::Drawing::Size(683, 531);
+            this->PlanetsGrid->Size = System::Drawing::Size(683, 480);
             this->PlanetsGrid->TabIndex = 0;
             this->PlanetsGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
             // 
             // TabColonies
             // 
+            this->TabColonies->BackColor = System::Drawing::SystemColors::Control;
             this->TabColonies->Controls->Add(this->splitContainer4);
             this->TabColonies->Location = System::Drawing::Point(4, 22);
             this->TabColonies->Name = L"TabColonies";
             this->TabColonies->Size = System::Drawing::Size(683, 563);
             this->TabColonies->TabIndex = 4;
             this->TabColonies->Text = L"Colonies";
-            this->TabColonies->UseVisualStyleBackColor = true;
             // 
             // splitContainer4
             // 
@@ -1384,28 +1753,28 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             this->ColoniesGrid->AllowUserToOrderColumns = true;
             this->ColoniesGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
             this->ColoniesGrid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-            dataGridViewCellStyle17->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle17->BackColor = System::Drawing::SystemColors::Window;
-            dataGridViewCellStyle17->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle5->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle5->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle5->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle17->ForeColor = System::Drawing::SystemColors::ControlText;
-            dataGridViewCellStyle17->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle17->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle17->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
-            this->ColoniesGrid->DefaultCellStyle = dataGridViewCellStyle17;
+            dataGridViewCellStyle5->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle5->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle5->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle5->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->ColoniesGrid->DefaultCellStyle = dataGridViewCellStyle5;
             this->ColoniesGrid->Dock = System::Windows::Forms::DockStyle::Fill;
             this->ColoniesGrid->Location = System::Drawing::Point(0, 0);
             this->ColoniesGrid->Name = L"ColoniesGrid";
             this->ColoniesGrid->ReadOnly = true;
-            dataGridViewCellStyle18->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle18->BackColor = System::Drawing::SystemColors::Control;
-            dataGridViewCellStyle18->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle6->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle6->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle6->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle18->ForeColor = System::Drawing::SystemColors::WindowText;
-            dataGridViewCellStyle18->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle18->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle18->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
-            this->ColoniesGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle18;
+            dataGridViewCellStyle6->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle6->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle6->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle6->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->ColoniesGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle6;
             this->ColoniesGrid->RowHeadersWidth = 4;
             this->ColoniesGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
             this->ColoniesGrid->Size = System::Drawing::Size(683, 531);
@@ -1414,13 +1783,13 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             // 
             // TabShips
             // 
+            this->TabShips->BackColor = System::Drawing::SystemColors::Control;
             this->TabShips->Controls->Add(this->splitContainer5);
             this->TabShips->Location = System::Drawing::Point(4, 22);
             this->TabShips->Name = L"TabShips";
             this->TabShips->Size = System::Drawing::Size(683, 563);
             this->TabShips->TabIndex = 5;
             this->TabShips->Text = L"Ships";
-            this->TabShips->UseVisualStyleBackColor = true;
             // 
             // splitContainer5
             // 
@@ -1457,28 +1826,28 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             this->ShipsGrid->AllowUserToOrderColumns = true;
             this->ShipsGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
             this->ShipsGrid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-            dataGridViewCellStyle19->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle19->BackColor = System::Drawing::SystemColors::Window;
-            dataGridViewCellStyle19->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle7->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle7->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle7->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle19->ForeColor = System::Drawing::SystemColors::ControlText;
-            dataGridViewCellStyle19->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle19->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle19->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
-            this->ShipsGrid->DefaultCellStyle = dataGridViewCellStyle19;
+            dataGridViewCellStyle7->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle7->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle7->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle7->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->ShipsGrid->DefaultCellStyle = dataGridViewCellStyle7;
             this->ShipsGrid->Dock = System::Windows::Forms::DockStyle::Fill;
             this->ShipsGrid->Location = System::Drawing::Point(0, 0);
             this->ShipsGrid->Name = L"ShipsGrid";
             this->ShipsGrid->ReadOnly = true;
-            dataGridViewCellStyle20->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle20->BackColor = System::Drawing::SystemColors::Control;
-            dataGridViewCellStyle20->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle8->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle8->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle8->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle20->ForeColor = System::Drawing::SystemColors::WindowText;
-            dataGridViewCellStyle20->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle20->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle20->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
-            this->ShipsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle20;
+            dataGridViewCellStyle8->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle8->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle8->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle8->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->ShipsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle8;
             this->ShipsGrid->RowHeadersWidth = 4;
             this->ShipsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
             this->ShipsGrid->Size = System::Drawing::Size(683, 531);
@@ -1487,13 +1856,13 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             // 
             // TabAliens
             // 
+            this->TabAliens->BackColor = System::Drawing::SystemColors::Control;
             this->TabAliens->Controls->Add(this->splitContainer6);
             this->TabAliens->Location = System::Drawing::Point(4, 22);
             this->TabAliens->Name = L"TabAliens";
             this->TabAliens->Size = System::Drawing::Size(683, 563);
             this->TabAliens->TabIndex = 6;
             this->TabAliens->Text = L"Aliens";
-            this->TabAliens->UseVisualStyleBackColor = true;
             // 
             // splitContainer6
             // 
@@ -1530,28 +1899,28 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             this->AliensGrid->AllowUserToOrderColumns = true;
             this->AliensGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
             this->AliensGrid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-            dataGridViewCellStyle21->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle21->BackColor = System::Drawing::SystemColors::Window;
-            dataGridViewCellStyle21->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle9->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle9->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle9->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle21->ForeColor = System::Drawing::SystemColors::ControlText;
-            dataGridViewCellStyle21->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle21->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle21->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
-            this->AliensGrid->DefaultCellStyle = dataGridViewCellStyle21;
+            dataGridViewCellStyle9->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle9->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle9->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle9->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->AliensGrid->DefaultCellStyle = dataGridViewCellStyle9;
             this->AliensGrid->Dock = System::Windows::Forms::DockStyle::Fill;
             this->AliensGrid->Location = System::Drawing::Point(0, 0);
             this->AliensGrid->Name = L"AliensGrid";
             this->AliensGrid->ReadOnly = true;
-            dataGridViewCellStyle22->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle22->BackColor = System::Drawing::SystemColors::Control;
-            dataGridViewCellStyle22->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle10->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle10->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle10->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle22->ForeColor = System::Drawing::SystemColors::WindowText;
-            dataGridViewCellStyle22->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle22->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle22->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
-            this->AliensGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle22;
+            dataGridViewCellStyle10->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle10->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle10->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle10->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->AliensGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle10;
             this->AliensGrid->RowHeadersWidth = 4;
             this->AliensGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
             this->AliensGrid->Size = System::Drawing::Size(683, 531);
@@ -1569,6 +1938,7 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             // 
             // TabAbout
             // 
+            this->TabAbout->BackColor = System::Drawing::SystemColors::Control;
             this->TabAbout->Controls->Add(this->TextAbout);
             this->TabAbout->Location = System::Drawing::Point(4, 22);
             this->TabAbout->Name = L"TabAbout";
@@ -1576,7 +1946,6 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             this->TabAbout->Size = System::Drawing::Size(683, 563);
             this->TabAbout->TabIndex = 8;
             this->TabAbout->Text = L"About";
-            this->TabAbout->UseVisualStyleBackColor = true;
             // 
             // TextAbout
             // 
@@ -1651,28 +2020,28 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             this->dataGridView1->AllowUserToOrderColumns = true;
             this->dataGridView1->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
             this->dataGridView1->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-            dataGridViewCellStyle23->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle23->BackColor = System::Drawing::SystemColors::Window;
-            dataGridViewCellStyle23->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle11->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle11->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle11->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle23->ForeColor = System::Drawing::SystemColors::ControlText;
-            dataGridViewCellStyle23->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle23->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle23->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
-            this->dataGridView1->DefaultCellStyle = dataGridViewCellStyle23;
+            dataGridViewCellStyle11->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle11->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle11->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle11->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->dataGridView1->DefaultCellStyle = dataGridViewCellStyle11;
             this->dataGridView1->Dock = System::Windows::Forms::DockStyle::Fill;
             this->dataGridView1->Location = System::Drawing::Point(0, 0);
             this->dataGridView1->Name = L"dataGridView1";
             this->dataGridView1->ReadOnly = true;
-            dataGridViewCellStyle24->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle24->BackColor = System::Drawing::SystemColors::Control;
-            dataGridViewCellStyle24->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle12->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle12->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle12->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle24->ForeColor = System::Drawing::SystemColors::WindowText;
-            dataGridViewCellStyle24->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle24->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle24->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
-            this->dataGridView1->RowHeadersDefaultCellStyle = dataGridViewCellStyle24;
+            dataGridViewCellStyle12->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle12->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle12->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle12->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->dataGridView1->RowHeadersDefaultCellStyle = dataGridViewCellStyle12;
             this->dataGridView1->RowHeadersWidth = 4;
             this->dataGridView1->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
             this->dataGridView1->Size = System::Drawing::Size(569, 504);
@@ -1718,12 +2087,13 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             this->MapSPSelf->PerformLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSPSelfGV))->EndInit();
             this->TabSystems->ResumeLayout(false);
-            this->splitContainer2->Panel1->ResumeLayout(false);
-            this->splitContainer2->Panel1->PerformLayout();
-            this->splitContainer2->Panel2->ResumeLayout(false);
-            this->splitContainer2->ResumeLayout(false);
+            splitContainer2->Panel1->ResumeLayout(false);
+            splitContainer2->Panel1->PerformLayout();
+            splitContainer2->Panel2->ResumeLayout(false);
+            splitContainer2->ResumeLayout(false);
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsMaxLSN))->EndInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsMaxDist))->EndInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsMaxMishap))->EndInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsShipAge))->EndInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsGV))->EndInit();
             groupBox5->ResumeLayout(false);
             groupBox5->PerformLayout();
@@ -1731,10 +2101,18 @@ private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
             groupBox4->PerformLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsGrid))->EndInit();
             this->TabPlanets->ResumeLayout(false);
-            this->splitContainer3->Panel1->ResumeLayout(false);
-            this->splitContainer3->Panel1->PerformLayout();
-            this->splitContainer3->Panel2->ResumeLayout(false);
-            this->splitContainer3->ResumeLayout(false);
+            splitContainer3->Panel1->ResumeLayout(false);
+            splitContainer3->Panel1->PerformLayout();
+            splitContainer3->Panel2->ResumeLayout(false);
+            splitContainer3->ResumeLayout(false);
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsMaxLSN))->EndInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsMaxMishap))->EndInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsShipAge))->EndInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsGV))->EndInit();
+            groupBox6->ResumeLayout(false);
+            groupBox6->PerformLayout();
+            groupBox7->ResumeLayout(false);
+            groupBox7->PerformLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsGrid))->EndInit();
             this->TabColonies->ResumeLayout(false);
             this->splitContainer4->Panel1->ResumeLayout(false);
@@ -1771,20 +2149,38 @@ private: System::Void DataGrid_DataBindingComplete(System::Object^  sender, Syst
              SetGridBgAndTooltip((DataGridView^)sender);
          }
 private: System::Void MapCanvas_Paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^  e) {
-             DrawMap();
+             MapDraw();
          }
 private: System::Void MapEnLSN_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
              MapLSNVal->Enabled = MapEnLSN->Checked;
-             DrawMap();
+             MapDraw();
          }
 private: System::Void MapUpdate(System::Object^  sender, System::EventArgs^  e) {
-             DrawMap();
+             MapDraw();
          }
 private: System::Void TurnReload_Click(System::Object^  sender, System::EventArgs^  e) {
              TurnReload();
          }
 private: System::Void RepMode_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
              RepModeChanged();
+         }
+private: System::Void Systems_Update(System::Object^  sender, System::EventArgs^  e) {
+             m_SystemsFilter->Update(sender);
+         }
+private: System::Void SystemsFiltersReset_Click(System::Object^  sender, System::EventArgs^  e) {
+             m_SystemsFilter->Reset();
+         }
+private: System::Void SystemsGrid_CellMouseDoubleClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
+             if( e->Button == Windows::Forms::MouseButtons::Left )
+             {
+                 SystemsSelectPlanets( e->RowIndex );
+             }
+         }
+private: System::Void Planets_Update(System::Object^  sender, System::EventArgs^  e) {
+             m_PlanetsFilter->Update(sender);
+         }
+private: System::Void PlanetsFiltersReset_Click(System::Object^  sender, System::EventArgs^  e) {
+             m_PlanetsFilter->Reset();
          }
 };
 }

@@ -217,6 +217,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GridFilter.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Map.cpp"
 				>
 			</File>
@@ -274,6 +278,10 @@
 			</File>
 			<File
 				RelativePath=".\GameData.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GridFilter.h"
 				>
 			</File>
 			<File

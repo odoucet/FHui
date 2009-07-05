@@ -92,15 +92,6 @@ String^ Planet::PrintLocation()
 
 // ---------------------------------------------------------
 
-int StarSystem::GetMinLSN()
-{
-    int minLSN = 99999;
-    for each( Planet ^pl in m_Planets )
-        minLSN = Math::Min(minLSN, pl->LSN == -1 ? 99999 : pl->LSN);
-
-    return minLSN;
-}
-
 Planet^ StarSystem::GetPlanet(int plNum)
 {
     if( plNum < 1 )
@@ -178,11 +169,11 @@ String^ StarSystem::GenerateScan()
     return scan;
 }
 
-String^ StarSystem::PrintScanTurn()
+String^ StarSystem::PrintScanStatus()
 {
-    if( TurnScanned == -1 )       return "Not scanned";
-    else if( TurnScanned == 0 )   return "Received";
-    else                            return String::Format("Scanned, {0}", TurnScanned);
+    if( TurnScanned == -1 )     return s_ScanNone;
+    else if( TurnScanned == 0 ) return s_ScanDipl;
+    else                        return s_ScanSelf;
 }
 
 String^ StarSystem::PrintColonies(int planetNum)
@@ -199,8 +190,10 @@ String^ StarSystem::PrintColonies(int planetNum)
             ret += ", ";
         if( planetNum == -1 )
             ret += ("#" + colony->PlanetNum.ToString() + " ");
-        ret += colony->Owner->Name;
-        ret += (colony->PlanetType == PLANET_HOME ? " (HOME)" : "");
+        ret += String::Format( "{0}{1}({2})",
+            colony->PlanetType == PLANET_HOME ? "(HOME) " : "",
+            colony->Owner->Name,
+            colony->EconomicBase == -1 ? "?" : Math::Round(colony->EconomicBase).ToString() );
 
         if( Master == nullptr )
             Master = colony->Owner;
@@ -920,10 +913,31 @@ void GameData::UpdateSystems()
         system->Ships    = GetShips(system, nullptr);
 
         // Calculate LSN
+        int minLSN = 99999;
+        int minLSNAvail = 99999;
         for each( Planet ^planet in system->GetPlanets() )
         {
             planet->LSN = planet->CalculateLSN(m_Species->AtmReq);
+            planet->NumColonies = 0;
+
+            // Update min LSN and num colonies
+            minLSN = Math::Min(planet->LSN, minLSN);
+            bool available = true;
+            for each( Colony ^colony in system->Colonies )
+            {
+                if( colony->PlanetNum == planet->Number )
+                {
+                    ++planet->NumColonies;
+                    available = false;
+                    break;
+                }
+            }
+            if( available )
+                minLSNAvail = Math::Min(planet->LSN, minLSNAvail);
         }
+
+        system->MinLSN      = minLSN;
+        system->MinLSNAvail = minLSNAvail;
     }
 }
 
@@ -931,18 +945,18 @@ void GameData::LinkPlanetNames()
 {
     for each( Colony ^colony in GetColonies() )
     {
+        StarSystem ^system = colony->System;
+        colony->Planet = system->GetPlanet( colony->PlanetNum );
+
         if( colony->Owner == m_Species )
         {
-            StarSystem ^system = colony->System;
-
-            if( system->GetPlanets()->Length < colony->PlanetNum )
+            if( colony->Planet == nullptr )
                 throw gcnew FHUIDataIntegrityException(
                     String::Format("Colony PL {0} at [{1} {2} {3} {4}]: Planet not scanned!",
                         colony->Name,
                         system->X, system->Y, system->Z,
                         colony->PlanetNum ) );
 
-            colony->Planet = system->GetPlanets()[ colony->PlanetNum - 1 ];
             colony->Planet->Name = colony->Name;
         }
     }

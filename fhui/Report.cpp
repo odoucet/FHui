@@ -887,6 +887,8 @@ void Report::MatchAliensReport(String ^s)
         plType = PLANET_COLONY_MINING;
     else if( MatchWithOutput(s, "^Resort colony PL\\s+") )
         plType = PLANET_COLONY_RESORT;
+    else if( MatchWithOutput(s, "^Uncolonized planet PL\\s+") )
+        plType = PLANET_UNCOLONIZED;
     if( plType != PLANET_MAX )
     {
         if( MatchWithOutput(s, "^([^,;]+)\\s+\\(pl #(\\d+)\\)\\s+SP\\s+([^,;]+)\\s*$") )
@@ -914,6 +916,14 @@ void Report::MatchAliensReport(String ^s)
     {
         if( m_ScanColony->LastSeen == m_Turn )
             m_ScanColony->MiBase = GetMatchResultInt(0);
+    }
+    else if( m_ScanColony && s == "(No economic base.)" )
+    {
+        if( m_ScanColony->LastSeen == m_Turn )
+        {
+            m_ScanColony->MiBase = 0;
+            m_ScanColony->MaBase = 0;
+        }
     }
     else if( m_ScanColony && MatchWithOutput(s, "^\\(There are (\\d+) Planetary Defense Units on the planet\\.\\)") )
     {
