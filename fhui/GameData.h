@@ -10,6 +10,24 @@ ref class StarSystem;
 ref class Ship;
 ref class Colony;
 
+// ---------------------------------------------------
+// -- base IGridDataSrc impl --
+public ref class GridDataSrcBase : public IGridDataSrc
+{
+public:
+    virtual Alien^      GetAlienForBgColor()        { throw gcnew FHUIDataImplException("Not implemented!"); }
+    virtual String^     GetTooltipText()            { return "<TODO...>"; }
+
+    virtual StarSystem^ GetFilterSystem()           { return nullptr; }
+    virtual Alien^      GetFilterOwner()            { throw gcnew FHUIDataImplException("Not implemented!"); }
+    virtual int         GetFilterLSN()              { throw gcnew FHUIDataImplException("Not implemented!"); }
+    virtual int         GetFilterNumColonies()      { throw gcnew FHUIDataImplException("Not implemented!"); }
+    virtual SPRelType   GetFilterRelType()          { throw gcnew FHUIDataImplException("Not implemented!"); }
+    virtual ShipType    GetFilterShipType()         { throw gcnew FHUIDataImplException("Not implemented!"); }
+};
+
+// ---------------------------------------------------
+// Atmospheric requirements
 public ref class AtmosphericReq
 {
 public:
@@ -46,7 +64,9 @@ protected:
     array<bool>        ^m_Poisonous;
 };
 
-public ref class Alien : public IGridDataSrc
+// ---------------------------------------------------
+// Alien species
+public ref class Alien : public GridDataSrcBase
 {
 public:
     Alien(String ^name, int turn)
@@ -66,12 +86,10 @@ public:
         m_TechLevelsTeach   = gcnew array<int>(TECH_MAX){0};
     }
 
-    virtual Alien^      GetAlienForBgColor()    { return this; }
-    virtual String^     GetTooltipText()        { return "<TODO...>"; }
-
-    virtual StarSystem^ GetFilterSystem()       { return nullptr; }
-    virtual int         GetFilterLSN()          { return 99999; }
-    virtual int         GetFilterNumColonies()  { return 0; }
+    // -------- IGridDataSrc ----------------------------
+    virtual Alien^      GetAlienForBgColor() override   { return this; }
+    virtual SPRelType   GetFilterRelType() override     { return Relation; }
+    // --------------------------------------------------
 
     String^         PrintRelation() { return SpRelToString(Relation); }
     String^         PrintHome();
@@ -106,7 +124,9 @@ protected:
     array<int>     ^m_TechLevelsTeach;
 };
 
-public ref class Planet : public IGridDataSrc
+// ---------------------------------------------------
+// Planet in star system
+public ref class Planet : public GridDataSrcBase
 {
 public:
     Planet(StarSystem ^s, int nr, int dia, float gv, int tc, int pc, float md)
@@ -126,12 +146,14 @@ public:
         m_Atmosphere = gcnew array<int>(GAS_MAX) {false};
     }
 
-    virtual Alien^      GetAlienForBgColor()    { return Master; }
-    virtual String^     GetTooltipText()        { return "<TODO...>"; }
+    // -------- IGridDataSrc ----------------------------
+    virtual Alien^      GetAlienForBgColor() override   { return Master; }
 
-    virtual StarSystem^ GetFilterSystem()       { return System; }
-    virtual int         GetFilterLSN()          { return LSN; }
-    virtual int         GetFilterNumColonies()  { return NumColonies; }
+    virtual StarSystem^ GetFilterSystem() override      { return System; }
+    virtual Alien^      GetFilterOwner() override       { return Master; }
+    virtual int         GetFilterLSN() override         { return LSN; }
+    virtual int         GetFilterNumColonies() override { return NumColonies; }
+    // --------------------------------------------------
 
     int         CalculateLSN(AtmosphericReq^);
 
@@ -158,7 +180,9 @@ protected:
     array<int> ^m_Atmosphere;
 };
 
-public ref class StarSystem : public IGridDataSrc
+// ---------------------------------------------------
+// Star system
+public ref class StarSystem : public GridDataSrcBase
 {
 public:
     StarSystem(int x, int y, int z, String ^type)
@@ -175,12 +199,15 @@ public:
         Master = nullptr;
     }
 
-    virtual Alien^      GetAlienForBgColor()    { return Master; }
-    virtual String^     GetTooltipText()        { return GenerateScan(); }
+    // -------- IGridDataSrc ----------------------------
+    virtual Alien^      GetAlienForBgColor() override   { return Master; }
+    virtual String^     GetTooltipText() override       { return GenerateScan(); }
 
-    virtual StarSystem^ GetFilterSystem()       { return this; }
-    virtual int         GetFilterLSN()          { return MinLSN; }
-    virtual int         GetFilterNumColonies()  { return Colonies->Count; }
+    virtual StarSystem^ GetFilterSystem() override      { return this; }
+    virtual Alien^      GetFilterOwner() override       { return Master; }
+    virtual int         GetFilterLSN() override         { return MinLSN; }
+    virtual int         GetFilterNumColonies() override { return Colonies->Count; }
+    // --------------------------------------------------
 
     static double       CalcDistance(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo);
     static double       CalcMishap(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo, int gv, int age);
@@ -230,7 +257,9 @@ protected:
     initonly static String^ s_ScanSelf = "Scanned";
 };
 
-public ref class Colony : public IGridDataSrc
+// ---------------------------------------------------
+// Colony
+public ref class Colony : public GridDataSrcBase
 {
 public:
     Colony(Alien ^owner, String ^name, StarSystem ^system, int planetNum)
@@ -254,12 +283,13 @@ public:
         m_Inventory = gcnew array<int>(INV_MAX){0};
     }
 
-    virtual Alien^      GetAlienForBgColor()    { return Owner; }
-    virtual String^     GetTooltipText()        { return "<TODO...>"; }
+    // -------- IGridDataSrc ----------------------------
+    virtual Alien^      GetAlienForBgColor() override   { return Owner; }
 
-    virtual StarSystem^ GetFilterSystem()       { return System; }
-    virtual int         GetFilterLSN()          { return Planet ? Planet->LSN : 99999; }
-    virtual int         GetFilterNumColonies()  { return 1; }
+    virtual StarSystem^ GetFilterSystem() override      { return System; }
+    virtual Alien^      GetFilterOwner() override       { return Owner; }
+    virtual int         GetFilterLSN() override         { return Planet ? Planet->LSN : 99999; }
+    // --------------------------------------------------
 
     String^         PrintLocation() { return String::Format("{0} {1}", System->PrintLocation(), PlanetNum); }
     String^         PrintInventoryShort();
@@ -292,6 +322,8 @@ protected:
     array<int>     ^m_Inventory;
 };
 
+// ---------------------------------------------------
+// Named planet info
 public ref class PlanetName
 {
 public:
@@ -311,7 +343,9 @@ public:
     property String^ Name;
 };
 
-public ref class Ship : public IGridDataSrc
+// ---------------------------------------------------
+// Ship or starbase
+public ref class Ship : public GridDataSrcBase
 {
 public:
     Ship(Alien ^owner, ShipType type, String ^name, int size, bool subLight)
@@ -336,12 +370,14 @@ public:
         m_Cargo = gcnew array<int>(INV_MAX){0};
     }
 
-    virtual Alien^      GetAlienForBgColor()    { return Owner; }
-    virtual String^     GetTooltipText()        { return "<TODO...>"; }
+    // -------- IGridDataSrc ----------------------------
+    virtual Alien^      GetAlienForBgColor() override   { return Owner; }
 
-    virtual StarSystem^ GetFilterSystem()       { return System; }
-    virtual int         GetFilterLSN()          { return 99999; }
-    virtual int         GetFilterNumColonies()  { return 0; }
+    virtual StarSystem^ GetFilterSystem() override      { return System; }
+    virtual Alien^      GetFilterOwner() override       { return Owner; }
+    virtual SPRelType   GetFilterRelType() override     { return Owner->GetFilterRelType(); }
+    virtual ShipType    GetFilterShipType() override    { return Type; }
+    // --------------------------------------------------
 
     String^         PrintClass();
     String^         PrintLocation();
@@ -386,6 +422,8 @@ protected:
     array<int>     ^m_Cargo;
 };
 
+// ---------------------------------------------------
+// Game data
 public ref class GameData
 {
 public:
@@ -465,3 +503,5 @@ protected:
 
     int                 m_TurnMax;
 };
+
+// ---------------------------------------------------

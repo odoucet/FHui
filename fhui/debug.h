@@ -17,3 +17,11 @@ public:
     FHUIDataIntegrityException(String ^err) : Exception(err) {}
     FHUIDataIntegrityException(String ^err, Exception ^ex) : Exception(err, ex) {}
 };
+
+public ref class FHUIDataImplException : public Exception
+{
+public:
+    FHUIDataImplException() : Exception() {}
+    FHUIDataImplException(String ^err) : Exception(err) {}
+    FHUIDataImplException(String ^err, Exception ^ex) : Exception(err, ex) {}
+};

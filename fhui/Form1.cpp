@@ -80,6 +80,65 @@ void Form1::InitControls()
     filter->CtrlFiltColN    = PlanetsFiltColN;
 
     m_PlanetsFilter = filter;
+
+    // -- colonies
+    filter = gcnew GridFilter(ColoniesGrid, m_bGridUpdateEnabled);
+    filter->OnGridSetup += gcnew GridSetupHandler(this, &Form1::ColoniesSetup);
+    filter->OnGridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
+
+    filter->CtrlRef         = ColoniesRef;
+    filter->CtrlRefHome     = ColoniesRefHome;
+    filter->CtrlRefXYZ      = ColoniesRefXYZ;
+    filter->CtrlRefColony   = ColoniesRefColony;
+    filter->CtrlRefShip     = ColoniesRefShip;
+    filter->CtrlGV          = ColoniesGV;
+    filter->CtrlShipAge     = ColoniesShipAge;
+    filter->CtrlMaxMishap   = ColoniesMaxMishap;
+    filter->CtrlMaxLSN      = ColoniesMaxLSN;
+    filter->CtrlFiltOwnA    = ColoniesFiltOwnA;
+    filter->CtrlFiltOwnO    = ColoniesFiltOwnO;
+    filter->CtrlFiltOwnN    = ColoniesFiltOwnN;
+    filter->CtrlMiMaBalance = ColoniesMiMaBalanced;
+
+    m_ColoniesFilter = filter;
+
+    // -- ships
+    filter = gcnew GridFilter(ShipsGrid, m_bGridUpdateEnabled);
+    filter->OnGridSetup += gcnew GridSetupHandler(this, &Form1::ShipsSetup);
+    filter->OnGridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
+
+    filter->CtrlRef         = ShipsRef;
+    filter->CtrlRefHome     = ShipsRefHome;
+    filter->CtrlRefXYZ      = ShipsRefXYZ;
+    filter->CtrlRefColony   = ShipsRefColony;
+    filter->CtrlRefShip     = ShipsRefShip;
+    filter->CtrlGV          = ShipsGV;
+    filter->CtrlShipAge     = ShipsShipAge;
+    filter->CtrlMaxMishap   = ShipsMaxMishap;
+    filter->CtrlFiltOwnA    = ShipsFiltOwnA;
+    filter->CtrlFiltOwnO    = ShipsFiltOwnO;
+    filter->CtrlFiltOwnN    = ShipsFiltOwnN;
+    filter->CtrlFiltRelA    = ShipsFiltRelA;
+    filter->CtrlFiltRelE    = ShipsFiltRelE;
+    filter->CtrlFiltRelN    = ShipsFiltRelN;
+    filter->CtrlFiltRelP    = ShipsFiltRelP;
+    filter->CtrlFiltTypeBas = ShipsFiltTypeBA;
+    filter->CtrlFiltTypeMl  = ShipsFiltTypeML;
+    filter->CtrlFiltTypeTr  = ShipsFiltTypeTR;
+
+    m_ShipsFilter = filter;
+
+    // -- aliens
+    filter = gcnew GridFilter(AliensGrid, m_bGridUpdateEnabled);
+    filter->OnGridSetup += gcnew GridSetupHandler(this, &Form1::AliensSetup);
+    filter->OnGridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
+
+    filter->CtrlFiltRelA    = AliensFiltRelA;
+    filter->CtrlFiltRelE    = AliensFiltRelE;
+    filter->CtrlFiltRelN    = AliensFiltRelN;
+    filter->CtrlFiltRelP    = AliensFiltRelP;
+
+    m_AliensFilter = filter;
 }
 
 void Form1::TurnReload()
@@ -115,6 +174,9 @@ void Form1::InitData()
 
     m_SystemsFilter->RefSystem = nullptr;
     m_PlanetsFilter->RefSystem = nullptr;
+    m_ColoniesFilter->RefSystem = nullptr;
+    m_ShipsFilter->RefSystem = nullptr;
+    m_AliensFilter->RefSystem = nullptr;
 }
 
 void Form1::InitRefLists()
@@ -325,9 +387,6 @@ void Form1::DisplayTurn()
             FHUI_BUILD_INFO() );
 
         MapSetup();
-        ColoniesSetup();
-        ShipsSetup();
-        AliensSetup();
     }
     catch( Exception ^e )
     {
@@ -756,12 +815,38 @@ void Form1::PlanetsSetup()
     *m_bGridUpdateEnabled = true;
 }
 
+void Form1::PlanetsSelectColonies( int rowIndex )
+{
+    int index = PlanetsGrid->Columns[0]->Index;
+    IGridDataSrc ^iDataSrc = safe_cast<IGridDataSrc^>(PlanetsGrid->Rows[ rowIndex ]->Cells[index]->Value);
+
+    ColoniesRefXYZ->Text = iDataSrc->GetFilterSystem()->PrintLocation();
+    ColoniesMaxMishap->Value = 0;
+    MenuTabs->SelectedIndex = 4;
+}
 
 ////////////////////////////////////////////////////////////////
 // Colonies
 
 void Form1::ColoniesUpdateControls()
 {
+    // Inhibit grid update
+    *m_bGridUpdateEnabled = false;
+
+    m_ColoniesFilter->GameData      = m_GameData;
+
+    ColoniesGV->Value               = Math::Max(1, m_GameData->GetSpecies()->TechLevels[TECH_GV]);
+
+    ColoniesRefXYZ->DataSource      = m_RefListSystemsXYZ;
+    ColoniesRefHome->DataSource     = m_RefListHomes;
+    ColoniesRefColony->DataSource   = m_RefListColonies;
+    ColoniesRefShip->DataSource     = m_RefListShips;
+
+    ColoniesRefHome->Text = GridFilter::s_CaptionHome;
+    // Trigger grid update
+    *m_bGridUpdateEnabled = true;
+    ColoniesRefHome->Text = m_GameData->GetSpeciesName();
+    m_ColoniesFilter->Reset();
 }
 
 void Form1::ColoniesSetup()
@@ -785,13 +870,17 @@ void Form1::ColoniesSetup()
     DataColumn ^colMishap       = dataTable->Columns->Add("Mishap %",   String::typeid );
     DataColumn ^colInventory    = dataTable->Columns->Add("Inventory",  String::typeid );
 
+    int gv  = Decimal::ToInt32(ColoniesGV->Value);
+    int age = Decimal::ToInt32(ColoniesShipAge->Value);
     Alien ^sp = m_GameData->GetSpecies();
-    int gv = sp->TechLevels[TECH_GV];
 
     for each( Colony ^colony in m_GameData->GetColonies() )
     {
-        double distance = colony->System->CalcDistance(sp->HomeSystem);
-        double mishap = colony->System->CalcMishap(sp->HomeSystem, gv, 0);
+        if( m_ColoniesFilter->Filter(colony) )
+            continue;
+
+        double distance = colony->System->CalcDistance(m_ColoniesFilter->RefSystem);
+        double mishap = colony->System->CalcMishap(m_ColoniesFilter->RefSystem, gv, age);
 
         DataRow^ row = dataTable->NewRow();
         row[colObject]      = colony;
@@ -816,8 +905,13 @@ void Form1::ColoniesSetup()
             if( colony->PlanetType == PLANET_HOME ||
                 colony->PlanetType == PLANET_COLONY )
             {
-                int mi = (int)((sp->TechLevels[TECH_MI] * colony->MiBase) / colony->Planet->MiningDiff);
-                int ma = (int)(sp->TechLevels[TECH_MA] * colony->MaBase);
+                int miTech = sp->TechLevels[TECH_MI];
+                int maTech = sp->TechLevels[TECH_MA];
+                if( m_ColoniesFilter->MiMaBalanced )
+                    miTech = maTech = Math::Max(miTech, maTech);
+
+                int mi = (int)((miTech * colony->MiBase) / colony->Planet->MiningDiff);
+                int ma = (int)(maTech * colony->MaBase);
                 if( mi == ma )
                     row[colBalance] = "Balanced";
                 else if( mi < ma )
@@ -846,12 +940,10 @@ void Form1::ColoniesSetup()
     // Default sort column
     ColoniesGrid->Sort( ColoniesGrid->Columns[colOwner->Ordinal], ListSortDirection::Ascending );
 
-    // Apply filters
-    ColoniesApplyFilters();
-}
+    ColoniesGrid->ClearSelection();
 
-void Form1::ColoniesApplyFilters()
-{
+    // Enable filters
+    *m_bGridUpdateEnabled = true;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -859,6 +951,23 @@ void Form1::ColoniesApplyFilters()
 
 void Form1::ShipsUpdateControls()
 {
+    // Inhibit grid update
+    *m_bGridUpdateEnabled = false;
+
+    m_ShipsFilter->GameData      = m_GameData;
+
+    ShipsGV->Value               = Math::Max(1, m_GameData->GetSpecies()->TechLevels[TECH_GV]);
+
+    ShipsRefXYZ->DataSource      = m_RefListSystemsXYZ;
+    ShipsRefHome->DataSource     = m_RefListHomes;
+    ShipsRefColony->DataSource   = m_RefListShips;
+    ShipsRefShip->DataSource     = m_RefListShips;
+
+    ShipsRefHome->Text = GridFilter::s_CaptionHome;
+    // Trigger grid update
+    *m_bGridUpdateEnabled = true;
+    ShipsRefHome->Text = m_GameData->GetSpeciesName();
+    m_ShipsFilter->Reset();
 }
 
 void Form1::ShipsSetup()
@@ -881,26 +990,29 @@ void Form1::ShipsSetup()
     DataColumn ^colRecVal   = dataTable->Columns->Add("Rec.Val",    int::typeid );
 
     Alien ^sp = m_GameData->GetSpecies();
-    int gv = sp->TechLevels[TECH_GV];
+    int gv  = Decimal::ToInt32(PlanetsGV->Value);
     int ml = sp->TechLevels[TECH_ML];
     double discount = (100.0 - (ml / 2)) / 100.0;
 
     for each( Ship ^ship in m_GameData->GetShips() )
     {
+        if( m_ShipsFilter->Filter(ship) )
+            continue;
+
         double distance = StarSystem::CalcDistance(
             ship->X,
             ship->Y,
             ship->Z,
-            sp->HomeSystem->X,
-            sp->HomeSystem->Y,
-            sp->HomeSystem->Z);
+            m_ShipsFilter->RefSystem->X,
+            m_ShipsFilter->RefSystem->Y,
+            m_ShipsFilter->RefSystem->Z);
         double mishap = StarSystem::CalcMishap(
             ship->X,
             ship->Y,
             ship->Z,
-            sp->HomeSystem->X,
-            sp->HomeSystem->Y,
-            sp->HomeSystem->Z,
+            m_ShipsFilter->RefSystem->X,
+            m_ShipsFilter->RefSystem->Y,
+            m_ShipsFilter->RefSystem->Z,
             gv,
             ship->Age);
 
@@ -933,12 +1045,10 @@ void Form1::ShipsSetup()
     // Default sort column
     ShipsGrid->Sort( ShipsGrid->Columns[colOwner->Ordinal], ListSortDirection::Ascending );
 
-    // Apply filters
-    ShipsApplyFilters();
-}
+    ShipsGrid->ClearSelection();
 
-void Form1::ShipsApplyFilters()
-{
+    // Enable filters
+    *m_bGridUpdateEnabled = true;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -946,6 +1056,8 @@ void Form1::ShipsApplyFilters()
 
 void Form1::AliensUpdateControls()
 {
+    *m_bGridUpdateEnabled = true;
+    m_AliensFilter->Reset();
 }
 
 void Form1::AliensSetup()
@@ -964,6 +1076,9 @@ void Form1::AliensSetup()
 
     for each( Alien ^alien in m_GameData->GetAliens() )
     {
+        if( m_AliensFilter->Filter(alien) )
+            continue;
+
         DataRow^ row = dataTable->NewRow();
         row[colObject]      = alien;
         row[colName]        = alien->Name;
@@ -985,12 +1100,10 @@ void Form1::AliensSetup()
     // Default sort column
     AliensGrid->Sort( AliensGrid->Columns[colRelation->Ordinal], ListSortDirection::Ascending );
 
-    // Apply filters
-    AliensApplyFilters();
-}
+    AliensGrid->ClearSelection();
 
-void Form1::AliensApplyFilters()
-{
+    // Enable filters
+    *m_bGridUpdateEnabled = true;
 }
 
 ////////////////////////////////////////////////////////////////

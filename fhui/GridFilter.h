@@ -16,6 +16,7 @@ public:
     GridFilter(DataGridView ^grid, bool ^gridUpdateEnabled)
         : m_Grid(grid)
         , m_bGridUpdateEnabled(gridUpdateEnabled)
+        , m_RefreshDummy(gcnew Object)
         , m_LastFiltMask(0)
     {
         GameData = nullptr;
@@ -30,6 +31,8 @@ public:
 
     virtual property int            DefaultLSN;
     virtual property int            DefaultMishap;
+
+    virtual property bool           MiMaBalanced { bool get() { return CtrlMiMaBalance->Checked; } }
 
     virtual void    Update(Object ^sender);
     virtual void    Reset();
@@ -50,6 +53,17 @@ public:
     RadioButton     ^CtrlFiltColA;
     RadioButton     ^CtrlFiltColC;
     RadioButton     ^CtrlFiltColN;
+    RadioButton     ^CtrlFiltOwnA;
+    RadioButton     ^CtrlFiltOwnO;
+    RadioButton     ^CtrlFiltOwnN;
+    CheckBox        ^CtrlMiMaBalance;
+    CheckBox        ^CtrlFiltRelA;
+    CheckBox        ^CtrlFiltRelE;
+    CheckBox        ^CtrlFiltRelN;
+    CheckBox        ^CtrlFiltRelP;
+    CheckBox        ^CtrlFiltTypeBas;
+    CheckBox        ^CtrlFiltTypeMl;
+    CheckBox        ^CtrlFiltTypeTr;
 
     event GridSetupHandler      ^OnGridSetup;
     event GridExceptionHandler  ^OnGridException;
@@ -70,6 +84,7 @@ protected:
 
     DataGridView    ^m_Grid;
     bool            ^m_bGridUpdateEnabled;
+    Object          ^m_RefreshDummy;
 
-    int             m_LastFiltMask;
+    __int64          m_LastFiltMask;
 };

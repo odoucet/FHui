@@ -1,5 +1,7 @@
 #pragma once
 
+#include "enums.h"
+
 ref class Alien;
 ref class StarSystem;
 ref class GameData;
@@ -10,8 +12,11 @@ public interface class IGridDataSrc
     String^     GetTooltipText();
 
     StarSystem^ GetFilterSystem();
+    Alien^      GetFilterOwner();
     int         GetFilterLSN();
     int         GetFilterNumColonies();
+    SPRelType   GetFilterRelType();
+    ShipType    GetFilterShipType();
 };
 
 public interface class IGridFilter
@@ -25,4 +30,6 @@ public interface class IGridFilter
 
     property int            DefaultLSN;
     property int            DefaultMishap;
+
+    property bool           MiMaBalanced { bool get(); }
 };

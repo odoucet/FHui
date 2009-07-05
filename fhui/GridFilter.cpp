@@ -19,8 +19,6 @@ void GridFilter::Update(Object ^sender)
                 SetRefColony();
             else if( sender == CtrlRefShip )
                 SetRefShip();
-            else if( sender == CtrlGV )
-                OnGridSetup();
             else if( sender == CtrlShipAge )
             {
                 // Update ship reference combo
@@ -30,25 +28,51 @@ void GridFilter::Update(Object ^sender)
 
                 OnGridSetup();
             }
-            else if( sender == CtrlMaxMishap ||
+            else if( sender == m_RefreshDummy ||
+                sender == CtrlGV ||
+                sender == CtrlMaxMishap ||
                 sender == CtrlMaxLSN ||
                 sender == CtrlFiltVisA ||
                 sender == CtrlFiltVisV ||
                 sender == CtrlFiltVisN ||
                 sender == CtrlFiltColA ||
                 sender == CtrlFiltColC ||
-                sender == CtrlFiltColN )
+                sender == CtrlFiltColN ||
+                sender == CtrlFiltOwnA ||
+                sender == CtrlFiltOwnO ||
+                sender == CtrlFiltOwnN ||
+                sender == CtrlFiltRelA ||
+                sender == CtrlFiltRelE ||
+                sender == CtrlFiltRelN ||
+                sender == CtrlFiltRelP ||
+                sender == CtrlFiltTypeBas ||
+                sender == CtrlFiltTypeMl ||
+                sender == CtrlFiltTypeTr ||
+                sender == CtrlMiMaBalance )
             {
-                int filtMask =
-                    ( Decimal::ToByte(CtrlMaxLSN->Value) ) +
-                    ( Decimal::ToByte(CtrlMaxMishap->Value) << 8 ) +
-                    ( CtrlFiltVisA ? (CtrlFiltVisA->Checked ? 1 << 16 : 0) : 0 ) +
-                    ( CtrlFiltVisV ? (CtrlFiltVisV->Checked ? 1 << 17 : 0) : 0 ) +
-                    ( CtrlFiltVisN ? (CtrlFiltVisN->Checked ? 1 << 18 : 0) : 0 ) +
-                    ( CtrlFiltColA ? (CtrlFiltColA->Checked ? 1 << 19 : 0) : 0 ) +
-                    ( CtrlFiltColC ? (CtrlFiltColC->Checked ? 1 << 20 : 0) : 0 ) +
-                    ( CtrlFiltColN ? (CtrlFiltColN->Checked ? 1 << 21 : 0) : 0 );
-                if( filtMask != m_LastFiltMask )
+                __int64 filtMask =
+                    ( CtrlMaxLSN ? Decimal::ToByte(CtrlMaxLSN->Value) : 0 ) +
+                    ( CtrlMaxMishap ? (Decimal::ToByte(CtrlMaxMishap->Value) << 8) : 0 ) +
+                    ( CtrlFiltVisA ? (CtrlFiltVisA->Checked ? (1 << 16) : 0) : 0 ) +
+                    ( CtrlFiltVisV ? (CtrlFiltVisV->Checked ? (1 << 17) : 0) : 0 ) +
+                    ( CtrlFiltVisN ? (CtrlFiltVisN->Checked ? (1 << 18) : 0) : 0 ) +
+                    ( CtrlFiltColA ? (CtrlFiltColA->Checked ? (1 << 19) : 0) : 0 ) +
+                    ( CtrlFiltColC ? (CtrlFiltColC->Checked ? (1 << 20) : 0) : 0 ) +
+                    ( CtrlFiltColN ? (CtrlFiltColN->Checked ? (1 << 21) : 0) : 0 ) +
+                    ( CtrlFiltOwnA ? (CtrlFiltOwnA->Checked ? (1 << 22) : 0) : 0 ) +
+                    ( CtrlFiltOwnO ? (CtrlFiltOwnO->Checked ? (1 << 23) : 0) : 0 ) +
+                    ( CtrlFiltOwnN ? (CtrlFiltOwnN->Checked ? (1 << 24) : 0) : 0 ) +
+                    ( CtrlFiltRelA ? (CtrlFiltRelA->Checked ? (1 << 25) : 0) : 0 ) +
+                    ( CtrlFiltRelE ? (CtrlFiltRelE->Checked ? (1 << 26) : 0) : 0 ) +
+                    ( CtrlFiltRelN ? (CtrlFiltRelN->Checked ? (1 << 27) : 0) : 0 ) +
+                    ( CtrlFiltRelP ? (CtrlFiltRelP->Checked ? (1 << 28) : 0) : 0 ) +
+                    ( CtrlFiltTypeBas ? (CtrlFiltTypeBas->Checked ? (1 << 29) : 0) : 0 ) +
+                    ( CtrlFiltTypeMl ? (CtrlFiltTypeMl->Checked ? (1 << 30) : 0) : 0 ) +
+                    ( CtrlFiltTypeTr ? (CtrlFiltTypeTr->Checked ? (1 << 31) : 0) : 0 ) +
+                    ( CtrlMiMaBalance ? (CtrlMiMaBalance->Checked ? (1LL << 32) : 0) : 0 );
+                if( sender == m_RefreshDummy ||
+                    sender == CtrlGV ||
+                    filtMask != m_LastFiltMask )
                 {
                     m_LastFiltMask = filtMask;
                     OnGridSetup();
@@ -64,46 +88,109 @@ void GridFilter::Update(Object ^sender)
 
 bool GridFilter::Filter(IGridDataSrc ^item)
 {
-    bool bShowVisV = CtrlFiltVisV->Checked;
-    bool bShowVisN = CtrlFiltVisN->Checked;
-    bool bShowColC = CtrlFiltColC->Checked;
-    bool bShowColN = CtrlFiltColN->Checked;
-
-    int numColonies = item->GetFilterNumColonies();
-    if( (bShowColC && numColonies == 0) ||
-        (bShowColN && numColonies > 0) )
+    // Colonized...
+    if( CtrlFiltColA )
     {
-        return true;
-    }
-
-    StarSystem ^system = item->GetFilterSystem();
-    if( system )
-    {
-        if( (bShowVisV && system->LastVisited == -1) ||
-            (bShowVisN && system->LastVisited != -1) )
+        int numColonies = item->GetFilterNumColonies();
+        if( (CtrlFiltColC->Checked && numColonies == 0) ||
+            (CtrlFiltColN->Checked && numColonies > 0) )
         {
             return true;
         }
     }
 
-    // Mishap
-    int gv  = Decimal::ToInt32(CtrlGV->Value);
-    int age = Decimal::ToInt32(CtrlShipAge->Value);
-    double maxMishap = Decimal::ToDouble(CtrlMaxMishap->Value);
-
-    if( system &&
-        RefSystem &&
-        maxMishap < system->CalcMishap(RefSystem, gv, age) )
+    // Owned
+    if( CtrlFiltOwnA )
     {
-        return true;
+        Alien ^owner = item->GetFilterOwner();
+        Alien ^sp    = GameData->GetSpecies();
+        if( (CtrlFiltOwnO->Checked && owner != sp) ||
+            (CtrlFiltOwnN->Checked && owner == sp) )
+        {
+            return true;
+        }
+    }
+
+    // Relation
+    if( CtrlFiltRelA )
+    {
+        switch( item->GetFilterRelType() )
+        {
+        case SP_NEUTRAL:
+            if( CtrlFiltRelN->Checked == false )
+                return true;
+            break;
+        case SP_ALLY:
+            if( CtrlFiltRelA->Checked == false )
+                return true;
+            break;
+        case SP_ENEMY:
+            if( CtrlFiltRelE->Checked == false )
+                return true;
+            break;
+        case SP_PIRATE:
+            if( CtrlFiltRelP->Checked == false )
+                return true;
+            break;
+        }
+    }
+
+    // Ship type
+    if( CtrlFiltTypeBas )
+    {
+        switch( item->GetFilterShipType() )
+        {
+        case SHIP_BAS:
+            if( CtrlFiltTypeBas->Checked == false )
+                return true;
+            break;
+        case SHIP_TR:
+            if( CtrlFiltTypeTr->Checked == false )
+                return true;
+            break;
+        default:
+            if( CtrlFiltTypeMl->Checked == false )
+                return true;
+        }
+    }
+
+    StarSystem ^system = item->GetFilterSystem();
+    if( system )
+    {
+        // Visited
+        if( CtrlFiltVisA )
+        {
+            bool bShowVisV = CtrlFiltVisV->Checked;
+            bool bShowVisN = CtrlFiltVisN->Checked;
+            if( (bShowVisV && system->LastVisited == -1) ||
+                (bShowVisN && system->LastVisited != -1) )
+            {
+                return true;
+            }
+        }
+
+        // Mishap
+        if( CtrlGV && CtrlShipAge )
+        {
+            int gv  = Decimal::ToInt32(CtrlGV->Value);
+            int age = Decimal::ToInt32(CtrlShipAge->Value);
+            double maxMishap = Decimal::ToDouble(CtrlMaxMishap->Value);
+            if( maxMishap < system->CalcMishap(RefSystem, gv, age) )
+            {
+                return true;
+            }
+        }
     }
 
     // LSN
-    int maxLSN = Decimal::ToInt32(CtrlMaxLSN->Value);
-    int itemLSN = item->GetFilterLSN();
-    if( itemLSN != 99999 && maxLSN < itemLSN )
+    if( CtrlMaxLSN )
     {
-        return true;
+        int maxLSN = Decimal::ToInt32(CtrlMaxLSN->Value);
+        int itemLSN = item->GetFilterLSN();
+        if( itemLSN != 99999 && maxLSN < itemLSN )
+        {
+            return true;
+        }
     }
 
     return false;
@@ -113,13 +200,34 @@ void GridFilter::Reset()
 {
     *m_bGridUpdateEnabled = false;
 
-    CtrlMaxLSN->Value = DefaultLSN;
-    CtrlMaxMishap->Value = DefaultMishap;
-    CtrlFiltVisA->Checked = true;
-    CtrlFiltColA->Checked = true;
+    if( CtrlMaxLSN )
+        CtrlMaxLSN->Value = DefaultLSN;
+    if( CtrlMaxMishap )
+        CtrlMaxMishap->Value = DefaultMishap;
+    if( CtrlFiltVisA )
+        CtrlFiltVisA->Checked = true;
+    if( CtrlFiltColA )
+        CtrlFiltColA->Checked = true;
+    if( CtrlFiltOwnA )
+        CtrlFiltOwnA->Checked = true;
+    if( CtrlFiltRelA )
+    {
+        CtrlFiltRelA->Checked = true;
+        CtrlFiltRelE->Checked = true;
+        CtrlFiltRelN->Checked = true;
+        CtrlFiltRelP->Checked = true;
+    }
+    if( CtrlFiltTypeBas )
+    {
+        CtrlFiltTypeBas->Checked = true;
+        CtrlFiltTypeMl->Checked = true;
+        CtrlFiltTypeTr->Checked = true;
+    }
+    if( CtrlMiMaBalance )
+        CtrlMiMaBalance->Checked = false;
 
     *m_bGridUpdateEnabled = true;
-    Update(CtrlMaxLSN);
+    Update(m_RefreshDummy);
 }
 
 void GridFilter::SetRefText()
