@@ -570,6 +570,9 @@ void Form1::ApplyDataAndFormat(DataGridView ^grid, DataTable ^data, DataColumn ^
     // Make object link column invisible
     grid->Columns[objColumn->Ordinal]->Visible = false;
 
+    // Adjust row height
+    grid->RowTemplate->Height = OPTIMAL_ROW_HEIGHT;
+
     // Formatting
     for each( DataColumn ^col in data->Columns )
     {
@@ -711,9 +714,6 @@ void Form1::SystemsSetup()
     // Default sort column
     SystemsGrid->Sort( SystemsGrid->Columns[colDist->Ordinal], ListSortDirection::Ascending );
 
-    // Adjust row height
-    SystemsGrid->RowTemplate->Height = OPTIMAL_ROW_HEIGHT;
-
     SystemsGrid->ClearSelection();
 
     // Enable filters
@@ -812,9 +812,6 @@ void Form1::PlanetsSetup()
 
     // Default sort column
     PlanetsGrid->Sort( PlanetsGrid->Columns[colLSN->Ordinal], ListSortDirection::Ascending );
-    
-    // Adjust row height
-    PlanetsGrid->RowTemplate->Height = OPTIMAL_ROW_HEIGHT;
 
     PlanetsGrid->ClearSelection();
 
@@ -947,9 +944,6 @@ void Form1::ColoniesSetup()
     // Default sort column
     ColoniesGrid->Sort( ColoniesGrid->Columns[colOwner->Ordinal], ListSortDirection::Ascending );
 
-    // Adjust row height
-    ColoniesGrid->RowTemplate->Height = OPTIMAL_ROW_HEIGHT;
-
     ColoniesGrid->ClearSelection();
 
     // Enable filters
@@ -1055,9 +1049,6 @@ void Form1::ShipsSetup()
     // Default sort column
     ShipsGrid->Sort( ShipsGrid->Columns[colOwner->Ordinal], ListSortDirection::Ascending );
 
-    // Adjust row height
-    ShipsGrid->RowTemplate->Height = OPTIMAL_ROW_HEIGHT;
-
     ShipsGrid->ClearSelection();
 
     // Enable filters
@@ -1112,9 +1103,6 @@ void Form1::AliensSetup()
 
     // Default sort column
     AliensGrid->Sort( AliensGrid->Columns[colRelation->Ordinal], ListSortDirection::Ascending );
-
-    // Adjust row height
-    AliensGrid->RowTemplate->Height = OPTIMAL_ROW_HEIGHT;
 
     AliensGrid->ClearSelection();
 
