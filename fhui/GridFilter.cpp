@@ -359,5 +359,22 @@ void GridFilter::SetRefShip()
         int refVal = Decimal::ToInt32(CtrlShipAge->Value);
         if( refVal != ship->Age )
             CtrlShipAge->Value = ship->Age;
+
+        if( SelectRefSystemFromRefShip &&
+            ship->System != RefSystem )
+        {
+            *m_bGridUpdateEnabled   = false;
+            CtrlRefXYZ->Text        = s_CaptionXYZ;
+            CtrlRefHome->Text       = s_CaptionHome;
+            CtrlRefColony->Text     = s_CaptionColony;
+
+            RefSystem = ship->System;
+            OnGridSetup();
+
+            CtrlRef->Text = String::Format("Ref. system: [{0}] {1} {2}",
+                RefSystem->PrintLocation(),
+                ship->PrintClass(),
+                ship->Name );
+        }
     }
 }

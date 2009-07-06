@@ -30,6 +30,7 @@ public interface class IGridFilter
 
     property int            DefaultLSN;
     property int            DefaultMishap;
+    property bool           SelectRefSystemFromRefShip;
 
     property bool           MiMaBalanced { bool get(); }
 };

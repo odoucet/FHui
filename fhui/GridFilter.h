@@ -22,6 +22,7 @@ public:
         GameData = nullptr;
         DefaultLSN = 99;
         DefaultMishap = 100;
+        SelectRefSystemFromRefShip = false;
 
         RefSystem = nullptr;
     }
@@ -31,6 +32,7 @@ public:
 
     virtual property int            DefaultLSN;
     virtual property int            DefaultMishap;
+    virtual property bool           SelectRefSystemFromRefShip;
 
     virtual property bool           MiMaBalanced { bool get() { return CtrlMiMaBalance->Checked; } }
 

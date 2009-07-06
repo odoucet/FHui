@@ -23,16 +23,24 @@ namespace fhui
 
 void Form1::LoadGameData()
 {
-    InitControls();
-    FillAboutBox();
-    TurnReload();
+    try
+    {
+        FillAboutBox();
+        InitData();
+        InitControls();
+        ScanReports();
+        LoadCommands();
+    }
+    catch( Exception ^e )
+    {
+        Summary->Text = "Failed loading game data.";
+        ShowException(e);
+    }
 }
 
 void Form1::InitControls()
 {
     System::Text::RegularExpressions::Regex::CacheSize = 500;
-
-    m_bGridUpdateEnabled = gcnew bool(false);
 
     GridFilter ^filter;
 
@@ -142,27 +150,11 @@ void Form1::InitControls()
     m_AliensFilter = filter;
 }
 
-void Form1::TurnReload()
-{
-    try
-    {
-        InitData();
-        ScanReports();
-        LoadCommands();
-        RepModeChanged();
-        UpdateControls();
-    }
-    catch( Exception ^e )
-    {
-        Summary->Text = "Failed loading game data.";
-        ShowException(e);
-    }
-}
-
 void Form1::InitData()
 {
     m_HadException = false;
-    *m_bGridUpdateEnabled = false;
+
+    m_bGridUpdateEnabled = gcnew bool(false);
 
     m_GalaxySize = 0;
 
@@ -172,12 +164,6 @@ void Form1::InitData()
     m_Reports   = gcnew SortedList<int, String^>;
     m_RepFiles  = gcnew SortedList<int, String^>;
     m_CmdFiles  = gcnew SortedList<String^, String^>;
-
-    m_SystemsFilter->RefSystem = nullptr;
-    m_PlanetsFilter->RefSystem = nullptr;
-    m_ColoniesFilter->RefSystem = nullptr;
-    m_ShipsFilter->RefSystem = nullptr;
-    m_AliensFilter->RefSystem = nullptr;
 }
 
 void Form1::InitRefLists()
@@ -361,8 +347,8 @@ void Form1::ScanReports()
                 arrN1[--n1] = "Status for " + text;
         }
 
-        TurnSelect->DataSource = arrN1;
         m_RepTurnNrData = arrN0;
+        TurnSelect->DataSource = arrN1;
     }
     else
     {
@@ -370,14 +356,23 @@ void Form1::ScanReports()
     }
 }
 
+void Form1::TurnReload()
+{
+    m_GameTurns->Remove( m_GameData->GetLastTurn() );
+    DisplayTurn();
+}
+
 void Form1::DisplayTurn()
 {
     try
     {
-        String ^sel = TurnSelect->SelectedItem->ToString();
+        String ^sel = TurnSelect->Text;
         int turn = int::Parse(sel->Substring(16));    // Skip 'Status for Turn '
 
+        *m_bGridUpdateEnabled = false;
         LoadGameTurn(turn);
+        RepModeChanged();
+        UpdateControls();
 
         // Display summary
         Summary->Text = m_GameData->GetSummary();
@@ -977,6 +972,7 @@ void Form1::ShipsUpdateControls()
     *m_bGridUpdateEnabled = false;
 
     m_ShipsFilter->GameData      = m_GameData;
+    m_ShipsFilter->SelectRefSystemFromRefShip = true;
 
     ShipsGV->Value               = Math::Max(1, m_GameData->GetSpecies()->TechLevels[TECH_GV]);
 
