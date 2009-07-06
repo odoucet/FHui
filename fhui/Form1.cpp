@@ -562,8 +562,29 @@ void Form1::LoadCommands()
 ////////////////////////////////////////////////////////////////
 // GUI misc
 
-void Form1::ApplyDataAndFormat(DataGridView ^grid, DataTable ^data, DataColumn ^objColumn)
+void Form1::ApplyDataAndFormat(
+    DataGridView ^grid,
+    DataTable ^data,
+    DataColumn ^objColumn,
+    int defaultSortColIdx )
 {
+    int sortBy = defaultSortColIdx;
+    ListSortDirection sortDir = ListSortDirection::Ascending;
+    if( grid->SortedColumn )
+    {
+        sortBy = grid->SortedColumn->Index;
+        switch( grid->SortOrder )
+        {
+        case SortOrder::None:
+            sortBy = -1;
+            break;
+        case SortOrder::Descending:
+            sortDir = ListSortDirection::Descending;
+            break;
+        }
+
+    }
+
     // Setup data source
     grid->DataSource = data;
 
@@ -582,6 +603,14 @@ void Form1::ApplyDataAndFormat(DataGridView ^grid, DataTable ^data, DataColumn ^
             grid->Columns[col->Ordinal]->DefaultCellStyle->Alignment =
                 DataGridViewContentAlignment::MiddleRight;
     }
+
+    // Sort grid
+    if( sortBy != -1 )
+    {
+        grid->Sort( grid->Columns[sortBy], sortDir );
+    }
+
+    grid->ClearSelection();
 }
 
 Color Form1::GetAlienColor(Alien ^sp)
@@ -705,16 +734,11 @@ void Form1::SystemsSetup()
         dataTable->Rows->Add(row);
     }
 
-    ApplyDataAndFormat(SystemsGrid, dataTable, colObject);
+    ApplyDataAndFormat(SystemsGrid, dataTable, colObject, colDist->Ordinal);
 
     // Some columns are not sortable... yet
     SystemsGrid->Columns[colScan->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
     SystemsGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
-
-    // Default sort column
-    SystemsGrid->Sort( SystemsGrid->Columns[colDist->Ordinal], ListSortDirection::Ascending );
-
-    SystemsGrid->ClearSelection();
 
     // Enable filters
     *m_bGridUpdateEnabled = true;
@@ -804,16 +828,11 @@ void Form1::PlanetsSetup()
         }
     }
 
-    ApplyDataAndFormat(PlanetsGrid, dataTable, colObject);
+    ApplyDataAndFormat(PlanetsGrid, dataTable, colObject, colLSN->Ordinal);
 
     // Some columns are not sortable... yet
     PlanetsGrid->Columns[colScan->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
     PlanetsGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
-
-    // Default sort column
-    PlanetsGrid->Sort( PlanetsGrid->Columns[colLSN->Ordinal], ListSortDirection::Ascending );
-
-    PlanetsGrid->ClearSelection();
 
     // Enable filters
     *m_bGridUpdateEnabled = true;
@@ -933,18 +952,13 @@ void Form1::ColoniesSetup()
         dataTable->Rows->Add(row);
     }
 
-    ApplyDataAndFormat(ColoniesGrid, dataTable, colObject);
+    ApplyDataAndFormat(ColoniesGrid, dataTable, colObject, colOwner->Ordinal);
 
     // Formatting
     ColoniesGrid->Columns[colSize->Ordinal]->DefaultCellStyle->Format = "F1";
 
     // Some columns are not sortable... yet
     ColoniesGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
-
-    // Default sort column
-    ColoniesGrid->Sort( ColoniesGrid->Columns[colOwner->Ordinal], ListSortDirection::Ascending );
-
-    ColoniesGrid->ClearSelection();
 
     // Enable filters
     *m_bGridUpdateEnabled = true;
@@ -1041,15 +1055,10 @@ void Form1::ShipsSetup()
         dataTable->Rows->Add(row);
     }
 
-    ApplyDataAndFormat(ShipsGrid, dataTable, colObject);
+    ApplyDataAndFormat(ShipsGrid, dataTable, colObject, colOwner->Ordinal);
 
     // Some columns are not sortable... yet
     ShipsGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
-
-    // Default sort column
-    ShipsGrid->Sort( ShipsGrid->Columns[colOwner->Ordinal], ListSortDirection::Ascending );
-
-    ShipsGrid->ClearSelection();
 
     // Enable filters
     *m_bGridUpdateEnabled = true;
@@ -1099,12 +1108,7 @@ void Form1::AliensSetup()
         dataTable->Rows->Add(row);
     }
 
-    ApplyDataAndFormat(AliensGrid, dataTable, colObject);
-
-    // Default sort column
-    AliensGrid->Sort( AliensGrid->Columns[colRelation->Ordinal], ListSortDirection::Ascending );
-
-    AliensGrid->ClearSelection();
+    ApplyDataAndFormat(AliensGrid, dataTable, colObject, colRelation->Ordinal);
 
     // Enable filters
     *m_bGridUpdateEnabled = true;

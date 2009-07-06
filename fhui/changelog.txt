@@ -3,6 +3,9 @@ Major new features and bug fixes will be listed here.
 + New features
 * Bug fixes
 
+FHUI build ??
++ Filters on Colonies, Ships and Aliens tabs.
+
 FHUI build 42
 * Fixed parsing alien technology estimates.
 * Fixed ship recycle value calculation.

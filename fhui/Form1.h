@@ -68,7 +68,11 @@ namespace fhui {
         void        ShowException(Exception ^e);
 
         // -- Data grids formatting
-        void        ApplyDataAndFormat(DataGridView ^grid, DataTable ^dataTable, DataColumn ^objColumn);
+        void        ApplyDataAndFormat(
+                        DataGridView ^grid,
+                        DataTable ^dataTable,
+                        DataColumn ^objColumn,
+                        int defaultSortColIdx );
         Color       GetAlienColor(Alien ^sp);
         void        SetGridBgAndTooltip(DataGridView ^grid);
 
