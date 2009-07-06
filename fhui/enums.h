@@ -18,11 +18,11 @@ enum TechType
 enum SPRelType
 {
     SP_PLAYER,
-    SP_NEUTRAL,
     SP_ALLY,
     SP_ENEMY,
+    SP_NEUTRAL,
     SP_PIRATE,
-    SP_MIXED
+    SP_MIXED        // can only be used for temporary object used for system/planet Master property
 };
 
 String^ SpRelToString(SPRelType);

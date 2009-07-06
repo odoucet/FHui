@@ -3,9 +3,11 @@ Major new features and bug fixes will be listed here.
 + New features
 * Bug fixes
 
-FHUI build ??
+FHUI build 50
 * Fixed crash on grid column header double click.
+* Fixed loading data from historic turns.
 + Filters on Colonies, Ships and Aliens tabs.
++ Aliens on sidebar sorted by relation (A/E/N).
 
 FHUI build 42
 * Fixed parsing alien technology estimates.

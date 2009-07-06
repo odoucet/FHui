@@ -476,16 +476,35 @@ String^ GameData::GetTechSummary(TechType tech)
     return String::Format("{0,2}   ", lev);
 }
 
+private ref class AlienRelComparer : public IComparer<Alien^>
+{
+public:
+    virtual int Compare(Alien ^a1, Alien ^a2)
+    {
+        if( a1->Relation == a2->Relation )
+            return String::Compare(a1->Name, a2->Name);
+        return a1->Relation - a2->Relation;
+    }
+};
+
 String^ GameData::GetAliensSummary()
 {
     String ^ret = "";
 
+    List<Alien^> ^aliens = gcnew List<Alien^>;
     for each( Alien ^alien in GetAliens() )
     {
-        if( alien == m_Species ||
-            alien->Relation == SP_PIRATE )
-            continue;
+        if( alien != m_Species &&
+            alien->Relation != SP_PIRATE )
+        {
+            aliens->Add(alien);
+        }
+    }
 
+    aliens->Sort( gcnew AlienRelComparer );
+
+    for each( Alien ^alien in aliens )
+    {
         String ^prefix = "N";
         if( alien->Relation == SP_ALLY )
             prefix = "A";
