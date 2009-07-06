@@ -746,12 +746,15 @@ void Form1::SystemsSetup()
 
 void Form1::SystemsSelectPlanets( int rowIndex )
 {
-    int index = SystemsGrid->Columns[0]->Index;
-    IGridDataSrc ^iDataSrc = safe_cast<IGridDataSrc^>(SystemsGrid->Rows[ rowIndex ]->Cells[index]->Value);
+    if( rowIndex >= 0 )
+    {
+        int index = SystemsGrid->Columns[0]->Index;
+        IGridDataSrc ^iDataSrc = safe_cast<IGridDataSrc^>(SystemsGrid->Rows[ rowIndex ]->Cells[index]->Value);
 
-    PlanetsRefXYZ->Text = iDataSrc->GetFilterSystem()->PrintLocation();
-    PlanetsMaxMishap->Value = 0;
-    MenuTabs->SelectedIndex = 3;
+        PlanetsRefXYZ->Text = iDataSrc->GetFilterSystem()->PrintLocation();
+        PlanetsMaxMishap->Value = 0;
+        MenuTabs->SelectedIndex = 3;
+    }
 }
 
 ////////////////////////////////////////////////////////////////
@@ -840,12 +843,15 @@ void Form1::PlanetsSetup()
 
 void Form1::PlanetsSelectColonies( int rowIndex )
 {
-    int index = PlanetsGrid->Columns[0]->Index;
-    IGridDataSrc ^iDataSrc = safe_cast<IGridDataSrc^>(PlanetsGrid->Rows[ rowIndex ]->Cells[index]->Value);
+    if( rowIndex != -1 )
+    {
+        int index = PlanetsGrid->Columns[0]->Index;
+        IGridDataSrc ^iDataSrc = safe_cast<IGridDataSrc^>(PlanetsGrid->Rows[ rowIndex ]->Cells[index]->Value);
 
-    ColoniesRefXYZ->Text = iDataSrc->GetFilterSystem()->PrintLocation();
-    ColoniesMaxMishap->Value = 0;
-    MenuTabs->SelectedIndex = 4;
+        ColoniesRefXYZ->Text = iDataSrc->GetFilterSystem()->PrintLocation();
+        ColoniesMaxMishap->Value = 0;
+        MenuTabs->SelectedIndex = 4;
+    }
 }
 
 ////////////////////////////////////////////////////////////////
