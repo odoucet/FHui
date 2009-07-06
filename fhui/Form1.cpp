@@ -737,7 +737,6 @@ void Form1::SystemsSetup()
     ApplyDataAndFormat(SystemsGrid, dataTable, colObject, colDist->Ordinal);
 
     // Some columns are not sortable... yet
-    SystemsGrid->Columns[colScan->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
     SystemsGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
 
     // Enable filters
@@ -834,7 +833,6 @@ void Form1::PlanetsSetup()
     ApplyDataAndFormat(PlanetsGrid, dataTable, colObject, colLSN->Ordinal);
 
     // Some columns are not sortable... yet
-    PlanetsGrid->Columns[colScan->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
     PlanetsGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
 
     // Enable filters
@@ -984,7 +982,7 @@ void Form1::ShipsUpdateControls()
 
     ShipsRefXYZ->DataSource      = m_RefListSystemsXYZ;
     ShipsRefHome->DataSource     = m_RefListHomes;
-    ShipsRefColony->DataSource   = m_RefListShips;
+    ShipsRefColony->DataSource   = m_RefListColonies;
     ShipsRefShip->DataSource     = m_RefListShips;
 
     ShipsRefHome->Text = GridFilter::s_CaptionHome;

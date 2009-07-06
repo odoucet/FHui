@@ -4,6 +4,7 @@ Major new features and bug fixes will be listed here.
 * Bug fixes
 
 FHUI build ??
+* Fixed crash on grid column header double click.
 + Filters on Colonies, Ships and Aliens tabs.
 
 FHUI build 42
