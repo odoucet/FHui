@@ -5,11 +5,16 @@
 
 using namespace System::Text::RegularExpressions;
 
+void GridFilter::Update()
+{
+    Update(m_RefreshDummy);
+}
+
 void GridFilter::Update(Object ^sender)
 {
     try
     {
-        if( *m_bGridUpdateEnabled )
+        if( EnableUpdates )
         {
             if( sender == CtrlRefHome )
                 SetRefHome();
@@ -198,7 +203,7 @@ bool GridFilter::Filter(IGridDataSrc ^item)
 
 void GridFilter::Reset()
 {
-    *m_bGridUpdateEnabled = false;
+    EnableUpdates = false;
 
     if( CtrlMaxLSN )
         CtrlMaxLSN->Value = DefaultLSN;
@@ -226,8 +231,8 @@ void GridFilter::Reset()
     if( CtrlMiMaBalance )
         CtrlMiMaBalance->Checked = false;
 
-    *m_bGridUpdateEnabled = true;
-    Update(m_RefreshDummy);
+    EnableUpdates = true;
+    Update();
 }
 
 void GridFilter::SetRefText()
@@ -252,9 +257,9 @@ void GridFilter::SetRefXYZ()
         if( RefSystem == system )
             return;
 
-        *m_bGridUpdateEnabled   = false;
-        CtrlRefHome->Text       = s_CaptionHome;
-        CtrlRefColony->Text     = s_CaptionColony;
+        EnableUpdates       = false;
+        CtrlRefHome->Text   = s_CaptionHome;
+        CtrlRefColony->Text = s_CaptionColony;
 
         RefSystem = system;
         OnGridSetup();
@@ -277,9 +282,9 @@ void GridFilter::SetRefHome()
     if( RefSystem == sp->HomeSystem )
         return;
 
-    *m_bGridUpdateEnabled   = false;
-    CtrlRefXYZ->Text        = s_CaptionXYZ;
-    CtrlRefColony->Text     = s_CaptionColony;
+    EnableUpdates       = false;
+    CtrlRefXYZ->Text    = s_CaptionXYZ;
+    CtrlRefColony->Text = s_CaptionColony;
 
     RefSystem = sp->HomeSystem;
     OnGridSetup();
@@ -327,9 +332,9 @@ void GridFilter::SetRefColony()
     if( RefSystem == colony->System )
         return;
 
-    *m_bGridUpdateEnabled   = false;
-    CtrlRefXYZ->Text        = s_CaptionXYZ;
-    CtrlRefHome->Text       = s_CaptionHome;
+    EnableUpdates       = false;
+    CtrlRefXYZ->Text    = s_CaptionXYZ;
+    CtrlRefHome->Text   = s_CaptionHome;
 
     RefSystem = colony->System;
     OnGridSetup();
@@ -363,10 +368,10 @@ void GridFilter::SetRefShip()
         if( SelectRefSystemFromRefShip &&
             ship->System != RefSystem )
         {
-            *m_bGridUpdateEnabled   = false;
-            CtrlRefXYZ->Text        = s_CaptionXYZ;
-            CtrlRefHome->Text       = s_CaptionHome;
-            CtrlRefColony->Text     = s_CaptionColony;
+            EnableUpdates       = false;
+            CtrlRefXYZ->Text    = s_CaptionXYZ;
+            CtrlRefHome->Text   = s_CaptionHome;
+            CtrlRefColony->Text = s_CaptionColony;
 
             RefSystem = ship->System;
             OnGridSetup();

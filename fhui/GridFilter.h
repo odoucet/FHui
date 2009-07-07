@@ -22,13 +22,18 @@ public:
         GameData = nullptr;
         DefaultLSN = 99;
         DefaultMishap = 100;
-        SelectRefSystemFromRefShip = false;
+        SelectRefSystemFromRefShip = true;
 
         RefSystem = nullptr;
     }
 
     virtual property GameData^      GameData;
     virtual property StarSystem^    RefSystem;
+    virtual property bool           EnableUpdates
+    {
+        void set(bool en) { *m_bGridUpdateEnabled = en; }
+        bool get()        { return *m_bGridUpdateEnabled; }
+    }
 
     virtual property int            DefaultLSN;
     virtual property int            DefaultMishap;
@@ -36,6 +41,7 @@ public:
 
     virtual property bool           MiMaBalanced { bool get() { return CtrlMiMaBalance->Checked; } }
 
+    virtual void    Update();
     virtual void    Update(Object ^sender);
     virtual void    Reset();
     virtual bool    Filter(IGridDataSrc ^item);

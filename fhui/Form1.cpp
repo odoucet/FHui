@@ -659,7 +659,7 @@ void Form1::SetGridBgAndTooltip(DataGridView ^grid)
 void Form1::SystemsUpdateControls()
 {
     // Inhibit grid update
-    *m_bGridUpdateEnabled = false;
+    m_SystemsFilter->EnableUpdates  = false;
 
     m_SystemsFilter->GameData       = m_GameData;
 
@@ -671,8 +671,8 @@ void Form1::SystemsUpdateControls()
     SystemsRefShip->DataSource      = m_RefListShips;
 
     // Trigger grid update
-    *m_bGridUpdateEnabled = true;
-    SystemsRefHome->Text = m_GameData->GetSpeciesName();
+    m_SystemsFilter->EnableUpdates  = true;
+    SystemsRefHome->Text            = m_GameData->GetSpeciesName();
 }
 
 void Form1::SystemsSetup()
@@ -735,7 +735,7 @@ void Form1::SystemsSetup()
     SystemsGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
 
     // Enable filters
-    *m_bGridUpdateEnabled = true;
+    m_SystemsFilter->EnableUpdates = true;
 }
 
 void Form1::SystemsSelectPlanets( int rowIndex )
@@ -757,10 +757,10 @@ void Form1::SystemsSelectPlanets( int rowIndex )
 void Form1::PlanetsUpdateControls()
 {
     // Inhibit grid update
-    *m_bGridUpdateEnabled = false;
+    m_PlanetsFilter->EnableUpdates  = false;
 
     m_PlanetsFilter->GameData       = m_GameData;
-    m_PlanetsFilter->DefaultLSN     = Math::Min(99, m_GameData->GetSpecies()->TechLevels[TECH_LS] + 9);
+    m_PlanetsFilter->DefaultLSN     = Math::Min(99, m_GameData->GetSpecies()->TechLevels[TECH_LS]);
 
     PlanetsGV->Value                = Math::Max(1, m_GameData->GetSpecies()->TechLevels[TECH_GV]);
 
@@ -771,7 +771,7 @@ void Form1::PlanetsUpdateControls()
 
     PlanetsRefHome->Text = GridFilter::s_CaptionHome;
     // Trigger grid update
-    *m_bGridUpdateEnabled = true;
+    m_PlanetsFilter->EnableUpdates  = true;
     PlanetsRefHome->Text = m_GameData->GetSpeciesName();
     m_PlanetsFilter->Reset();
 }
@@ -790,6 +790,7 @@ void Form1::PlanetsSetup()
     DataColumn ^colLSN      = dataTable->Columns->Add("LSN",        int::typeid );
     DataColumn ^colDist     = dataTable->Columns->Add("Dist.",      double::typeid );
     DataColumn ^colMishap   = dataTable->Columns->Add("Mishap %",   String::typeid );
+    DataColumn ^colVisited  = dataTable->Columns->Add("Visited",    int::typeid );
     DataColumn ^colScan     = dataTable->Columns->Add("Scan",       String::typeid );
     DataColumn ^colColonies = dataTable->Columns->Add("Colonies",   String::typeid );
     DataColumn ^colNotes    = dataTable->Columns->Add("Notes",      String::typeid );
@@ -817,6 +818,8 @@ void Form1::PlanetsSetup()
             row[colLSN]      = planet->LSN;
             row[colDist]     = distance;
             row[colMishap]   = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
+            if( system->LastVisited != -1 )
+                row[colVisited] = system->LastVisited;
             row[colScan]     = system->PrintScanStatus();
             row[colColonies] = system->PrintColonies( planet->Number );
             row[colNotes]    = planet->Comment;
@@ -831,7 +834,7 @@ void Form1::PlanetsSetup()
     PlanetsGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
 
     // Enable filters
-    *m_bGridUpdateEnabled = true;
+    m_PlanetsFilter->EnableUpdates = true;
 }
 
 void Form1::PlanetsSelectColonies( int rowIndex )
@@ -839,11 +842,20 @@ void Form1::PlanetsSelectColonies( int rowIndex )
     if( rowIndex != -1 )
     {
         int index = PlanetsGrid->Columns[0]->Index;
-        IGridDataSrc ^iDataSrc = safe_cast<IGridDataSrc^>(PlanetsGrid->Rows[ rowIndex ]->Cells[index]->Value);
+        Planet ^planet = safe_cast<Planet^>(PlanetsGrid->Rows[ rowIndex ]->Cells[index]->Value);
 
-        ColoniesRefXYZ->Text = iDataSrc->GetFilterSystem()->PrintLocation();
-        ColoniesMaxMishap->Value = 0;
-        MenuTabs->SelectedIndex = 4;
+        if( planet->System->Colonies->Count > 0 )
+        {
+            ColoniesRefXYZ->Text = planet->System->PrintLocation();
+            ColoniesMaxMishap->Value = 0;
+            MenuTabs->SelectedIndex = 4;
+        }
+        else
+        {
+            PlanetsRefXYZ->Text = planet->System->PrintLocation();
+            PlanetsMaxMishap->Value = 0;
+            PlanetsMaxLSN->Value = 99;
+        }
     }
 }
 
@@ -853,7 +865,7 @@ void Form1::PlanetsSelectColonies( int rowIndex )
 void Form1::ColoniesUpdateControls()
 {
     // Inhibit grid update
-    *m_bGridUpdateEnabled = false;
+    m_ColoniesFilter->EnableUpdates = false;
 
     m_ColoniesFilter->GameData      = m_GameData;
 
@@ -866,7 +878,7 @@ void Form1::ColoniesUpdateControls()
 
     ColoniesRefHome->Text = GridFilter::s_CaptionHome;
     // Trigger grid update
-    *m_bGridUpdateEnabled = true;
+    m_ColoniesFilter->EnableUpdates = true;
     ColoniesRefHome->Text = m_GameData->GetSpeciesName();
     m_ColoniesFilter->Reset();
 }
@@ -960,7 +972,7 @@ void Form1::ColoniesSetup()
     ColoniesGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
 
     // Enable filters
-    *m_bGridUpdateEnabled = true;
+    m_ColoniesFilter->EnableUpdates = true;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -969,10 +981,9 @@ void Form1::ColoniesSetup()
 void Form1::ShipsUpdateControls()
 {
     // Inhibit grid update
-    *m_bGridUpdateEnabled = false;
+    m_ShipsFilter->EnableUpdates = false;
 
     m_ShipsFilter->GameData      = m_GameData;
-    m_ShipsFilter->SelectRefSystemFromRefShip = true;
 
     ShipsGV->Value               = Math::Max(1, m_GameData->GetSpecies()->TechLevels[TECH_GV]);
 
@@ -983,7 +994,7 @@ void Form1::ShipsUpdateControls()
 
     ShipsRefHome->Text = GridFilter::s_CaptionHome;
     // Trigger grid update
-    *m_bGridUpdateEnabled = true;
+    m_ShipsFilter->EnableUpdates = true;
     ShipsRefHome->Text = m_GameData->GetSpeciesName();
     m_ShipsFilter->Reset();
 }
@@ -1061,7 +1072,7 @@ void Form1::ShipsSetup()
     ShipsGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
 
     // Enable filters
-    *m_bGridUpdateEnabled = true;
+    m_ShipsFilter->EnableUpdates = true;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1069,7 +1080,7 @@ void Form1::ShipsSetup()
 
 void Form1::AliensUpdateControls()
 {
-    *m_bGridUpdateEnabled = true;
+    m_AliensFilter->EnableUpdates = true;
     m_AliensFilter->Reset();
 }
 
@@ -1111,7 +1122,7 @@ void Form1::AliensSetup()
     ApplyDataAndFormat(AliensGrid, dataTable, colObject, colRelation->Ordinal);
 
     // Enable filters
-    *m_bGridUpdateEnabled = true;
+    m_AliensFilter->EnableUpdates = true;
 }
 
 ////////////////////////////////////////////////////////////////

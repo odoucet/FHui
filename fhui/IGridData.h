@@ -21,11 +21,13 @@ public interface class IGridDataSrc
 
 public interface class IGridFilter
 {
-    void    Update(System::Object^  sender);
+    void    Update();
+    void    Update(System::Object^ sender);
     void    Reset();
     bool    Filter(IGridDataSrc ^item);
 
     property GameData^      GameData;
+    property bool           EnableUpdates;
     property StarSystem^    RefSystem;
 
     property int            DefaultLSN;
