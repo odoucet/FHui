@@ -929,7 +929,7 @@ Colony^ GameData::AddColony(int turn, Alien ^sp, String ^name, StarSystem ^syste
             // System is not yet known, initialize with defaults
             for(int i = 0; i < plNum; i++)
             {
-                system->Planets[i] = gcnew Planet( system, i+1, 99, 99.99, 99, 99, 99.99);
+                system->Planets[i] = gcnew Planet( system, i+1, 99, 99.99F, 99, 99, 99.99F);
             }
         }
 
@@ -1017,7 +1017,7 @@ void GameData::UpdateSystems()
                     // Helps with MD changed via mining or when there is no system scan
                     if ( colony->Owner == GetSpecies() )
                     {
-                        planet->MiningDiff = colony->MiDiff;
+                        planet->MiningDiff = (float)colony->MiDiff;
                         planet->LSN = colony->LSN;
                     }
 
