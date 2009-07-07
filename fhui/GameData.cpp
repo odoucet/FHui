@@ -82,6 +82,8 @@ int Planet::CalculateLSN(AtmosphericReq ^atmReq)
         lsn += 3;
     }
 
+    lsn = Math::Min(lsn, 99); 
+
     return lsn;
 }
 
@@ -869,6 +871,15 @@ Colony^ GameData::AddColony(int turn, Alien ^sp, String ^name, StarSystem ^syste
         Colony ^colony = gcnew Colony(sp, name, system, plNum);
         m_Colonies[name->ToLower()] = colony;
 
+        if( system->PlanetsCount < plNum )
+        {
+            // System is not yet known, initialize with defaults
+            for(int i = 0; i < plNum; i++)
+            {
+                system->Planets[i] = gcnew Planet( system, i+1, 99, 99.99, 99, 99, 99.99);
+            }
+        }
+
         // If this is species' own colony, remove alien colonies from this system.
         // They'll be restored by 'Aliens at...' parsing. If not - it means that alien
         // colony was destroyed or assymilated.
@@ -948,6 +959,15 @@ void GameData::UpdateSystems()
                 {
                     ++planet->NumColonies;
                     available = false;
+
+                    // Update planet info with colony info, if there is any difference
+                    // Helps with MD changed via mining or when there is no system scan
+                    if ( colony->Owner == GetSpecies() )
+                    {
+                        planet->MiningDiff = colony->MiDiff;
+                        planet->LSN = colony->LSN;
+                    }
+
                     break;
                 }
             }

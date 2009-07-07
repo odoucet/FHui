@@ -518,17 +518,20 @@ void Report::MatchColonyScan(String ^s)
         {
             String ^plName = GetMatchResult(0);
             plName = plName->TrimEnd(' ');
+
             StarSystem ^system = m_GameData->GetStarSystem(
                 GetMatchResultInt(1),
                 GetMatchResultInt(2),
                 GetMatchResultInt(3) );
 
+            int plNum = GetMatchResultInt(4);
+ 
             m_ScanColony = m_GameData->AddColony(
                 m_Turn,
                 m_GameData->GetSpecies(),
                 plName,
                 system,
-                GetMatchResultInt(4) );
+                plNum );
 
             // Species have colony here, so system is visited
             system->LastVisited = m_Turn;
@@ -584,9 +587,10 @@ void Report::MatchColonyScan(String ^s)
     {
         m_ScanColony->EconomicEff = GetMatchResultInt(0);
     }
-    else if( MatchWithOutput(s, "^Production penalty = (\\d+)% \\(") )
+    else if( MatchWithOutput(s, "^Production penalty = (\\d+)% \\(LSN = (\\d+)\\)") )
     {
         m_ScanColony->ProdPenalty = GetMatchResultInt(0);
+        m_ScanColony->LSN = GetMatchResultInt(1);
     }
     else if( MatchWithOutput(s, "^Mining base = (\\d+\\.\\d+) \\(MI = \\d+, MD = (\\d+\\.\\d+)\\)") )
     {

@@ -278,6 +278,7 @@ public:
         MiBase = -1;
         MiDiff = 0;
         MaBase = -1;
+        LSN = 99;
         Shipyards = 0;
         LastSeen = -1;
         m_Inventory = gcnew array<int>(INV_MAX){0};
@@ -308,6 +309,7 @@ public:
     double          MiBase;
     double          MiDiff;
     double          MaBase;
+    int             LSN;
     int             Shipyards;
     int             LastSeen;
 

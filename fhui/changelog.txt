@@ -3,6 +3,9 @@ Major new features and bug fixes will be listed here.
 + New features
 * Bug fixes
 
+FHUI build ?
+* Colony on a planet without system scan is now correctly handled
+
 FHUI build 50
 * Fixed crash on grid column header double click.
 * Fixed loading data from historic turns.
