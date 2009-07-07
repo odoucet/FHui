@@ -723,7 +723,7 @@ void Form1::SystemsSetup()
         row[colScan]        = system->PrintScanStatus();
         if( system->LastVisited != -1 )
             row[colVisited] = system->LastVisited;
-        row[colColonies]    = system->PrintColonies( -1 );
+        row[colColonies]    = system->PrintColonies( -1, m_GameData->GetSpecies() );
         row[colNotes]       = system->Comment;
 
         dataTable->Rows->Add(row);
@@ -821,7 +821,7 @@ void Form1::PlanetsSetup()
             if( system->LastVisited != -1 )
                 row[colVisited] = system->LastVisited;
             row[colScan]     = system->PrintScanStatus();
-            row[colColonies] = system->PrintColonies( planet->Number );
+            row[colColonies] = system->PrintColonies( planet->Number, m_GameData->GetSpecies() );
             row[colNotes]    = planet->Comment;
 
             dataTable->Rows->Add(row);

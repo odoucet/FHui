@@ -178,7 +178,7 @@ String^ StarSystem::PrintScanStatus()
     else                        return s_ScanSelf;
 }
 
-String^ StarSystem::PrintColonies(int planetNum)
+String^ StarSystem::PrintColonies(int planetNum, Alien ^player)
 {
     String ^ret = "";
 
@@ -190,12 +190,50 @@ String^ StarSystem::PrintColonies(int planetNum)
 
         if( String::IsNullOrEmpty(ret) == false )
             ret += ", ";
-        if( planetNum == -1 )
-            ret += ("#" + colony->PlanetNum.ToString() + " ");
-        ret += String::Format( "{0}{1}({2})",
-            colony->PlanetType == PLANET_HOME ? "(HOME) " : "",
-            colony->Owner->Name,
-            colony->EconomicBase == -1 ? "?" : Math::Round(colony->EconomicBase).ToString() );
+    }
+
+    for each( Colony ^colony in Colonies )
+    {
+        if( planetNum != -1 &&
+            colony->PlanetNum != planetNum )
+            continue;
+
+        String ^entry = "";
+
+        if( colony->Owner == player )
+        {
+            // Put player colony first, by name
+            if( planetNum == -1 )
+            {
+                entry += ("#" + colony->PlanetNum.ToString() + " ");
+            }
+
+            entry += String::Format("PL {0}[{1}]",
+                colony->Name,
+                colony->EconomicBase == -1 ? "?" : Math::Round(colony->EconomicBase).ToString() );
+
+            if( String::IsNullOrEmpty(ret) )
+            {
+                ret = entry;
+            }
+            else
+            {
+                ret = entry + ", " + ret;
+            }
+        }
+        else
+        {
+            // Then list alien colonies by species name
+
+            if( String::IsNullOrEmpty(ret) == false )
+                ret += ", ";
+            if( planetNum == -1 )
+                ret += ("#" + colony->PlanetNum.ToString() + " ");
+            ret += String::Format( "{0}{1}[{2}]",
+                colony->PlanetType == PLANET_HOME ? "(HOME) " : "",
+                colony->Owner->Name,
+                colony->EconomicBase == -1 ? "?" : Math::Round(colony->EconomicBase).ToString() );
+        }
 
         if( Master == nullptr )
             Master = colony->Owner;

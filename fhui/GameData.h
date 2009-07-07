@@ -224,7 +224,7 @@ public:
     String^     GenerateScan();
     String^     PrintLocation() { return String::Format("{0,2} {1,2} {2,2}", X, Y, Z); }
     String^     PrintScanStatus();
-    String^     PrintColonies(int planetNum);   // -1 for all colonies in system
+    String^     PrintColonies(int planetNum, Alien ^player);   // -1 for all colonies in system
     //String^     PrintShips();
 
     property int        X;
