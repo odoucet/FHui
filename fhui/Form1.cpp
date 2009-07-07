@@ -1050,7 +1050,7 @@ void Form1::ShipsSetup()
         row[colOwner]       = ship->Owner == sp ? String::Format("* {0}", sp->Name) : ship->Owner->Name;
         row[colClass]       = ship->PrintClass();
         row[colName]        = ship->Name;
-        row[colLocation]    = ship->PrintLocation();
+        row[colLocation]    = ship->PrintLocation( m_GameData->GetSpecies() );
         if( !ship->IsPirate )
             row[colAge]     = ship->Age;
         row[colCap]         = ship->Capacity;

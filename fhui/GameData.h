@@ -382,7 +382,7 @@ public:
     // --------------------------------------------------
 
     String^         PrintClass();
-    String^         PrintLocation();
+    String^         PrintLocation(Alien ^player);
     String^         PrintCargo();
 
     int             GetMaintenanceCost();

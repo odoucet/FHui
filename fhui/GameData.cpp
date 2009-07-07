@@ -297,12 +297,25 @@ String^ Ship::PrintClass()
         SubLight ? "s" : "" );
 }
 
-String^ Ship::PrintLocation()
+String^ Ship::PrintLocation(Alien ^player)
 {
     String ^xyz;
 
     if( System )
     {
+        if( PlanetNum == -1 )
+        {
+            // check if there is player colony in the system
+            for each( Colony ^colony in System->Colonies )
+            {
+                if ( colony->System == System && colony->Owner == player )
+                {
+                    PlanetNum = colony->PlanetNum;
+                    break;
+                }
+            }
+        }
+
         if( PlanetNum != -1 )
         {
             Planet ^planet = System->Planets[PlanetNum - 1];
@@ -315,7 +328,9 @@ String^ Ship::PrintLocation()
                 xyz = String::Format("[{0} {1}]", System->PrintLocation(), PlanetNum);
         }
         else
+        {
            xyz = String::Format("[{0}]", System->PrintLocation());
+        }
     }
     else
     {
@@ -327,7 +342,7 @@ String^ Ship::PrintLocation()
 
     switch( Location )
     {
-    case SHIP_LOC_DEEP_SPACE:   return String::Format("{0}, DeepSp", xyz);
+    case SHIP_LOC_DEEP_SPACE:   return String::Format("{0}, Deep", xyz);
     case SHIP_LOC_ORBIT:        return String::Format("{0}, Orbit", xyz);
     case SHIP_LOC_LANDED:       return String::Format("{0}, Landed", xyz);
     }
@@ -603,7 +618,7 @@ String^ GameData::GetShipsSummary()
         ret += String::Format("{0} {1} @{2}\r\n",
             ship->PrintClass(),
             ship->Name,
-            ship->PrintLocation() );
+            ship->PrintLocation( GetSpecies() ) );
 
     return ret;
 }
