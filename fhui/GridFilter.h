@@ -46,6 +46,8 @@ public:
     virtual void    Reset();
     virtual bool    Filter(IGridDataSrc ^item);
 
+    virtual void    SetRefSystem(StarSystem ^system);
+
     Label           ^CtrlRef;
     ComboBox        ^CtrlRefHome;
     ComboBox        ^CtrlRefXYZ;

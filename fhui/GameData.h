@@ -201,6 +201,7 @@ public:
         Master = nullptr;
         Ships = gcnew List<Ship^>;
         Colonies = gcnew List<Colony^>;
+        IsVoid = true;
     }
 
     // -------- IGridDataSrc ----------------------------
@@ -240,6 +241,7 @@ public:
     property int        LastVisited;
     property int        MinLSN;
     property int        MinLSNAvail;
+    property bool       IsVoid;
 
     property List<Ship^>^   Ships;
     property List<Colony^>^ Colonies;
@@ -298,6 +300,7 @@ public:
 
     String^         PrintLocation() { return String::Format("{0} {1}", System->PrintLocation(), PlanetNum); }
     String^         PrintInventoryShort();
+    String^         PrintRefListEntry(Alien ^player);
 
     Alien^          Owner;
     String^         Name;
@@ -388,6 +391,7 @@ public:
     String^         PrintClass();
     String^         PrintLocation(Alien ^player);
     String^         PrintCargo();
+    String^         PrintRefListEntry();
 
     int             GetMaintenanceCost();
     int             GetUpgradeCost()        { return Age * OriginalCost / 40; }

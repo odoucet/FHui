@@ -346,6 +346,29 @@ void GridFilter::SetRefColony()
         RefSystem->PrintLocation(), ref);
 }
 
+void GridFilter::SetRefSystem(StarSystem ^system)
+{
+    if( system != RefSystem &&
+        CtrlRefXYZ != nullptr )
+    {
+        if( system->IsVoid )
+        {
+            EnableUpdates       = false;
+            CtrlRefXYZ->Text    = s_CaptionXYZ;
+            CtrlRefHome->Text   = s_CaptionHome;
+            CtrlRefColony->Text = s_CaptionColony;
+
+            RefSystem = system;
+            OnGridSetup();
+
+            CtrlRef->Text = String::Format("Ref. system: [{0}] (space void)",
+                RefSystem->PrintLocation());
+        }
+        else
+            CtrlRefXYZ->Text = system->PrintLocation();
+    }
+}
+
 Ship^ GridFilter::GetShipFromRefList(ComboBox ^combo)
 {
     String ^ref = combo->Text;

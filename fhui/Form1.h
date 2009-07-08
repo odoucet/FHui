@@ -75,6 +75,7 @@ namespace fhui {
                         int defaultSortColIdx );
         Color       GetAlienColor(Alien ^sp);
         void        SetGridBgAndTooltip(DataGridView ^grid);
+        void        SetGridRefSystemOnMouseClick(DataGridView ^grid, int rowIndex);
 
         // ==================================================
 
@@ -114,6 +115,7 @@ namespace fhui {
         // --- COLONIES ---
         void        ColoniesUpdateControls();
         void        ColoniesSetup();
+        void        ColoniesSetRef( int rowIndex );
 
         IGridFilter        ^m_ColoniesFilter;
 
@@ -121,6 +123,7 @@ namespace fhui {
         // --- SHIPS ---
         void        ShipsUpdateControls();
         void        ShipsSetup();
+        void        ShipsSetRef( int rowIndex );
 
         IGridFilter        ^m_ShipsFilter;
 
@@ -266,7 +269,7 @@ private: System::Windows::Forms::Label^  PlanetsRef;
     private: System::Windows::Forms::TabPage^  TabShips;
     private: System::Windows::Forms::TabPage^  TabAliens;
     private: System::Windows::Forms::TabPage^  TabCommands;
-    private: System::Windows::Forms::Label^  RepStatus;
+
     private: System::Windows::Forms::ComboBox^  RepTurnNr;
     private: System::Windows::Forms::TextBox^  RepText;
     private: System::Windows::Forms::ComboBox^  SystemsRefXYZ;
@@ -411,7 +414,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle12 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             this->RepModeCommands = (gcnew System::Windows::Forms::RadioButton());
             this->RepModeReports = (gcnew System::Windows::Forms::RadioButton());
-            this->RepStatus = (gcnew System::Windows::Forms::Label());
             this->RepTurnNr = (gcnew System::Windows::Forms::ComboBox());
             this->RepText = (gcnew System::Windows::Forms::TextBox());
             this->TurnReloadBtn = (gcnew System::Windows::Forms::Button());
@@ -438,6 +440,10 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->MapSPSelfGV = (gcnew System::Windows::Forms::NumericUpDown());
             this->MapSPSelfSystem = (gcnew System::Windows::Forms::ComboBox());
             this->TabSystems = (gcnew System::Windows::Forms::TabPage());
+            this->SystemsFiltVisN = (gcnew System::Windows::Forms::CheckBox());
+            this->SystemsFiltColN = (gcnew System::Windows::Forms::CheckBox());
+            this->SystemsFiltVisV = (gcnew System::Windows::Forms::CheckBox());
+            this->SystemsFiltColC = (gcnew System::Windows::Forms::CheckBox());
             this->SystemsFiltersReset = (gcnew System::Windows::Forms::Button());
             this->SystemsRefEdit = (gcnew System::Windows::Forms::TextBox());
             this->SystemsMaxLSN = (gcnew System::Windows::Forms::NumericUpDown());
@@ -451,6 +457,10 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->SystemsRef = (gcnew System::Windows::Forms::Label());
             this->SystemsGrid = (gcnew System::Windows::Forms::DataGridView());
             this->TabPlanets = (gcnew System::Windows::Forms::TabPage());
+            this->PlanetsFiltVisN = (gcnew System::Windows::Forms::CheckBox());
+            this->PlanetsFiltColN = (gcnew System::Windows::Forms::CheckBox());
+            this->PlanetsFiltVisV = (gcnew System::Windows::Forms::CheckBox());
+            this->PlanetsFiltColC = (gcnew System::Windows::Forms::CheckBox());
             this->PlanetsFiltersReset = (gcnew System::Windows::Forms::Button());
             this->PlanetsRefEdit = (gcnew System::Windows::Forms::TextBox());
             this->PlanetsMaxLSN = (gcnew System::Windows::Forms::NumericUpDown());
@@ -465,6 +475,8 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->PlanetsGrid = (gcnew System::Windows::Forms::DataGridView());
             this->TabColonies = (gcnew System::Windows::Forms::TabPage());
             this->splitContainer4 = (gcnew System::Windows::Forms::SplitContainer());
+            this->ColoniesFiltOwnN = (gcnew System::Windows::Forms::CheckBox());
+            this->ColoniesFiltOwnO = (gcnew System::Windows::Forms::CheckBox());
             this->ColoniesMiMaBalanced = (gcnew System::Windows::Forms::CheckBox());
             this->ColoniesRefHome = (gcnew System::Windows::Forms::ComboBox());
             this->ColoniesFiltersReset = (gcnew System::Windows::Forms::Button());
@@ -486,6 +498,8 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ShipsFiltRelP = (gcnew System::Windows::Forms::CheckBox());
             this->ShipsFiltTypeBA = (gcnew System::Windows::Forms::CheckBox());
             this->ShipsFiltRelN = (gcnew System::Windows::Forms::CheckBox());
+            this->ShipsFiltOwnN = (gcnew System::Windows::Forms::CheckBox());
+            this->ShipsFiltOwnO = (gcnew System::Windows::Forms::CheckBox());
             this->ShipsFiltRelE = (gcnew System::Windows::Forms::CheckBox());
             this->ShipsFiltRelA = (gcnew System::Windows::Forms::CheckBox());
             this->ShipsRefHome = (gcnew System::Windows::Forms::ComboBox());
@@ -515,18 +529,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->comboBox2 = (gcnew System::Windows::Forms::ComboBox());
             this->dataGridView1 = (gcnew System::Windows::Forms::DataGridView());
             this->BtnTooltip = (gcnew System::Windows::Forms::ToolTip(this->components));
-            this->ShipsFiltOwnO = (gcnew System::Windows::Forms::CheckBox());
-            this->ShipsFiltOwnN = (gcnew System::Windows::Forms::CheckBox());
-            this->ColoniesFiltOwnN = (gcnew System::Windows::Forms::CheckBox());
-            this->ColoniesFiltOwnO = (gcnew System::Windows::Forms::CheckBox());
-            this->PlanetsFiltColN = (gcnew System::Windows::Forms::CheckBox());
-            this->PlanetsFiltColC = (gcnew System::Windows::Forms::CheckBox());
-            this->PlanetsFiltVisV = (gcnew System::Windows::Forms::CheckBox());
-            this->PlanetsFiltVisN = (gcnew System::Windows::Forms::CheckBox());
-            this->SystemsFiltVisN = (gcnew System::Windows::Forms::CheckBox());
-            this->SystemsFiltColN = (gcnew System::Windows::Forms::CheckBox());
-            this->SystemsFiltVisV = (gcnew System::Windows::Forms::CheckBox());
-            this->SystemsFiltColC = (gcnew System::Windows::Forms::CheckBox());
             splitContainer1 = (gcnew System::Windows::Forms::SplitContainer());
             TopSplitCont = (gcnew System::Windows::Forms::SplitContainer());
             splitContainer7 = (gcnew System::Windows::Forms::SplitContainer());
@@ -639,7 +641,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             splitContainer1->Panel1->Controls->Add(this->RepModeCommands);
             splitContainer1->Panel1->Controls->Add(this->RepModeReports);
-            splitContainer1->Panel1->Controls->Add(this->RepStatus);
             splitContainer1->Panel1->Controls->Add(this->RepTurnNr);
             // 
             // splitContainer1.Panel2
@@ -674,15 +675,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->RepModeReports->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
             this->RepModeReports->UseVisualStyleBackColor = true;
             this->RepModeReports->CheckedChanged += gcnew System::EventHandler(this, &Form1::RepMode_CheckedChanged);
-            // 
-            // RepStatus
-            // 
-            this->RepStatus->AutoSize = true;
-            this->RepStatus->Location = System::Drawing::Point(302, 6);
-            this->RepStatus->Name = L"RepStatus";
-            this->RepStatus->Size = System::Drawing::Size(16, 13);
-            this->RepStatus->TabIndex = 1;
-            this->RepStatus->Text = L"...";
             // 
             // RepTurnNr
             // 
@@ -1147,6 +1139,62 @@ private: System::Windows::Forms::Label^  SystemsRef;
             splitContainer2->SplitterWidth = 1;
             splitContainer2->TabIndex = 0;
             // 
+            // SystemsFiltVisN
+            // 
+            this->SystemsFiltVisN->Appearance = System::Windows::Forms::Appearance::Button;
+            this->SystemsFiltVisN->Location = System::Drawing::Point(296, 51);
+            this->SystemsFiltVisN->Margin = System::Windows::Forms::Padding(1);
+            this->SystemsFiltVisN->Name = L"SystemsFiltVisN";
+            this->SystemsFiltVisN->Size = System::Drawing::Size(23, 23);
+            this->SystemsFiltVisN->TabIndex = 75;
+            this->SystemsFiltVisN->Text = L"N";
+            this->SystemsFiltVisN->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->SystemsFiltVisN, L"Show NOT VISITED systems.");
+            this->SystemsFiltVisN->UseVisualStyleBackColor = true;
+            this->SystemsFiltVisN->CheckedChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
+            // 
+            // SystemsFiltColN
+            // 
+            this->SystemsFiltColN->Appearance = System::Windows::Forms::Appearance::Button;
+            this->SystemsFiltColN->Location = System::Drawing::Point(368, 51);
+            this->SystemsFiltColN->Margin = System::Windows::Forms::Padding(1);
+            this->SystemsFiltColN->Name = L"SystemsFiltColN";
+            this->SystemsFiltColN->Size = System::Drawing::Size(23, 23);
+            this->SystemsFiltColN->TabIndex = 74;
+            this->SystemsFiltColN->Text = L"N";
+            this->SystemsFiltColN->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->SystemsFiltColN, L"Show NOT COLONIZED systems.");
+            this->SystemsFiltColN->UseVisualStyleBackColor = true;
+            this->SystemsFiltColN->CheckedChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
+            // 
+            // SystemsFiltVisV
+            // 
+            this->SystemsFiltVisV->Appearance = System::Windows::Forms::Appearance::Button;
+            this->SystemsFiltVisV->Location = System::Drawing::Point(271, 51);
+            this->SystemsFiltVisV->Margin = System::Windows::Forms::Padding(1);
+            this->SystemsFiltVisV->Name = L"SystemsFiltVisV";
+            this->SystemsFiltVisV->Size = System::Drawing::Size(23, 23);
+            this->SystemsFiltVisV->TabIndex = 77;
+            this->SystemsFiltVisV->Text = L"V";
+            this->SystemsFiltVisV->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->SystemsFiltVisV, L"Show VISITED systems.");
+            this->SystemsFiltVisV->UseVisualStyleBackColor = true;
+            this->SystemsFiltVisV->CheckedChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
+            // 
+            // SystemsFiltColC
+            // 
+            this->SystemsFiltColC->Appearance = System::Windows::Forms::Appearance::Button;
+            this->SystemsFiltColC->Location = System::Drawing::Point(343, 51);
+            this->SystemsFiltColC->Margin = System::Windows::Forms::Padding(1);
+            this->SystemsFiltColC->Name = L"SystemsFiltColC";
+            this->SystemsFiltColC->Size = System::Drawing::Size(23, 23);
+            this->SystemsFiltColC->TabIndex = 76;
+            this->SystemsFiltColC->Text = L"C";
+            this->SystemsFiltColC->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->SystemsFiltColC, L"Show COLONIZED systems.");
+            this->SystemsFiltColC->UseVisualStyleBackColor = true;
+            this->SystemsFiltColC->CheckedChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
+            // 
             // SystemsFiltersReset
             // 
             this->SystemsFiltersReset->Location = System::Drawing::Point(558, 51);
@@ -1398,6 +1446,62 @@ private: System::Windows::Forms::Label^  SystemsRef;
             splitContainer3->SplitterWidth = 1;
             splitContainer3->TabIndex = 1;
             // 
+            // PlanetsFiltVisN
+            // 
+            this->PlanetsFiltVisN->Appearance = System::Windows::Forms::Appearance::Button;
+            this->PlanetsFiltVisN->Location = System::Drawing::Point(296, 51);
+            this->PlanetsFiltVisN->Margin = System::Windows::Forms::Padding(1);
+            this->PlanetsFiltVisN->Name = L"PlanetsFiltVisN";
+            this->PlanetsFiltVisN->Size = System::Drawing::Size(23, 23);
+            this->PlanetsFiltVisN->TabIndex = 72;
+            this->PlanetsFiltVisN->Text = L"N";
+            this->PlanetsFiltVisN->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->PlanetsFiltVisN, L"Show planets in NOT VISITED systems.");
+            this->PlanetsFiltVisN->UseVisualStyleBackColor = true;
+            this->PlanetsFiltVisN->CheckedChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
+            // 
+            // PlanetsFiltColN
+            // 
+            this->PlanetsFiltColN->Appearance = System::Windows::Forms::Appearance::Button;
+            this->PlanetsFiltColN->Location = System::Drawing::Point(368, 51);
+            this->PlanetsFiltColN->Margin = System::Windows::Forms::Padding(1);
+            this->PlanetsFiltColN->Name = L"PlanetsFiltColN";
+            this->PlanetsFiltColN->Size = System::Drawing::Size(23, 23);
+            this->PlanetsFiltColN->TabIndex = 72;
+            this->PlanetsFiltColN->Text = L"N";
+            this->PlanetsFiltColN->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->PlanetsFiltColN, L"Show NOT COLONIZED planets.");
+            this->PlanetsFiltColN->UseVisualStyleBackColor = true;
+            this->PlanetsFiltColN->CheckedChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
+            // 
+            // PlanetsFiltVisV
+            // 
+            this->PlanetsFiltVisV->Appearance = System::Windows::Forms::Appearance::Button;
+            this->PlanetsFiltVisV->Location = System::Drawing::Point(271, 51);
+            this->PlanetsFiltVisV->Margin = System::Windows::Forms::Padding(1);
+            this->PlanetsFiltVisV->Name = L"PlanetsFiltVisV";
+            this->PlanetsFiltVisV->Size = System::Drawing::Size(23, 23);
+            this->PlanetsFiltVisV->TabIndex = 73;
+            this->PlanetsFiltVisV->Text = L"V";
+            this->PlanetsFiltVisV->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->PlanetsFiltVisV, L"Show planets in VISITED systems.");
+            this->PlanetsFiltVisV->UseVisualStyleBackColor = true;
+            this->PlanetsFiltVisV->CheckedChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
+            // 
+            // PlanetsFiltColC
+            // 
+            this->PlanetsFiltColC->Appearance = System::Windows::Forms::Appearance::Button;
+            this->PlanetsFiltColC->Location = System::Drawing::Point(343, 51);
+            this->PlanetsFiltColC->Margin = System::Windows::Forms::Padding(1);
+            this->PlanetsFiltColC->Name = L"PlanetsFiltColC";
+            this->PlanetsFiltColC->Size = System::Drawing::Size(23, 23);
+            this->PlanetsFiltColC->TabIndex = 73;
+            this->PlanetsFiltColC->Text = L"C";
+            this->PlanetsFiltColC->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->PlanetsFiltColC, L"Show COLONIZED planets.");
+            this->PlanetsFiltColC->UseVisualStyleBackColor = true;
+            this->PlanetsFiltColC->CheckedChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
+            // 
             // PlanetsFiltersReset
             // 
             this->PlanetsFiltersReset->Location = System::Drawing::Point(558, 51);
@@ -1648,6 +1752,34 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->splitContainer4->SplitterWidth = 1;
             this->splitContainer4->TabIndex = 2;
             // 
+            // ColoniesFiltOwnN
+            // 
+            this->ColoniesFiltOwnN->Appearance = System::Windows::Forms::Appearance::Button;
+            this->ColoniesFiltOwnN->Location = System::Drawing::Point(296, 51);
+            this->ColoniesFiltOwnN->Margin = System::Windows::Forms::Padding(1);
+            this->ColoniesFiltOwnN->Name = L"ColoniesFiltOwnN";
+            this->ColoniesFiltOwnN->Size = System::Drawing::Size(23, 23);
+            this->ColoniesFiltOwnN->TabIndex = 70;
+            this->ColoniesFiltOwnN->Text = L"N";
+            this->ColoniesFiltOwnN->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->ColoniesFiltOwnN, L"Show NOT OWNED colonies.");
+            this->ColoniesFiltOwnN->UseVisualStyleBackColor = true;
+            this->ColoniesFiltOwnN->CheckedChanged += gcnew System::EventHandler(this, &Form1::Colonies_Update);
+            // 
+            // ColoniesFiltOwnO
+            // 
+            this->ColoniesFiltOwnO->Appearance = System::Windows::Forms::Appearance::Button;
+            this->ColoniesFiltOwnO->Location = System::Drawing::Point(271, 51);
+            this->ColoniesFiltOwnO->Margin = System::Windows::Forms::Padding(1);
+            this->ColoniesFiltOwnO->Name = L"ColoniesFiltOwnO";
+            this->ColoniesFiltOwnO->Size = System::Drawing::Size(23, 23);
+            this->ColoniesFiltOwnO->TabIndex = 71;
+            this->ColoniesFiltOwnO->Text = L"O";
+            this->ColoniesFiltOwnO->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->ColoniesFiltOwnO, L"Show OWNED colonies.");
+            this->ColoniesFiltOwnO->UseVisualStyleBackColor = true;
+            this->ColoniesFiltOwnO->CheckedChanged += gcnew System::EventHandler(this, &Form1::Colonies_Update);
+            // 
             // ColoniesMiMaBalanced
             // 
             this->ColoniesMiMaBalanced->AutoSize = true;
@@ -1859,6 +1991,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ColoniesGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
             this->ColoniesGrid->Size = System::Drawing::Size(683, 480);
             this->ColoniesGrid->TabIndex = 0;
+            this->ColoniesGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::ColoniesGrid_CellMouseDoubleClick);
             this->ColoniesGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
             // 
             // TabShips
@@ -1994,6 +2127,34 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->BtnTooltip->SetToolTip(this->ShipsFiltRelN, L"Show NEUTRAL ships.");
             this->ShipsFiltRelN->UseVisualStyleBackColor = true;
             this->ShipsFiltRelN->CheckedChanged += gcnew System::EventHandler(this, &Form1::Ships_Update);
+            // 
+            // ShipsFiltOwnN
+            // 
+            this->ShipsFiltOwnN->Appearance = System::Windows::Forms::Appearance::Button;
+            this->ShipsFiltOwnN->Location = System::Drawing::Point(196, 52);
+            this->ShipsFiltOwnN->Margin = System::Windows::Forms::Padding(1);
+            this->ShipsFiltOwnN->Name = L"ShipsFiltOwnN";
+            this->ShipsFiltOwnN->Size = System::Drawing::Size(23, 23);
+            this->ShipsFiltOwnN->TabIndex = 68;
+            this->ShipsFiltOwnN->Text = L"N";
+            this->ShipsFiltOwnN->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->ShipsFiltOwnN, L"Show NOT OWNED ships.");
+            this->ShipsFiltOwnN->UseVisualStyleBackColor = true;
+            this->ShipsFiltOwnN->CheckedChanged += gcnew System::EventHandler(this, &Form1::Ships_Update);
+            // 
+            // ShipsFiltOwnO
+            // 
+            this->ShipsFiltOwnO->Appearance = System::Windows::Forms::Appearance::Button;
+            this->ShipsFiltOwnO->Location = System::Drawing::Point(171, 52);
+            this->ShipsFiltOwnO->Margin = System::Windows::Forms::Padding(1);
+            this->ShipsFiltOwnO->Name = L"ShipsFiltOwnO";
+            this->ShipsFiltOwnO->Size = System::Drawing::Size(23, 23);
+            this->ShipsFiltOwnO->TabIndex = 69;
+            this->ShipsFiltOwnO->Text = L"O";
+            this->ShipsFiltOwnO->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->ShipsFiltOwnO, L"Show OWNED ships.");
+            this->ShipsFiltOwnO->UseVisualStyleBackColor = true;
+            this->ShipsFiltOwnO->CheckedChanged += gcnew System::EventHandler(this, &Form1::Ships_Update);
             // 
             // ShipsFiltRelE
             // 
@@ -2189,6 +2350,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ShipsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
             this->ShipsGrid->Size = System::Drawing::Size(683, 480);
             this->ShipsGrid->TabIndex = 0;
+            this->ShipsGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::ShipsGrid_CellMouseDoubleClick);
             this->ShipsGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
             // 
             // TabAliens
@@ -2326,6 +2488,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->AliensGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
             this->AliensGrid->Size = System::Drawing::Size(683, 533);
             this->AliensGrid->TabIndex = 0;
+            this->AliensGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseDoubleClick);
             this->AliensGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
             // 
             // TabCommands
@@ -2448,174 +2611,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->dataGridView1->Size = System::Drawing::Size(569, 504);
             this->dataGridView1->TabIndex = 0;
             // 
-            // ShipsFiltOwnO
-            // 
-            this->ShipsFiltOwnO->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ShipsFiltOwnO->Location = System::Drawing::Point(171, 52);
-            this->ShipsFiltOwnO->Margin = System::Windows::Forms::Padding(1);
-            this->ShipsFiltOwnO->Name = L"ShipsFiltOwnO";
-            this->ShipsFiltOwnO->Size = System::Drawing::Size(23, 23);
-            this->ShipsFiltOwnO->TabIndex = 69;
-            this->ShipsFiltOwnO->Text = L"O";
-            this->ShipsFiltOwnO->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->BtnTooltip->SetToolTip(this->ShipsFiltOwnO, L"Show OWNED ships.");
-            this->ShipsFiltOwnO->UseVisualStyleBackColor = true;
-            this->ShipsFiltOwnO->CheckedChanged += gcnew System::EventHandler(this, &Form1::Ships_Update);
-            // 
-            // ShipsFiltOwnN
-            // 
-            this->ShipsFiltOwnN->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ShipsFiltOwnN->Location = System::Drawing::Point(196, 52);
-            this->ShipsFiltOwnN->Margin = System::Windows::Forms::Padding(1);
-            this->ShipsFiltOwnN->Name = L"ShipsFiltOwnN";
-            this->ShipsFiltOwnN->Size = System::Drawing::Size(23, 23);
-            this->ShipsFiltOwnN->TabIndex = 68;
-            this->ShipsFiltOwnN->Text = L"N";
-            this->ShipsFiltOwnN->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->BtnTooltip->SetToolTip(this->ShipsFiltOwnN, L"Show NOT OWNED ships.");
-            this->ShipsFiltOwnN->UseVisualStyleBackColor = true;
-            this->ShipsFiltOwnN->CheckedChanged += gcnew System::EventHandler(this, &Form1::Ships_Update);
-            // 
-            // ColoniesFiltOwnN
-            // 
-            this->ColoniesFiltOwnN->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ColoniesFiltOwnN->Location = System::Drawing::Point(296, 51);
-            this->ColoniesFiltOwnN->Margin = System::Windows::Forms::Padding(1);
-            this->ColoniesFiltOwnN->Name = L"ColoniesFiltOwnN";
-            this->ColoniesFiltOwnN->Size = System::Drawing::Size(23, 23);
-            this->ColoniesFiltOwnN->TabIndex = 70;
-            this->ColoniesFiltOwnN->Text = L"N";
-            this->ColoniesFiltOwnN->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->BtnTooltip->SetToolTip(this->ColoniesFiltOwnN, L"Show NOT OWNED colonies.");
-            this->ColoniesFiltOwnN->UseVisualStyleBackColor = true;
-            this->ColoniesFiltOwnN->CheckedChanged += gcnew System::EventHandler(this, &Form1::Colonies_Update);
-            // 
-            // ColoniesFiltOwnO
-            // 
-            this->ColoniesFiltOwnO->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ColoniesFiltOwnO->Location = System::Drawing::Point(271, 51);
-            this->ColoniesFiltOwnO->Margin = System::Windows::Forms::Padding(1);
-            this->ColoniesFiltOwnO->Name = L"ColoniesFiltOwnO";
-            this->ColoniesFiltOwnO->Size = System::Drawing::Size(23, 23);
-            this->ColoniesFiltOwnO->TabIndex = 71;
-            this->ColoniesFiltOwnO->Text = L"O";
-            this->ColoniesFiltOwnO->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->BtnTooltip->SetToolTip(this->ColoniesFiltOwnO, L"Show OWNED colonies.");
-            this->ColoniesFiltOwnO->UseVisualStyleBackColor = true;
-            this->ColoniesFiltOwnO->CheckedChanged += gcnew System::EventHandler(this, &Form1::Colonies_Update);
-            // 
-            // PlanetsFiltColN
-            // 
-            this->PlanetsFiltColN->Appearance = System::Windows::Forms::Appearance::Button;
-            this->PlanetsFiltColN->Location = System::Drawing::Point(368, 51);
-            this->PlanetsFiltColN->Margin = System::Windows::Forms::Padding(1);
-            this->PlanetsFiltColN->Name = L"PlanetsFiltColN";
-            this->PlanetsFiltColN->Size = System::Drawing::Size(23, 23);
-            this->PlanetsFiltColN->TabIndex = 72;
-            this->PlanetsFiltColN->Text = L"N";
-            this->PlanetsFiltColN->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->BtnTooltip->SetToolTip(this->PlanetsFiltColN, L"Show NOT COLONIZED planets.");
-            this->PlanetsFiltColN->UseVisualStyleBackColor = true;
-            this->PlanetsFiltColN->CheckedChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
-            // 
-            // PlanetsFiltColC
-            // 
-            this->PlanetsFiltColC->Appearance = System::Windows::Forms::Appearance::Button;
-            this->PlanetsFiltColC->Location = System::Drawing::Point(343, 51);
-            this->PlanetsFiltColC->Margin = System::Windows::Forms::Padding(1);
-            this->PlanetsFiltColC->Name = L"PlanetsFiltColC";
-            this->PlanetsFiltColC->Size = System::Drawing::Size(23, 23);
-            this->PlanetsFiltColC->TabIndex = 73;
-            this->PlanetsFiltColC->Text = L"C";
-            this->PlanetsFiltColC->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->BtnTooltip->SetToolTip(this->PlanetsFiltColC, L"Show COLONIZED planets.");
-            this->PlanetsFiltColC->UseVisualStyleBackColor = true;
-            this->PlanetsFiltColC->CheckedChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
-            // 
-            // PlanetsFiltVisV
-            // 
-            this->PlanetsFiltVisV->Appearance = System::Windows::Forms::Appearance::Button;
-            this->PlanetsFiltVisV->Location = System::Drawing::Point(271, 51);
-            this->PlanetsFiltVisV->Margin = System::Windows::Forms::Padding(1);
-            this->PlanetsFiltVisV->Name = L"PlanetsFiltVisV";
-            this->PlanetsFiltVisV->Size = System::Drawing::Size(23, 23);
-            this->PlanetsFiltVisV->TabIndex = 73;
-            this->PlanetsFiltVisV->Text = L"V";
-            this->PlanetsFiltVisV->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->BtnTooltip->SetToolTip(this->PlanetsFiltVisV, L"Show planets in VISITED systems.");
-            this->PlanetsFiltVisV->UseVisualStyleBackColor = true;
-            this->PlanetsFiltVisV->CheckedChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
-            // 
-            // PlanetsFiltVisN
-            // 
-            this->PlanetsFiltVisN->Appearance = System::Windows::Forms::Appearance::Button;
-            this->PlanetsFiltVisN->Location = System::Drawing::Point(296, 51);
-            this->PlanetsFiltVisN->Margin = System::Windows::Forms::Padding(1);
-            this->PlanetsFiltVisN->Name = L"PlanetsFiltVisN";
-            this->PlanetsFiltVisN->Size = System::Drawing::Size(23, 23);
-            this->PlanetsFiltVisN->TabIndex = 72;
-            this->PlanetsFiltVisN->Text = L"N";
-            this->PlanetsFiltVisN->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->BtnTooltip->SetToolTip(this->PlanetsFiltVisN, L"Show planets in NOT VISITED systems.");
-            this->PlanetsFiltVisN->UseVisualStyleBackColor = true;
-            this->PlanetsFiltVisN->CheckedChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
-            // 
-            // SystemsFiltVisN
-            // 
-            this->SystemsFiltVisN->Appearance = System::Windows::Forms::Appearance::Button;
-            this->SystemsFiltVisN->Location = System::Drawing::Point(296, 51);
-            this->SystemsFiltVisN->Margin = System::Windows::Forms::Padding(1);
-            this->SystemsFiltVisN->Name = L"SystemsFiltVisN";
-            this->SystemsFiltVisN->Size = System::Drawing::Size(23, 23);
-            this->SystemsFiltVisN->TabIndex = 75;
-            this->SystemsFiltVisN->Text = L"N";
-            this->SystemsFiltVisN->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->BtnTooltip->SetToolTip(this->SystemsFiltVisN, L"Show NOT VISITED systems.");
-            this->SystemsFiltVisN->UseVisualStyleBackColor = true;
-            this->SystemsFiltVisN->CheckedChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
-            // 
-            // SystemsFiltColN
-            // 
-            this->SystemsFiltColN->Appearance = System::Windows::Forms::Appearance::Button;
-            this->SystemsFiltColN->Location = System::Drawing::Point(368, 51);
-            this->SystemsFiltColN->Margin = System::Windows::Forms::Padding(1);
-            this->SystemsFiltColN->Name = L"SystemsFiltColN";
-            this->SystemsFiltColN->Size = System::Drawing::Size(23, 23);
-            this->SystemsFiltColN->TabIndex = 74;
-            this->SystemsFiltColN->Text = L"N";
-            this->SystemsFiltColN->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->BtnTooltip->SetToolTip(this->SystemsFiltColN, L"Show NOT COLONIZED systems.");
-            this->SystemsFiltColN->UseVisualStyleBackColor = true;
-            this->SystemsFiltColN->CheckedChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
-            // 
-            // SystemsFiltVisV
-            // 
-            this->SystemsFiltVisV->Appearance = System::Windows::Forms::Appearance::Button;
-            this->SystemsFiltVisV->Location = System::Drawing::Point(271, 51);
-            this->SystemsFiltVisV->Margin = System::Windows::Forms::Padding(1);
-            this->SystemsFiltVisV->Name = L"SystemsFiltVisV";
-            this->SystemsFiltVisV->Size = System::Drawing::Size(23, 23);
-            this->SystemsFiltVisV->TabIndex = 77;
-            this->SystemsFiltVisV->Text = L"V";
-            this->SystemsFiltVisV->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->BtnTooltip->SetToolTip(this->SystemsFiltVisV, L"Show VISITED systems.");
-            this->SystemsFiltVisV->UseVisualStyleBackColor = true;
-            this->SystemsFiltVisV->CheckedChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
-            // 
-            // SystemsFiltColC
-            // 
-            this->SystemsFiltColC->Appearance = System::Windows::Forms::Appearance::Button;
-            this->SystemsFiltColC->Location = System::Drawing::Point(343, 51);
-            this->SystemsFiltColC->Margin = System::Windows::Forms::Padding(1);
-            this->SystemsFiltColC->Name = L"SystemsFiltColC";
-            this->SystemsFiltColC->Size = System::Drawing::Size(23, 23);
-            this->SystemsFiltColC->TabIndex = 76;
-            this->SystemsFiltColC->Text = L"C";
-            this->SystemsFiltColC->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->BtnTooltip->SetToolTip(this->SystemsFiltColC, L"Show COLONIZED systems.");
-            this->SystemsFiltColC->UseVisualStyleBackColor = true;
-            this->SystemsFiltColC->CheckedChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
-            // 
             // Form1
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -2626,7 +2621,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->Text = L"FarHorizons User Interface";
             this->WindowState = System::Windows::Forms::FormWindowState::Maximized;
             splitContainer1->Panel1->ResumeLayout(false);
-            splitContainer1->Panel1->PerformLayout();
             splitContainer1->Panel2->ResumeLayout(false);
             splitContainer1->Panel2->PerformLayout();
             splitContainer1->ResumeLayout(false);
@@ -2742,6 +2736,8 @@ private: System::Void SystemsGrid_CellMouseDoubleClick(System::Object^  sender, 
              {
                  SystemsSelectPlanets( e->RowIndex );
              }
+             else
+                 Grid_CellMouseDoubleClick(sender, e);
          }
 private: System::Void Planets_Update(System::Object^  sender, System::EventArgs^  e) {
              m_PlanetsFilter->Update(sender);
@@ -2754,6 +2750,8 @@ private: System::Void PlanetsGrid_CellMouseDoubleClick(System::Object^  sender, 
              {
                  PlanetsSelectColonies( e->RowIndex );
              }
+             else
+                 Grid_CellMouseDoubleClick(sender, e);
          }
 private: System::Void Colonies_Update(System::Object^  sender, System::EventArgs^  e) {
              m_ColoniesFilter->Update(sender);
@@ -2761,17 +2759,39 @@ private: System::Void Colonies_Update(System::Object^  sender, System::EventArgs
 private: System::Void ColoniesFiltersReset_Click(System::Object^  sender, System::EventArgs^  e) {
              m_ColoniesFilter->Reset();
          }
+private: System::Void ColoniesGrid_CellMouseDoubleClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
+             if( e->Button == Windows::Forms::MouseButtons::Left )
+             {
+                 ColoniesSetRef( e->RowIndex );
+             }
+             else
+                 Grid_CellMouseDoubleClick(sender, e);
+         }
 private: System::Void Ships_Update(System::Object^  sender, System::EventArgs^  e) {
              m_ShipsFilter->Update(sender);
          }
 private: System::Void ShipsFiltersReset_Click(System::Object^  sender, System::EventArgs^  e) {
              m_ShipsFilter->Reset();
          }
+private: System::Void ShipsGrid_CellMouseDoubleClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
+             if( e->Button == Windows::Forms::MouseButtons::Left )
+             {
+                 ShipsSetRef( e->RowIndex );
+             }
+             else
+                 Grid_CellMouseDoubleClick(sender, e);
+         }
 private: System::Void Aliens_Update(System::Object^  sender, System::EventArgs^  e) {
              m_AliensFilter->Update(sender);
          }
 private: System::Void AliensFiltersReset_Click(System::Object^  sender, System::EventArgs^  e) {
              m_AliensFilter->Reset();
+         }
+private: System::Void Grid_CellMouseDoubleClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
+             if( e->Button == Windows::Forms::MouseButtons::Middle )
+             {
+                 SetGridRefSystemOnMouseClick(safe_cast<DataGridView^>(sender), e->RowIndex);
+             }
          }
 };
 }

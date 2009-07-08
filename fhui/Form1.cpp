@@ -185,11 +185,11 @@ void Form1::InitRefLists()
     // owned first
     m_RefListColonies->Add( GridFilter::s_CaptionColony );
     for each( Colony ^colony in sp->Colonies )
-        m_RefListColonies->Add( colony->Name );
+        m_RefListColonies->Add( colony->PrintRefListEntry(sp) );
     // then alien
     for each( Colony ^colony in m_GameData->GetColonies() )
         if( colony->Owner != sp )
-            m_RefListColonies->Add( colony->Name + " (" + colony->Owner->Name + ")");
+            m_RefListColonies->Add( colony->PrintRefListEntry(sp) );
 
     // -- ref ship age:
     m_RefListShips->Add( GridFilter::s_CaptionShip );
@@ -197,7 +197,7 @@ void Form1::InitRefLists()
         if( ship->Type != SHIP_BAS &&
             ship->SubLight == false )
         {
-            m_RefListShips->Add( ship->PrintClass() + " " + ship->Name + " (A" + ship->Age.ToString() + ")" );
+            m_RefListShips->Add( ship->PrintRefListEntry() );
         }
 }
 
@@ -646,6 +646,32 @@ void Form1::SetGridBgAndTooltip(DataGridView ^grid)
     }
 }
 
+void Form1::SetGridRefSystemOnMouseClick(DataGridView ^grid, int rowIndex)
+{
+    if( rowIndex >= 0 )
+    {
+        int index = grid->Columns[0]->Index;
+        IGridDataSrc ^iDataSrc = safe_cast<IGridDataSrc^>(grid->Rows[ rowIndex ]->Cells[index]->Value);
+
+        StarSystem ^system = iDataSrc->GetFilterSystem();
+        if( system )
+        {
+            IGridFilter ^filter = nullptr;
+            if( grid == SystemsGrid )
+                filter = m_SystemsFilter;
+            else if( grid == PlanetsGrid )
+                filter = m_PlanetsFilter;
+            else if( grid == ColoniesGrid )
+                filter = m_ColoniesFilter;
+            else if( grid == ShipsGrid )
+                filter = m_ShipsFilter;
+            else if( grid == AliensGrid )
+                filter = m_AliensFilter;
+            if( filter )
+                filter->SetRefSystem(system);
+        }
+    }
+}
 
 ////////////////////////////////////////////////////////////////
 // Systems
@@ -970,6 +996,16 @@ void Form1::ColoniesSetup()
     m_ColoniesFilter->EnableUpdates = true;
 }
 
+void Form1::ColoniesSetRef( int rowIndex )
+{
+    if( rowIndex != -1 )
+    {
+        int index = PlanetsGrid->Columns[0]->Index;
+        Colony ^colony = safe_cast<Colony^>(ColoniesGrid->Rows[ rowIndex ]->Cells[index]->Value);
+        ColoniesRefColony->Text = colony->PrintRefListEntry( m_GameData->GetSpecies() );
+    }
+}
+
 ////////////////////////////////////////////////////////////////
 // Ships
 
@@ -1068,6 +1104,16 @@ void Form1::ShipsSetup()
 
     // Enable filters
     m_ShipsFilter->EnableUpdates = true;
+}
+
+void Form1::ShipsSetRef( int rowIndex )
+{
+    if( rowIndex != -1 )
+    {
+        int index = ShipsGrid->Columns[0]->Index;
+        Ship ^ship = safe_cast<Ship^>(ShipsGrid->Rows[ rowIndex ]->Cells[index]->Value);
+        ShipsRefShip->Text = ship->PrintRefListEntry();
+    }
 }
 
 ////////////////////////////////////////////////////////////////

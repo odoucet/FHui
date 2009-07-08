@@ -26,6 +26,8 @@ public interface class IGridFilter
     void    Reset();
     bool    Filter(IGridDataSrc ^item);
 
+    void    SetRefSystem(StarSystem ^system);
+
     property GameData^      GameData;
     property bool           EnableUpdates;
     property StarSystem^    RefSystem;

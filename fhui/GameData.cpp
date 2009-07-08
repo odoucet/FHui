@@ -286,6 +286,11 @@ String^ Colony::PrintInventoryShort()
     return PrintInventory(m_Inventory);
 }
 
+String^ Colony::PrintRefListEntry(Alien ^player)
+{
+    return Name + (player != Owner ? (" (" + Owner->Name + ")") : "");
+}
+
 // ---------------------------------------------------------
 
 String^ Ship::PrintClass()
@@ -295,6 +300,11 @@ String^ Ship::PrintClass()
         ShipToString( Type ),
         Type == SHIP_TR ? Size.ToString() : "",
         SubLight ? "s" : "" );
+}
+
+String^ Ship::PrintRefListEntry()
+{
+    return PrintClass() + " " + Name + " (A" + Age.ToString() + ")";
 }
 
 String^ Ship::PrintLocation(Alien ^player)
@@ -458,8 +468,8 @@ String^ GameData::GetSummary()
         GetAllTechsSummary(),
         GetEconomicSummary(),
         GetAliensSummary(),
-        GetPlanetsSummary(),
-        GetShipsSummary() );
+        GetShipsSummary(),
+        GetPlanetsSummary() );
 }
 
 String^ GameData::GetSpeciesSummary()
@@ -584,7 +594,7 @@ String^ GameData::GetPlanetsSummary()
             if( String::IsNullOrEmpty(planet->Name) )
                 continue;
 
-            ret += String::Format("PL {0} @{1}\r\n",
+            ret += String::Format("PL {0} @ {1}\r\n",
                 planet->Name,
                 planet->PrintLocation() );
         }
@@ -867,6 +877,7 @@ void GameData::AddStarSystem(int x, int y, int z, String ^type, String ^comment)
 
     StarSystem ^system = gcnew StarSystem(x, y, z, type);
     system->Comment = comment;
+    system->IsVoid = false;
     Array::Resize(m_Systems, m_Systems->Length + 1);
     m_Systems[m_Systems->Length - 1] = system;
 }

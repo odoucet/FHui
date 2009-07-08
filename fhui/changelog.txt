@@ -3,8 +3,14 @@ Major new features and bug fixes will be listed here.
 + New features
 * Bug fixes
 
-FHUI build ?
-* Colony on a planet without system scan is now correctly handled
+FHUI build 58
+* Colony on a planet without system scan is now correctly handled.
+* Fixed crash when player has colony in system not scanned in reports.
++ Selecting ship reference sets reference system to ship's location.
++ Left mouse button double click on systems and planets tabs moves
+  to next tab with filters applied.
++ Middle mouse button double click on grid row sets reference system.
++ Lots of minor improvements.
 
 FHUI build 50
 * Fixed crash on grid column header double click.
