@@ -37,13 +37,10 @@ void GridFilter::Update(Object ^sender)
                 sender == CtrlGV ||
                 sender == CtrlMaxMishap ||
                 sender == CtrlMaxLSN ||
-                sender == CtrlFiltVisA ||
                 sender == CtrlFiltVisV ||
                 sender == CtrlFiltVisN ||
-                sender == CtrlFiltColA ||
                 sender == CtrlFiltColC ||
                 sender == CtrlFiltColN ||
-                sender == CtrlFiltOwnA ||
                 sender == CtrlFiltOwnO ||
                 sender == CtrlFiltOwnN ||
                 sender == CtrlFiltRelA ||
@@ -58,13 +55,10 @@ void GridFilter::Update(Object ^sender)
                 __int64 filtMask =
                     ( CtrlMaxLSN ? Decimal::ToByte(CtrlMaxLSN->Value) : 0 ) +
                     ( CtrlMaxMishap ? (Decimal::ToByte(CtrlMaxMishap->Value) << 8) : 0 ) +
-                    ( CtrlFiltVisA ? (CtrlFiltVisA->Checked ? (1 << 16) : 0) : 0 ) +
                     ( CtrlFiltVisV ? (CtrlFiltVisV->Checked ? (1 << 17) : 0) : 0 ) +
                     ( CtrlFiltVisN ? (CtrlFiltVisN->Checked ? (1 << 18) : 0) : 0 ) +
-                    ( CtrlFiltColA ? (CtrlFiltColA->Checked ? (1 << 19) : 0) : 0 ) +
                     ( CtrlFiltColC ? (CtrlFiltColC->Checked ? (1 << 20) : 0) : 0 ) +
                     ( CtrlFiltColN ? (CtrlFiltColN->Checked ? (1 << 21) : 0) : 0 ) +
-                    ( CtrlFiltOwnA ? (CtrlFiltOwnA->Checked ? (1 << 22) : 0) : 0 ) +
                     ( CtrlFiltOwnO ? (CtrlFiltOwnO->Checked ? (1 << 23) : 0) : 0 ) +
                     ( CtrlFiltOwnN ? (CtrlFiltOwnN->Checked ? (1 << 24) : 0) : 0 ) +
                     ( CtrlFiltRelA ? (CtrlFiltRelA->Checked ? (1 << 25) : 0) : 0 ) +
@@ -94,23 +88,23 @@ void GridFilter::Update(Object ^sender)
 bool GridFilter::Filter(IGridDataSrc ^item)
 {
     // Colonized...
-    if( CtrlFiltColA )
+    if( CtrlFiltColC )
     {
         int numColonies = item->GetFilterNumColonies();
-        if( (CtrlFiltColC->Checked && numColonies == 0) ||
-            (CtrlFiltColN->Checked && numColonies > 0) )
+        if( (!CtrlFiltColN->Checked && numColonies == 0) ||
+            (!CtrlFiltColC->Checked && numColonies > 0) )
         {
             return true;
         }
     }
 
     // Owned
-    if( CtrlFiltOwnA )
+    if( CtrlFiltOwnO )
     {
         Alien ^owner = item->GetFilterOwner();
         Alien ^sp    = GameData->GetSpecies();
-        if( (CtrlFiltOwnO->Checked && owner != sp) ||
-            (CtrlFiltOwnN->Checked && owner == sp) )
+        if( (!CtrlFiltOwnO->Checked && owner == sp) ||
+            (!CtrlFiltOwnN->Checked && owner != sp) )
         {
             return true;
         }
@@ -163,12 +157,12 @@ bool GridFilter::Filter(IGridDataSrc ^item)
     if( system )
     {
         // Visited
-        if( CtrlFiltVisA )
+        if( CtrlFiltVisV )
         {
             bool bShowVisV = CtrlFiltVisV->Checked;
             bool bShowVisN = CtrlFiltVisN->Checked;
-            if( (bShowVisV && system->LastVisited == -1) ||
-                (bShowVisN && system->LastVisited != -1) )
+            if( (!CtrlFiltVisN->Checked && system->LastVisited == -1) ||
+                (!CtrlFiltVisV->Checked && system->LastVisited != -1) )
             {
                 return true;
             }
@@ -209,12 +203,21 @@ void GridFilter::Reset()
         CtrlMaxLSN->Value = DefaultLSN;
     if( CtrlMaxMishap )
         CtrlMaxMishap->Value = DefaultMishap;
-    if( CtrlFiltVisA )
-        CtrlFiltVisA->Checked = true;
-    if( CtrlFiltColA )
-        CtrlFiltColA->Checked = true;
-    if( CtrlFiltOwnA )
-        CtrlFiltOwnA->Checked = true;
+    if( CtrlFiltVisV )
+    {
+        CtrlFiltVisV->Checked = true;
+        CtrlFiltVisN->Checked = true;
+    }
+    if( CtrlFiltColC )
+    {
+        CtrlFiltColC->Checked = true;
+        CtrlFiltColN->Checked = true;
+    }
+    if( CtrlFiltOwnO )
+    {
+        CtrlFiltOwnO->Checked = true;
+        CtrlFiltOwnN->Checked = true;
+    }
     if( CtrlFiltRelA )
     {
         CtrlFiltRelA->Checked = true;

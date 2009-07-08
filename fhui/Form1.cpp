@@ -58,10 +58,8 @@ void Form1::InitControls()
     filter->CtrlShipAge     = SystemsShipAge;
     filter->CtrlMaxMishap   = SystemsMaxMishap;
     filter->CtrlMaxLSN      = SystemsMaxLSN;
-    filter->CtrlFiltVisA    = SystemsFiltVisA;
     filter->CtrlFiltVisV    = SystemsFiltVisV;
     filter->CtrlFiltVisN    = SystemsFiltVisN;
-    filter->CtrlFiltColA    = SystemsFiltColA;
     filter->CtrlFiltColC    = SystemsFiltColC;
     filter->CtrlFiltColN    = SystemsFiltColN;
 
@@ -81,10 +79,8 @@ void Form1::InitControls()
     filter->CtrlShipAge     = PlanetsShipAge;
     filter->CtrlMaxMishap   = PlanetsMaxMishap;
     filter->CtrlMaxLSN      = PlanetsMaxLSN;
-    filter->CtrlFiltVisA    = PlanetsFiltVisA;
     filter->CtrlFiltVisV    = PlanetsFiltVisV;
     filter->CtrlFiltVisN    = PlanetsFiltVisN;
-    filter->CtrlFiltColA    = PlanetsFiltColA;
     filter->CtrlFiltColC    = PlanetsFiltColC;
     filter->CtrlFiltColN    = PlanetsFiltColN;
 
@@ -104,7 +100,6 @@ void Form1::InitControls()
     filter->CtrlShipAge     = ColoniesShipAge;
     filter->CtrlMaxMishap   = ColoniesMaxMishap;
     filter->CtrlMaxLSN      = ColoniesMaxLSN;
-    filter->CtrlFiltOwnA    = ColoniesFiltOwnA;
     filter->CtrlFiltOwnO    = ColoniesFiltOwnO;
     filter->CtrlFiltOwnN    = ColoniesFiltOwnN;
     filter->CtrlMiMaBalance = ColoniesMiMaBalanced;
@@ -124,7 +119,6 @@ void Form1::InitControls()
     filter->CtrlGV          = ShipsGV;
     filter->CtrlShipAge     = ShipsShipAge;
     filter->CtrlMaxMishap   = ShipsMaxMishap;
-    filter->CtrlFiltOwnA    = ShipsFiltOwnA;
     filter->CtrlFiltOwnO    = ShipsFiltOwnO;
     filter->CtrlFiltOwnN    = ShipsFiltOwnN;
     filter->CtrlFiltRelA    = ShipsFiltRelA;
@@ -673,6 +667,7 @@ void Form1::SystemsUpdateControls()
     // Trigger grid update
     m_SystemsFilter->EnableUpdates  = true;
     SystemsRefHome->Text            = m_GameData->GetSpeciesName();
+    m_SystemsFilter->Reset();
 }
 
 void Form1::SystemsSetup()
