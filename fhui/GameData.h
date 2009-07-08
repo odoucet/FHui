@@ -81,6 +81,8 @@ public:
         HomePlanet = -1;
         AtmReq = gcnew AtmosphericReq;
         TechEstimateTurn = -1;
+        Ships = gcnew List<Ship^>;
+        Colonies = gcnew List<Colony^>;
 
         m_TechLevels        = gcnew array<int>(TECH_MAX){0};
         m_TechLevelsTeach   = gcnew array<int>(TECH_MAX){0};
@@ -197,6 +199,8 @@ public:
         MinLSN = 99999;
         MinLSNAvail = 99999;
         Master = nullptr;
+        Ships = gcnew List<Ship^>;
+        Colonies = gcnew List<Colony^>;
     }
 
     // -------- IGridDataSrc ----------------------------
