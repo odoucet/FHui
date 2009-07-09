@@ -2,6 +2,9 @@
 
 using namespace System;
 
+namespace FHUI
+{
+
 public ref class FHUIParsingException : public Exception
 {
 public:
@@ -25,3 +28,5 @@ public:
     FHUIDataImplException(String ^err) : Exception(err) {}
     FHUIDataImplException(String ^err, Exception ^ex) : Exception(err, ex) {}
 };
+
+} // namespace FHUI

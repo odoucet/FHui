@@ -1,6 +1,11 @@
 #pragma once
 
-#include "GameData.h"
+#include "enums.h"
+
+using namespace System;
+
+namespace FHUI
+{
 
 enum PhaseType
 {
@@ -29,7 +34,7 @@ enum PhaseType
 
 #define AGGREGATE_LINES_MAX  -1
 
-public ref class Report
+ref class Report
 {
 public:
     Report(GameData^);
@@ -86,3 +91,5 @@ private:
 
     Alien          ^m_EstimateAlien;
 };
+
+} // end namespace FHUI

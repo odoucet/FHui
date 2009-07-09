@@ -1,11 +1,10 @@
 #include "StdAfx.h"
 #include "Form1.h"
-
-#include "GameData.h"
+#include "Enums.h"
 
 ////////////////////////////////////////////////////////////////
 
-namespace fhui 
+namespace FHUI
 {
 
 private ref struct MapColors
@@ -298,5 +297,4 @@ void Form1::MapDrawBattles(Graphics ^g)
 {
 }
 
-} // end namespace fhui
-
+} // end namespace FHUI

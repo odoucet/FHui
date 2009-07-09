@@ -1,6 +1,11 @@
 #pragma once
 
-private ref class BuildInfo sealed
+using namespace System;
+
+namespace FHUI
+{
+
+ref class BuildInfo sealed
 {
 public:
     initonly static String^ Version = GetVersion();
@@ -11,3 +16,5 @@ public:
 private:
     static String^  GetVersion();
 };
+
+} // end namespace FHUI

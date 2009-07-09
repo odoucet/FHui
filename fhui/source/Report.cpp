@@ -3,6 +3,9 @@
 
 using namespace System::Text::RegularExpressions;
 
+namespace FHUI
+{
+
 Report::Report(GameData ^gd)
     : m_GameData(gd)
     , m_Phase(gd == nullptr ? PHASE_FILE_DETECT : PHASE_GLOBAL)
@@ -108,20 +111,20 @@ bool Report::Parse(String ^s)
         // Atmospheric requirements
         else if( MatchWithOutput(s, "^Atmospheric Requirement: (\\d+)%-(\\d+)% ([A-Za-z0-9]+)") )
             m_GameData->SetAtmosphereReq(
-                GasFromString( GetMatchResult(2) ), // required gas
+                FHStrings::GasFromString( GetMatchResult(2) ), // required gas
                 GetMatchResultInt(0),               // min level
                 GetMatchResultInt(1) );             // max level
         else if( MatchAggregateList(s, "^Neutral Gases:", "([A-Za-z0-9]+)") )
         {
             for( int i = 0; i < m_TmpRegexResult->Length; ++i )
                 m_GameData->SetAtmosphereNeutral(
-                    GasFromString(GetMatchResult(i)) );
+                    FHStrings::GasFromString(GetMatchResult(i)) );
         }
         else if( MatchAggregateList(s, "^Poisonous Gases:", "([A-Za-z0-9]+)") )
         {
             for( int i = 0; i < m_TmpRegexResult->Length; ++i )
                 m_GameData->SetAtmospherePoisonous(
-                    GasFromString(GetMatchResult(i)) );
+                    FHStrings::GasFromString(GetMatchResult(i)) );
         }
         // Economy
         else if( MatchWithOutput(s, "^Economic units = (\\d+)") )
@@ -447,7 +450,7 @@ void Report::MatchPlanetScan(String ^s)
             while( MatchWithOutput(s, ",?(\\w+)\\((\\d+)%\\)") )
             {
                 bGasMatched = true;
-                int gas = GasFromString(GetMatchResult(0));
+                int gas = FHStrings::GasFromString(GetMatchResult(0));
                 planet->Atmosphere[gas] = GetMatchResultInt(1);
             }
             if( !bGasMatched )
@@ -712,7 +715,7 @@ void Report::MatchShipScan(String ^s, bool bColony)
         {
             if( MatchWithOutput(s, "([A-Za-z]{2})([Ss]?)\\s+") )
             {
-                type = ShipFromString( GetMatchResult(0) );
+                type = FHStrings::ShipFromString( GetMatchResult(0) );
                 subLight = 0 == String::Compare( GetMatchResult(1)->ToLower(), "s" );
             }
             else
@@ -832,7 +835,7 @@ void Report::MatchShipScan(String ^s, bool bColony)
                 if( MatchWithOutput(s, ",?\\s*(\\d+)\\s+(\\w+)\\s*") )
                 {
                     int amount = GetMatchResultInt(0);
-                    InventoryType inv = InvFromString( GetMatchResult(1) );
+                    InventoryType inv = FHStrings::InvFromString( GetMatchResult(1) );
                     m_ScanShip->Cargo[inv] = amount;
                 }
                 else
@@ -1014,3 +1017,5 @@ bool Report::MatchAggregateList(String ^s, String ^prefix, String ^exp)
 
     return cnt > 0;
 }
+
+} // end namespace FHUI

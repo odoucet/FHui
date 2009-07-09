@@ -2,6 +2,9 @@
 
 #include "enums.h"
 
+namespace FHUI
+{
+
 ref class Alien;
 ref class StarSystem;
 ref class GameData;
@@ -38,3 +41,5 @@ public interface class IGridFilter
 
     property bool           MiMaBalanced { bool get(); }
 };
+
+} // end namespace FHUI

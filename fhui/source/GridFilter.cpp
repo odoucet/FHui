@@ -1,9 +1,12 @@
 #include "StdAfx.h"
 
 #include "GridFilter.h"
-#include "GameData.h"
+#include "Enums.h"
 
 using namespace System::Text::RegularExpressions;
+
+namespace FHUI
+{
 
 void GridFilter::Update()
 {
@@ -409,3 +412,5 @@ void GridFilter::SetRefShip()
         }
     }
 }
+
+} // end namespace FHUI

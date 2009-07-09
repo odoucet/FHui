@@ -12,7 +12,7 @@ using namespace System::Text::RegularExpressions;
 
 ////////////////////////////////////////////////////////////////
 
-namespace fhui 
+namespace FHUI
 {
 
 void Form1::LoadGameData()
@@ -935,7 +935,7 @@ void Form1::ColoniesSetup()
         row[colObject]      = colony;
         row[colOwner]       = colony->Owner == sp ? String::Format("* {0}", sp->Name) : colony->Owner->Name;
         row[colName]        = colony->Name;
-        row[colType]        = PlTypeToString(colony->PlanetType);
+        row[colType]        = FHStrings::PlTypeToString(colony->PlanetType);
         row[colLocation]    = colony->PrintLocation();
         if( colony->EconomicBase != -1 )
             row[colSize]    = colony->EconomicBase;
@@ -1162,4 +1162,4 @@ void Form1::AliensSetup()
 
 ////////////////////////////////////////////////////////////////
 
-}
+} // end namespace FHUI

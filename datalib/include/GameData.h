@@ -2,9 +2,13 @@
 
 #include "enums.h"
 #include "IGridData.h"
+#include "FHStrings.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
+
+namespace FHUI
+{
 
 ref class StarSystem;
 ref class Ship;
@@ -93,7 +97,7 @@ public:
     virtual SPRelType   GetFilterRelType() override     { return Relation; }
     // --------------------------------------------------
 
-    String^         PrintRelation() { return SpRelToString(Relation); }
+    String^         PrintRelation() { return FHStrings::SpRelToString(Relation); }
     String^         PrintHome();
     String^         PrintTechLevels();
 
@@ -515,3 +519,5 @@ protected:
 };
 
 // ---------------------------------------------------
+
+} // end namespace FHUI

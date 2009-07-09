@@ -1,6 +1,9 @@
 #include "StdAfx.h"
 #include "GameData.h"
 
+namespace FHUI
+{
+
 // ---------------------------------------------------------
 
 String^ PrintInventory(array<int> ^inv)
@@ -15,7 +18,7 @@ String^ PrintInventory(array<int> ^inv)
                 ret,
                 String::IsNullOrEmpty(ret) ? "" : ", ",
                 inv[i],
-                InvToString(static_cast<InventoryType>(i)) );
+                FHStrings::InvToString(static_cast<InventoryType>(i)) );
         }
     }
 
@@ -156,7 +159,7 @@ String^ StarSystem::GenerateScan()
                     String::Format(
                         "{0}{1}({2}%)",
                         anyGas ? "," : "",
-                        GasToString(static_cast<GasType>(gas)),
+                        FHStrings::GasToString(static_cast<GasType>(gas)),
                         planet->Atmosphere[gas] ) );
                 anyGas = true;
             }
@@ -297,7 +300,7 @@ String^ Ship::PrintClass()
 {
     return String::Format(
         "{0}{1}{2}",
-        ShipToString( Type ),
+        FHStrings::ShipToString( Type ),
         Type == SHIP_TR ? Size.ToString() : "",
         SubLight ? "s" : "" );
 }
@@ -480,7 +483,7 @@ String^ GameData::GetSpeciesSummary()
     for( int gas = 0; gas < GAS_MAX; ++gas )
     {
         if( atm->Poisonous[gas] )
-            toxicGases = toxicGases + String::Format(",{0}", GasToString(static_cast<GasType>(gas)));
+            toxicGases = toxicGases + String::Format(",{0}", FHStrings::GasToString(static_cast<GasType>(gas)));
     }
 
     return String::Format(
@@ -495,7 +498,7 @@ String^ GameData::GetSpeciesSummary()
         m_Species->HomePlanet,
         atm->TempClass == -1 ? "??" : atm->TempClass.ToString(),
         atm->PressClass == -1 ? "??" : atm->PressClass.ToString(),
-        GasToString( atm->GasRequired ),
+        FHStrings::GasToString( atm->GasRequired ),
         atm->ReqMin,
         atm->ReqMax,
         toxicGases->Substring(1));
@@ -1125,3 +1128,5 @@ Ship^ GameData::AddShip(int turn, Alien ^sp, ShipType type, String ^name, int si
 
     return nullptr;
 }
+
+} // end namespace FHUI

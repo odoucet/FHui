@@ -1,7 +1,11 @@
 #include "stdafx.h"
 #include "enums.h"
+#include "GameData.h"
 
-String^ SpRelToString(SPRelType rel)
+namespace FHUI
+{
+
+String^ FHStrings::SpRelToString(SPRelType rel)
 {
     switch( rel )
     {
@@ -41,7 +45,7 @@ static GasStr s_GasStrings[GAS_MAX] =
     { GAS_H2S,  "H2S" },
 };
 
-String^ GasToString(GasType gas)
+String^ FHStrings::GasToString(GasType gas)
 {
     if( gas >= GAS_MAX )
         return "???";
@@ -51,7 +55,7 @@ String^ GasToString(GasType gas)
     throw gcnew FHUIDataIntegrityException("Invalid atmospheric GAS.");
 }
 
-GasType GasFromString(String^ gas)
+GasType FHStrings::GasFromString(String^ gas)
 {
     for( int i = 0; i < GAS_MAX; ++i )
         if( String::Compare(
@@ -64,7 +68,7 @@ GasType GasFromString(String^ gas)
         String::Format("Invalid atmospheric GAS: {0}", gas) );
 }
 
-String^ PlTypeToString(PlanetType plType)
+String^ FHStrings::PlTypeToString(PlanetType plType)
 {
     switch( plType )
     {
@@ -124,7 +128,7 @@ static InvStr s_InvStrings[INV_MAX] =
     { INV_SG9, "SG9" },
 };
 
-String^ InvToString(InventoryType inv)
+String^ FHStrings::InvToString(InventoryType inv)
 {
     if( inv >= INV_MAX )
         return "???";
@@ -137,7 +141,7 @@ String^ InvToString(InventoryType inv)
         String::Format("Invalid inventory type: {0}.", i) );
 }
 
-InventoryType InvFromString(String^ inv)
+InventoryType FHStrings::InvFromString(String^ inv)
 {
     for( int i = 0; i < INV_MAX; ++i )
         if( String::Compare(
@@ -178,7 +182,7 @@ static ShipStr s_ShipStrings[SHIP_MAX] =
     { SHIP_BR, "BR" },
 };
 
-String^ ShipToString(ShipType ship)
+String^ FHStrings::ShipToString(ShipType ship)
 {
     if( ship >= SHIP_MAX )
         return "???";
@@ -191,7 +195,7 @@ String^ ShipToString(ShipType ship)
         String::Format("Invalid ship type: {0}.", s) );
 }
 
-ShipType ShipFromString(String^ ship)
+ShipType FHStrings::ShipFromString(String^ ship)
 {
     for( int i = 0; i < SHIP_MAX; ++i )
         if( String::Compare(
@@ -203,3 +207,5 @@ ShipType ShipFromString(String^ ship)
     throw gcnew FHUIParsingException(
         String::Format("Invalid ship abbreviation: {0}", ship) );
 }
+
+} // end namespace FHUI

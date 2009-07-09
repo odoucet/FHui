@@ -1,7 +1,5 @@
 #pragma once
 
-using namespace System;
-
 const int TURN_NOTES = 99999;
 
 enum TechType
@@ -25,8 +23,6 @@ enum SPRelType
     SP_MIXED        // can only be used for temporary object used for system/planet Master property
 };
 
-String^ SpRelToString(SPRelType);
-
 enum GasType
 {
     GAS_O2,
@@ -45,9 +41,6 @@ enum GasType
     GAS_MAX
 };
 
-String^ GasToString(GasType gas);
-GasType GasFromString(String^ gas);
-
 enum PlanetType
 {
     PLANET_HOME,
@@ -57,8 +50,6 @@ enum PlanetType
     PLANET_UNCOLONIZED,
     PLANET_MAX
 };
-
-String^ PlTypeToString(PlanetType);
 
 enum InventoryType
 {
@@ -98,9 +89,6 @@ enum InventoryType
     INV_MAX
 };
 
-String^ InvToString(InventoryType inv);
-InventoryType InvFromString(String^ inv);
-
 enum ShipType
 {
     SHIP_BAS,
@@ -131,6 +119,3 @@ enum ShipLocType
     SHIP_LOC_LANDED,
     SHIP_LOC_MAX
 };
-
-String^ ShipToString(ShipType ship);
-ShipType ShipFromString(String^ ship);

@@ -44,6 +44,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)\Include&quot;;&quot;$(SolutionDir)\Include&quot;;&quot;$(SolutionDir)\datalib\Include&quot;"
+				AdditionalUsingDirectories=""
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
@@ -125,6 +126,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)\Include&quot;;&quot;$(SolutionDir)\Include&quot;;&quot;$(SolutionDir)\datalib\Include&quot;"
+				AdditionalUsingDirectories=""
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
@@ -205,36 +207,12 @@
 			AssemblyName="System.Xml, Version=2.0.0.0, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL"
 			MinFrameworkVersion="131072"
 		/>
+		<ProjectReference
+			ReferencedProjectIdentifier="{8DE8DB71-AE00-49E9-8603-8C021409F142}"
+			RelativePathToProject=".\DataLib\DataLib.vcproj"
+		/>
 	</References>
 	<Files>
-		<Filter
-			Name="DataLib"
-			>
-			<Filter
-				Name="include"
-				>
-				<File
-					RelativePath="..\datalib\include\enums.h"
-					>
-				</File>
-				<File
-					RelativePath="..\datalib\include\GameData.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="source"
-				>
-				<File
-					RelativePath="..\datalib\source\GameData.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\datalib\source\strings.cpp"
-					>
-				</File>
-			</Filter>
-		</Filter>
 		<Filter
 			Name="Include"
 			>
@@ -357,7 +335,7 @@
 						>
 						<Tool
 							Name="VCCustomBuildTool"
-							CommandLine="subwcrev .\.. .\include\svn_rev.template .\include\svn_rev.h"
+							CommandLine="subwcrev .\.. .\include\svn_rev.template .\include\svn_rev.h&#x0D;&#x0A;"
 							Outputs=".\include\svn_rev.h"
 						/>
 					</FileConfiguration>
@@ -366,7 +344,7 @@
 						>
 						<Tool
 							Name="VCCustomBuildTool"
-							CommandLine="subwcrev .\.. .\include\svn_rev.template .\include\svn_rev.h"
+							CommandLine="subwcrev .\.. .\include\svn_rev.template .\include\svn_rev.h&#x0D;&#x0A;"
 							Outputs=".\include\svn_rev.h"
 						/>
 					</FileConfiguration>

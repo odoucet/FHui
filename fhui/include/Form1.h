@@ -1,7 +1,5 @@
 #pragma once
 
-#include "IGridData.h"
-
 ref class GameData;
 ref class Alien;
 ref class StarSystem;
@@ -9,7 +7,7 @@ ref class Ship;
 ref class PlanetView;
 ref class Report;
 
-namespace fhui {
+namespace FHUI {
 
 	using namespace System;
 	using namespace System::ComponentModel;
@@ -2794,5 +2792,5 @@ private: System::Void Grid_CellMouseDoubleClick(System::Object^  sender, System:
              }
          }
 };
-}
 
+} // end namespace FHUI

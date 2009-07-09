@@ -1,16 +1,18 @@
 #pragma once
 
-#include "IGridData.h"
-
+using namespace System;
 using namespace System::Windows::Forms;
+
+namespace FHUI
+{
 
 ref class Ship;
 ref class StarSystem;
 
-public delegate void GridSetupHandler();
-public delegate void GridExceptionHandler(Exception ^e);
+delegate void GridSetupHandler();
+delegate void GridExceptionHandler(Exception ^e);
 
-public ref class GridFilter : public IGridFilter
+ref class GridFilter : public IGridFilter
 {
 public:
     GridFilter(DataGridView ^grid, bool ^gridUpdateEnabled)
@@ -95,3 +97,5 @@ protected:
 
     __int64          m_LastFiltMask;
 };
+
+} // end namespace FHUI
