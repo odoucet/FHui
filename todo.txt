@@ -1,2 +1,3 @@
 * tekst tooltipow nad gridem Systems moglby sie wyswietlac courierem zamiast defaultowym fontem.
 * usuwac kolonie podczas aliens at...
+* dodac w projekcie mozliwosc kompilacji na wielu corach

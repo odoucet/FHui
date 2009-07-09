@@ -18,8 +18,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)\Binaries\Builds\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)\Binaries\Obj\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="1"
 			CharacterSet="1"
 			ManagedExtensions="2"
@@ -43,10 +43,13 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(BOOST_PATH)"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\Include&quot;;&quot;$(SolutionDir)\Include&quot;;&quot;$(SolutionDir)\datalib\Include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\vc90.pdb"
+				XMLDocumentationFileName="$(IntDir)\"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -62,82 +65,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="$(NoInherit)"
+				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
-				SubSystem="2"
-				EntryPointSymbol="main"
-				TargetMachine="1"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
-			CharacterSet="1"
-			ManagedExtensions="2"
-			WholeProgramOptimization="1"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="$(BOOST_PATH)"
-				PreprocessorDefinitions="WIN32;NDEBUG"
-				RuntimeLibrary="2"
-				UsePrecompiledHeader="2"
-				WarningLevel="3"
-				DebugInformationFormat="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="$(NoInherit)"
-				LinkIncremental="1"
-				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(TargetDir)\pdb\$(TargetName).pdb"
 				SubSystem="2"
 				EntryPointSymbol="main"
 				TargetMachine="1"
@@ -163,7 +95,87 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy changelog to build output dir."
-				CommandLine="copy changelog.txt $(OutDir)"
+				CommandLine="copy $(SolutionDir)\changelog.txt $(TargetDir)"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="$(SolutionDir)\Binaries\Builds\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)\Binaries\Obj\$(ConfigurationName)\$(ProjectName)"
+			ConfigurationType="1"
+			CharacterSet="1"
+			ManagedExtensions="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\Include&quot;;&quot;$(SolutionDir)\Include&quot;;&quot;$(SolutionDir)\datalib\Include&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG"
+				RuntimeLibrary="2"
+				UsePrecompiledHeader="2"
+				ObjectFile="$(IntDir)\"
+				ProgramDataBaseFileName="$(IntDir)\vc90.pdb"
+				XMLDocumentationFileName="$(IntDir)\"
+				WarningLevel="3"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="$(NoInherit)"
+				OutputFile="$(OutDir)\$(ProjectName).exe"
+				LinkIncremental="1"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(TargetDir)\pdb\$(TargetName).pdb"
+				SubSystem="2"
+				EntryPointSymbol="main"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				Description="Copy changelog to build output dir."
+				CommandLine="copy $(SolutionDir)\changelog.txt $(TargetDir)"
 			/>
 		</Configuration>
 	</Configurations>
@@ -196,153 +208,177 @@
 	</References>
 	<Files>
 		<Filter
-			Name="Source Files"
-			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			Name="DataLib"
 			>
-			<File
-				RelativePath=".\AssemblyInfo.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\fhui.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Form1.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GameData.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GridFilter.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Map.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Report.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\stdafx.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\strings.cpp"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
-			>
-			<File
-				RelativePath=".\debug.h"
-				>
-			</File>
-			<File
-				RelativePath=".\enums.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Form1.h"
-				FileType="3"
+			<Filter
+				Name="include"
 				>
 				<File
-					RelativePath=".\Form1.resX"
-					SubType="Designer"
+					RelativePath="..\datalib\include\enums.h"
 					>
 				</File>
-			</File>
-			<File
-				RelativePath=".\GameData.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GridFilter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IGridData.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Report.h"
-				>
-			</File>
-			<File
-				RelativePath=".\resource.h"
-				>
-			</File>
-			<File
-				RelativePath=".\stdafx.h"
-				>
-			</File>
-			<File
-				RelativePath=".\svn_rev.template"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
+				<File
+					RelativePath="..\datalib\include\GameData.h"
 					>
-					<Tool
-						Name="VCCustomBuildTool"
-						CommandLine="subwcrev .\.. .\svn_rev.template .\svn_rev.h&#x0D;&#x0A;"
-						Outputs=".\svn_rev.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
+				</File>
+			</Filter>
+			<Filter
+				Name="source"
+				>
+				<File
+					RelativePath="..\datalib\source\GameData.cpp"
 					>
-					<Tool
-						Name="VCCustomBuildTool"
-						CommandLine="subwcrev .\.. .\svn_rev.template .\svn_rev.h&#x0D;&#x0A;"
-						Outputs=".\svn_rev.h"
-					/>
-				</FileConfiguration>
+				</File>
+				<File
+					RelativePath="..\datalib\source\strings.cpp"
+					>
+				</File>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="Include"
+			>
+			<File
+				RelativePath="..\include\debug.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\IGridData.h"
+				>
 			</File>
 		</Filter>
 		<Filter
-			Name="Resource Files"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			Name="FHUI"
 			>
-			<File
-				RelativePath=".\app.ico"
+			<Filter
+				Name="Source"
+				Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
+				UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 				>
-			</File>
-			<File
-				RelativePath=".\app.rc"
+				<File
+					RelativePath=".\source\AssemblyInfo.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\BuildInfo.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\fhui.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\Form1.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\GridFilter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\Map.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\Report.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\stdafx.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="1"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="1"
+						/>
+					</FileConfiguration>
+				</File>
+			</Filter>
+			<Filter
+				Name="Resources"
+				Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
+				UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 				>
-			</File>
+				<File
+					RelativePath=".\resources\app.ico"
+					>
+				</File>
+				<File
+					RelativePath=".\resources\app.rc"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Include"
+				Filter="h;hpp;hxx;hm;inl;inc;xsd"
+				UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+				>
+				<File
+					RelativePath=".\include\BuildInfo.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\Form1.h"
+					FileType="3"
+					>
+					<File
+						RelativePath=".\resources\Form1.resX"
+						SubType="Designer"
+						>
+					</File>
+				</File>
+				<File
+					RelativePath=".\include\GridFilter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\Report.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\stdafx.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\svn_rev.template"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							CommandLine="subwcrev .\.. .\include\svn_rev.template .\include\svn_rev.h"
+							Outputs=".\include\svn_rev.h"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCustomBuildTool"
+							CommandLine="subwcrev .\.. .\include\svn_rev.template .\include\svn_rev.h"
+							Outputs=".\include\svn_rev.h"
+						/>
+					</FileConfiguration>
+				</File>
+			</Filter>
 		</Filter>
 		<File
-			RelativePath=".\changelog.txt"
+			RelativePath="..\changelog.txt"
 			>
 		</File>
 		<File
-			RelativePath=".\todo.txt"
+			RelativePath="..\todo.txt"
 			>
 		</File>
 	</Files>

@@ -1,18 +1,12 @@
 #include "StdAfx.h"
 #include "Form1.h"
+#include "BuildInfo.h"
 
 #include "Report.h"
 #include "GridFilter.h"
-#include "svn_rev.h"
 
 using namespace System::IO;
 using namespace System::Text::RegularExpressions;
-
-#define FHUI_CONTACT_EMAILS "jdukat+fhui@gmail.com"
-#define FHUI_CONTACT_WIKI   "http://www.cetnerowski.com/farhorizons/pmwiki/pmwiki.php/FHUI/FHUI"
-
-#define FHUI_BUILD_INFO_APPENDIX ""
-#define FHUI_BUILD_INFO() String::Format("{0}{1}{2}", FHUI_REVISION_NUMBER, FHUI_BUILD_INFO_APPENDIX, FHUI_REVISION_MODIFIED ? " (modified)" : "")
 
 #define OPTIMAL_ROW_HEIGHT 18
 
@@ -233,8 +227,8 @@ void Form1::ShowException(Exception ^e)
         "---------------------------------------------------------------------------\r\n"
         "{4}\r\n"
         "---------------------------------------------------------------------------\r\n",
-        FHUI_CONTACT_EMAILS,
-        FHUI_BUILD_INFO(),
+        BuildInfo::ContactEmails,
+        BuildInfo::Version,
         e->GetType()->ToString(),
         e->Message,
         e->InnerException == nullptr ? e->StackTrace : e->InnerException->StackTrace );
@@ -270,9 +264,9 @@ void Form1::FillAboutBox()
         "---------------------------------------------------------------------------\r\n"
         "{3}\r\n"
         "---------------------------------------------------------------------------\r\n",
-            FHUI_BUILD_INFO(),
-            FHUI_CONTACT_EMAILS,
-            FHUI_CONTACT_WIKI,
+            BuildInfo::Version,
+            BuildInfo::ContactEmails,
+            BuildInfo::ContactWiki,
             changeLog );
 }
 
@@ -374,7 +368,7 @@ void Form1::DisplayTurn()
         this->Text = String::Format("[SP {0}, Turn {1}] Far Horizons User Interface, build {2}",
             m_GameData->GetSpeciesName(),
             m_GameData->GetLastTurn(),
-            FHUI_BUILD_INFO() );
+            BuildInfo::Version );
 
         MapSetup();
     }
