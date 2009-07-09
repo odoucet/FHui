@@ -209,7 +209,7 @@
 		/>
 		<ProjectReference
 			ReferencedProjectIdentifier="{8DE8DB71-AE00-49E9-8603-8C021409F142}"
-			RelativePathToProject=".\DataLib\DataLib.vcproj"
+			RelativePathToProject=".\datalib\DataLib.vcproj"
 		/>
 	</References>
 	<Files>
@@ -217,11 +217,7 @@
 			Name="Include"
 			>
 			<File
-				RelativePath="..\include\debug.h"
-				>
-			</File>
-			<File
-				RelativePath="..\include\IGridData.h"
+				RelativePath="..\include\enums.h"
 				>
 			</File>
 		</Filter>
