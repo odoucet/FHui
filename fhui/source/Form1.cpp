@@ -7,6 +7,7 @@
 
 using namespace System::IO;
 using namespace System::Text::RegularExpressions;
+using namespace System::Reflection;
 
 #define OPTIMAL_ROW_HEIGHT 18
 
@@ -22,6 +23,7 @@ void Form1::LoadGameData()
         FillAboutBox();
         InitData();
         InitControls();
+        LoadPlugins();
         ScanReports();
         LoadCommands();
     }
@@ -543,6 +545,37 @@ void Form1::LoadCommands()
 }
 
 ////////////////////////////////////////////////////////////////
+// Plugins
+
+void Form1::LoadPlugins()
+{
+    m_GridPlugins = gcnew List<IGridPlugin^>;
+
+    DirectoryInfo ^dir = gcnew DirectoryInfo(Application::StartupPath);
+
+    for each( FileInfo ^f in dir->GetFiles("*.dll"))
+    {
+        if( f->Name->ToLower() == "datalib.dll" )
+            continue;
+
+        Assembly ^assembly = Assembly::LoadFrom(f->FullName);
+
+        // Walk through each type in the assembly
+        for each( Type ^type in assembly->GetTypes() )
+        {
+            if( type->IsClass && type->IsPublic )
+            {
+                if( type->GetInterface("FHUI.IGridPlugin") )
+                {
+                    IGridPlugin ^gridPlugin = safe_cast<IGridPlugin^>(Activator::CreateInstance(type));
+                    m_GridPlugins->Add(gridPlugin);
+                }
+            }
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////
 // GUI misc
 
 void Form1::ApplyDataAndFormat(
@@ -710,6 +743,9 @@ void Form1::SystemsSetup()
     DataColumn ^colColonies = dataTable->Columns->Add("Colonies",   String::typeid );
     DataColumn ^colNotes    = dataTable->Columns->Add("Notes",      String::typeid );
 
+    for each( IGridPlugin ^plugin in m_GridPlugins )
+        plugin->AddColumnsSystems(dataTable);
+
     int gv  = Decimal::ToInt32(SystemsGV->Value);
     int age = Decimal::ToInt32(SystemsShipAge->Value);
 
@@ -741,10 +777,15 @@ void Form1::SystemsSetup()
         row[colColonies]    = system->PrintColonies( -1, m_GameData->GetSpecies() );
         row[colNotes]       = system->Comment;
 
+        for each( IGridPlugin ^plugin in m_GridPlugins )
+            plugin->AddRowDataSystems(row, system, m_SystemsFilter);
+
         dataTable->Rows->Add(row);
     }
 
     ApplyDataAndFormat(SystemsGrid, dataTable, colObject, colDist->Ordinal);
+    for each( IGridPlugin ^plugin in m_GridPlugins )
+        plugin->GridFormatSystems(SystemsGrid);
 
     // Some columns are not sortable... yet
     SystemsGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;

@@ -22,7 +22,7 @@
 			IntermediateDirectory="$(SolutionDir)Binaries\Obj\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			CharacterSet="1"
-			ManagedExtensions="1"
+			ManagedExtensions="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -64,6 +64,7 @@
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				AssemblyDebug="1"
+				ProgramDatabaseFile="$(TargetDir)\pdb\$(TargetName).pdb"
 				ResourceOnlyDLL="true"
 				TargetMachine="1"
 			/>
@@ -95,7 +96,7 @@
 			IntermediateDirectory="$(SolutionDir)Binaries\Obj\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			CharacterSet="1"
-			ManagedExtensions="1"
+			ManagedExtensions="2"
 			WholeProgramOptimization="1"
 			>
 			<Tool
@@ -179,6 +180,11 @@
 			AssemblyName="System.Xml, Version=2.0.0.0, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL"
 			MinFrameworkVersion="131072"
 		/>
+		<AssemblyReference
+			RelativePath="System.Windows.Forms.dll"
+			AssemblyName="System.Windows.Forms, Version=2.0.0.0, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL"
+			MinFrameworkVersion="131072"
+		/>
 	</References>
 	<Files>
 		<Filter
@@ -210,6 +216,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\include\IFHUIPlugin.h"
+					>
+				</File>
+				<File
 					RelativePath=".\include\IGridData.h"
 					>
 				</File>
@@ -233,6 +243,10 @@
 				</File>
 				<File
 					RelativePath=".\source\GameData.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\NullPlugin.cpp"
 					>
 				</File>
 				<File

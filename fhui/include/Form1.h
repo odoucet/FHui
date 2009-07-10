@@ -94,6 +94,12 @@ namespace FHUI {
         bool               ^m_bGridUpdateEnabled;
 
         // ==================================================
+        // --- Plugins ---
+        void        LoadPlugins();
+
+        List<IGridPlugin^>^ m_GridPlugins;
+
+        // ==================================================
         // --- SYSTEMS ---
         void        SystemsUpdateControls();
         void        SystemsSetup();
