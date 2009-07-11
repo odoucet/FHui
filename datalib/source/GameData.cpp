@@ -148,7 +148,7 @@ String^ StarSystem::GenerateScan()
             planet->Grav,
             planet->TempClass,
             planet->PressClass,
-            planet->MiDiff,
+            (double)planet->MiDiff / 100,
             planet->LSN );
         bool anyGas = false;
         for( int gas = 0; gas < GAS_MAX; ++gas )
