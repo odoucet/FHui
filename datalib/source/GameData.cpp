@@ -148,7 +148,7 @@ String^ StarSystem::GenerateScan()
             planet->Grav,
             planet->TempClass,
             planet->PressClass,
-            planet->MiningDiff,
+            planet->MiDiff,
             planet->LSN );
         bool anyGas = false;
         for( int gas = 0; gas < GAS_MAX; ++gas )
@@ -202,6 +202,19 @@ String^ StarSystem::PrintColonies(int planetNum, Alien ^player)
             continue;
 
         String ^entry = "";
+        String ^size;
+        if( colony->EconomicBase == -1 )
+        {
+            size = "?";
+        }
+        else if ( colony->EconomicBase % 10 )
+        {
+            size = String::Format("{0}.{1}", colony->EconomicBase / 10, colony->EconomicBase % 10);
+        }
+        else
+        {
+            size = (colony->EconomicBase / 10).ToString();
+        }
 
         if( colony->Owner == player )
         {
@@ -211,9 +224,7 @@ String^ StarSystem::PrintColonies(int planetNum, Alien ^player)
                 entry += ("#" + colony->PlanetNum.ToString() + " ");
             }
 
-            entry += String::Format("PL {0}[{1}]",
-                colony->Name,
-                colony->EconomicBase == -1 ? "?" : Math::Round(colony->EconomicBase).ToString() );
+            entry += String::Format("PL {0}[{1}]", colony->Name, size );
 
             if( String::IsNullOrEmpty(ret) )
             {
@@ -235,7 +246,7 @@ String^ StarSystem::PrintColonies(int planetNum, Alien ^player)
             ret += String::Format( "{0}{1}[{2}]",
                 colony->PlanetType == PLANET_HOME ? "(HOME) " : "",
                 colony->Owner->Name,
-                colony->EconomicBase == -1 ? "?" : Math::Round(colony->EconomicBase).ToString() );
+                size );
         }
 
         if( Master == nullptr )
@@ -943,13 +954,13 @@ Colony^ GameData::AddColony(int turn, Alien ^sp, String ^name, StarSystem ^syste
             // System is not yet known, initialize with defaults
             for(int i = 0; i < plNum; i++)
             {
-                system->Planets[i] = gcnew Planet( system, i+1, 99, 99.99F, 99, 99, 99.99F);
+                system->Planets[i] = gcnew Planet( system, i+1, 99, 99.99F, 99, 99, 999);
             }
         }
 
         // If this is species' own colony, remove alien colonies from this system.
         // They'll be restored by 'Aliens at...' parsing. If not - it means that alien
-        // colony was destroyed or assymilated.
+        // colony was destroyed or assimilated.
         if( sp == m_Species )
         {
             bool bRemoved = false;
@@ -1031,7 +1042,7 @@ void GameData::UpdateSystems()
                     // Helps with MD changed via mining or when there is no system scan
                     if ( colony->Owner == GetSpecies() )
                     {
-                        planet->MiningDiff = (float)colony->MiDiff;
+                        planet->MiDiff = colony->MiDiff;
                         planet->LSN = colony->LSN;
                     }
 

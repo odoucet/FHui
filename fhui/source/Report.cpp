@@ -408,7 +408,7 @@ bool Report::MatchSystemScanStart(String ^s)
 void Report::MatchPlanetScan(String ^s)
 {
     //                          0:plNum   1:dia    2:gv            3:tc       4:pc    5:mining diff
-    if( MatchWithOutput(s, "^(\\d+)\\s+(\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+\\.\\d+)\\s+") )
+    if( MatchWithOutput(s, "^(\\d+)\\s+(\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\.(\\d+)\\s+") )
     {
         int plNum = GetMatchResultInt(0);
         Planet ^planet = gcnew Planet(
@@ -418,7 +418,7 @@ void Report::MatchPlanetScan(String ^s)
             GetMatchResultFloat(2),
             GetMatchResultInt(3),
             GetMatchResultInt(4),
-            GetMatchResultFloat(5) );
+            GetMatchResultInt(5) * 100 + GetMatchResultInt(6) );
 
         // Try reading LSN
         if( MatchWithOutput(s, "(\\d+)\\s+") )
@@ -595,18 +595,18 @@ void Report::MatchColonyScan(String ^s)
         m_ScanColony->ProdPenalty = GetMatchResultInt(0);
         m_ScanColony->LSN = GetMatchResultInt(1);
     }
-    else if( MatchWithOutput(s, "^Mining base = (\\d+\\.\\d+) \\(MI = \\d+, MD = (\\d+\\.\\d+)\\)") )
+    else if( MatchWithOutput(s, "^Mining base = (\\d+)\\.(\\d+) \\(MI = \\d+, MD = (\\d+)\\.(\\d+)\\)") )
     {
-        m_ScanColony->MiBase = GetMatchResultFloat(0);
-        m_ScanColony->MiDiff = GetMatchResultFloat(1);
+        m_ScanColony->MiBase = GetMatchResultInt(0) * 10 + GetMatchResultInt(1);
+        m_ScanColony->MiDiff = GetMatchResultInt(2) * 100 + GetMatchResultInt(3);
     }
     else if( MatchWithOutput(s, "^Raw Material Units \\(RM,C1\\) carried over from last turn = (\\d+)") )
     {
         m_ScanColony->Inventory[INV_RM] = GetMatchResultInt(0);
     }
-    else if( MatchWithOutput(s, "^Manufacturing base = (\\d+\\.\\d+) \\(") )
+    else if( MatchWithOutput(s, "^Manufacturing base = (\\d+)\\.(\\d+) \\(") )
     {
-        m_ScanColony->MaBase = GetMatchResultFloat(0);
+        m_ScanColony->MaBase = GetMatchResultInt(0) * 10 + GetMatchResultInt(1);
     }
     else if( MatchWithOutput(s, "^Shipyard capacity = (\\d+)") )
     {
@@ -862,16 +862,43 @@ void Report::MatchShipScan(String ^s, bool bColony)
 
 void Report::MatchOtherPlanetsShipsScan(String ^s)
 {
-    if( MatchWithOutput(s, "^(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+#(\\d+)\\s+PL\\s+([^,]+)") )
+    if( MatchWithOutput(s, "^(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+#(\\d+)\\s+PL\\s+([^,]+),?(.*)$") )
     {
         m_ScanX = GetMatchResultInt(0);
         m_ScanY = GetMatchResultInt(1);
         m_ScanZ = GetMatchResultInt(2);
 
-        m_GameData->AddPlanetName(
-            m_Turn, m_ScanX, m_ScanY, m_ScanZ,
-            GetMatchResultInt(3),
-            GetMatchResult(4) );
+        StarSystem^ system = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ);
+
+        int plNum = GetMatchResultInt(3);
+        String^ plName = GetMatchResult(4);
+        String^ inventory = GetMatchResult(5);
+
+        m_GameData->AddPlanetName( m_Turn, m_ScanX, m_ScanY, m_ScanZ, plNum, plName);
+
+        if( inventory->Length )
+        {
+            // Treat as colony of size 0
+            Colony^ colony = m_GameData->AddColony(
+                m_Turn,
+                m_GameData->GetSpecies(),
+                plName,
+                system,
+                plNum );
+
+            colony->PlanetType = PLANET_COLONY;
+            colony->LSN = system->Planets[plNum - 1]->LSN;
+            colony->MiDiff = system->Planets[plNum - 1]->MiDiff;
+            colony->MiBase = 0;
+            colony->MaBase = 0;
+            colony->EconomicEff = 0;
+
+            // Species have colony here, so system is visited
+            // TODO: Not sure if no CUs are present
+            system->LastVisited = m_Turn;
+
+            // TODO: Parse inventory
+        }
     }
 
     if( MatchWithOutput(s, "^(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+") )
@@ -915,6 +942,8 @@ void Report::MatchAliensReport(String ^s)
                 {
                     sp->HomeSystem = system;
                     sp->HomePlanet = plNum;
+
+                    system->HomeSpecies = sp;
                 }
             }
         }
@@ -922,7 +951,10 @@ void Report::MatchAliensReport(String ^s)
     else if( m_ScanColony && MatchWithOutput(s, "^\\(Economic base is approximately (\\d+)\\.\\)") )
     {
         if( m_ScanColony->LastSeen == m_Turn )
-            m_ScanColony->MiBase = GetMatchResultInt(0);
+        {
+            m_ScanColony->MiBase = 10 * GetMatchResultInt(0);
+            m_ScanColony->MaBase = 0;
+        }
     }
     else if( m_ScanColony && s == "(No economic base.)" )
     {

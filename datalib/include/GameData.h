@@ -135,7 +135,7 @@ protected:
 public ref class Planet : public GridDataSrcBase
 {
 public:
-    Planet(StarSystem ^s, int nr, int dia, float gv, int tc, int pc, float md)
+    Planet(StarSystem ^s, int nr, int dia, float gv, int tc, int pc, int md)
     {
         System = s;
         Number = nr;
@@ -145,7 +145,7 @@ public:
         Grav = gv;
         TempClass = tc;
         PressClass = pc;
-        MiningDiff = md;
+        MiDiff = md;
         LSN = -1;
         Master = nullptr;
         NumColonies = 0;
@@ -173,7 +173,7 @@ public:
     property float          Grav;
     property int            TempClass;
     property int            PressClass;
-    property float          MiningDiff;
+    property int            MiDiff; // * 100
     property int            LSN;
     property Alien^         Master;
     property int            NumColonies;
@@ -247,6 +247,8 @@ public:
     property int        MinLSNAvail;
     property bool       IsVoid;
 
+    property Alien^     HomeSpecies;
+
     property List<Ship^>^   Ships;
     property List<Colony^>^ Colonies;
     property Alien^         Master;
@@ -317,14 +319,14 @@ public:
     int             ProdPenalty;
     int             EUProd;
     int             EUFleet;
-    double          MiBase;
-    double          MiDiff;
-    double          MaBase;
+    int             MaBase; // *10
+    int             MiBase; // *10
+    int             MiDiff; // *100
     int             LSN;
     int             Shipyards;
     int             LastSeen;
 
-    property double EconomicBase    { double get() { return Math::Max(-1.0, MiBase + MaBase); } }
+    property int EconomicBase { int get() { return Math::Max(-1, MiBase + MaBase); } }
 
     property int            Inventory [int] {
         int  get(int inv)           { return m_Inventory[inv]; }

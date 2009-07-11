@@ -870,7 +870,7 @@ void Form1::PlanetsSetup()
             row[colCoords]   = planet->PrintLocation();
             row[colTemp]     = planet->TempClass;
             row[colPress]    = planet->PressClass;
-            row[colMD]       = planet->MiningDiff;
+            row[colMD]       = (double)planet->MiDiff / 100;
             row[colLSN]      = planet->LSN;
             row[colDist]     = distance;
             row[colMishap]   = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
@@ -878,7 +878,23 @@ void Form1::PlanetsSetup()
                 row[colVisited] = system->LastVisited;
             row[colScan]     = system->PrintScanStatus();
             row[colColonies] = system->PrintColonies( planet->Number, m_GameData->GetSpecies() );
-            row[colNotes]    = planet->Comment;
+
+            if( (planet->NumColonies == 0) &&
+                (planet->System->HomeSpecies != nullptr) )
+            {
+                // A home planet exists in the system. Make a note about that
+                String ^note = "";
+                if ( planet->Comment && planet->Comment->Length )
+                {
+                    note = planet->Comment + "; ";
+                }
+                note += String::Format(" SP {0} home system", planet->System->HomeSpecies->Name );
+                row[colNotes] = note;
+            }
+            else
+            {
+                row[colNotes]    = planet->Comment;
+            }
 
             dataTable->Rows->Add(row);
         }
@@ -979,7 +995,7 @@ void Form1::ColoniesSetup()
         row[colType]        = FHStrings::PlTypeToString(colony->PlanetType);
         row[colLocation]    = colony->PrintLocation();
         if( colony->EconomicBase != -1 )
-            row[colSize]    = colony->EconomicBase;
+            row[colSize]    = (double)colony->EconomicBase / 10;
         row[colDist]        = distance;
         row[colMishap]      = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
         row[colInventory]   = colony->PrintInventoryShort();
@@ -998,16 +1014,36 @@ void Form1::ColoniesSetup()
                 int miTech = sp->TechLevels[TECH_MI];
                 int maTech = sp->TechLevels[TECH_MA];
                 if( m_ColoniesFilter->MiMaBalanced )
-                    miTech = maTech = Math::Max(miTech, maTech);
+                    miTech = maTech = Math::Min(miTech, maTech);
 
-                int mi = (int)((miTech * colony->MiBase) / colony->Planet->MiningDiff);
-                int ma = (int)(maTech * colony->MaBase);
-                if( mi == ma )
-                    row[colBalance] = "Balanced";
-                else if( mi < ma )
-                    row[colBalance] = String::Format("+{0} MA cap.", ma - mi);
+                int mi = (10 * (miTech * colony->MiBase)) / colony->MiDiff;
+                int ma = (maTech * colony->MaBase) / 10;
+                
+                int needIU = 0;
+                int needAU = 0;
+                int diff = Math::Abs(mi - ma);
+
+                if( mi < ma )
+                {
+                    needIU = (int)Math::Round( (double)(diff * colony->MiDiff ) / ( miTech * 10) );
+                }
                 else
-                    row[colBalance] = String::Format("-{0} MA cap.", mi - ma);
+                {
+                    needAU = (int)Math::Round( (double)(diff * 10) / maTech );
+                }
+                
+                if( needAU )
+                {
+                    row[colBalance] = String::Format("+{0} AU", needAU);
+                }
+                else if ( needIU)
+                {
+                    row[colBalance] = String::Format("+{0} IU", needIU);
+                }
+                else
+                {
+                    row[colBalance] = "Balanced";
+                }
             }
         }
         else
