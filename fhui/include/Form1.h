@@ -91,6 +91,8 @@ namespace FHUI {
         List<String^>      ^m_RefListShips;
 
         bool                m_HadException;
+    private: System::Windows::Forms::TabPage^  TabOrders;
+    protected: 
         bool               ^m_bGridUpdateEnabled;
 
         // ==================================================
@@ -272,7 +274,7 @@ private: System::Windows::Forms::Label^  PlanetsRef;
     private: System::Windows::Forms::TabPage^  TabColonies;
     private: System::Windows::Forms::TabPage^  TabShips;
     private: System::Windows::Forms::TabPage^  TabAliens;
-    private: System::Windows::Forms::TabPage^  TabCommands;
+
 
     private: System::Windows::Forms::ComboBox^  RepTurnNr;
     private: System::Windows::Forms::TextBox^  RepText;
@@ -524,7 +526,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->AliensFiltRelE = (gcnew System::Windows::Forms::CheckBox());
             this->AliensFiltRelA = (gcnew System::Windows::Forms::CheckBox());
             this->AliensGrid = (gcnew System::Windows::Forms::DataGridView());
-            this->TabCommands = (gcnew System::Windows::Forms::TabPage());
             this->TabAbout = (gcnew System::Windows::Forms::TabPage());
             this->TextAbout = (gcnew System::Windows::Forms::TextBox());
             this->comboBox1 = (gcnew System::Windows::Forms::ComboBox());
@@ -533,6 +534,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->comboBox2 = (gcnew System::Windows::Forms::ComboBox());
             this->dataGridView1 = (gcnew System::Windows::Forms::DataGridView());
             this->BtnTooltip = (gcnew System::Windows::Forms::ToolTip(this->components));
+            this->TabOrders = (gcnew System::Windows::Forms::TabPage());
             splitContainer1 = (gcnew System::Windows::Forms::SplitContainer());
             TopSplitCont = (gcnew System::Windows::Forms::SplitContainer());
             splitContainer7 = (gcnew System::Windows::Forms::SplitContainer());
@@ -794,7 +796,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->MenuTabs->Controls->Add(this->TabColonies);
             this->MenuTabs->Controls->Add(this->TabShips);
             this->MenuTabs->Controls->Add(this->TabAliens);
-            this->MenuTabs->Controls->Add(this->TabCommands);
+            this->MenuTabs->Controls->Add(this->TabOrders);
             this->MenuTabs->Controls->Add(this->TabAbout);
             this->MenuTabs->Dock = System::Windows::Forms::DockStyle::Fill;
             this->MenuTabs->Location = System::Drawing::Point(0, 0);
@@ -805,7 +807,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // TabReports
             // 
-            this->TabReports->BackColor = System::Drawing::SystemColors::Control;
+            this->TabReports->BackColor = System::Drawing::Color::Transparent;
             this->TabReports->Controls->Add(splitContainer1);
             this->TabReports->Location = System::Drawing::Point(4, 22);
             this->TabReports->Margin = System::Windows::Forms::Padding(0);
@@ -814,6 +816,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabReports->Size = System::Drawing::Size(683, 563);
             this->TabReports->TabIndex = 0;
             this->TabReports->Text = L"Reports";
+            this->TabReports->UseVisualStyleBackColor = true;
             // 
             // TabMap
             // 
@@ -825,6 +828,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabMap->Size = System::Drawing::Size(683, 563);
             this->TabMap->TabIndex = 1;
             this->TabMap->Text = L"Map";
+            this->TabMap->UseVisualStyleBackColor = true;
             this->TabMap->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &Form1::MapCanvas_Paint);
             // 
             // panel1
@@ -1094,13 +1098,14 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // TabSystems
             // 
-            this->TabSystems->BackColor = System::Drawing::SystemColors::Control;
+            this->TabSystems->BackColor = System::Drawing::Color::Transparent;
             this->TabSystems->Controls->Add(splitContainer2);
             this->TabSystems->Location = System::Drawing::Point(4, 22);
             this->TabSystems->Name = L"TabSystems";
             this->TabSystems->Size = System::Drawing::Size(683, 563);
             this->TabSystems->TabIndex = 2;
             this->TabSystems->Text = L"Systems";
+            this->TabSystems->UseVisualStyleBackColor = true;
             // 
             // splitContainer2
             // 
@@ -1403,13 +1408,14 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // TabPlanets
             // 
-            this->TabPlanets->BackColor = System::Drawing::SystemColors::Control;
+            this->TabPlanets->BackColor = System::Drawing::Color::Transparent;
             this->TabPlanets->Controls->Add(splitContainer3);
             this->TabPlanets->Location = System::Drawing::Point(4, 22);
             this->TabPlanets->Name = L"TabPlanets";
             this->TabPlanets->Size = System::Drawing::Size(683, 563);
             this->TabPlanets->TabIndex = 3;
             this->TabPlanets->Text = L"Planets";
+            this->TabPlanets->UseVisualStyleBackColor = true;
             // 
             // splitContainer3
             // 
@@ -1709,13 +1715,14 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // TabColonies
             // 
-            this->TabColonies->BackColor = System::Drawing::SystemColors::Control;
+            this->TabColonies->BackColor = System::Drawing::Color::Transparent;
             this->TabColonies->Controls->Add(this->splitContainer4);
             this->TabColonies->Location = System::Drawing::Point(4, 22);
             this->TabColonies->Name = L"TabColonies";
             this->TabColonies->Size = System::Drawing::Size(683, 563);
             this->TabColonies->TabIndex = 4;
             this->TabColonies->Text = L"Colonies";
+            this->TabColonies->UseVisualStyleBackColor = true;
             // 
             // splitContainer4
             // 
@@ -2000,13 +2007,14 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // TabShips
             // 
-            this->TabShips->BackColor = System::Drawing::SystemColors::Control;
+            this->TabShips->BackColor = System::Drawing::Color::Transparent;
             this->TabShips->Controls->Add(this->splitContainer5);
             this->TabShips->Location = System::Drawing::Point(4, 22);
             this->TabShips->Name = L"TabShips";
             this->TabShips->Size = System::Drawing::Size(683, 563);
             this->TabShips->TabIndex = 5;
             this->TabShips->Text = L"Ships";
+            this->TabShips->UseVisualStyleBackColor = true;
             // 
             // splitContainer5
             // 
@@ -2359,13 +2367,14 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // TabAliens
             // 
-            this->TabAliens->BackColor = System::Drawing::SystemColors::Control;
+            this->TabAliens->BackColor = System::Drawing::Color::Transparent;
             this->TabAliens->Controls->Add(this->splitContainer6);
             this->TabAliens->Location = System::Drawing::Point(4, 22);
             this->TabAliens->Name = L"TabAliens";
             this->TabAliens->Size = System::Drawing::Size(683, 563);
             this->TabAliens->TabIndex = 6;
             this->TabAliens->Text = L"Aliens";
+            this->TabAliens->UseVisualStyleBackColor = true;
             // 
             // splitContainer6
             // 
@@ -2495,18 +2504,9 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->AliensGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseDoubleClick);
             this->AliensGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
             // 
-            // TabCommands
-            // 
-            this->TabCommands->Location = System::Drawing::Point(4, 22);
-            this->TabCommands->Name = L"TabCommands";
-            this->TabCommands->Size = System::Drawing::Size(683, 563);
-            this->TabCommands->TabIndex = 7;
-            this->TabCommands->Text = L"Commands";
-            this->TabCommands->UseVisualStyleBackColor = true;
-            // 
             // TabAbout
             // 
-            this->TabAbout->BackColor = System::Drawing::SystemColors::Control;
+            this->TabAbout->BackColor = System::Drawing::Color::Transparent;
             this->TabAbout->Controls->Add(this->TextAbout);
             this->TabAbout->Location = System::Drawing::Point(4, 22);
             this->TabAbout->Name = L"TabAbout";
@@ -2514,6 +2514,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabAbout->Size = System::Drawing::Size(683, 563);
             this->TabAbout->TabIndex = 8;
             this->TabAbout->Text = L"About";
+            this->TabAbout->UseVisualStyleBackColor = true;
             // 
             // TextAbout
             // 
@@ -2614,6 +2615,15 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->dataGridView1->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
             this->dataGridView1->Size = System::Drawing::Size(569, 504);
             this->dataGridView1->TabIndex = 0;
+            // 
+            // TabOrders
+            // 
+            this->TabOrders->Location = System::Drawing::Point(4, 22);
+            this->TabOrders->Name = L"TabOrders";
+            this->TabOrders->Size = System::Drawing::Size(683, 563);
+            this->TabOrders->TabIndex = 9;
+            this->TabOrders->Text = L"Orders";
+            this->TabOrders->UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
