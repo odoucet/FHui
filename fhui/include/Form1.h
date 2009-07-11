@@ -526,6 +526,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->AliensFiltRelE = (gcnew System::Windows::Forms::CheckBox());
             this->AliensFiltRelA = (gcnew System::Windows::Forms::CheckBox());
             this->AliensGrid = (gcnew System::Windows::Forms::DataGridView());
+            this->TabOrders = (gcnew System::Windows::Forms::TabPage());
             this->TabAbout = (gcnew System::Windows::Forms::TabPage());
             this->TextAbout = (gcnew System::Windows::Forms::TextBox());
             this->comboBox1 = (gcnew System::Windows::Forms::ComboBox());
@@ -534,7 +535,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->comboBox2 = (gcnew System::Windows::Forms::ComboBox());
             this->dataGridView1 = (gcnew System::Windows::Forms::DataGridView());
             this->BtnTooltip = (gcnew System::Windows::Forms::ToolTip(this->components));
-            this->TabOrders = (gcnew System::Windows::Forms::TabPage());
             splitContainer1 = (gcnew System::Windows::Forms::SplitContainer());
             TopSplitCont = (gcnew System::Windows::Forms::SplitContainer());
             splitContainer7 = (gcnew System::Windows::Forms::SplitContainer());
@@ -1401,8 +1401,11 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->SystemsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle2;
             this->SystemsGrid->RowHeadersWidth = 4;
             this->SystemsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
+            this->SystemsGrid->ShowCellToolTips = false;
             this->SystemsGrid->Size = System::Drawing::Size(683, 480);
             this->SystemsGrid->TabIndex = 0;
+            this->SystemsGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::SystemsGrid_CellMouseLeave);
+            this->SystemsGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::SystemsGrid_CellMouseEnter);
             this->SystemsGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::SystemsGrid_CellMouseDoubleClick);
             this->SystemsGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
             // 
@@ -2504,6 +2507,15 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->AliensGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseDoubleClick);
             this->AliensGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
             // 
+            // TabOrders
+            // 
+            this->TabOrders->Location = System::Drawing::Point(4, 22);
+            this->TabOrders->Name = L"TabOrders";
+            this->TabOrders->Size = System::Drawing::Size(683, 563);
+            this->TabOrders->TabIndex = 9;
+            this->TabOrders->Text = L"Orders";
+            this->TabOrders->UseVisualStyleBackColor = true;
+            // 
             // TabAbout
             // 
             this->TabAbout->BackColor = System::Drawing::Color::Transparent;
@@ -2615,15 +2627,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->dataGridView1->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
             this->dataGridView1->Size = System::Drawing::Size(569, 504);
             this->dataGridView1->TabIndex = 0;
-            // 
-            // TabOrders
-            // 
-            this->TabOrders->Location = System::Drawing::Point(4, 22);
-            this->TabOrders->Name = L"TabOrders";
-            this->TabOrders->Size = System::Drawing::Size(683, 563);
-            this->TabOrders->TabIndex = 9;
-            this->TabOrders->Text = L"Orders";
-            this->TabOrders->UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
@@ -2806,6 +2809,27 @@ private: System::Void Grid_CellMouseDoubleClick(System::Object^  sender, System:
              {
                  SetGridRefSystemOnMouseClick(safe_cast<DataGridView^>(sender), e->RowIndex);
              }
+         }
+
+private: System::Windows::Forms::ToolTip ^m_ToolTip;
+
+private: System::Void SystemsGrid_CellMouseEnter(System::Object^  sender, System::Windows::Forms::DataGridViewCellEventArgs^  e) {
+             if( e->ColumnIndex >= 0 && e->RowIndex >= 0 )
+             {
+                String^ toolTipText = SystemsGrid->Rows[e->RowIndex]->Cells[e->ColumnIndex]->ToolTipText;
+
+                if( m_ToolTip == nullptr )
+                {
+                    m_ToolTip = gcnew ToolTip();
+                }
+
+                // Show tooltip for a minute
+                m_ToolTip->Show(toolTipText, SystemsGrid, 60000);
+             }
+         }
+private: System::Void SystemsGrid_CellMouseLeave(System::Object^  sender, System::Windows::Forms::DataGridViewCellEventArgs^  e) {
+                // Stop displaying tooltip
+                m_ToolTip->Hide(SystemsGrid);
          }
 };
 

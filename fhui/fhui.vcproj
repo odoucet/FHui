@@ -306,7 +306,7 @@
 					FileType="3"
 					>
 					<File
-						RelativePath=".\resources\Form1.resX"
+						RelativePath=".\include\Form1.resX"
 						SubType="Designer"
 						>
 					</File>
