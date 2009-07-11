@@ -862,7 +862,7 @@ void Report::MatchShipScan(String ^s, bool bColony)
 
 void Report::MatchOtherPlanetsShipsScan(String ^s)
 {
-    if( MatchWithOutput(s, "^(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+#(\\d+)\\s+PL\\s+(.+)$") )
+    if( MatchWithOutput(s, "^(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+#(\\d+)\\s+PL\\s+([^,]+)") )
     {
         m_ScanX = GetMatchResultInt(0);
         m_ScanY = GetMatchResultInt(1);
