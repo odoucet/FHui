@@ -40,6 +40,8 @@ void Form1::InitControls()
 {
     System::Text::RegularExpressions::Regex::CacheSize = 500;
 
+    m_GridToolTip = gcnew ToolTip;
+
     GridFilter ^filter;
 
     // -- systems

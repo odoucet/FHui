@@ -97,6 +97,8 @@ namespace FHUI {
         bool                m_HadException;
         bool               ^m_bGridUpdateEnabled;
 
+        System::Windows::Forms::ToolTip^    m_GridToolTip;
+
         // ==================================================
         // --- Plugins ---
         void        LoadPlugins();
@@ -1407,8 +1409,8 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->SystemsGrid->ShowCellToolTips = false;
             this->SystemsGrid->Size = System::Drawing::Size(683, 480);
             this->SystemsGrid->TabIndex = 0;
-            this->SystemsGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::SystemsGrid_CellMouseLeave);
-            this->SystemsGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::SystemsGrid_CellMouseEnter);
+            this->SystemsGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
+            this->SystemsGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseEnter);
             this->SystemsGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::SystemsGrid_CellMouseDoubleClick);
             this->SystemsGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
             // 
@@ -2814,25 +2816,19 @@ private: System::Void Grid_CellMouseDoubleClick(System::Object^  sender, System:
              }
          }
 
-private: System::Windows::Forms::ToolTip ^m_ToolTip;
-
-private: System::Void SystemsGrid_CellMouseEnter(System::Object^  sender, System::Windows::Forms::DataGridViewCellEventArgs^  e) {
+private: System::Void Grid_CellMouseEnter(System::Object^  sender, System::Windows::Forms::DataGridViewCellEventArgs^  e) {
+             DataGridView ^grid = safe_cast<DataGridView^>(sender);
              if( e->ColumnIndex >= 0 && e->RowIndex >= 0 )
              {
-                String^ toolTipText = SystemsGrid->Rows[e->RowIndex]->Cells[e->ColumnIndex]->ToolTipText;
+                 String^ toolTipText = grid->Rows[e->RowIndex]->Cells[e->ColumnIndex]->ToolTipText;
 
-                if( m_ToolTip == nullptr )
-                {
-                    m_ToolTip = gcnew ToolTip();
-                }
-
-                // Show tooltip for a minute
-                m_ToolTip->Show(toolTipText, SystemsGrid, 60000);
+                 // Show tooltip for a minute
+                 m_GridToolTip->Show(toolTipText, grid, 60000);
              }
          }
-private: System::Void SystemsGrid_CellMouseLeave(System::Object^  sender, System::Windows::Forms::DataGridViewCellEventArgs^  e) {
+private: System::Void Grid_CellMouseLeave(System::Object^  sender, System::Windows::Forms::DataGridViewCellEventArgs^  e) {
                 // Stop displaying tooltip
-                m_ToolTip->Hide(SystemsGrid);
+                m_GridToolTip->Hide(safe_cast<DataGridView^>(sender));
          }
 };
 
