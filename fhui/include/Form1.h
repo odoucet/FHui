@@ -30,10 +30,15 @@ namespace FHUI {
 	public:
 		Form1(void)
 		{
-            InitializeComponent();
-            LoadGameData();
         }
 
+        void        LoadGameData();
+
+        // ==================================================
+        // -- Config properties --
+        property String^    DataDir;
+
+        // ==================================================
 	protected:
 		/// <summary>
 		/// Clean up any resources being used.
@@ -46,7 +51,6 @@ namespace FHUI {
 			}
 		}
 
-        void        LoadGameData();
         void        ScanReports();
         int         CheckReport(String ^fileName);
         void        LoadGalaxy();
@@ -91,8 +95,6 @@ namespace FHUI {
         List<String^>      ^m_RefListShips;
 
         bool                m_HadException;
-    private: System::Windows::Forms::TabPage^  TabOrders;
-    protected: 
         bool               ^m_bGridUpdateEnabled;
 
         // ==================================================
@@ -175,6 +177,7 @@ namespace FHUI {
         // Auto-generated code below this point
         // --------------------------------------------------
 
+    private: System::Windows::Forms::TabPage^  TabOrders;
     private: System::Windows::Forms::CheckBox^  AliensFiltRelP;
     private: System::Windows::Forms::CheckBox^  AliensFiltRelN;
     private: System::Windows::Forms::CheckBox^  AliensFiltRelE;

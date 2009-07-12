@@ -20,6 +20,8 @@ void Form1::LoadGameData()
 {
     try
     {
+        InitializeComponent();
+
         FillAboutBox();
         InitData();
         InitControls();
@@ -274,7 +276,11 @@ void Form1::FillAboutBox()
 
 void Form1::LoadGalaxy()
 {
-    StreamReader ^sr = File::OpenText("galaxy_list.txt");
+    String^ galaxyList = "galaxy_list.txt";
+    if( !String::IsNullOrEmpty(DataDir) )
+        galaxyList = DataDir + "/" + galaxyList;
+
+    StreamReader ^sr = File::OpenText(galaxyList);
     String ^line;
     while( (line = sr->ReadLine()) != nullptr ) 
     {
@@ -310,7 +316,11 @@ void Form1::LoadGalaxy()
 
 void Form1::ScanReports()
 {
-    DirectoryInfo ^dir = gcnew DirectoryInfo("reports");
+    String^ reportsDir = "reports";
+    if( !String::IsNullOrEmpty(DataDir) )
+        reportsDir = DataDir + "/" + reportsDir;
+
+    DirectoryInfo ^dir = gcnew DirectoryInfo(reportsDir);
 
     for each( FileInfo ^f in dir->GetFiles("*"))
     {   // First check each file if it is a report and find out for which turn.
@@ -521,7 +531,11 @@ void Form1::LoadCommands()
 
     try
     {
-        DirectoryInfo ^dir = gcnew DirectoryInfo("orders");
+        String^ ordersDir = "orders";
+        if( !String::IsNullOrEmpty(DataDir) )
+            ordersDir = DataDir + "/" + ordersDir;
+
+        DirectoryInfo ^dir = gcnew DirectoryInfo(ordersDir);
 
         for each( FileInfo ^f in dir->GetFiles("*"))
         {
@@ -555,7 +569,7 @@ void Form1::LoadPlugins()
 
     for each( FileInfo ^f in dir->GetFiles("*.dll"))
     {
-        if( f->Name->ToLower() == "datalib.dll" )
+        if( f->Name->ToLower() == "fhui.datalib.dll" )
             continue;
 
         Assembly ^assembly = Assembly::LoadFrom(f->FullName);

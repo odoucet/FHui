@@ -3,6 +3,15 @@ Major new features and bug fixes will be listed here.
 + New features
 * Bug fixes
 
+FHUI build ..
+* Fixed misreporting alien colony size by 0.1
+* Internal calculations precission improved to be consistent with FH engine.
++ Balance now reports IU / AU needed.
++ Empty planets in alien home systems are marked in notes.
++ Added handling for planets with inventory but not yet colonized.
++ Command line -dir <data_path> switch supported so FHUI binaries may.
+  be run from any directory separate from game data, eg. via shortcut.
+
 FHUI build 58
 * Colony on a planet without system scan is now correctly handled.
 * Fixed crash when player has colony in system not scanned in reports.
