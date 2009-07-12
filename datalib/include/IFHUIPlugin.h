@@ -12,30 +12,35 @@ ref class Planet;
 ref class Colony;
 ref class Alien;
 ref class Ship;
+ref class GameData;
 interface class IGridFilter;
 
-public interface class IGridPlugin
+public interface class IPluginBase
 {
 public:
-    void        AddColumnsSystems(DataTable^);
-    void        AddRowDataSystems(DataRow^, StarSystem^, IGridFilter^);
-    void        GridFormatSystems(DataGridView^);
+    void        SetGameData(GameData^);
+};
 
-    void        AddColumnsPlanets(DataTable^);
-    void        AddRowDataPlanets(DataRow^, Planet^, IGridFilter^);
-    void        GridFormatPlanets(DataGridView^);
+public enum class GridType
+{
+    Systems,
+    Planets,
+    Colonies,
+    Ships,
+    Aliens,
+};
 
-    void        AddColumnsColonies(DataTable^);
-    void        AddRowDataColonies(DataRow^, Colony^, IGridFilter^);
-    void        GridFormatColonies(DataGridView^);
+public interface class IGridPlugin : public IPluginBase
+{
+public:
+    void        AddColumns(GridType, DataTable^);
+    void        GridFormat(GridType, DataGridView^);
 
-    void        AddColumnsShips(DataTable^);
-    void        AddRowDataShips(DataRow^, Ship^, IGridFilter^);
-    void        GridFormatShips(DataGridView^);
-
-    void        AddColumnsAliens(DataTable^);
-    void        AddRowDataAliens(DataRow^, Alien^, IGridFilter^);
-    void        GridFormatAliens(DataGridView^);
+    void        AddRowData(DataRow^, StarSystem^, IGridFilter^);
+    void        AddRowData(DataRow^, Planet^, IGridFilter^);
+    void        AddRowData(DataRow^, Colony^, IGridFilter^);
+    void        AddRowData(DataRow^, Ship^, IGridFilter^);
+    void        AddRowData(DataRow^, Alien^, IGridFilter^);
 };
 
 } // end namespace FHUIPlugin

@@ -201,6 +201,12 @@ void Form1::InitRefLists()
         }
 }
 
+void Form1::UpdatePlugins()
+{
+    for each( IGridPlugin ^plugin in m_GridPlugins )
+        plugin->SetGameData(m_GameData);
+}
+
 void Form1::UpdateControls()
 {
     InitRefLists();
@@ -374,6 +380,7 @@ void Form1::DisplayTurn()
         *m_bGridUpdateEnabled = false;
         LoadGameTurn(turn);
         RepModeChanged();
+        UpdatePlugins();
         UpdateControls();
 
         // Display summary
@@ -569,7 +576,7 @@ void Form1::LoadPlugins()
 
     DirectoryInfo ^dir = gcnew DirectoryInfo(Application::StartupPath);
 
-    for each( FileInfo ^f in dir->GetFiles("*.dll"))
+    for each( FileInfo ^f in dir->GetFiles("fhui.*.dll"))
     {
         if( f->Name->ToLower() == "fhui.datalib.dll" )
             continue;
@@ -760,7 +767,7 @@ void Form1::SystemsSetup()
     DataColumn ^colNotes    = dataTable->Columns->Add("Notes",      String::typeid );
 
     for each( IGridPlugin ^plugin in m_GridPlugins )
-        plugin->AddColumnsSystems(dataTable);
+        plugin->AddColumns(GridType::Systems, dataTable);
 
     int gv  = Decimal::ToInt32(SystemsGV->Value);
     int age = Decimal::ToInt32(SystemsShipAge->Value);
@@ -794,14 +801,14 @@ void Form1::SystemsSetup()
         row[colNotes]       = system->Comment;
 
         for each( IGridPlugin ^plugin in m_GridPlugins )
-            plugin->AddRowDataSystems(row, system, m_SystemsFilter);
+            plugin->AddRowData(row, system, m_SystemsFilter);
 
         dataTable->Rows->Add(row);
     }
 
     ApplyDataAndFormat(SystemsGrid, dataTable, colObject, colDist->Ordinal);
     for each( IGridPlugin ^plugin in m_GridPlugins )
-        plugin->GridFormatSystems(SystemsGrid);
+        plugin->GridFormat(GridType::Systems, SystemsGrid);
 
     // Some columns are not sortable... yet
     SystemsGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
@@ -867,6 +874,9 @@ void Form1::PlanetsSetup()
     DataColumn ^colColonies = dataTable->Columns->Add("Colonies",   String::typeid );
     DataColumn ^colNotes    = dataTable->Columns->Add("Notes",      String::typeid );
 
+    for each( IGridPlugin ^plugin in m_GridPlugins )
+        plugin->AddColumns(GridType::Planets, dataTable);
+
     int gv  = Decimal::ToInt32(PlanetsGV->Value);
     int age = Decimal::ToInt32(PlanetsShipAge->Value);
 
@@ -912,11 +922,16 @@ void Form1::PlanetsSetup()
                 row[colNotes]    = planet->Comment;
             }
 
+            for each( IGridPlugin ^plugin in m_GridPlugins )
+                plugin->AddRowData(row, planet, m_SystemsFilter);
+
             dataTable->Rows->Add(row);
         }
     }
 
     ApplyDataAndFormat(PlanetsGrid, dataTable, colObject, colLSN->Ordinal);
+    for each( IGridPlugin ^plugin in m_GridPlugins )
+        plugin->GridFormat(GridType::Planets, SystemsGrid);
 
     // Some columns are not sortable... yet
     PlanetsGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
@@ -991,6 +1006,9 @@ void Form1::ColoniesSetup()
     DataColumn ^colDist         = dataTable->Columns->Add("Dist.",      double::typeid );
     DataColumn ^colMishap       = dataTable->Columns->Add("Mishap %",   String::typeid );
     DataColumn ^colInventory    = dataTable->Columns->Add("Inventory",  String::typeid );
+
+    for each( IGridPlugin ^plugin in m_GridPlugins )
+        plugin->AddColumns(GridType::Colonies, dataTable);
 
     int gv  = Decimal::ToInt32(ColoniesGV->Value);
     int age = Decimal::ToInt32(ColoniesShipAge->Value);
@@ -1068,10 +1086,15 @@ void Form1::ColoniesSetup()
                 row[colSeen] = colony->LastSeen;
         }
 
+        for each( IGridPlugin ^plugin in m_GridPlugins )
+            plugin->AddRowData(row, colony, m_SystemsFilter);
+
         dataTable->Rows->Add(row);
     }
 
     ApplyDataAndFormat(ColoniesGrid, dataTable, colObject, colOwner->Ordinal);
+    for each( IGridPlugin ^plugin in m_GridPlugins )
+        plugin->GridFormat(GridType::Colonies, SystemsGrid);
 
     // Formatting
     ColoniesGrid->Columns[colSize->Ordinal]->DefaultCellStyle->Format = "F1";
@@ -1136,6 +1159,9 @@ void Form1::ShipsSetup()
     DataColumn ^colUpgCost  = dataTable->Columns->Add("Upg.Cost",   int::typeid );
     DataColumn ^colRecVal   = dataTable->Columns->Add("Rec.Val",    int::typeid );
 
+    for each( IGridPlugin ^plugin in m_GridPlugins )
+        plugin->AddColumns(GridType::Ships, dataTable);
+
     Alien ^sp = m_GameData->GetSpecies();
     int gv  = Decimal::ToInt32(PlanetsGV->Value);
     int ml = sp->TechLevels[TECH_ML];
@@ -1181,10 +1207,16 @@ void Form1::ShipsSetup()
             row[colUpgCost] = ship->GetUpgradeCost();
             row[colRecVal]  = ship->GetRecycleValue();
         }
+
+        for each( IGridPlugin ^plugin in m_GridPlugins )
+            plugin->AddRowData(row, ship, m_SystemsFilter);
+
         dataTable->Rows->Add(row);
     }
 
     ApplyDataAndFormat(ShipsGrid, dataTable, colObject, colOwner->Ordinal);
+    for each( IGridPlugin ^plugin in m_GridPlugins )
+        plugin->GridFormat(GridType::Ships, SystemsGrid);
 
     // Some columns are not sortable... yet
     ShipsGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
@@ -1226,6 +1258,9 @@ void Form1::AliensSetup()
     DataColumn ^colPress    = dataTable->Columns->Add("Press",          int::typeid );
     DataColumn ^colEMail    = dataTable->Columns->Add("EMail",          String::typeid );
 
+    for each( IGridPlugin ^plugin in m_GridPlugins )
+        plugin->AddColumns(GridType::Aliens, dataTable);
+
     for each( Alien ^alien in m_GameData->GetAliens() )
     {
         if( m_AliensFilter->Filter(alien) )
@@ -1244,10 +1279,16 @@ void Form1::AliensSetup()
             row[colPress]   = alien->AtmReq->PressClass;
         }
         row[colEMail]       = alien->Email;
+
+        for each( IGridPlugin ^plugin in m_GridPlugins )
+            plugin->AddRowData(row, alien, m_SystemsFilter);
+
         dataTable->Rows->Add(row);
     }
 
     ApplyDataAndFormat(AliensGrid, dataTable, colObject, colRelation->Ordinal);
+    for each( IGridPlugin ^plugin in m_GridPlugins )
+        plugin->GridFormat(GridType::Aliens, SystemsGrid);
 
     // Enable filters
     m_AliensFilter->EnableUpdates = true;

@@ -7,28 +7,25 @@ using namespace System::Data;
 namespace FHUI
 {
 
-public ref class NullGridPlugin : public IGridPlugin
+public ref class NullPluginBase : public IPluginBase
 {
 public:
-    virtual void        AddColumnsSystems(DataTable^) {}
-    virtual void        AddRowDataSystems(DataRow^, StarSystem^, IGridFilter^) {}
-    virtual void        GridFormatSystems(DataGridView^) {}
+    virtual void        SetGameData(GameData^ gd) { m_GameData = gd; }
 
-    virtual void        AddColumnsPlanets(DataTable^) {}
-    virtual void        AddRowDataPlanets(DataRow^, Planet^, IGridFilter^) {}
-    virtual void        GridFormatPlanets(DataGridView^) {}
+protected:
+    GameData^   m_GameData;
+};
 
-    virtual void        AddColumnsColonies(DataTable^) {}
-    virtual void        AddRowDataColonies(DataRow^, Colony^, IGridFilter^) {}
-    virtual void        GridFormatColonies(DataGridView^) {}
-
-    virtual void        AddColumnsShips(DataTable^) {}
-    virtual void        AddRowDataShips(DataRow^, Ship^, IGridFilter^) {}
-    virtual void        GridFormatShips(DataGridView^) {}
-
-    virtual void        AddColumnsAliens(DataTable^) {}
-    virtual void        AddRowDataAliens(DataRow^, Alien^, IGridFilter^) {}
-    virtual void        GridFormatAliens(DataGridView^) {}
+public ref class NullGridPlugin : public IGridPlugin, public NullPluginBase
+{
+public:
+    virtual void        AddColumns(GridType, DataTable^) {}
+    virtual void        GridFormat(GridType, DataGridView^) {}
+    virtual void        AddRowData(DataRow^, StarSystem^, IGridFilter^) {}
+    virtual void        AddRowData(DataRow^, Planet^, IGridFilter^) {}
+    virtual void        AddRowData(DataRow^, Colony^, IGridFilter^) {}
+    virtual void        AddRowData(DataRow^, Ship^, IGridFilter^) {}
+    virtual void        AddRowData(DataRow^, Alien^, IGridFilter^) {}
 };
 
 } // end namespace FHUIPlugin

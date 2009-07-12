@@ -61,6 +61,7 @@ namespace FHUI {
         void        InitData();
         void        InitRefLists();
         void        InitControls();
+        void        UpdatePlugins();
         void        UpdateControls();
 
         void        FillAboutBox();
