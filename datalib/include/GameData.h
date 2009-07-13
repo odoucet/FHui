@@ -288,6 +288,8 @@ public:
         EUProd = 0;
         EUFleet = 0;
         MiBase = -1;
+        NeedIU = 0;
+        NeedAU = 0;
         MiDiff = 0;
         MaBase = -1;
         LSN = 99;
@@ -307,6 +309,9 @@ public:
     String^         PrintLocation() { return String::Format("{0} {1}", System->PrintLocation(), PlanetNum); }
     String^         PrintInventoryShort();
     String^         PrintRefListEntry(Alien ^player);
+    String^         PrintBalance();
+
+    void            CalculateBalance(bool MiMaBalanced);
 
     Alien^          Owner;
     String^         Name;
@@ -321,6 +326,8 @@ public:
     int             EUFleet;
     int             MaBase; // *10
     int             MiBase; // *10
+    int             NeedIU;
+    int             NeedAU;
     int             MiDiff; // *100
     int             LSN;
     int             Shipyards;
@@ -395,6 +402,7 @@ public:
     // --------------------------------------------------
 
     String^         PrintClass();
+    String^         PrintClassWithName()                { return PrintClass() + " " + Name; }
     String^         PrintLocation(Alien ^player);
     String^         PrintCargo();
     String^         PrintRefListEntry();
@@ -447,6 +455,7 @@ public:
 
     String^         GetSummary();
     int             GetLastTurn()               { return m_TurnMax; }
+    int             GetCarriedEU()              { return m_TurnEUStart; }
 
     Alien^          GetSpecies()                { return m_Species; }
     String^         GetSpeciesName()            { return m_Species->Name; }

@@ -15,11 +15,17 @@ ref class Ship;
 ref class GameData;
 interface class IGridFilter;
 
+// ---------------------------------------------------------
+//
+// Base class for all plugins
+//
 public interface class IPluginBase
 {
 public:
     void        SetGameData(GameData^);
 };
+
+// ---------------------------------------------------------
 
 public enum class GridType
 {
@@ -30,6 +36,8 @@ public enum class GridType
     Aliens,
 };
 
+// ---------------------------------------------------------
+// Grid Plugin - add new colums to data grids
 public interface class IGridPlugin : public IPluginBase
 {
 public:
@@ -42,5 +50,20 @@ public:
     void        AddRowData(DataRow^, Ship^, IGridFilter^);
     void        AddRowData(DataRow^, Alien^, IGridFilter^);
 };
+
+// ---------------------------------------------------------
+// Orders plugin
+public interface class IOrdersPlugin : public IPluginBase
+{
+public:
+    String^     GenerateCombat();
+    String^     GeneratePreDeparture();
+    String^     GenerateJumps();
+    String^     GenerateProduction(Colony^);
+    String^     GeneratePostArrival();
+    String^     GenerateStrikes();
+};
+
+// ---------------------------------------------------------
 
 } // end namespace FHUIPlugin

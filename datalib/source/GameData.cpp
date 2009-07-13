@@ -305,6 +305,42 @@ String^ Colony::PrintRefListEntry(Alien ^player)
     return Name + (player != Owner ? (" (" + Owner->Name + ")") : "");
 }
 
+String^ Colony::PrintBalance()
+{
+    if( NeedAU > 0 )
+        return String::Format("+{0} AU", NeedAU);
+    else if( NeedIU )
+        return String::Format("+{0} IU", NeedIU);
+    else
+        return "Balanced";
+}
+
+void Colony::CalculateBalance(bool MiMaBalanced)
+{
+    int miTech = Owner->TechLevels[TECH_MI];
+    int maTech = Owner->TechLevels[TECH_MA];
+    if( MiMaBalanced )
+        miTech = maTech = Math::Min(miTech, maTech);
+
+    int mi = (10 * (miTech * MiBase)) / MiDiff;
+    int ma = (maTech * MaBase) / 10;
+
+    NeedIU = 0;
+    NeedAU = 0;
+
+    int diff = Math::Abs(mi - ma);
+    if( mi < ma )
+    {
+        NeedIU = (int)Math::Round( (double)(diff * MiDiff ) / ( miTech * 10) );
+        NeedAU = -NeedIU;
+    }
+    else
+    {
+        NeedAU = (int)Math::Round( (double)(diff * 10) / maTech );
+        NeedIU = -NeedAU;
+    }
+}
+
 // ---------------------------------------------------------
 
 String^ Ship::PrintClass()
@@ -1042,6 +1078,8 @@ void GameData::UpdateSystems()
                     // Helps with MD changed via mining or when there is no system scan
                     if ( colony->Owner == GetSpecies() )
                     {
+                        colony->CalculateBalance(false);
+
                         planet->MiDiff = colony->MiDiff;
                         planet->LSN = colony->LSN;
                     }

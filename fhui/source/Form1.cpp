@@ -258,7 +258,7 @@ void Form1::FillAboutBox()
     String ^changeLog = nullptr;
 
     try {
-        StreamReader ^sr = File::OpenText("changelog.txt");
+        StreamReader ^sr = File::OpenText(Application::StartupPath + "/changelog.txt");
         changeLog = sr->ReadToEnd();
     }
     catch( SystemException^ )
@@ -526,7 +526,28 @@ void Form1::DisplayReport()
         String ^sel = RepTurnNr->SelectedItem->ToString();
         int key = int::Parse(sel->Substring(5));    // Skip 'Turn '
 
-        RepText->Text = m_Reports[key];
+        String ^text = m_Reports[key];
+        // --- temporary ---
+        for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
+        {
+            text += "---------------------------------------\r\n";
+            plugin->SetGameData(m_GameData);
+            text += plugin->GeneratePreDeparture();
+            text += plugin->GenerateJumps();
+            text += plugin->GenerateProduction(nullptr);
+            for each( Colony ^colony in m_GameData->GetSpecies()->Colonies )
+                if( colony->PlanetType == PLANET_COLONY_MINING ||
+                    colony->PlanetType == PLANET_COLONY_RESORT )
+                    text += plugin->GenerateProduction(colony);
+            for each( Colony ^colony in m_GameData->GetSpecies()->Colonies )
+                if( colony->PlanetType == PLANET_COLONY )
+                    text += plugin->GenerateProduction(colony);
+            for each( Colony ^colony in m_GameData->GetSpecies()->Colonies )
+                if( colony->PlanetType == PLANET_HOME )
+                    text += plugin->GenerateProduction(colony);
+        }
+        // --- end temporary ---
+        RepText->Text = text;
     }
     else if( RepModeCommands->Checked )
     {
@@ -573,6 +594,7 @@ void Form1::LoadCommands()
 void Form1::LoadPlugins()
 {
     m_GridPlugins = gcnew List<IGridPlugin^>;
+    m_OrdersPlugins = gcnew List<IOrdersPlugin^>;
 
     DirectoryInfo ^dir = gcnew DirectoryInfo(Application::StartupPath);
 
@@ -590,8 +612,13 @@ void Form1::LoadPlugins()
             {
                 if( type->GetInterface("FHUI.IGridPlugin") )
                 {
-                    IGridPlugin ^gridPlugin = safe_cast<IGridPlugin^>(Activator::CreateInstance(type));
-                    m_GridPlugins->Add(gridPlugin);
+                    IGridPlugin ^plugin = safe_cast<IGridPlugin^>(Activator::CreateInstance(type));
+                    m_GridPlugins->Add(plugin);
+                }
+                if( type->GetInterface("FHUI.IOrdersPlugin") )
+                {
+                    IOrdersPlugin ^plugin = safe_cast<IOrdersPlugin^>(Activator::CreateInstance(type));
+                    m_OrdersPlugins->Add(plugin);
                 }
             }
         }
@@ -1045,39 +1072,8 @@ void Form1::ColoniesSetup()
             if( colony->PlanetType == PLANET_HOME ||
                 colony->PlanetType == PLANET_COLONY )
             {
-                int miTech = sp->TechLevels[TECH_MI];
-                int maTech = sp->TechLevels[TECH_MA];
-                if( m_ColoniesFilter->MiMaBalanced )
-                    miTech = maTech = Math::Min(miTech, maTech);
-
-                int mi = (10 * (miTech * colony->MiBase)) / colony->MiDiff;
-                int ma = (maTech * colony->MaBase) / 10;
-                
-                int needIU = 0;
-                int needAU = 0;
-                int diff = Math::Abs(mi - ma);
-
-                if( mi < ma )
-                {
-                    needIU = (int)Math::Round( (double)(diff * colony->MiDiff ) / ( miTech * 10) );
-                }
-                else
-                {
-                    needAU = (int)Math::Round( (double)(diff * 10) / maTech );
-                }
-                
-                if( needAU )
-                {
-                    row[colBalance] = String::Format("+{0} AU", needAU);
-                }
-                else if ( needIU)
-                {
-                    row[colBalance] = String::Format("+{0} IU", needIU);
-                }
-                else
-                {
-                    row[colBalance] = "Balanced";
-                }
+                colony->CalculateBalance(m_ColoniesFilter->MiMaBalanced);
+                row[colBalance] = colony->PrintBalance();
             }
         }
         else
