@@ -610,15 +610,17 @@ void Form1::LoadPlugins()
         {
             if( type->IsClass && type->IsPublic )
             {
-                if( type->GetInterface("FHUI.IGridPlugin") )
+                if( type->GetInterface("FHUI.IPluginBase") )
                 {
-                    IGridPlugin ^plugin = safe_cast<IGridPlugin^>(Activator::CreateInstance(type));
-                    m_GridPlugins->Add(plugin);
-                }
-                if( type->GetInterface("FHUI.IOrdersPlugin") )
-                {
-                    IOrdersPlugin ^plugin = safe_cast<IOrdersPlugin^>(Activator::CreateInstance(type));
-                    m_OrdersPlugins->Add(plugin);
+                    IPluginBase^ plugin = safe_cast<IPluginBase^>(Activator::CreateInstance(type));
+                    
+                    IGridPlugin^ gridPlugin = dynamic_cast<IGridPlugin^>(plugin);
+                    if( gridPlugin )
+                        m_GridPlugins->Add(gridPlugin);
+
+                    IOrdersPlugin^ ordersPlugin = dynamic_cast<IOrdersPlugin^>(plugin);
+                    if( ordersPlugin )
+                        m_OrdersPlugins->Add(ordersPlugin);
                 }
             }
         }
@@ -826,6 +828,8 @@ void Form1::SystemsSetup()
             row[colVisited] = system->LastVisited;
         row[colColonies]    = system->PrintColonies( -1, m_GameData->GetSpecies() );
         row[colNotes]       = system->Comment;
+
+        //SystemsGrid->Columns[colColonies->Ordinal]->DefaultCellStyle->WrapMode = DataGridViewTriState::True;
 
         for each( IGridPlugin ^plugin in m_GridPlugins )
             plugin->AddRowData(row, system, m_SystemsFilter);
