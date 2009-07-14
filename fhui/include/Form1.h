@@ -79,6 +79,7 @@ namespace FHUI {
         Color       GetAlienColor(Alien ^sp);
         void        SetGridBgAndTooltip(DataGridView ^grid);
         void        SetGridRefSystemOnMouseClick(DataGridView ^grid, int rowIndex);
+        void        ShowGridContextMenu(DataGridView^ grid, DataGridViewCellMouseEventArgs ^e);
 
         // ==================================================
 
@@ -98,9 +99,7 @@ namespace FHUI {
         bool                m_HadException;
         bool               ^m_bGridUpdateEnabled;
     private: System::Windows::Forms::TabPage^  TabUtils;
-    private: System::Windows::Forms::TextBox^  OrderTemplate;
-
-    protected: 
+    private: System::Windows::Forms::TextBox^  OrderTemplate;    protected: 
 
         System::Windows::Forms::ToolTip^    m_GridToolTip;
 
@@ -132,6 +131,7 @@ namespace FHUI {
         void        ColoniesUpdateControls();
         void        ColoniesSetup();
         void        ColoniesSetRef( int rowIndex );
+        void        ColoniesMenuSetup(Object^ sender, CancelEventArgs^ e);
 
         IGridFilter        ^m_ColoniesFilter;
 
@@ -547,8 +547,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->comboBox2 = (gcnew System::Windows::Forms::ComboBox());
             this->dataGridView1 = (gcnew System::Windows::Forms::DataGridView());
             this->BtnTooltip = (gcnew System::Windows::Forms::ToolTip(this->components));
-            this->OrderTemplate = (gcnew System::Windows::Forms::TextBox());
-            splitContainer1 = (gcnew System::Windows::Forms::SplitContainer());
+            this->OrderTemplate = (gcnew System::Windows::Forms::TextBox());            splitContainer1 = (gcnew System::Windows::Forms::SplitContainer());
             TopSplitCont = (gcnew System::Windows::Forms::SplitContainer());
             splitContainer7 = (gcnew System::Windows::Forms::SplitContainer());
             groupBox3 = (gcnew System::Windows::Forms::GroupBox());
@@ -1415,10 +1414,11 @@ private: System::Windows::Forms::Label^  SystemsRef;
             dataGridViewCellStyle2->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
             this->SystemsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle2;
             this->SystemsGrid->RowHeadersWidth = 4;
-            this->SystemsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
+            this->SystemsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
             this->SystemsGrid->ShowCellToolTips = false;
             this->SystemsGrid->Size = System::Drawing::Size(683, 480);
             this->SystemsGrid->TabIndex = 0;
+            this->SystemsGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::SystemsGrid_CellMouseClick);
             this->SystemsGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
             this->SystemsGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseEnter);
             this->SystemsGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::SystemsGrid_CellMouseDoubleClick);
@@ -2657,20 +2657,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->dataGridView1->Size = System::Drawing::Size(569, 504);
             this->dataGridView1->TabIndex = 0;
             // 
-            // OrderTemplate
-            // 
-            this->OrderTemplate->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom) 
-                | System::Windows::Forms::AnchorStyles::Left) 
-                | System::Windows::Forms::AnchorStyles::Right));
-            this->OrderTemplate->Location = System::Drawing::Point(-1, 3);
-            this->OrderTemplate->MaxLength = 65536;
-            this->OrderTemplate->Multiline = true;
-            this->OrderTemplate->Name = L"OrderTemplate";
-            this->OrderTemplate->ReadOnly = true;
-            this->OrderTemplate->Size = System::Drawing::Size(681, 554);
-            this->OrderTemplate->TabIndex = 0;
-            // 
-            // Form1
+            // OrderTemplate            //             this->OrderTemplate->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)                 | System::Windows::Forms::AnchorStyles::Left)                 | System::Windows::Forms::AnchorStyles::Right));            this->OrderTemplate->Location = System::Drawing::Point(-1, 3);            this->OrderTemplate->MaxLength = 65536;            this->OrderTemplate->Multiline = true;            this->OrderTemplate->Name = L"OrderTemplate";            this->OrderTemplate->ReadOnly = true;            this->OrderTemplate->Size = System::Drawing::Size(681, 554);            this->OrderTemplate->TabIndex = 0;            //             // Form1
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
             this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
@@ -2861,13 +2848,17 @@ private: System::Void Grid_CellMouseEnter(System::Object^  sender, System::Windo
              {
                  String^ toolTipText = grid->Rows[e->RowIndex]->Cells[e->ColumnIndex]->ToolTipText;
 
-                 // Show tooltip for a minute
-                 m_GridToolTip->Show(toolTipText, grid, 60000);
+                 // Show tooltip for a 30 sec.
+                 m_GridToolTip->Show(toolTipText, grid, 30000);
              }
          }
 private: System::Void Grid_CellMouseLeave(System::Object^  sender, System::Windows::Forms::DataGridViewCellEventArgs^  e) {
                 // Stop displaying tooltip
                 m_GridToolTip->Hide(safe_cast<DataGridView^>(sender));
+         }
+private: System::Void SystemsGrid_CellMouseClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
+             ShowGridContextMenu(safe_cast<DataGridView^>(sender), e);
+
          }
 };
 
