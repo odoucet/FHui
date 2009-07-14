@@ -98,8 +98,6 @@ namespace FHUI {
 
         bool                m_HadException;
         bool               ^m_bGridUpdateEnabled;
-    private: System::Windows::Forms::TabPage^  TabUtils;
-    private: System::Windows::Forms::TextBox^  OrderTemplate;    protected: 
 
         System::Windows::Forms::ToolTip^    m_GridToolTip;
 
@@ -115,38 +113,55 @@ namespace FHUI {
         void        SystemsUpdateControls();
         void        SystemsSetup();
         void        SystemsSelectPlanets( int rowIndex );
+        void        SystemsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
+        void        SystemsMenuShowPlanets(Object^, EventArgs^);
+        void        SystemsMenuShowColonies(Object^, EventArgs^);
+        void        SystemsMenuSelectRef(Object^, EventArgs^);
 
         IGridFilter        ^m_SystemsFilter;
+        StarSystem         ^m_SystemsMenuRef;
+        int                 m_SystemsMenuRefRow;
 
         // ==================================================
         // --- PLANETS ---
         void        PlanetsUpdateControls();
         void        PlanetsSetup();
         void        PlanetsSelectColonies( int rowIndex );
+        void        PlanetsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
+        void        PlanetsMenuShowColonies(Object^, EventArgs^);
+        void        PlanetsMenuSelectRef(Object^, EventArgs^);
 
         IGridFilter        ^m_PlanetsFilter;
+        Planet             ^m_PlanetsMenuRef;
+        int                 m_PlanetsMenuRefRow;
 
         // ==================================================
         // --- COLONIES ---
         void        ColoniesUpdateControls();
         void        ColoniesSetup();
         void        ColoniesSetRef( int rowIndex );
-        void        ColoniesMenuSetup(Object^ sender, CancelEventArgs^ e);
+        void        ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
+        void        ColoniesMenuSelectRef(Object^, EventArgs^);
 
         IGridFilter        ^m_ColoniesFilter;
+        Colony             ^m_ColoniesMenuRef;
 
         // ==================================================
         // --- SHIPS ---
         void        ShipsUpdateControls();
         void        ShipsSetup();
         void        ShipsSetRef( int rowIndex );
+        void        ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
+        void        ShipsMenuSelectRef(Object^, EventArgs^);
 
         IGridFilter        ^m_ShipsFilter;
+        Ship               ^m_ShipsMenuRef;
 
         // ==================================================
         // --- ALIENS ---
         void        AliensSetup();
         void        AliensUpdateControls();
+        void        AliensFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
 
         IGridFilter        ^m_AliensFilter;
 
@@ -185,6 +200,8 @@ namespace FHUI {
         // Auto-generated code below this point
         // --------------------------------------------------
 
+    private: System::Windows::Forms::TabPage^  TabUtils;
+    private: System::Windows::Forms::TextBox^  OrderTemplate;
     private: System::Windows::Forms::TabPage^  TabOrders;
     private: System::Windows::Forms::CheckBox^  AliensFiltRelP;
     private: System::Windows::Forms::CheckBox^  AliensFiltRelN;
@@ -206,7 +223,7 @@ namespace FHUI {
     private: System::Windows::Forms::Button^  ShipsFiltersReset;
     private: System::Windows::Forms::TextBox^  ShipsRefText;
     private: System::Windows::Forms::NumericUpDown^  ShipsMaxMishap;
-    private: System::Windows::Forms::NumericUpDown^  ShipsShipAge;
+
     private: System::Windows::Forms::NumericUpDown^  ShipsGV;
 
     private: System::Windows::Forms::ComboBox^  ShipsRefShip;
@@ -419,7 +436,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle6 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::Label^  label10;
             System::Windows::Forms::Label^  label23;
-            System::Windows::Forms::Label^  label25;
             System::Windows::Forms::Label^  label27;
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle7 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle8 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
@@ -523,7 +539,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ShipsFiltersReset = (gcnew System::Windows::Forms::Button());
             this->ShipsRefText = (gcnew System::Windows::Forms::TextBox());
             this->ShipsMaxMishap = (gcnew System::Windows::Forms::NumericUpDown());
-            this->ShipsShipAge = (gcnew System::Windows::Forms::NumericUpDown());
             this->ShipsGV = (gcnew System::Windows::Forms::NumericUpDown());
             this->ShipsRefShip = (gcnew System::Windows::Forms::ComboBox());
             this->ShipsRefColony = (gcnew System::Windows::Forms::ComboBox());
@@ -538,6 +553,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->AliensFiltRelA = (gcnew System::Windows::Forms::CheckBox());
             this->AliensGrid = (gcnew System::Windows::Forms::DataGridView());
             this->TabOrders = (gcnew System::Windows::Forms::TabPage());
+            this->OrderTemplate = (gcnew System::Windows::Forms::TextBox());
             this->TabUtils = (gcnew System::Windows::Forms::TabPage());
             this->TabAbout = (gcnew System::Windows::Forms::TabPage());
             this->TextAbout = (gcnew System::Windows::Forms::TextBox());
@@ -547,7 +563,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->comboBox2 = (gcnew System::Windows::Forms::ComboBox());
             this->dataGridView1 = (gcnew System::Windows::Forms::DataGridView());
             this->BtnTooltip = (gcnew System::Windows::Forms::ToolTip(this->components));
-            this->OrderTemplate = (gcnew System::Windows::Forms::TextBox());            splitContainer1 = (gcnew System::Windows::Forms::SplitContainer());
+            splitContainer1 = (gcnew System::Windows::Forms::SplitContainer());
             TopSplitCont = (gcnew System::Windows::Forms::SplitContainer());
             splitContainer7 = (gcnew System::Windows::Forms::SplitContainer());
             groupBox3 = (gcnew System::Windows::Forms::GroupBox());
@@ -576,7 +592,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             label24 = (gcnew System::Windows::Forms::Label());
             label10 = (gcnew System::Windows::Forms::Label());
             label23 = (gcnew System::Windows::Forms::Label());
-            label25 = (gcnew System::Windows::Forms::Label());
             label27 = (gcnew System::Windows::Forms::Label());
             label5 = (gcnew System::Windows::Forms::Label());
             label6 = (gcnew System::Windows::Forms::Label());
@@ -634,7 +649,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->splitContainer5->Panel2->SuspendLayout();
             this->splitContainer5->SuspendLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ShipsMaxMishap))->BeginInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ShipsShipAge))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ShipsGV))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ShipsGrid))->BeginInit();
             this->TabAliens->SuspendLayout();
@@ -1418,7 +1432,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->SystemsGrid->ShowCellToolTips = false;
             this->SystemsGrid->Size = System::Drawing::Size(683, 480);
             this->SystemsGrid->TabIndex = 0;
-            this->SystemsGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::SystemsGrid_CellMouseClick);
+            this->SystemsGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
             this->SystemsGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
             this->SystemsGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseEnter);
             this->SystemsGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::SystemsGrid_CellMouseDoubleClick);
@@ -1727,8 +1741,12 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->PlanetsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle4;
             this->PlanetsGrid->RowHeadersWidth = 4;
             this->PlanetsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
+            this->PlanetsGrid->ShowCellToolTips = false;
             this->PlanetsGrid->Size = System::Drawing::Size(683, 480);
             this->PlanetsGrid->TabIndex = 0;
+            this->PlanetsGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
+            this->PlanetsGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
+            this->PlanetsGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseEnter);
             this->PlanetsGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::PlanetsGrid_CellMouseDoubleClick);
             this->PlanetsGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
             // 
@@ -2020,8 +2038,12 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ColoniesGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle6;
             this->ColoniesGrid->RowHeadersWidth = 4;
             this->ColoniesGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
+            this->ColoniesGrid->ShowCellToolTips = false;
             this->ColoniesGrid->Size = System::Drawing::Size(683, 480);
             this->ColoniesGrid->TabIndex = 0;
+            this->ColoniesGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
+            this->ColoniesGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
+            this->ColoniesGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseEnter);
             this->ColoniesGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::ColoniesGrid_CellMouseDoubleClick);
             this->ColoniesGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
             // 
@@ -2063,11 +2085,9 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->splitContainer5->Panel1->Controls->Add(this->ShipsRefText);
             this->splitContainer5->Panel1->Controls->Add(this->ShipsMaxMishap);
             this->splitContainer5->Panel1->Controls->Add(label10);
-            this->splitContainer5->Panel1->Controls->Add(this->ShipsShipAge);
             this->splitContainer5->Panel1->Controls->Add(this->ShipsGV);
             this->splitContainer5->Panel1->Controls->Add(this->ShipsRefShip);
             this->splitContainer5->Panel1->Controls->Add(label23);
-            this->splitContainer5->Panel1->Controls->Add(label25);
             this->splitContainer5->Panel1->Controls->Add(this->ShipsRefColony);
             this->splitContainer5->Panel1->Controls->Add(this->ShipsRef);
             this->splitContainer5->Panel1->Controls->Add(label27);
@@ -2268,16 +2288,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             label10->TabIndex = 64;
             label10->Text = L"Max Mishap%:";
             // 
-            // ShipsShipAge
-            // 
-            this->ShipsShipAge->Location = System::Drawing::Point(422, 3);
-            this->ShipsShipAge->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {50, 0, 0, 0});
-            this->ShipsShipAge->Name = L"ShipsShipAge";
-            this->ShipsShipAge->Size = System::Drawing::Size(47, 20);
-            this->ShipsShipAge->TabIndex = 54;
-            this->BtnTooltip->SetToolTip(this->ShipsShipAge, L"Select ship age for mishap calculation.");
-            this->ShipsShipAge->ValueChanged += gcnew System::EventHandler(this, &Form1::Ships_Update);
-            // 
             // ShipsGV
             // 
             this->ShipsGV->Location = System::Drawing::Point(311, 3);
@@ -2294,9 +2304,9 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             this->ShipsRefShip->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->ShipsRefShip->FormattingEnabled = true;
-            this->ShipsRefShip->Location = System::Drawing::Point(482, 3);
+            this->ShipsRefShip->Location = System::Drawing::Point(447, 3);
             this->ShipsRefShip->Name = L"ShipsRefShip";
-            this->ShipsRefShip->Size = System::Drawing::Size(135, 21);
+            this->ShipsRefShip->Size = System::Drawing::Size(170, 21);
             this->ShipsRefShip->TabIndex = 55;
             this->BtnTooltip->SetToolTip(this->ShipsRefShip, L"Select ship reference for mishap calculation.");
             this->ShipsRefShip->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::Ships_Update);
@@ -2309,15 +2319,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             label23->Size = System::Drawing::Size(25, 13);
             label23->TabIndex = 57;
             label23->Text = L"GV:";
-            // 
-            // label25
-            // 
-            label25->AutoSize = true;
-            label25->Location = System::Drawing::Point(367, 6);
-            label25->Name = L"label25";
-            label25->Size = System::Drawing::Size(53, 13);
-            label25->TabIndex = 58;
-            label25->Text = L"Ship Age:";
             // 
             // ShipsRefColony
             // 
@@ -2381,8 +2382,12 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ShipsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle8;
             this->ShipsGrid->RowHeadersWidth = 4;
             this->ShipsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
+            this->ShipsGrid->ShowCellToolTips = false;
             this->ShipsGrid->Size = System::Drawing::Size(683, 480);
             this->ShipsGrid->TabIndex = 0;
+            this->ShipsGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
+            this->ShipsGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
+            this->ShipsGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseEnter);
             this->ShipsGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::ShipsGrid_CellMouseDoubleClick);
             this->ShipsGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
             // 
@@ -2521,8 +2526,12 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->AliensGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle10;
             this->AliensGrid->RowHeadersWidth = 4;
             this->AliensGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
+            this->AliensGrid->ShowCellToolTips = false;
             this->AliensGrid->Size = System::Drawing::Size(683, 533);
             this->AliensGrid->TabIndex = 0;
+            this->AliensGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
+            this->AliensGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
+            this->AliensGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseEnter);
             this->AliensGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseDoubleClick);
             this->AliensGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
             // 
@@ -2535,6 +2544,13 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabOrders->TabIndex = 9;
             this->TabOrders->Text = L"Orders";
             this->TabOrders->UseVisualStyleBackColor = true;
+            // 
+            // OrderTemplate
+            // 
+            this->OrderTemplate->Location = System::Drawing::Point(0, 0);
+            this->OrderTemplate->Name = L"OrderTemplate";
+            this->OrderTemplate->Size = System::Drawing::Size(100, 20);
+            this->OrderTemplate->TabIndex = 0;
             // 
             // TabUtils
             // 
@@ -2657,7 +2673,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->dataGridView1->Size = System::Drawing::Size(569, 504);
             this->dataGridView1->TabIndex = 0;
             // 
-            // OrderTemplate            //             this->OrderTemplate->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)                 | System::Windows::Forms::AnchorStyles::Left)                 | System::Windows::Forms::AnchorStyles::Right));            this->OrderTemplate->Location = System::Drawing::Point(-1, 3);            this->OrderTemplate->MaxLength = 65536;            this->OrderTemplate->Multiline = true;            this->OrderTemplate->Name = L"OrderTemplate";            this->OrderTemplate->ReadOnly = true;            this->OrderTemplate->Size = System::Drawing::Size(681, 554);            this->OrderTemplate->TabIndex = 0;            //             // Form1
+            // Form1
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
             this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
@@ -2731,7 +2747,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->splitContainer5->Panel2->ResumeLayout(false);
             this->splitContainer5->ResumeLayout(false);
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ShipsMaxMishap))->EndInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ShipsShipAge))->EndInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ShipsGV))->EndInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ShipsGrid))->EndInit();
             this->TabAliens->ResumeLayout(false);
@@ -2856,9 +2871,11 @@ private: System::Void Grid_CellMouseLeave(System::Object^  sender, System::Windo
                 // Stop displaying tooltip
                 m_GridToolTip->Hide(safe_cast<DataGridView^>(sender));
          }
-private: System::Void SystemsGrid_CellMouseClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
-             ShowGridContextMenu(safe_cast<DataGridView^>(sender), e);
-
+private: System::Void Grid_CellMouseClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
+             if( e->Button == Windows::Forms::MouseButtons::Right )
+             {
+                 ShowGridContextMenu(safe_cast<DataGridView^>(sender), e);
+             }
          }
 };
 
