@@ -43,7 +43,7 @@ public interface class IGridPlugin : public IPluginBase
 public:
     void        AddColumns(GridType, DataTable^);
     void        GridFormat(GridType, DataGridView^);
-
+    void        AddMenuItems(GridType, DataGridView^);
     void        AddRowData(DataRow^, StarSystem^, IGridFilter^);
     void        AddRowData(DataRow^, Planet^, IGridFilter^);
     void        AddRowData(DataRow^, Colony^, IGridFilter^);

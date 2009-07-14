@@ -172,10 +172,18 @@ bool GridFilter::Filter(IGridDataSrc ^item)
         }
 
         // Mishap
-        if( CtrlGV && CtrlShipAge )
+        if( CtrlGV  )
         {
             int gv  = Decimal::ToInt32(CtrlGV->Value);
-            int age = Decimal::ToInt32(CtrlShipAge->Value);
+            int age = 0;
+            if( CtrlShipAge )
+                age = Decimal::ToInt32(CtrlShipAge->Value);
+            else
+            {
+                Ship ^ship = dynamic_cast<Ship^>(item);
+                if( ship )
+                    age = ship->Age;
+            }
             double maxMishap = Decimal::ToDouble(CtrlMaxMishap->Value);
             if( maxMishap < system->CalcMishap(RefSystem, gv, age) )
             {

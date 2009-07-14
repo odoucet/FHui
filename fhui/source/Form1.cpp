@@ -117,7 +117,6 @@ void Form1::InitControls()
     filter->CtrlRefColony   = ShipsRefColony;
     filter->CtrlRefShip     = ShipsRefShip;
     filter->CtrlGV          = ShipsGV;
-    filter->CtrlShipAge     = ShipsShipAge;
     filter->CtrlMaxMishap   = ShipsMaxMishap;
     filter->CtrlFiltOwnO    = ShipsFiltOwnO;
     filter->CtrlFiltOwnN    = ShipsFiltOwnN;
@@ -752,6 +751,31 @@ void Form1::SetGridRefSystemOnMouseClick(DataGridView ^grid, int rowIndex)
     }
 }
 
+void Form1::ShowGridContextMenu(DataGridView^ grid, DataGridViewCellMouseEventArgs ^e)
+{
+    if( e->RowIndex < 0 || e->ColumnIndex < 0 )
+        return;
+
+    // Create menu
+    Windows::Forms::ContextMenuStrip ^menu = gcnew Windows::Forms::ContextMenuStrip;
+
+    // Populate menu
+    if( grid == SystemsGrid )
+        SystemsFillMenu(menu, e->RowIndex);
+    else if( grid == PlanetsGrid )
+        PlanetsFillMenu(menu, e->RowIndex);
+    else if( grid == ColoniesGrid )
+        ColoniesFillMenu(menu, e->RowIndex);
+    else if( grid == ShipsGrid )
+        ShipsFillMenu(menu, e->RowIndex);
+    else if( grid == AliensGrid )
+        AliensFillMenu(menu, e->RowIndex);
+
+    // Show menu
+    Rectangle r = grid->GetCellDisplayRectangle(e->ColumnIndex, e->RowIndex, false);
+    menu->Show(grid, r.Left + e->Location.X, r.Top + e->Location.Y);
+}
+
 ////////////////////////////////////////////////////////////////
 // Systems
 
@@ -793,10 +817,11 @@ void Form1::SystemsSetup()
     DataColumn ^colVisited  = dataTable->Columns->Add("Visited",    int::typeid );
     DataColumn ^colScan     = dataTable->Columns->Add("Scan",       String::typeid );
     DataColumn ^colColonies = dataTable->Columns->Add("Colonies",   String::typeid );
-    DataColumn ^colNotes    = dataTable->Columns->Add("Notes",      String::typeid );
 
     for each( IGridPlugin ^plugin in m_GridPlugins )
         plugin->AddColumns(GridType::Systems, dataTable);
+
+    DataColumn ^colNotes    = dataTable->Columns->Add("Notes",      String::typeid );
 
     int gv  = Decimal::ToInt32(SystemsGV->Value);
     int age = Decimal::ToInt32(SystemsShipAge->Value);
@@ -861,6 +886,57 @@ void Form1::SystemsSelectPlanets( int rowIndex )
     }
 }
 
+void Form1::SystemsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
+{
+    int index = SystemsGrid->Columns[0]->Index;
+    StarSystem ^system = safe_cast<StarSystem^>(SystemsGrid->Rows[ rowIndex ]->Cells[index]->Value);
+    m_SystemsMenuRef    = system;
+    m_SystemsMenuRefRow = rowIndex;
+
+    if( system->PlanetsCount > 0 )
+    {
+        menu->Items->Add(
+            "Show Planets in " + system->PrintLocation(),
+            nullptr,
+            gcnew EventHandler(this, &Form1::SystemsMenuShowPlanets) );
+    }
+
+    if( system->Colonies->Count > 0 )
+    {
+        menu->Items->Add(
+            "Show Colonies in " + system->PrintLocation(),
+            nullptr,
+            gcnew EventHandler(this, &Form1::SystemsMenuShowColonies) );
+    }
+
+    menu->Items->Add(
+        "Select ref: " + system->PrintLocation(),
+        nullptr,
+        gcnew EventHandler(this, &Form1::SystemsMenuSelectRef) );
+
+    menu->Items->Add(
+        "Reset Filters",
+        nullptr,
+        gcnew EventHandler(this, &Form1::SystemsFiltersReset_Click));
+}
+
+void Form1::SystemsMenuShowPlanets(Object^, EventArgs^)
+{
+    SystemsSelectPlanets(m_SystemsMenuRefRow);
+}
+
+void Form1::SystemsMenuShowColonies(Object^, EventArgs^)
+{
+    ColoniesRefXYZ->Text = m_SystemsMenuRef->PrintLocation();
+    ColoniesMaxMishap->Value = 0;
+    MenuTabs->SelectedIndex = 4;
+}
+
+void Form1::SystemsMenuSelectRef(Object^, EventArgs^)
+{
+    m_SystemsFilter->SetRefSystem(m_SystemsMenuRef);
+}
+
 ////////////////////////////////////////////////////////////////
 // Planets
 
@@ -903,10 +979,11 @@ void Form1::PlanetsSetup()
     DataColumn ^colVisited  = dataTable->Columns->Add("Visited",    int::typeid );
     DataColumn ^colScan     = dataTable->Columns->Add("Scan",       String::typeid );
     DataColumn ^colColonies = dataTable->Columns->Add("Colonies",   String::typeid );
-    DataColumn ^colNotes    = dataTable->Columns->Add("Notes",      String::typeid );
 
     for each( IGridPlugin ^plugin in m_GridPlugins )
         plugin->AddColumns(GridType::Planets, dataTable);
+
+    DataColumn ^colNotes    = dataTable->Columns->Add("Notes",      String::typeid );
 
     int gv  = Decimal::ToInt32(PlanetsGV->Value);
     int age = Decimal::ToInt32(PlanetsShipAge->Value);
@@ -991,6 +1068,46 @@ void Form1::PlanetsSelectColonies( int rowIndex )
             PlanetsMaxLSN->Value = 99;
         }
     }
+}
+
+void Form1::PlanetsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
+{
+    int index = PlanetsGrid->Columns[0]->Index;
+    Planet ^planet = safe_cast<Planet^>(PlanetsGrid->Rows[ rowIndex ]->Cells[index]->Value);
+    m_PlanetsMenuRef    = planet;
+    m_PlanetsMenuRefRow = rowIndex;
+
+    String^ name = String::IsNullOrEmpty(planet->Name)
+        ? planet->PrintLocation()
+        : "PL " + planet->Name;
+
+    if( planet->System->Colonies->Count > 0 )
+    {
+        menu->Items->Add(
+            "Show Colonies near " + name,
+            nullptr,
+            gcnew EventHandler(this, &Form1::PlanetsMenuShowColonies) );
+    }
+
+    menu->Items->Add(
+        "Select ref: " + name,
+        nullptr,
+        gcnew EventHandler(this, &Form1::PlanetsMenuSelectRef) );
+
+    menu->Items->Add(
+        "Reset Filters",
+        nullptr,
+        gcnew EventHandler(this, &Form1::PlanetsFiltersReset_Click));
+}
+
+void Form1::PlanetsMenuShowColonies(Object^, EventArgs^)
+{
+    PlanetsSelectColonies(m_PlanetsMenuRefRow);
+}
+
+void Form1::PlanetsMenuSelectRef(Object^, EventArgs^)
+{
+    m_PlanetsFilter->SetRefSystem(m_PlanetsMenuRef->System);
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1116,6 +1233,27 @@ void Form1::ColoniesSetRef( int rowIndex )
     }
 }
 
+void Form1::ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
+{
+    int index = ColoniesGrid->Columns[0]->Index;
+    m_ColoniesMenuRef = safe_cast<Colony^>(ColoniesGrid->Rows[ rowIndex ]->Cells[index]->Value);
+
+    menu->Items->Add(
+        "Select ref: PL " + m_ColoniesMenuRef->PrintRefListEntry(m_GameData->GetSpecies()),
+        nullptr,
+        gcnew EventHandler(this, &Form1::ColoniesMenuSelectRef) );
+
+    menu->Items->Add(
+        "Reset Filters",
+        nullptr,
+        gcnew EventHandler(this, &Form1::ColoniesFiltersReset_Click));
+}
+
+void Form1::ColoniesMenuSelectRef(Object^, EventArgs ^e)
+{
+    ColoniesRefColony->Text = m_ColoniesMenuRef->PrintRefListEntry(m_GameData->GetSpecies());
+}
+
 ////////////////////////////////////////////////////////////////
 // Ships
 
@@ -1231,8 +1369,38 @@ void Form1::ShipsSetRef( int rowIndex )
     {
         int index = ShipsGrid->Columns[0]->Index;
         Ship ^ship = safe_cast<Ship^>(ShipsGrid->Rows[ rowIndex ]->Cells[index]->Value);
-        ShipsRefShip->Text = ship->PrintRefListEntry();
+        if( ship->Owner == m_GameData->GetSpecies() )
+            ShipsRefShip->Text = ship->PrintRefListEntry();
+        else
+            m_ShipsFilter->SetRefSystem(ship->System);
     }
+}
+
+void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
+{
+    int index = ShipsGrid->Columns[0]->Index;
+    m_ShipsMenuRef = safe_cast<Ship^>(ShipsGrid->Rows[ rowIndex ]->Cells[index]->Value);
+
+    menu->Items->Add(
+        String::Format("Select ref: {0} {1} (@ {2})",
+            m_ShipsMenuRef->PrintClass(),
+            m_ShipsMenuRef->Name,
+            m_ShipsMenuRef->System->PrintLocation() ),
+        nullptr,
+        gcnew EventHandler(this, &Form1::ShipsMenuSelectRef) );
+
+    menu->Items->Add(
+        "Reset Filters",
+        nullptr,
+        gcnew EventHandler(this, &Form1::ShipsFiltersReset_Click));
+}
+
+void Form1::ShipsMenuSelectRef(Object^, EventArgs ^e)
+{
+    if( m_ShipsMenuRef->Owner == m_GameData->GetSpecies() )
+        ShipsRefShip->Text = m_ShipsMenuRef->PrintRefListEntry();
+    else
+        m_ShipsFilter->SetRefSystem(m_ShipsMenuRef->System);
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1292,6 +1460,17 @@ void Form1::AliensSetup()
 
     // Enable filters
     m_AliensFilter->EnableUpdates = true;
+}
+
+void Form1::AliensFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
+{
+    int index = AliensGrid->Columns[0]->Index;
+    IGridDataSrc ^iDataSrc = safe_cast<IGridDataSrc^>(AliensGrid->Rows[ rowIndex ]->Cells[index]->Value);
+
+    menu->Items->Add(
+        "Reset Filters",
+        nullptr,
+        gcnew EventHandler(this, &Form1::AliensFiltersReset_Click));
 }
 
 ////////////////////////////////////////////////////////////////

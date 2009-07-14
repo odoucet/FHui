@@ -25,6 +25,7 @@ public ref class NullGridPlugin : public IGridPlugin, public NullPluginBase
 public:
     virtual void        AddColumns(GridType, DataTable^) {}
     virtual void        GridFormat(GridType, DataGridView^) {}
+    virtual void        AddMenuItems(GridType, DataGridView^) {}
     virtual void        AddRowData(DataRow^, StarSystem^, IGridFilter^) {}
     virtual void        AddRowData(DataRow^, Planet^, IGridFilter^) {}
     virtual void        AddRowData(DataRow^, Colony^, IGridFilter^) {}
