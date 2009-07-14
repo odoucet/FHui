@@ -1,3 +1,11 @@
 * tekst tooltipow nad gridem Systems moglby sie wyswietlac courierem zamiast defaultowym fontem.
 * usuwac kolonie podczas aliens at...
 * dodac w projekcie mozliwosc kompilacji na wielu corach
+
+prozenfe:
+* Wypisac gdzies liczbe aktualnie widocznych wierszy w gridzie
+* Kolonie ktorych juz nie widac powinny byc zaznaczone w notes do planets, ale nie w colonies
+* statek w systemie z nazwana planeta traktuj tak samo jak gdyby byla ona zasiedlona
+* poprawic kod do wyliczania recycle value - sa drobne roznice
+* maintenance as integer value / doublecheck 
+* W colonies sortowanie po size w obrebie rasy
