@@ -603,26 +603,36 @@ void Form1::LoadPlugins()
         if( f->Name->ToLower() == "fhui.datalib.dll" )
             continue;
 
-        Assembly ^assembly = Assembly::LoadFrom(f->FullName);
-
-        // Walk through each type in the assembly
-        for each( Type ^type in assembly->GetTypes() )
+        try
         {
-            if( type->IsClass && type->IsPublic )
-            {
-                if( type->GetInterface("FHUI.IPluginBase") )
-                {
-                    IPluginBase^ plugin = safe_cast<IPluginBase^>(Activator::CreateInstance(type));
-                    
-                    IGridPlugin^ gridPlugin = dynamic_cast<IGridPlugin^>(plugin);
-                    if( gridPlugin )
-                        m_GridPlugins->Add(gridPlugin);
+            Assembly ^assembly = Assembly::LoadFrom(f->FullName);
 
-                    IOrdersPlugin^ ordersPlugin = dynamic_cast<IOrdersPlugin^>(plugin);
-                    if( ordersPlugin )
-                        m_OrdersPlugins->Add(ordersPlugin);
+            // Walk through each type in the assembly
+            for each( Type ^type in assembly->GetTypes() )
+            {
+                if( type->IsClass && type->IsPublic )
+                {
+                    if( type->GetInterface("FHUI.IPluginBase") )
+                    {
+                        IPluginBase^ plugin = safe_cast<IPluginBase^>(Activator::CreateInstance(type));
+                        
+                        IGridPlugin^ gridPlugin = dynamic_cast<IGridPlugin^>(plugin);
+                        if( gridPlugin )
+                            m_GridPlugins->Add(gridPlugin);
+
+                        IOrdersPlugin^ ordersPlugin = dynamic_cast<IOrdersPlugin^>(plugin);
+                        if( ordersPlugin )
+                            m_OrdersPlugins->Add(ordersPlugin);
+                    }
                 }
             }
+        }
+        catch( Exception ^ex )
+        {
+            throw gcnew FHUIPluginException(
+                String::Format("Error occured while loading plugin: {0}\r\n Error message: {1}",
+                    f->Name, ex->Message),
+                ex );
         }
     }
 }

@@ -29,4 +29,12 @@ public:
     FHUIDataImplException(String ^err, Exception ^ex) : Exception(err, ex) {}
 };
 
+public ref class FHUIPluginException : public Exception
+{
+public:
+    FHUIPluginException() : Exception() {}
+    FHUIPluginException(String ^err) : Exception(err) {}
+    FHUIPluginException(String ^err, Exception ^ex) : Exception(err, ex) {}
+};
+
 } // namespace FHUI
