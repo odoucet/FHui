@@ -254,6 +254,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\source\Orders.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\source\Report.cpp"
 					>
 				</File>

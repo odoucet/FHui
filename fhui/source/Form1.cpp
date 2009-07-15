@@ -27,7 +27,8 @@ void Form1::LoadGameData()
         InitControls();
         LoadPlugins();
         ScanReports();
-        LoadCommands();
+        GenerateTemplate();
+        LoadCommands(); // TBD: Do czego to ma sluzyc?
     }
     catch( Exception ^e )
     {
