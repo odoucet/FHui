@@ -3,6 +3,7 @@
 using namespace System;
 using namespace System::Data;
 using namespace System::Windows::Forms;
+using namespace System::Collections::Generic;
 
 namespace FHUI
 {
@@ -56,12 +57,13 @@ public:
 public interface class IOrdersPlugin : public IPluginBase
 {
 public:
-    String^     GenerateCombat(StarSystem^);
-    String^     GeneratePreDeparture();
-    String^     GenerateJumps();
-    String^     GenerateProduction(Colony^);
-    String^     GeneratePostArrival();
-    String^     GenerateStrikes();
+    List<String^>^  GenerateCombat(StarSystem^);
+    List<String^>^  GeneratePreDeparture(Ship^);
+    List<String^>^  GeneratePreDeparture(Colony^);
+    List<String^>^  GenerateJumps(Ship^);
+    List<String^>^  GenerateProduction(Colony^);
+    List<String^>^  GeneratePostArrival(Ship^);
+    List<String^>^  GenerateStrikes(StarSystem^);
 };
 
 // ---------------------------------------------------------

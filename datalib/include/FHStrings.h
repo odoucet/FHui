@@ -13,6 +13,7 @@ public ref class FHStrings
 {
 public:
     static String^          SpRelToString(SPRelType);
+    static String^          TechToString(TechType);
 
     static String^          GasToString(GasType gas);
     static GasType          GasFromString(String^ gas);

@@ -22,6 +22,24 @@ String^ FHStrings::SpRelToString(SPRelType rel)
     }
 }
 
+String^ FHStrings::TechToString(TechType tech)
+{
+    switch( tech )
+    {
+    case TECH_MI:       return "MI";
+    case TECH_MA:       return "MA";
+    case TECH_ML:       return "ML";
+    case TECH_GV:       return "GV";
+    case TECH_LS:       return "LS";
+    case TECH_BI:       return "BI";
+    default:
+        {
+            int t = tech;
+            throw gcnew FHUIDataIntegrityException(String::Format("Invalid tech type: {0}", t));
+        }
+    }
+}
+
 struct GasStr
 {
     GasType     type;

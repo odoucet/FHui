@@ -528,28 +528,7 @@ void Form1::DisplayReport()
         String ^sel = RepTurnNr->SelectedItem->ToString();
         int key = int::Parse(sel->Substring(5));    // Skip 'Turn '
 
-        String ^text = m_Reports[key];
-        // --- temporary ---
-        for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
-        {
-            text += "---------------------------------------\r\n";
-            plugin->SetGameData(m_GameData);
-            text += plugin->GeneratePreDeparture();
-            text += plugin->GenerateJumps();
-            text += plugin->GenerateProduction(nullptr);
-            for each( Colony ^colony in m_GameData->GetSpecies()->Colonies )
-                if( colony->PlanetType == PLANET_COLONY_MINING ||
-                    colony->PlanetType == PLANET_COLONY_RESORT )
-                    text += plugin->GenerateProduction(colony);
-            for each( Colony ^colony in m_GameData->GetSpecies()->Colonies )
-                if( colony->PlanetType == PLANET_COLONY )
-                    text += plugin->GenerateProduction(colony);
-            for each( Colony ^colony in m_GameData->GetSpecies()->Colonies )
-                if( colony->PlanetType == PLANET_HOME )
-                    text += plugin->GenerateProduction(colony);
-        }
-        // --- end temporary ---
-        RepText->Text = text;
+        RepText->Text = m_Reports[key];
     }
     else if( RepModeCommands->Checked )
     {
