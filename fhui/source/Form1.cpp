@@ -158,6 +158,8 @@ void Form1::InitData()
     m_Reports   = gcnew SortedList<int, String^>;
     m_RepFiles  = gcnew SortedList<int, String^>;
     m_CmdFiles  = gcnew SortedList<String^, String^>;
+
+    m_OrderList = gcnew List<String^>;
 }
 
 void Form1::InitRefLists()

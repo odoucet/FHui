@@ -89,6 +89,8 @@ namespace FHUI {
         SortedList<int, String^>       ^m_RepFiles;
         SortedList<String^, String^>   ^m_CmdFiles;
 
+        List<String^>      ^m_OrderList;
+
         array<String^>     ^m_RepTurnNrData;
 
         List<String^>      ^m_RefListSystemsXYZ;
@@ -98,8 +100,6 @@ namespace FHUI {
 
         bool                m_HadException;
         bool               ^m_bGridUpdateEnabled;
-    private: System::Windows::Forms::RichTextBox^  OrderTemplate;
-    protected: 
 
         System::Windows::Forms::ToolTip^    m_GridToolTip;
 
@@ -178,8 +178,7 @@ namespace FHUI {
         void        GeneratePostArrival();
         void        GenerateStrikes();
 
-        void        AddTemplateLine(String^ line);
-
+        void        GenerateCombatInfo(StarSystem^);
         // ==================================================
         // --- MAP ---
         void        MapSetup();
@@ -215,6 +214,7 @@ namespace FHUI {
         // Auto-generated code below this point
         // --------------------------------------------------
 
+    private: System::Windows::Forms::RichTextBox^  OrderTemplate;
     private: System::Windows::Forms::TabPage^  TabUtils;
 
     private: System::Windows::Forms::TabPage^  TabOrders;
@@ -2566,6 +2566,8 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->OrderTemplate->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom) 
                 | System::Windows::Forms::AnchorStyles::Left) 
                 | System::Windows::Forms::AnchorStyles::Right));
+            this->OrderTemplate->Font = (gcnew System::Drawing::Font(L"Courier New", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+                static_cast<System::Byte>(0)));
             this->OrderTemplate->Location = System::Drawing::Point(10, 10);
             this->OrderTemplate->Name = L"OrderTemplate";
             this->OrderTemplate->ReadOnly = true;

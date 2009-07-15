@@ -56,7 +56,7 @@ public:
 public interface class IOrdersPlugin : public IPluginBase
 {
 public:
-    String^     GenerateCombat();
+    String^     GenerateCombat(StarSystem^);
     String^     GeneratePreDeparture();
     String^     GenerateJumps();
     String^     GenerateProduction(Colony^);
