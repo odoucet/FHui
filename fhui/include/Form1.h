@@ -432,34 +432,34 @@ private: System::Windows::Forms::Label^  SystemsRef;
             System::Windows::Forms::Label^  label14;
             System::Windows::Forms::Label^  label2;
             System::Windows::Forms::Label^  label17;
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle25 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle26 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle13 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle14 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::SplitContainer^  splitContainer3;
             System::Windows::Forms::Label^  label1;
             System::Windows::Forms::Label^  label3;
             System::Windows::Forms::Label^  label4;
             System::Windows::Forms::Label^  label18;
             System::Windows::Forms::Label^  label20;
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle27 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle28 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle15 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle16 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::Label^  label8;
             System::Windows::Forms::Label^  label19;
             System::Windows::Forms::Label^  label21;
             System::Windows::Forms::Label^  label22;
             System::Windows::Forms::Label^  label24;
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle29 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle30 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle17 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle18 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::Label^  label10;
             System::Windows::Forms::Label^  label23;
             System::Windows::Forms::Label^  label27;
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle31 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle32 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle33 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle34 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle19 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle20 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle21 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle22 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::Label^  label5;
             System::Windows::Forms::Label^  label6;
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle35 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle36 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle23 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle24 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             this->RepModeCommands = (gcnew System::Windows::Forms::RadioButton());
             this->RepModeReports = (gcnew System::Windows::Forms::RadioButton());
             this->RepTurnNr = (gcnew System::Windows::Forms::ComboBox());
@@ -568,6 +568,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->AliensFiltRelA = (gcnew System::Windows::Forms::CheckBox());
             this->AliensGrid = (gcnew System::Windows::Forms::DataGridView());
             this->TabOrders = (gcnew System::Windows::Forms::TabPage());
+            this->OrderTemplate = (gcnew System::Windows::Forms::RichTextBox());
             this->TabUtils = (gcnew System::Windows::Forms::TabPage());
             this->TabAbout = (gcnew System::Windows::Forms::TabPage());
             this->TextAbout = (gcnew System::Windows::Forms::TextBox());
@@ -577,7 +578,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->comboBox2 = (gcnew System::Windows::Forms::ComboBox());
             this->dataGridView1 = (gcnew System::Windows::Forms::DataGridView());
             this->BtnTooltip = (gcnew System::Windows::Forms::ToolTip(this->components));
-            this->OrderTemplate = (gcnew System::Windows::Forms::RichTextBox());
             splitContainer1 = (gcnew System::Windows::Forms::SplitContainer());
             TopSplitCont = (gcnew System::Windows::Forms::SplitContainer());
             splitContainer7 = (gcnew System::Windows::Forms::SplitContainer());
@@ -742,6 +742,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->RepText->Font = (gcnew System::Drawing::Font(L"Courier New", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
             this->RepText->Location = System::Drawing::Point(0, 0);
+            this->RepText->MaxLength = 65536;
             this->RepText->Multiline = true;
             this->RepText->Name = L"RepText";
             this->RepText->ReadOnly = true;
@@ -1418,30 +1419,30 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->SystemsGrid->AllowUserToAddRows = false;
             this->SystemsGrid->AllowUserToDeleteRows = false;
             this->SystemsGrid->AllowUserToOrderColumns = true;
-            this->SystemsGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
+            this->SystemsGrid->AutoSizeRowsMode = System::Windows::Forms::DataGridViewAutoSizeRowsMode::AllCells;
             this->SystemsGrid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-            dataGridViewCellStyle25->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle25->BackColor = System::Drawing::SystemColors::Window;
-            dataGridViewCellStyle25->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle13->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle13->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle13->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle25->ForeColor = System::Drawing::SystemColors::ControlText;
-            dataGridViewCellStyle25->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle25->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle25->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
-            this->SystemsGrid->DefaultCellStyle = dataGridViewCellStyle25;
+            dataGridViewCellStyle13->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle13->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle13->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle13->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->SystemsGrid->DefaultCellStyle = dataGridViewCellStyle13;
             this->SystemsGrid->Dock = System::Windows::Forms::DockStyle::Fill;
             this->SystemsGrid->Location = System::Drawing::Point(0, 0);
             this->SystemsGrid->Name = L"SystemsGrid";
             this->SystemsGrid->ReadOnly = true;
-            dataGridViewCellStyle26->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle26->BackColor = System::Drawing::SystemColors::Control;
-            dataGridViewCellStyle26->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle14->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle14->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle14->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle26->ForeColor = System::Drawing::SystemColors::WindowText;
-            dataGridViewCellStyle26->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle26->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle26->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
-            this->SystemsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle26;
+            dataGridViewCellStyle14->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle14->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle14->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle14->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->SystemsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle14;
             this->SystemsGrid->RowHeadersWidth = 4;
             this->SystemsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
             this->SystemsGrid->ShowCellToolTips = false;
@@ -1732,30 +1733,30 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->PlanetsGrid->AllowUserToOrderColumns = true;
             this->PlanetsGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
             this->PlanetsGrid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-            dataGridViewCellStyle27->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle27->BackColor = System::Drawing::SystemColors::Window;
-            dataGridViewCellStyle27->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle15->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle15->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle15->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle27->ForeColor = System::Drawing::SystemColors::ControlText;
-            dataGridViewCellStyle27->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle27->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle27->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
-            this->PlanetsGrid->DefaultCellStyle = dataGridViewCellStyle27;
+            dataGridViewCellStyle15->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle15->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle15->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle15->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->PlanetsGrid->DefaultCellStyle = dataGridViewCellStyle15;
             this->PlanetsGrid->Dock = System::Windows::Forms::DockStyle::Fill;
             this->PlanetsGrid->Location = System::Drawing::Point(0, 0);
             this->PlanetsGrid->Name = L"PlanetsGrid";
             this->PlanetsGrid->ReadOnly = true;
-            dataGridViewCellStyle28->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle28->BackColor = System::Drawing::SystemColors::Control;
-            dataGridViewCellStyle28->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle16->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle16->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle16->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle28->ForeColor = System::Drawing::SystemColors::WindowText;
-            dataGridViewCellStyle28->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle28->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle28->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
-            this->PlanetsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle28;
+            dataGridViewCellStyle16->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle16->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle16->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle16->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->PlanetsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle16;
             this->PlanetsGrid->RowHeadersWidth = 4;
-            this->PlanetsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
+            this->PlanetsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
             this->PlanetsGrid->ShowCellToolTips = false;
             this->PlanetsGrid->Size = System::Drawing::Size(683, 480);
             this->PlanetsGrid->TabIndex = 0;
@@ -2029,30 +2030,30 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ColoniesGrid->AllowUserToOrderColumns = true;
             this->ColoniesGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
             this->ColoniesGrid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-            dataGridViewCellStyle29->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle29->BackColor = System::Drawing::SystemColors::Window;
-            dataGridViewCellStyle29->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle17->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle17->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle17->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle29->ForeColor = System::Drawing::SystemColors::ControlText;
-            dataGridViewCellStyle29->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle29->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle29->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
-            this->ColoniesGrid->DefaultCellStyle = dataGridViewCellStyle29;
+            dataGridViewCellStyle17->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle17->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle17->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle17->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->ColoniesGrid->DefaultCellStyle = dataGridViewCellStyle17;
             this->ColoniesGrid->Dock = System::Windows::Forms::DockStyle::Fill;
             this->ColoniesGrid->Location = System::Drawing::Point(0, 0);
             this->ColoniesGrid->Name = L"ColoniesGrid";
             this->ColoniesGrid->ReadOnly = true;
-            dataGridViewCellStyle30->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle30->BackColor = System::Drawing::SystemColors::Control;
-            dataGridViewCellStyle30->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle18->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle18->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle18->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle30->ForeColor = System::Drawing::SystemColors::WindowText;
-            dataGridViewCellStyle30->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle30->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle30->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
-            this->ColoniesGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle30;
+            dataGridViewCellStyle18->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle18->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle18->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle18->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->ColoniesGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle18;
             this->ColoniesGrid->RowHeadersWidth = 4;
-            this->ColoniesGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
+            this->ColoniesGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
             this->ColoniesGrid->ShowCellToolTips = false;
             this->ColoniesGrid->Size = System::Drawing::Size(683, 480);
             this->ColoniesGrid->TabIndex = 0;
@@ -2373,30 +2374,30 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ShipsGrid->AllowUserToOrderColumns = true;
             this->ShipsGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
             this->ShipsGrid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-            dataGridViewCellStyle31->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle31->BackColor = System::Drawing::SystemColors::Window;
-            dataGridViewCellStyle31->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle19->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle19->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle19->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle31->ForeColor = System::Drawing::SystemColors::ControlText;
-            dataGridViewCellStyle31->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle31->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle31->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
-            this->ShipsGrid->DefaultCellStyle = dataGridViewCellStyle31;
+            dataGridViewCellStyle19->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle19->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle19->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle19->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->ShipsGrid->DefaultCellStyle = dataGridViewCellStyle19;
             this->ShipsGrid->Dock = System::Windows::Forms::DockStyle::Fill;
             this->ShipsGrid->Location = System::Drawing::Point(0, 0);
             this->ShipsGrid->Name = L"ShipsGrid";
             this->ShipsGrid->ReadOnly = true;
-            dataGridViewCellStyle32->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle32->BackColor = System::Drawing::SystemColors::Control;
-            dataGridViewCellStyle32->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle20->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle20->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle20->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle32->ForeColor = System::Drawing::SystemColors::WindowText;
-            dataGridViewCellStyle32->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle32->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle32->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
-            this->ShipsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle32;
+            dataGridViewCellStyle20->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle20->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle20->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle20->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->ShipsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle20;
             this->ShipsGrid->RowHeadersWidth = 4;
-            this->ShipsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
+            this->ShipsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
             this->ShipsGrid->ShowCellToolTips = false;
             this->ShipsGrid->Size = System::Drawing::Size(683, 480);
             this->ShipsGrid->TabIndex = 0;
@@ -2517,30 +2518,30 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->AliensGrid->AllowUserToOrderColumns = true;
             this->AliensGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
             this->AliensGrid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-            dataGridViewCellStyle33->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle33->BackColor = System::Drawing::SystemColors::Window;
-            dataGridViewCellStyle33->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle21->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle21->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle21->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle33->ForeColor = System::Drawing::SystemColors::ControlText;
-            dataGridViewCellStyle33->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle33->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle33->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
-            this->AliensGrid->DefaultCellStyle = dataGridViewCellStyle33;
+            dataGridViewCellStyle21->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle21->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle21->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle21->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->AliensGrid->DefaultCellStyle = dataGridViewCellStyle21;
             this->AliensGrid->Dock = System::Windows::Forms::DockStyle::Fill;
             this->AliensGrid->Location = System::Drawing::Point(0, 0);
             this->AliensGrid->Name = L"AliensGrid";
             this->AliensGrid->ReadOnly = true;
-            dataGridViewCellStyle34->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle34->BackColor = System::Drawing::SystemColors::Control;
-            dataGridViewCellStyle34->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle22->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle22->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle22->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle34->ForeColor = System::Drawing::SystemColors::WindowText;
-            dataGridViewCellStyle34->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle34->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle34->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
-            this->AliensGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle34;
+            dataGridViewCellStyle22->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle22->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle22->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle22->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->AliensGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle22;
             this->AliensGrid->RowHeadersWidth = 4;
-            this->AliensGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
+            this->AliensGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
             this->AliensGrid->ShowCellToolTips = false;
             this->AliensGrid->Size = System::Drawing::Size(683, 533);
             this->AliensGrid->TabIndex = 0;
@@ -2559,6 +2560,18 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabOrders->TabIndex = 9;
             this->TabOrders->Text = L"Orders";
             this->TabOrders->UseVisualStyleBackColor = true;
+            // 
+            // OrderTemplate
+            // 
+            this->OrderTemplate->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom) 
+                | System::Windows::Forms::AnchorStyles::Left) 
+                | System::Windows::Forms::AnchorStyles::Right));
+            this->OrderTemplate->Location = System::Drawing::Point(10, 10);
+            this->OrderTemplate->Name = L"OrderTemplate";
+            this->OrderTemplate->ReadOnly = true;
+            this->OrderTemplate->Size = System::Drawing::Size(663, 543);
+            this->OrderTemplate->TabIndex = 0;
+            this->OrderTemplate->Text = L"";
             // 
             // TabUtils
             // 
@@ -2654,44 +2667,32 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->dataGridView1->AllowUserToOrderColumns = true;
             this->dataGridView1->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
             this->dataGridView1->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-            dataGridViewCellStyle35->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle35->BackColor = System::Drawing::SystemColors::Window;
-            dataGridViewCellStyle35->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle23->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle23->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle23->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle35->ForeColor = System::Drawing::SystemColors::ControlText;
-            dataGridViewCellStyle35->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle35->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle35->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
-            this->dataGridView1->DefaultCellStyle = dataGridViewCellStyle35;
+            dataGridViewCellStyle23->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle23->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle23->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle23->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->dataGridView1->DefaultCellStyle = dataGridViewCellStyle23;
             this->dataGridView1->Dock = System::Windows::Forms::DockStyle::Fill;
             this->dataGridView1->Location = System::Drawing::Point(0, 0);
             this->dataGridView1->Name = L"dataGridView1";
             this->dataGridView1->ReadOnly = true;
-            dataGridViewCellStyle36->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle36->BackColor = System::Drawing::SystemColors::Control;
-            dataGridViewCellStyle36->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle24->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle24->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle24->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle36->ForeColor = System::Drawing::SystemColors::WindowText;
-            dataGridViewCellStyle36->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle36->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle36->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
-            this->dataGridView1->RowHeadersDefaultCellStyle = dataGridViewCellStyle36;
+            dataGridViewCellStyle24->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle24->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle24->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle24->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->dataGridView1->RowHeadersDefaultCellStyle = dataGridViewCellStyle24;
             this->dataGridView1->RowHeadersWidth = 4;
             this->dataGridView1->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
             this->dataGridView1->Size = System::Drawing::Size(569, 504);
             this->dataGridView1->TabIndex = 0;
-            // 
-            // OrderTemplate
-            // 
-            this->OrderTemplate->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom) 
-                | System::Windows::Forms::AnchorStyles::Left) 
-                | System::Windows::Forms::AnchorStyles::Right));
-            this->OrderTemplate->Location = System::Drawing::Point(10, 10);
-            this->OrderTemplate->Name = L"OrderTemplate";
-            this->OrderTemplate->ReadOnly = true;
-            this->OrderTemplate->Size = System::Drawing::Size(663, 543);
-            this->OrderTemplate->TabIndex = 0;
-            this->OrderTemplate->Text = L"";
             // 
             // Form1
             // 

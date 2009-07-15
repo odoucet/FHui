@@ -398,9 +398,12 @@ void GridFilter::SetRefShip()
     Ship ^ship = GetShipFromRefList(CtrlRefShip);
     if( ship )
     {
-        int refVal = Decimal::ToInt32(CtrlShipAge->Value);
-        if( refVal != ship->Age )
-            CtrlShipAge->Value = ship->Age;
+        if( CtrlShipAge )
+        {
+            int refVal = Decimal::ToInt32(CtrlShipAge->Value);
+            if( refVal != ship->Age )
+                CtrlShipAge->Value = ship->Age;
+        }
 
         if( SelectRefSystemFromRefShip &&
             ship->System != RefSystem )
