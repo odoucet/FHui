@@ -109,25 +109,6 @@ Planet^ StarSystem::GetPlanet(int plNum)
     return nullptr;
 }
 
-double StarSystem::CalcDistance(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo)
-{
-    int dx = Math::Abs(xFrom - xTo);
-    int dy = Math::Abs(yFrom - yTo);
-    int dz = Math::Abs(zFrom - zTo);
-    return Math::Sqrt(dx * dx + dy * dy + dz * dz);
-}
-
-double StarSystem::CalcMishap(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo, int gv, int age)
-{
-    if( gv == 0 )
-        throw gcnew FHUIDataIntegrityException("GV must not be 0 for mishap calculation!");
-
-    double dist = CalcDistance(xFrom, yFrom, zFrom, xTo, yTo, zTo);
-    if( dist == 0 )
-        return 0.0;
-    return (dist * dist) / gv + (age * 2.0);
-}
-
 String^ StarSystem::GenerateScan()
 {
     String ^scan = String::Format(
@@ -422,7 +403,7 @@ void Ship::CalculateCapacity()
     switch( Type )
     {
     case SHIP_BAS:  Capacity = Size / 1000; break;
-    case SHIP_TR:   Capacity = (10 + (Size / 2)) * Size; break;
+    case SHIP_TR:   Capacity = Calculators::TransportCapacity(Size); break;
     case SHIP_PB:   Capacity = 1;       break;
     case SHIP_CT:   Capacity = 2;       break;
     case SHIP_ES:   Capacity = 5;       break;

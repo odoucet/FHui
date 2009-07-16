@@ -3,6 +3,7 @@
 #include "enums.h"
 #include "IGridData.h"
 #include "FHStrings.h"
+#include "Calculators.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -210,13 +211,10 @@ public:
     virtual int         GetFilterNumColonies() override { return Colonies->Count; }
     // --------------------------------------------------
 
-    static double       CalcDistance(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo);
-    static double       CalcMishap(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo, int gv, int age);
-
-    double      CalcDistance(StarSystem ^s)                         { return CalcDistance(X, Y, Z, s->X, s->Y, s->Z); }
-    double      CalcMishap(StarSystem ^s, int gv, int age)          { return CalcMishap(X, Y, Z, s->X, s->Y, s->Z, gv, age); }
-    double      CalcDistance(int x, int y, int z)                   { return CalcDistance(X, Y, Z, x, y, z); }
-    double      CalcMishap(int x, int y, int z, int gv, int age)    { return CalcMishap(X, Y, Z, x, y, z, gv, age); }
+    double      CalcDistance(StarSystem ^s)                         { return Calculators::Distance(X, Y, Z, s->X, s->Y, s->Z); }
+    double      CalcMishap(StarSystem ^s, int gv, int age)          { return Calculators::Mishap(X, Y, Z, s->X, s->Y, s->Z, gv, age); }
+    double      CalcDistance(int x, int y, int z)                   { return Calculators::Distance(X, Y, Z, x, y, z); }
+    double      CalcMishap(int x, int y, int z, int gv, int age)    { return Calculators::Mishap(X, Y, Z, x, y, z, gv, age); }
 
     Planet^     GetPlanet(int plNum);
 
@@ -400,8 +398,8 @@ public:
     String^         PrintRefListEntry();
 
     int             GetMaintenanceCost();
-    int             GetUpgradeCost()        { return Age * OriginalCost / 40; }
-    int             GetRecycleValue()       { return (int)Math::Floor(((3 * OriginalCost) / 4.0) * ((60 - Age) / 50.0)); }
+    int             GetUpgradeCost()        { return Calculators::ShipUpgradeCost(Age, OriginalCost); }
+    int             GetRecycleValue()       { return Calculators::ShipRecycleValue(Age, OriginalCost); }
 
     void            CalculateCapacity();
 

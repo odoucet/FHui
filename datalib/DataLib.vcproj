@@ -206,6 +206,10 @@
 				UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 				>
 				<File
+					RelativePath=".\include\Calculators.h"
+					>
+				</File>
+				<File
 					RelativePath=".\include\exceptions.h"
 					>
 				</File>
@@ -237,6 +241,10 @@
 				>
 				<File
 					RelativePath=".\Source\AssemblyInfo.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\Calculators.cpp"
 					>
 				</File>
 				<File

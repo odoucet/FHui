@@ -5,6 +5,8 @@ Major new features and bug fixes will be listed here.
 
 FHUI build ??
 + Context menu added on grids after right mouse button click.
++ Assumed tech levels toolbar added. It is used for calculating colony balance,
+  jump mishap probability, and more in the future.
 
 FHUI build 70
 * Fixed misreporting alien colony size by 0.1

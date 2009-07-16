@@ -1377,14 +1377,14 @@ void Form1::ShipsSetup()
         if( m_ShipsFilter->Filter(ship) )
             continue;
 
-        double distance = StarSystem::CalcDistance(
+        double distance = Calculators::Distance(
             ship->X,
             ship->Y,
             ship->Z,
             m_ShipsFilter->RefSystem->X,
             m_ShipsFilter->RefSystem->Y,
             m_ShipsFilter->RefSystem->Z);
-        double mishap = StarSystem::CalcMishap(
+        double mishap = Calculators::Mishap(
             ship->X,
             ship->Y,
             ship->Z,
