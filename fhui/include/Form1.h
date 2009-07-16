@@ -170,7 +170,6 @@ namespace FHUI {
         // ==================================================
         // --- ORDER TEMPLATE ---
         void        GenerateTemplate();
-        void        AddOrders(List<String^> ^orders);
 
         void        GenerateCombat();
         void        GeneratePreDeparture();

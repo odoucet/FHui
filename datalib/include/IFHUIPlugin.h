@@ -57,13 +57,13 @@ public:
 public interface class IOrdersPlugin : public IPluginBase
 {
 public:
-    List<String^>^  GenerateCombat(StarSystem^);
-    List<String^>^  GeneratePreDeparture(Ship^);
-    List<String^>^  GeneratePreDeparture(Colony^);
-    List<String^>^  GenerateJumps(Ship^);
-    List<String^>^  GenerateProduction(Colony^);
-    List<String^>^  GeneratePostArrival(Ship^);
-    List<String^>^  GenerateStrikes(StarSystem^);
+    void        GenerateCombat(List<String^>^, StarSystem^);
+    void        GeneratePreDeparture(List<String^>^, Ship^);
+    void        GeneratePreDeparture(List<String^>^, Colony^);
+    void        GenerateJumps(List<String^>^, Ship^);
+    void        GenerateProduction(List<String^>^, Colony^);
+    void        GeneratePostArrival(List<String^>^, Ship^);
+    void        GenerateStrikes(List<String^>^, StarSystem^);
 };
 
 // ---------------------------------------------------------
