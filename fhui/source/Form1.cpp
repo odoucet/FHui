@@ -27,7 +27,6 @@ void Form1::LoadGameData()
         InitControls();
         LoadPlugins();
         ScanReports();
-        GenerateTemplate();
         LoadCommands(); // TBD: Do czego to ma sluzyc?
     }
     catch( Exception ^e )
@@ -55,7 +54,7 @@ void Form1::InitControls()
     filter->CtrlRefXYZ      = SystemsRefXYZ;
     filter->CtrlRefColony   = SystemsRefColony;
     filter->CtrlRefShip     = SystemsRefShip;
-    filter->CtrlGV          = SystemsGV;
+    filter->CtrlGV          = TechGV;
     filter->CtrlShipAge     = SystemsShipAge;
     filter->CtrlMaxMishap   = SystemsMaxMishap;
     filter->CtrlMaxLSN      = SystemsMaxLSN;
@@ -76,7 +75,7 @@ void Form1::InitControls()
     filter->CtrlRefXYZ      = PlanetsRefXYZ;
     filter->CtrlRefColony   = PlanetsRefColony;
     filter->CtrlRefShip     = PlanetsRefShip;
-    filter->CtrlGV          = PlanetsGV;
+    filter->CtrlGV          = TechGV;
     filter->CtrlShipAge     = PlanetsShipAge;
     filter->CtrlMaxMishap   = PlanetsMaxMishap;
     filter->CtrlMaxLSN      = PlanetsMaxLSN;
@@ -97,7 +96,7 @@ void Form1::InitControls()
     filter->CtrlRefXYZ      = ColoniesRefXYZ;
     filter->CtrlRefColony   = ColoniesRefColony;
     filter->CtrlRefShip     = ColoniesRefShip;
-    filter->CtrlGV          = ColoniesGV;
+    filter->CtrlGV          = TechGV;
     filter->CtrlShipAge     = ColoniesShipAge;
     filter->CtrlMaxMishap   = ColoniesMaxMishap;
     filter->CtrlMaxLSN      = ColoniesMaxLSN;
@@ -117,7 +116,7 @@ void Form1::InitControls()
     filter->CtrlRefXYZ      = ShipsRefXYZ;
     filter->CtrlRefColony   = ShipsRefColony;
     filter->CtrlRefShip     = ShipsRefShip;
-    filter->CtrlGV          = ShipsGV;
+    filter->CtrlGV          = TechGV;
     filter->CtrlMaxMishap   = ShipsMaxMishap;
     filter->CtrlFiltOwnO    = ShipsFiltOwnO;
     filter->CtrlFiltOwnN    = ShipsFiltOwnN;
@@ -218,11 +217,92 @@ void Form1::UpdateControls()
 
     RepModeReports->Checked = true;
 
+    TechLevelsResetToCurrent();
+
     SystemsUpdateControls();
     PlanetsUpdateControls();
     ColoniesUpdateControls();
     ShipsUpdateControls();
     AliensUpdateControls();
+}
+
+void Form1::UpdateTabs()
+{
+    if( MenuTabs->SelectedIndex == TabIndex::Map )
+    {
+        MapDraw();
+    }
+
+    if( MenuTabs->SelectedIndex == TabIndex::Orders )
+    {
+        GenerateTemplate();
+    }
+}
+
+void Form1::TechLevelsResetToCurrent()
+{
+    Alien ^sp = m_GameData->GetSpecies();
+
+    // Inhibit grid update
+    *m_bGridUpdateEnabled = false;
+
+    TechMI->Minimum = Math::Max(1, sp->TechLevels[TECH_MI]);
+    TechMA->Minimum = Math::Max(1, sp->TechLevels[TECH_MA]);
+    TechML->Minimum = Math::Max(1, sp->TechLevels[TECH_ML]);
+    TechGV->Minimum = Math::Max(1, sp->TechLevels[TECH_GV]);
+    TechLS->Minimum = Math::Max(1, sp->TechLevels[TECH_LS]);
+    TechBI->Minimum = Math::Max(1, sp->TechLevels[TECH_BI]);
+
+    TechMI->Value = sp->TechLevelsAssumed[TECH_MI] = Math::Max(1, sp->TechLevels[TECH_MI]);
+    TechMA->Value = sp->TechLevelsAssumed[TECH_MA] = Math::Max(1, sp->TechLevels[TECH_MA]);
+    TechML->Value = sp->TechLevelsAssumed[TECH_ML] = Math::Max(1, sp->TechLevels[TECH_ML]);
+    TechGV->Value = sp->TechLevelsAssumed[TECH_GV] = Math::Max(1, sp->TechLevels[TECH_GV]);
+    TechLS->Value = sp->TechLevelsAssumed[TECH_LS] = Math::Max(1, sp->TechLevels[TECH_LS]);
+    TechBI->Value = sp->TechLevelsAssumed[TECH_BI] = Math::Max(1, sp->TechLevels[TECH_BI]);
+
+    *m_bGridUpdateEnabled = true;
+}
+
+void Form1::TechLevelsResetToTaught()
+{
+    Alien ^sp = m_GameData->GetSpecies();
+
+    // Inhibit grid update
+    *m_bGridUpdateEnabled = false;
+
+    TechMI->Value = sp->TechLevelsAssumed[TECH_MI] = Math::Max(1, sp->TechLevelsTeach[TECH_MI]);
+    TechMA->Value = sp->TechLevelsAssumed[TECH_MA] = Math::Max(1, sp->TechLevelsTeach[TECH_MA]);
+    TechML->Value = sp->TechLevelsAssumed[TECH_ML] = Math::Max(1, sp->TechLevelsTeach[TECH_ML]);
+    TechGV->Value = sp->TechLevelsAssumed[TECH_GV] = Math::Max(1, sp->TechLevelsTeach[TECH_GV]);
+    TechLS->Value = sp->TechLevelsAssumed[TECH_LS] = Math::Max(1, sp->TechLevelsTeach[TECH_LS]);
+    TechBI->Value = sp->TechLevelsAssumed[TECH_BI] = Math::Max(1, sp->TechLevelsTeach[TECH_BI]);
+
+    *m_bGridUpdateEnabled = true;
+}
+
+void Form1::TechLevelsChanged()
+{
+    Alien ^sp = m_GameData->GetSpecies();
+
+    sp->TechLevelsAssumed[TECH_MI] = Decimal::ToInt32(TechMI->Value);
+    sp->TechLevelsAssumed[TECH_MA] = Decimal::ToInt32(TechMA->Value);
+    sp->TechLevelsAssumed[TECH_ML] = Decimal::ToInt32(TechML->Value);
+    sp->TechLevelsAssumed[TECH_GV] = Decimal::ToInt32(TechGV->Value);
+    sp->TechLevelsAssumed[TECH_LS] = Decimal::ToInt32(TechLS->Value);
+    sp->TechLevelsAssumed[TECH_BI] = Decimal::ToInt32(TechBI->Value);
+
+    if( *m_bGridUpdateEnabled )
+    {
+        m_SystemsFilter->Update();
+        m_PlanetsFilter->Update();
+        m_ColoniesFilter->Update();
+        m_ShipsFilter->Update();
+
+        if( MenuTabs->SelectedIndex == TabIndex::Map )
+            MapDraw();
+        if( MenuTabs->SelectedIndex == TabIndex::Orders )
+            GenerateTemplate();
+    }
 }
 
 void Form1::ShowException(Exception ^e)
@@ -394,6 +474,7 @@ void Form1::DisplayTurn()
             BuildInfo::Version );
 
         MapSetup();
+        UpdateTabs();
     }
     catch( Exception ^e )
     {
@@ -574,6 +655,7 @@ void Form1::LoadCommands()
 
 void Form1::LoadPlugins()
 {
+    m_AllPlugins = gcnew List<IPluginBase^>;
     m_GridPlugins = gcnew List<IGridPlugin^>;
     m_OrdersPlugins = gcnew List<IOrdersPlugin^>;
 
@@ -596,6 +678,7 @@ void Form1::LoadPlugins()
                     if( type->GetInterface("FHUI.IPluginBase") )
                     {
                         IPluginBase^ plugin = safe_cast<IPluginBase^>(Activator::CreateInstance(type));
+                        m_AllPlugins->Add(plugin);
                         
                         IGridPlugin^ gridPlugin = dynamic_cast<IGridPlugin^>(plugin);
                         if( gridPlugin )
@@ -778,8 +861,6 @@ void Form1::SystemsUpdateControls()
 
     m_SystemsFilter->GameData       = m_GameData;
 
-    SystemsGV->Value                = Math::Max(1, m_GameData->GetSpecies()->TechLevels[TECH_GV]);
-
     SystemsRefXYZ->DataSource       = m_RefListSystemsXYZ;
     SystemsRefHome->DataSource      = m_RefListHomes;
     SystemsRefColony->DataSource    = m_RefListColonies;
@@ -815,7 +896,7 @@ void Form1::SystemsSetup()
 
     DataColumn ^colNotes    = dataTable->Columns->Add("Notes",      String::typeid );
 
-    int gv  = Decimal::ToInt32(SystemsGV->Value);
+    int gv  = Decimal::ToInt32(TechGV->Value);
     int age = Decimal::ToInt32(SystemsShipAge->Value);
 
     for each( StarSystem ^system in m_GameData->GetStarSystems() )
@@ -874,7 +955,7 @@ void Form1::SystemsSelectPlanets( int rowIndex )
 
         PlanetsRefXYZ->Text = iDataSrc->GetFilterSystem()->PrintLocation();
         PlanetsMaxMishap->Value = 0;
-        MenuTabs->SelectedIndex = 3;
+        MenuTabs->SelectedIndex = TabIndex::Planets;
     }
 }
 
@@ -921,7 +1002,7 @@ void Form1::SystemsMenuShowColonies(Object^, EventArgs^)
 {
     ColoniesRefXYZ->Text = m_SystemsMenuRef->PrintLocation();
     ColoniesMaxMishap->Value = 0;
-    MenuTabs->SelectedIndex = 4;
+    MenuTabs->SelectedIndex = TabIndex::Colonies;
 }
 
 void Form1::SystemsMenuSelectRef(Object^, EventArgs^)
@@ -938,9 +1019,7 @@ void Form1::PlanetsUpdateControls()
     m_PlanetsFilter->EnableUpdates  = false;
 
     m_PlanetsFilter->GameData       = m_GameData;
-    m_PlanetsFilter->DefaultLSN     = Math::Min(99, m_GameData->GetSpecies()->TechLevels[TECH_LS]);
-
-    PlanetsGV->Value                = Math::Max(1, m_GameData->GetSpecies()->TechLevels[TECH_GV]);
+    m_PlanetsFilter->DefaultLSN     = Math::Min(99, m_GameData->GetSpecies()->TechLevelsAssumed[TECH_LS]);
 
     PlanetsRefXYZ->DataSource       = m_RefListSystemsXYZ;
     PlanetsRefHome->DataSource      = m_RefListHomes;
@@ -977,7 +1056,7 @@ void Form1::PlanetsSetup()
 
     DataColumn ^colNotes    = dataTable->Columns->Add("Notes",      String::typeid );
 
-    int gv  = Decimal::ToInt32(PlanetsGV->Value);
+    int gv  = Decimal::ToInt32(TechGV->Value);
     int age = Decimal::ToInt32(PlanetsShipAge->Value);
 
     for each( StarSystem ^system in m_GameData->GetStarSystems() )
@@ -1051,7 +1130,7 @@ void Form1::PlanetsSelectColonies( int rowIndex )
         {
             ColoniesRefXYZ->Text = planet->System->PrintLocation();
             ColoniesMaxMishap->Value = 0;
-            MenuTabs->SelectedIndex = 4;
+            MenuTabs->SelectedIndex  = TabIndex::Colonies;
         }
         else
         {
@@ -1112,8 +1191,6 @@ void Form1::ColoniesUpdateControls()
 
     m_ColoniesFilter->GameData      = m_GameData;
 
-    ColoniesGV->Value               = Math::Max(1, m_GameData->GetSpecies()->TechLevels[TECH_GV]);
-
     ColoniesRefXYZ->DataSource      = m_RefListSystemsXYZ;
     ColoniesRefHome->DataSource     = m_RefListHomes;
     ColoniesRefColony->DataSource   = m_RefListColonies;
@@ -1150,7 +1227,7 @@ void Form1::ColoniesSetup()
     for each( IGridPlugin ^plugin in m_GridPlugins )
         plugin->AddColumns(GridType::Colonies, dataTable);
 
-    int gv  = Decimal::ToInt32(ColoniesGV->Value);
+    int gv  = Decimal::ToInt32(TechGV->Value);
     int age = Decimal::ToInt32(ColoniesShipAge->Value);
     Alien ^sp = m_GameData->GetSpecies();
 
@@ -1256,8 +1333,6 @@ void Form1::ShipsUpdateControls()
 
     m_ShipsFilter->GameData      = m_GameData;
 
-    ShipsGV->Value               = Math::Max(1, m_GameData->GetSpecies()->TechLevels[TECH_GV]);
-
     ShipsRefXYZ->DataSource      = m_RefListSystemsXYZ;
     ShipsRefHome->DataSource     = m_RefListHomes;
     ShipsRefColony->DataSource   = m_RefListColonies;
@@ -1293,8 +1368,8 @@ void Form1::ShipsSetup()
         plugin->AddColumns(GridType::Ships, dataTable);
 
     Alien ^sp = m_GameData->GetSpecies();
-    int gv  = Decimal::ToInt32(PlanetsGV->Value);
-    int ml = sp->TechLevels[TECH_ML];
+    int gv = sp->TechLevelsAssumed[TECH_GV];
+    int ml = sp->TechLevelsAssumed[TECH_ML];
     double discount = (100.0 - (ml / 2)) / 100.0;
 
     for each( Ship ^ship in m_GameData->GetShips() )

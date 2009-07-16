@@ -12,9 +12,7 @@ namespace FHUI
 
 void Form1::GenerateTemplate()
 {
-    // TBD: to na pewno nie moze byc tutaj...
-    for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
-        plugin->SetGameData(m_GameData);
+    m_OrderList->Clear();
 
     GenerateCombat();
 

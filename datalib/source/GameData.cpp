@@ -317,8 +317,8 @@ String^ Colony::PrintBalance()
 
 void Colony::CalculateBalance(bool MiMaBalanced)
 {
-    int miTech = Owner->TechLevels[TECH_MI];
-    int maTech = Owner->TechLevels[TECH_MA];
+    int miTech = Owner->TechLevelsAssumed[TECH_MI];
+    int maTech = Owner->TechLevelsAssumed[TECH_MA];
     if( MiMaBalanced )
         miTech = maTech = Math::Min(miTech, maTech);
 
@@ -839,9 +839,10 @@ void GameData::SetTechLevel(int turn, Alien ^sp, TechType tech, int lev, int lev
     {
         m_TurnMax = turn;
 
-        sp->TechEstimateTurn      = turn;
-        sp->TechLevels[tech]      = lev;
-        sp->TechLevelsTeach[tech] = levTeach;
+        sp->TechEstimateTurn        = turn;
+        sp->TechLevels[tech]        = lev;
+        sp->TechLevelsAssumed[tech] = lev;
+        sp->TechLevelsTeach[tech]   = levTeach;
     }
 }
 

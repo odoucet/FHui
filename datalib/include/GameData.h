@@ -88,8 +88,9 @@ public:
         Ships = gcnew List<Ship^>;
         Colonies = gcnew List<Colony^>;
 
-        m_TechLevels        = gcnew array<int>(TECH_MAX){0};
-        m_TechLevelsTeach   = gcnew array<int>(TECH_MAX){0};
+        TechLevels        = gcnew array<int>(TECH_MAX){0};
+        TechLevelsTeach   = gcnew array<int>(TECH_MAX){0};
+        TechLevelsAssumed = gcnew array<int>(TECH_MAX){0};
     }
 
     // -------- IGridDataSrc ----------------------------
@@ -116,18 +117,9 @@ public:
     property List<Colony^>^     Colonies;
 
     property int                TechEstimateTurn;
-    property int                TechLevels [int] {
-        int  get(int tech)          { return m_TechLevels[tech]; }
-        void set(int tech, int val) { m_TechLevels[tech] = val; }
-    }
-    property int                TechLevelsTeach [int] {
-        int  get(int tech)          { return m_TechLevelsTeach[tech]; }
-        void set(int tech, int val) { m_TechLevelsTeach[tech] = val; }
-    }
-
-protected:
-    array<int>     ^m_TechLevels;
-    array<int>     ^m_TechLevelsTeach;
+    property array<int>^        TechLevels;
+    property array<int>^        TechLevelsTeach;
+    property array<int>^        TechLevelsAssumed;
 };
 
 // ---------------------------------------------------

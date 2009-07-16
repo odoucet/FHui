@@ -7,7 +7,7 @@
 namespace FHUI
 {
 
-private ref struct MapColors
+private value struct MapColors
 {
     initonly static Color Background        = Color::Black;
     initonly static Color Grid              = Color::FromArgb(12, 12, 12);
@@ -20,7 +20,7 @@ private ref struct MapColors
     initonly static Color SystemExplored    = Color::Yellow;
 };
 
-private ref struct MapConstants
+private value struct MapConstants
 {
     initonly static float   RadiusHome      = 120.0F;
     initonly static float   RadiusColony    =  80.0F;
@@ -96,7 +96,7 @@ StarSystem^ Form1::MapGetRefSystem(int sp)
 int Form1::MapGetAlienGV(int sp)
 {
     Alien ^alien = MapGetAlien(sp);
-    return alien->TechLevels[TECH_GV];
+    return alien->TechLevelsAssumed[TECH_GV];
 }
 
 Color Form1::MapGetAlienColor(int sp, double dim)
@@ -154,7 +154,7 @@ Brush^ Form1::MapGetBrushLSN(int lsn)
     }
     else
     {
-        int minLsn = m_GameData->GetSpecies()->TechLevels[TECH_LS];
+        int minLsn = m_GameData->GetSpecies()->TechLevelsAssumed[TECH_LS];
         alpha = (25.0F + (((minLsn - Math::Min(minLsn, lsn)) * 75.0F) / minLsn)) / 100.0F;
     }
 

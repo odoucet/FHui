@@ -37,7 +37,6 @@ void GridFilter::Update(Object ^sender)
                 OnGridSetup();
             }
             else if( sender == m_RefreshDummy ||
-                sender == CtrlGV ||
                 sender == CtrlMaxMishap ||
                 sender == CtrlMaxLSN ||
                 sender == CtrlFiltVisV ||
@@ -73,7 +72,6 @@ void GridFilter::Update(Object ^sender)
                     ( CtrlFiltTypeTr ? (CtrlFiltTypeTr->Checked ? (1 << 31) : 0) : 0 ) +
                     ( CtrlMiMaBalance ? (CtrlMiMaBalance->Checked ? (1LL << 32) : 0) : 0 );
                 if( sender == m_RefreshDummy ||
-                    sender == CtrlGV ||
                     filtMask != m_LastFiltMask )
                 {
                     m_LastFiltMask = filtMask;

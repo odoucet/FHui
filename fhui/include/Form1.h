@@ -61,14 +61,18 @@ namespace FHUI {
         void        InitData();
         void        InitRefLists();
         void        InitControls();
-        void        UpdatePlugins();
         void        UpdateControls();
+        void        UpdateTabs();
 
         void        FillAboutBox();
         void        RepModeChanged();
         void        DisplayReport();
         void        DisplayTurn();
         void        ShowException(Exception ^e);
+
+        void        TechLevelsResetToCurrent();
+        void        TechLevelsResetToTaught();
+        void        TechLevelsChanged();
 
         // -- Data grids formatting
         void        ApplyDataAndFormat(
@@ -82,6 +86,22 @@ namespace FHUI {
         void        ShowGridContextMenu(DataGridView^ grid, DataGridViewCellMouseEventArgs ^e);
 
         // ==================================================
+
+        ////////////////////////////////////////////////////////////////
+        value struct TabIndex
+        {
+            initonly static int Reports     = 0;
+            initonly static int Map         = 1;
+            initonly static int Systems     = 2;
+            initonly static int Planets     = 3;
+            initonly static int Colonies    = 4;
+            initonly static int Ships       = 5;
+            initonly static int Aliens      = 6;
+            initonly static int Orders      = 7;
+            initonly static int Utils       = 8;
+            initonly static int About       = 9;
+        };
+        ////////////////////////////////////////////////////////////////
 
         GameData   ^m_GameData;
         SortedList<int, GameData^>     ^m_GameTurns;
@@ -106,7 +126,9 @@ namespace FHUI {
         // ==================================================
         // --- Plugins ---
         void        LoadPlugins();
+        void        UpdatePlugins();
 
+        List<IPluginBase^>^     m_AllPlugins;
         List<IGridPlugin^>^     m_GridPlugins;
         List<IOrdersPlugin^>^   m_OrdersPlugins;
 
@@ -216,7 +238,19 @@ namespace FHUI {
 
     private: System::Windows::Forms::RichTextBox^  OrderTemplate;
     private: System::Windows::Forms::TabPage^  TabUtils;
-
+    private: System::Windows::Forms::RadioButton^  RepModeCommands;
+    private: System::Windows::Forms::RadioButton^  RepModeReports;
+    private: System::Windows::Forms::ComboBox^  RepTurnNr;
+    private: System::Windows::Forms::TextBox^  RepText;
+    private: System::Windows::Forms::NumericUpDown^  TechLS;
+    private: System::Windows::Forms::ComboBox^  SystemsRefColony;
+    private: System::Windows::Forms::NumericUpDown^  TechBI;
+    private: System::Windows::Forms::NumericUpDown^  TechMI;
+    private: System::Windows::Forms::NumericUpDown^  TechMA;
+    private: System::Windows::Forms::NumericUpDown^  TechML;
+    private: System::Windows::Forms::NumericUpDown^  TechGV;
+    private: System::Windows::Forms::Button^  TechResetTaught;
+    private: System::Windows::Forms::Button^  TechResetCurrent;
     private: System::Windows::Forms::TabPage^  TabOrders;
     private: System::Windows::Forms::CheckBox^  AliensFiltRelP;
     private: System::Windows::Forms::CheckBox^  AliensFiltRelN;
@@ -239,7 +273,7 @@ namespace FHUI {
     private: System::Windows::Forms::TextBox^  ShipsRefText;
     private: System::Windows::Forms::NumericUpDown^  ShipsMaxMishap;
 
-    private: System::Windows::Forms::NumericUpDown^  ShipsGV;
+
 
     private: System::Windows::Forms::ComboBox^  ShipsRefShip;
     private: System::Windows::Forms::ComboBox^  ShipsRefColony;
@@ -258,7 +292,7 @@ namespace FHUI {
     private: System::Windows::Forms::NumericUpDown^  ColoniesMaxLSN;
     private: System::Windows::Forms::NumericUpDown^  ColoniesMaxMishap;
     private: System::Windows::Forms::NumericUpDown^  ColoniesShipAge;
-    private: System::Windows::Forms::NumericUpDown^  ColoniesGV;
+
     private: System::Windows::Forms::ComboBox^  ColoniesRefShip;
     private: System::Windows::Forms::ComboBox^  ColoniesRefColony;
     private: System::Windows::Forms::ComboBox^  ColoniesRefHome;
@@ -281,55 +315,25 @@ private: System::Windows::Forms::CheckBox^  ColoniesMiMaBalanced;
 
 
     private: System::Windows::Forms::NumericUpDown^  PlanetsShipAge;
-    private: System::Windows::Forms::NumericUpDown^  PlanetsGV;
+
     private: System::Windows::Forms::ComboBox^  PlanetsRefShip;
     private: System::Windows::Forms::ComboBox^  PlanetsRefColony;
 
     private: System::Windows::Forms::ComboBox^  PlanetsRefHome;
 
     private: System::Windows::Forms::ComboBox^  PlanetsRefXYZ;
-private: System::Windows::Forms::Label^  PlanetsRef;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    private: System::Windows::Forms::Label^  PlanetsRef;
     private: System::Windows::Forms::TabControl^  MenuTabs;
     private: System::Windows::Forms::TabPage^  TabReports;
-
-
     private: System::Windows::Forms::TabPage^  TabMap;
     private: System::Windows::Forms::TabPage^  TabSystems;
     private: System::Windows::Forms::TabPage^  TabPlanets;
     private: System::Windows::Forms::TabPage^  TabColonies;
     private: System::Windows::Forms::TabPage^  TabShips;
     private: System::Windows::Forms::TabPage^  TabAliens;
-
-
-    private: System::Windows::Forms::ComboBox^  RepTurnNr;
-    private: System::Windows::Forms::TextBox^  RepText;
     private: System::Windows::Forms::ComboBox^  SystemsRefXYZ;
-
     private: System::Windows::Forms::ComboBox^  SystemsRefShip;
     private: System::Windows::Forms::DataGridView^  SystemsGrid;
-
-
-
-
-
     private: System::Windows::Forms::DataGridView^  PlanetsGrid;
     private: System::Windows::Forms::TabPage^  TabAbout;
     private: System::Windows::Forms::TextBox^  TextAbout;
@@ -379,11 +383,11 @@ private: System::Windows::Forms::TextBox^  Summary;
 private: System::Windows::Forms::Button^  TurnReloadBtn;
 
 private: System::Windows::Forms::ComboBox^  TurnSelect;
-private: System::Windows::Forms::RadioButton^  RepModeCommands;
 
-private: System::Windows::Forms::RadioButton^  RepModeReports;
 
-private: System::Windows::Forms::NumericUpDown^  SystemsGV;
+
+
+
 private: System::Windows::Forms::NumericUpDown^  SystemsMaxMishap;
 
 
@@ -395,7 +399,7 @@ private: System::Windows::Forms::ToolTip^  BtnTooltip;
 private: System::Windows::Forms::NumericUpDown^  SystemsMaxLSN;
 private: System::Windows::Forms::NumericUpDown^  SystemsShipAge;
 private: System::Windows::Forms::TextBox^  SystemsRefEdit;
-private: System::Windows::Forms::ComboBox^  SystemsRefColony;
+
 private: System::Windows::Forms::ComboBox^  SystemsRefHome;
 private: System::Windows::Forms::Label^  SystemsRef;
 
@@ -416,9 +420,15 @@ private: System::Windows::Forms::Label^  SystemsRef;
 		void InitializeComponent(void)
 		{
             this->components = (gcnew System::ComponentModel::Container());
-            System::Windows::Forms::SplitContainer^  splitContainer1;
             System::Windows::Forms::SplitContainer^  TopSplitCont;
             System::Windows::Forms::SplitContainer^  splitContainer7;
+            System::Windows::Forms::Label^  label25;
+            System::Windows::Forms::Label^  label26;
+            System::Windows::Forms::Label^  label23;
+            System::Windows::Forms::Label^  label21;
+            System::Windows::Forms::Label^  label9;
+            System::Windows::Forms::Label^  label4;
+            System::Windows::Forms::Label^  label14;
             System::Windows::Forms::GroupBox^  groupBox3;
             System::Windows::Forms::Label^  label13;
             System::Windows::Forms::GroupBox^  groupBox2;
@@ -429,7 +439,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             System::Windows::Forms::SplitContainer^  splitContainer2;
             System::Windows::Forms::Label^  label16;
             System::Windows::Forms::Label^  label15;
-            System::Windows::Forms::Label^  label14;
             System::Windows::Forms::Label^  label2;
             System::Windows::Forms::Label^  label17;
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle1 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
@@ -437,20 +446,17 @@ private: System::Windows::Forms::Label^  SystemsRef;
             System::Windows::Forms::SplitContainer^  splitContainer3;
             System::Windows::Forms::Label^  label1;
             System::Windows::Forms::Label^  label3;
-            System::Windows::Forms::Label^  label4;
             System::Windows::Forms::Label^  label18;
             System::Windows::Forms::Label^  label20;
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle3 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle4 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::Label^  label8;
             System::Windows::Forms::Label^  label19;
-            System::Windows::Forms::Label^  label21;
             System::Windows::Forms::Label^  label22;
             System::Windows::Forms::Label^  label24;
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle5 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle6 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::Label^  label10;
-            System::Windows::Forms::Label^  label23;
             System::Windows::Forms::Label^  label27;
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle7 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle8 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
@@ -460,15 +466,23 @@ private: System::Windows::Forms::Label^  SystemsRef;
             System::Windows::Forms::Label^  label6;
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle11 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle12 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            this->RepModeCommands = (gcnew System::Windows::Forms::RadioButton());
-            this->RepModeReports = (gcnew System::Windows::Forms::RadioButton());
-            this->RepTurnNr = (gcnew System::Windows::Forms::ComboBox());
-            this->RepText = (gcnew System::Windows::Forms::TextBox());
             this->TurnReloadBtn = (gcnew System::Windows::Forms::Button());
             this->TurnSelect = (gcnew System::Windows::Forms::ComboBox());
             this->Summary = (gcnew System::Windows::Forms::TextBox());
+            this->TechBI = (gcnew System::Windows::Forms::NumericUpDown());
+            this->TechMI = (gcnew System::Windows::Forms::NumericUpDown());
+            this->TechResetTaught = (gcnew System::Windows::Forms::Button());
+            this->TechResetCurrent = (gcnew System::Windows::Forms::Button());
+            this->TechMA = (gcnew System::Windows::Forms::NumericUpDown());
+            this->TechML = (gcnew System::Windows::Forms::NumericUpDown());
+            this->TechGV = (gcnew System::Windows::Forms::NumericUpDown());
+            this->TechLS = (gcnew System::Windows::Forms::NumericUpDown());
             this->MenuTabs = (gcnew System::Windows::Forms::TabControl());
             this->TabReports = (gcnew System::Windows::Forms::TabPage());
+            this->RepText = (gcnew System::Windows::Forms::TextBox());
+            this->RepModeCommands = (gcnew System::Windows::Forms::RadioButton());
+            this->RepTurnNr = (gcnew System::Windows::Forms::ComboBox());
+            this->RepModeReports = (gcnew System::Windows::Forms::RadioButton());
             this->TabMap = (gcnew System::Windows::Forms::TabPage());
             this->panel1 = (gcnew System::Windows::Forms::Panel());
             this->MapLSNVal = (gcnew System::Windows::Forms::NumericUpDown());
@@ -497,7 +511,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->SystemsMaxLSN = (gcnew System::Windows::Forms::NumericUpDown());
             this->SystemsMaxMishap = (gcnew System::Windows::Forms::NumericUpDown());
             this->SystemsShipAge = (gcnew System::Windows::Forms::NumericUpDown());
-            this->SystemsGV = (gcnew System::Windows::Forms::NumericUpDown());
             this->SystemsRefShip = (gcnew System::Windows::Forms::ComboBox());
             this->SystemsRefColony = (gcnew System::Windows::Forms::ComboBox());
             this->SystemsRefHome = (gcnew System::Windows::Forms::ComboBox());
@@ -514,7 +527,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->PlanetsMaxLSN = (gcnew System::Windows::Forms::NumericUpDown());
             this->PlanetsMaxMishap = (gcnew System::Windows::Forms::NumericUpDown());
             this->PlanetsShipAge = (gcnew System::Windows::Forms::NumericUpDown());
-            this->PlanetsGV = (gcnew System::Windows::Forms::NumericUpDown());
             this->PlanetsRefShip = (gcnew System::Windows::Forms::ComboBox());
             this->PlanetsRefColony = (gcnew System::Windows::Forms::ComboBox());
             this->PlanetsRefHome = (gcnew System::Windows::Forms::ComboBox());
@@ -532,7 +544,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ColoniesMaxLSN = (gcnew System::Windows::Forms::NumericUpDown());
             this->ColoniesMaxMishap = (gcnew System::Windows::Forms::NumericUpDown());
             this->ColoniesShipAge = (gcnew System::Windows::Forms::NumericUpDown());
-            this->ColoniesGV = (gcnew System::Windows::Forms::NumericUpDown());
             this->ColoniesRefShip = (gcnew System::Windows::Forms::ComboBox());
             this->ColoniesRefColony = (gcnew System::Windows::Forms::ComboBox());
             this->ColoniesRefXYZ = (gcnew System::Windows::Forms::ComboBox());
@@ -554,7 +565,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ShipsFiltersReset = (gcnew System::Windows::Forms::Button());
             this->ShipsRefText = (gcnew System::Windows::Forms::TextBox());
             this->ShipsMaxMishap = (gcnew System::Windows::Forms::NumericUpDown());
-            this->ShipsGV = (gcnew System::Windows::Forms::NumericUpDown());
             this->ShipsRefShip = (gcnew System::Windows::Forms::ComboBox());
             this->ShipsRefColony = (gcnew System::Windows::Forms::ComboBox());
             this->ShipsRef = (gcnew System::Windows::Forms::Label());
@@ -578,9 +588,15 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->comboBox2 = (gcnew System::Windows::Forms::ComboBox());
             this->dataGridView1 = (gcnew System::Windows::Forms::DataGridView());
             this->BtnTooltip = (gcnew System::Windows::Forms::ToolTip(this->components));
-            splitContainer1 = (gcnew System::Windows::Forms::SplitContainer());
             TopSplitCont = (gcnew System::Windows::Forms::SplitContainer());
             splitContainer7 = (gcnew System::Windows::Forms::SplitContainer());
+            label25 = (gcnew System::Windows::Forms::Label());
+            label26 = (gcnew System::Windows::Forms::Label());
+            label23 = (gcnew System::Windows::Forms::Label());
+            label21 = (gcnew System::Windows::Forms::Label());
+            label9 = (gcnew System::Windows::Forms::Label());
+            label4 = (gcnew System::Windows::Forms::Label());
+            label14 = (gcnew System::Windows::Forms::Label());
             groupBox3 = (gcnew System::Windows::Forms::GroupBox());
             label13 = (gcnew System::Windows::Forms::Label());
             groupBox2 = (gcnew System::Windows::Forms::GroupBox());
@@ -591,34 +607,33 @@ private: System::Windows::Forms::Label^  SystemsRef;
             splitContainer2 = (gcnew System::Windows::Forms::SplitContainer());
             label16 = (gcnew System::Windows::Forms::Label());
             label15 = (gcnew System::Windows::Forms::Label());
-            label14 = (gcnew System::Windows::Forms::Label());
             label2 = (gcnew System::Windows::Forms::Label());
             label17 = (gcnew System::Windows::Forms::Label());
             splitContainer3 = (gcnew System::Windows::Forms::SplitContainer());
             label1 = (gcnew System::Windows::Forms::Label());
             label3 = (gcnew System::Windows::Forms::Label());
-            label4 = (gcnew System::Windows::Forms::Label());
             label18 = (gcnew System::Windows::Forms::Label());
             label20 = (gcnew System::Windows::Forms::Label());
             label8 = (gcnew System::Windows::Forms::Label());
             label19 = (gcnew System::Windows::Forms::Label());
-            label21 = (gcnew System::Windows::Forms::Label());
             label22 = (gcnew System::Windows::Forms::Label());
             label24 = (gcnew System::Windows::Forms::Label());
             label10 = (gcnew System::Windows::Forms::Label());
-            label23 = (gcnew System::Windows::Forms::Label());
             label27 = (gcnew System::Windows::Forms::Label());
             label5 = (gcnew System::Windows::Forms::Label());
             label6 = (gcnew System::Windows::Forms::Label());
-            splitContainer1->Panel1->SuspendLayout();
-            splitContainer1->Panel2->SuspendLayout();
-            splitContainer1->SuspendLayout();
             TopSplitCont->Panel1->SuspendLayout();
             TopSplitCont->Panel2->SuspendLayout();
             TopSplitCont->SuspendLayout();
             splitContainer7->Panel1->SuspendLayout();
             splitContainer7->Panel2->SuspendLayout();
             splitContainer7->SuspendLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechBI))->BeginInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechMI))->BeginInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechMA))->BeginInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechML))->BeginInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechGV))->BeginInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechLS))->BeginInit();
             this->MenuTabs->SuspendLayout();
             this->TabReports->SuspendLayout();
             this->TabMap->SuspendLayout();
@@ -639,7 +654,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsMaxLSN))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsMaxMishap))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsShipAge))->BeginInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsGV))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsGrid))->BeginInit();
             this->TabPlanets->SuspendLayout();
             splitContainer3->Panel1->SuspendLayout();
@@ -648,7 +662,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsMaxLSN))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsMaxMishap))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsShipAge))->BeginInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsGV))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsGrid))->BeginInit();
             this->TabColonies->SuspendLayout();
             this->splitContainer4->Panel1->SuspendLayout();
@@ -657,14 +670,12 @@ private: System::Windows::Forms::Label^  SystemsRef;
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ColoniesMaxLSN))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ColoniesMaxMishap))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ColoniesShipAge))->BeginInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ColoniesGV))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ColoniesGrid))->BeginInit();
             this->TabShips->SuspendLayout();
             this->splitContainer5->Panel1->SuspendLayout();
             this->splitContainer5->Panel2->SuspendLayout();
             this->splitContainer5->SuspendLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ShipsMaxMishap))->BeginInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ShipsGV))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ShipsGrid))->BeginInit();
             this->TabAliens->SuspendLayout();
             this->splitContainer6->Panel1->SuspendLayout();
@@ -675,81 +686,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabAbout->SuspendLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->dataGridView1))->BeginInit();
             this->SuspendLayout();
-            // 
-            // splitContainer1
-            // 
-            splitContainer1->BackColor = System::Drawing::SystemColors::Control;
-            splitContainer1->Dock = System::Windows::Forms::DockStyle::Fill;
-            splitContainer1->FixedPanel = System::Windows::Forms::FixedPanel::Panel1;
-            splitContainer1->IsSplitterFixed = true;
-            splitContainer1->Location = System::Drawing::Point(3, 3);
-            splitContainer1->Name = L"splitContainer1";
-            splitContainer1->Orientation = System::Windows::Forms::Orientation::Horizontal;
-            // 
-            // splitContainer1.Panel1
-            // 
-            splitContainer1->Panel1->Controls->Add(this->RepModeCommands);
-            splitContainer1->Panel1->Controls->Add(this->RepModeReports);
-            splitContainer1->Panel1->Controls->Add(this->RepTurnNr);
-            // 
-            // splitContainer1.Panel2
-            // 
-            splitContainer1->Panel2->Controls->Add(this->RepText);
-            splitContainer1->Size = System::Drawing::Size(677, 557);
-            splitContainer1->SplitterDistance = 25;
-            splitContainer1->SplitterWidth = 1;
-            splitContainer1->TabIndex = 0;
-            // 
-            // RepModeCommands
-            // 
-            this->RepModeCommands->Appearance = System::Windows::Forms::Appearance::Button;
-            this->RepModeCommands->Location = System::Drawing::Point(84, 1);
-            this->RepModeCommands->Name = L"RepModeCommands";
-            this->RepModeCommands->Size = System::Drawing::Size(80, 23);
-            this->RepModeCommands->TabIndex = 2;
-            this->RepModeCommands->TabStop = true;
-            this->RepModeCommands->Text = L"Commands";
-            this->RepModeCommands->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->RepModeCommands->UseVisualStyleBackColor = true;
-            // 
-            // RepModeReports
-            // 
-            this->RepModeReports->Appearance = System::Windows::Forms::Appearance::Button;
-            this->RepModeReports->Location = System::Drawing::Point(2, 1);
-            this->RepModeReports->Name = L"RepModeReports";
-            this->RepModeReports->Size = System::Drawing::Size(80, 23);
-            this->RepModeReports->TabIndex = 2;
-            this->RepModeReports->TabStop = true;
-            this->RepModeReports->Text = L"Reports";
-            this->RepModeReports->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->RepModeReports->UseVisualStyleBackColor = true;
-            this->RepModeReports->CheckedChanged += gcnew System::EventHandler(this, &Form1::RepMode_CheckedChanged);
-            // 
-            // RepTurnNr
-            // 
-            this->RepTurnNr->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
-            this->RepTurnNr->FormattingEnabled = true;
-            this->RepTurnNr->Location = System::Drawing::Point(167, 3);
-            this->RepTurnNr->MaxDropDownItems = 20;
-            this->RepTurnNr->Name = L"RepTurnNr";
-            this->RepTurnNr->Size = System::Drawing::Size(129, 21);
-            this->RepTurnNr->TabIndex = 0;
-            this->RepTurnNr->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::RepTurnNr_SelectedIndexChanged);
-            // 
-            // RepText
-            // 
-            this->RepText->Dock = System::Windows::Forms::DockStyle::Fill;
-            this->RepText->Font = (gcnew System::Drawing::Font(L"Courier New", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
-                static_cast<System::Byte>(238)));
-            this->RepText->Location = System::Drawing::Point(0, 0);
-            this->RepText->MaxLength = 65536;
-            this->RepText->Multiline = true;
-            this->RepText->Name = L"RepText";
-            this->RepText->ReadOnly = true;
-            this->RepText->ScrollBars = System::Windows::Forms::ScrollBars::Both;
-            this->RepText->Size = System::Drawing::Size(677, 531);
-            this->RepText->TabIndex = 0;
-            this->RepText->WordWrap = false;
             // 
             // TopSplitCont
             // 
@@ -767,6 +703,21 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // TopSplitCont.Panel2
             // 
+            TopSplitCont->Panel2->Controls->Add(this->TechBI);
+            TopSplitCont->Panel2->Controls->Add(label25);
+            TopSplitCont->Panel2->Controls->Add(this->TechMI);
+            TopSplitCont->Panel2->Controls->Add(label26);
+            TopSplitCont->Panel2->Controls->Add(this->TechResetTaught);
+            TopSplitCont->Panel2->Controls->Add(this->TechResetCurrent);
+            TopSplitCont->Panel2->Controls->Add(label23);
+            TopSplitCont->Panel2->Controls->Add(this->TechMA);
+            TopSplitCont->Panel2->Controls->Add(label21);
+            TopSplitCont->Panel2->Controls->Add(this->TechML);
+            TopSplitCont->Panel2->Controls->Add(label9);
+            TopSplitCont->Panel2->Controls->Add(this->TechGV);
+            TopSplitCont->Panel2->Controls->Add(label4);
+            TopSplitCont->Panel2->Controls->Add(this->TechLS);
+            TopSplitCont->Panel2->Controls->Add(label14);
             TopSplitCont->Panel2->Controls->Add(this->MenuTabs);
             TopSplitCont->Size = System::Drawing::Size(927, 593);
             TopSplitCont->SplitterDistance = 230;
@@ -831,8 +782,166 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->Summary->TabIndex = 3;
             this->Summary->WordWrap = false;
             // 
+            // TechBI
+            // 
+            this->TechBI->Location = System::Drawing::Point(469, 4);
+            this->TechBI->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {200, 0, 0, 0});
+            this->TechBI->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+            this->TechBI->Name = L"TechBI";
+            this->TechBI->Size = System::Drawing::Size(38, 20);
+            this->TechBI->TabIndex = 6;
+            this->BtnTooltip->SetToolTip(this->TechBI, L"Set assumed BI technology level.");
+            this->TechBI->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+            this->TechBI->ValueChanged += gcnew System::EventHandler(this, &Form1::Tech_ValueChanged);
+            // 
+            // label25
+            // 
+            label25->AutoSize = true;
+            label25->Location = System::Drawing::Point(450, 7);
+            label25->Name = L"label25";
+            label25->Size = System::Drawing::Size(17, 13);
+            label25->TabIndex = 7;
+            label25->Text = L"BI";
+            // 
+            // TechMI
+            // 
+            this->TechMI->Location = System::Drawing::Point(140, 4);
+            this->TechMI->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {200, 0, 0, 0});
+            this->TechMI->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+            this->TechMI->Name = L"TechMI";
+            this->TechMI->Size = System::Drawing::Size(38, 20);
+            this->TechMI->TabIndex = 6;
+            this->BtnTooltip->SetToolTip(this->TechMI, L"Set assumed MI technology level.");
+            this->TechMI->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+            this->TechMI->ValueChanged += gcnew System::EventHandler(this, &Form1::Tech_ValueChanged);
+            // 
+            // label26
+            // 
+            label26->AutoSize = true;
+            label26->Location = System::Drawing::Point(7, 7);
+            label26->Name = L"label26";
+            label26->Size = System::Drawing::Size(107, 13);
+            label26->TabIndex = 7;
+            label26->Text = L"Assumed tech levels:";
+            // 
+            // TechResetTaught
+            // 
+            this->TechResetTaught->Location = System::Drawing::Point(571, 4);
+            this->TechResetTaught->Name = L"TechResetTaught";
+            this->TechResetTaught->Size = System::Drawing::Size(50, 23);
+            this->TechResetTaught->TabIndex = 12;
+            this->TechResetTaught->Text = L"Taught";
+            this->TechResetTaught->UseVisualStyleBackColor = true;
+            this->TechResetTaught->Click += gcnew System::EventHandler(this, &Form1::TechResetTaught_Click);
+            // 
+            // TechResetCurrent
+            // 
+            this->TechResetCurrent->Location = System::Drawing::Point(522, 4);
+            this->TechResetCurrent->Name = L"TechResetCurrent";
+            this->TechResetCurrent->Size = System::Drawing::Size(50, 23);
+            this->TechResetCurrent->TabIndex = 12;
+            this->TechResetCurrent->Text = L"Current";
+            this->TechResetCurrent->UseVisualStyleBackColor = true;
+            this->TechResetCurrent->Click += gcnew System::EventHandler(this, &Form1::TechResetCurrent_Click);
+            // 
+            // label23
+            // 
+            label23->AutoSize = true;
+            label23->Location = System::Drawing::Point(119, 7);
+            label23->Name = L"label23";
+            label23->Size = System::Drawing::Size(19, 13);
+            label23->TabIndex = 7;
+            label23->Text = L"MI";
+            // 
+            // TechMA
+            // 
+            this->TechMA->Location = System::Drawing::Point(208, 4);
+            this->TechMA->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {200, 0, 0, 0});
+            this->TechMA->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+            this->TechMA->Name = L"TechMA";
+            this->TechMA->Size = System::Drawing::Size(38, 20);
+            this->TechMA->TabIndex = 6;
+            this->BtnTooltip->SetToolTip(this->TechMA, L"Set assumed MA technology level.");
+            this->TechMA->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+            this->TechMA->ValueChanged += gcnew System::EventHandler(this, &Form1::Tech_ValueChanged);
+            // 
+            // label21
+            // 
+            label21->AutoSize = true;
+            label21->Location = System::Drawing::Point(183, 7);
+            label21->Name = L"label21";
+            label21->Size = System::Drawing::Size(23, 13);
+            label21->TabIndex = 7;
+            label21->Text = L"MA";
+            // 
+            // TechML
+            // 
+            this->TechML->Location = System::Drawing::Point(275, 4);
+            this->TechML->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {200, 0, 0, 0});
+            this->TechML->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+            this->TechML->Name = L"TechML";
+            this->TechML->Size = System::Drawing::Size(38, 20);
+            this->TechML->TabIndex = 6;
+            this->BtnTooltip->SetToolTip(this->TechML, L"Set assumed ML technology level.");
+            this->TechML->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+            this->TechML->ValueChanged += gcnew System::EventHandler(this, &Form1::Tech_ValueChanged);
+            // 
+            // label9
+            // 
+            label9->AutoSize = true;
+            label9->Location = System::Drawing::Point(251, 7);
+            label9->Name = L"label9";
+            label9->Size = System::Drawing::Size(22, 13);
+            label9->TabIndex = 7;
+            label9->Text = L"ML";
+            // 
+            // TechGV
+            // 
+            this->TechGV->Location = System::Drawing::Point(342, 4);
+            this->TechGV->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {200, 0, 0, 0});
+            this->TechGV->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+            this->TechGV->Name = L"TechGV";
+            this->TechGV->Size = System::Drawing::Size(38, 20);
+            this->TechGV->TabIndex = 6;
+            this->BtnTooltip->SetToolTip(this->TechGV, L"Set assumed GV technology level.");
+            this->TechGV->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+            this->TechGV->ValueChanged += gcnew System::EventHandler(this, &Form1::Tech_ValueChanged);
+            // 
+            // label4
+            // 
+            label4->AutoSize = true;
+            label4->Location = System::Drawing::Point(318, 7);
+            label4->Name = L"label4";
+            label4->Size = System::Drawing::Size(22, 13);
+            label4->TabIndex = 7;
+            label4->Text = L"GV";
+            // 
+            // TechLS
+            // 
+            this->TechLS->Location = System::Drawing::Point(407, 4);
+            this->TechLS->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {200, 0, 0, 0});
+            this->TechLS->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+            this->TechLS->Name = L"TechLS";
+            this->TechLS->Size = System::Drawing::Size(38, 20);
+            this->TechLS->TabIndex = 6;
+            this->BtnTooltip->SetToolTip(this->TechLS, L"Set assumed LS technology level.");
+            this->TechLS->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+            this->TechLS->ValueChanged += gcnew System::EventHandler(this, &Form1::Tech_ValueChanged);
+            // 
+            // label14
+            // 
+            label14->AutoSize = true;
+            label14->Location = System::Drawing::Point(385, 7);
+            label14->Name = L"label14";
+            label14->Size = System::Drawing::Size(20, 13);
+            label14->TabIndex = 7;
+            label14->Text = L"LS";
+            // 
             // MenuTabs
             // 
+            this->MenuTabs->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom) 
+                | System::Windows::Forms::AnchorStyles::Left) 
+                | System::Windows::Forms::AnchorStyles::Right));
             this->MenuTabs->Controls->Add(this->TabReports);
             this->MenuTabs->Controls->Add(this->TabMap);
             this->MenuTabs->Controls->Add(this->TabSystems);
@@ -843,17 +952,20 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->MenuTabs->Controls->Add(this->TabOrders);
             this->MenuTabs->Controls->Add(this->TabUtils);
             this->MenuTabs->Controls->Add(this->TabAbout);
-            this->MenuTabs->Dock = System::Windows::Forms::DockStyle::Fill;
-            this->MenuTabs->Location = System::Drawing::Point(0, 0);
+            this->MenuTabs->Location = System::Drawing::Point(0, 30);
             this->MenuTabs->Name = L"MenuTabs";
             this->MenuTabs->SelectedIndex = 0;
             this->MenuTabs->Size = System::Drawing::Size(691, 589);
             this->MenuTabs->TabIndex = 0;
+            this->MenuTabs->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::MenuTabs_SelectedIndexChanged);
             // 
             // TabReports
             // 
             this->TabReports->BackColor = System::Drawing::SystemColors::Control;
-            this->TabReports->Controls->Add(splitContainer1);
+            this->TabReports->Controls->Add(this->RepText);
+            this->TabReports->Controls->Add(this->RepModeCommands);
+            this->TabReports->Controls->Add(this->RepTurnNr);
+            this->TabReports->Controls->Add(this->RepModeReports);
             this->TabReports->Location = System::Drawing::Point(4, 22);
             this->TabReports->Margin = System::Windows::Forms::Padding(0);
             this->TabReports->Name = L"TabReports";
@@ -861,6 +973,59 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabReports->Size = System::Drawing::Size(683, 563);
             this->TabReports->TabIndex = 0;
             this->TabReports->Text = L"Reports";
+            // 
+            // RepText
+            // 
+            this->RepText->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom) 
+                | System::Windows::Forms::AnchorStyles::Left) 
+                | System::Windows::Forms::AnchorStyles::Right));
+            this->RepText->Font = (gcnew System::Drawing::Font(L"Courier New", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+                static_cast<System::Byte>(238)));
+            this->RepText->Location = System::Drawing::Point(0, 28);
+            this->RepText->MaxLength = 65536;
+            this->RepText->Multiline = true;
+            this->RepText->Name = L"RepText";
+            this->RepText->ReadOnly = true;
+            this->RepText->ScrollBars = System::Windows::Forms::ScrollBars::Both;
+            this->RepText->Size = System::Drawing::Size(677, 531);
+            this->RepText->TabIndex = 3;
+            this->RepText->WordWrap = false;
+            // 
+            // RepModeCommands
+            // 
+            this->RepModeCommands->Appearance = System::Windows::Forms::Appearance::Button;
+            this->RepModeCommands->Location = System::Drawing::Point(92, 3);
+            this->RepModeCommands->Name = L"RepModeCommands";
+            this->RepModeCommands->Size = System::Drawing::Size(80, 23);
+            this->RepModeCommands->TabIndex = 2;
+            this->RepModeCommands->TabStop = true;
+            this->RepModeCommands->Text = L"Commands";
+            this->RepModeCommands->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->RepModeCommands->UseVisualStyleBackColor = true;
+            // 
+            // RepTurnNr
+            // 
+            this->RepTurnNr->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
+            this->RepTurnNr->FormattingEnabled = true;
+            this->RepTurnNr->Location = System::Drawing::Point(178, 4);
+            this->RepTurnNr->MaxDropDownItems = 20;
+            this->RepTurnNr->Name = L"RepTurnNr";
+            this->RepTurnNr->Size = System::Drawing::Size(129, 21);
+            this->RepTurnNr->TabIndex = 0;
+            this->RepTurnNr->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::RepTurnNr_SelectedIndexChanged);
+            // 
+            // RepModeReports
+            // 
+            this->RepModeReports->Appearance = System::Windows::Forms::Appearance::Button;
+            this->RepModeReports->Location = System::Drawing::Point(6, 3);
+            this->RepModeReports->Name = L"RepModeReports";
+            this->RepModeReports->Size = System::Drawing::Size(80, 23);
+            this->RepModeReports->TabIndex = 2;
+            this->RepModeReports->TabStop = true;
+            this->RepModeReports->Text = L"Reports";
+            this->RepModeReports->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->RepModeReports->UseVisualStyleBackColor = true;
+            this->RepModeReports->CheckedChanged += gcnew System::EventHandler(this, &Form1::RepMode_CheckedChanged);
             // 
             // TabMap
             // 
@@ -1174,9 +1339,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             splitContainer2->Panel1->Controls->Add(label16);
             splitContainer2->Panel1->Controls->Add(label15);
             splitContainer2->Panel1->Controls->Add(this->SystemsShipAge);
-            splitContainer2->Panel1->Controls->Add(this->SystemsGV);
             splitContainer2->Panel1->Controls->Add(this->SystemsRefShip);
-            splitContainer2->Panel1->Controls->Add(label14);
             splitContainer2->Panel1->Controls->Add(label2);
             splitContainer2->Panel1->Controls->Add(this->SystemsRefColony);
             splitContainer2->Panel1->Controls->Add(this->SystemsRefHome);
@@ -1261,7 +1424,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // SystemsRefEdit
             // 
-            this->SystemsRefEdit->Location = System::Drawing::Point(50, 27);
+            this->SystemsRefEdit->Location = System::Drawing::Point(396, 4);
             this->SystemsRefEdit->MaxLength = 12;
             this->SystemsRefEdit->Name = L"SystemsRefEdit";
             this->SystemsRefEdit->Size = System::Drawing::Size(82, 20);
@@ -1312,7 +1475,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // SystemsShipAge
             // 
-            this->SystemsShipAge->Location = System::Drawing::Point(422, 3);
+            this->SystemsShipAge->Location = System::Drawing::Point(570, 4);
             this->SystemsShipAge->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {50, 0, 0, 0});
             this->SystemsShipAge->Name = L"SystemsShipAge";
             this->SystemsShipAge->Size = System::Drawing::Size(47, 20);
@@ -1320,42 +1483,21 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->BtnTooltip->SetToolTip(this->SystemsShipAge, L"Select ship age for mishap calculation.");
             this->SystemsShipAge->ValueChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
             // 
-            // SystemsGV
-            // 
-            this->SystemsGV->Location = System::Drawing::Point(311, 3);
-            this->SystemsGV->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {200, 0, 0, 0});
-            this->SystemsGV->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
-            this->SystemsGV->Name = L"SystemsGV";
-            this->SystemsGV->Size = System::Drawing::Size(47, 20);
-            this->SystemsGV->TabIndex = 1;
-            this->BtnTooltip->SetToolTip(this->SystemsGV, L"Set reference GV technology level for distance and mishap calculation.");
-            this->SystemsGV->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
-            this->SystemsGV->ValueChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
-            // 
             // SystemsRefShip
             // 
             this->SystemsRefShip->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->SystemsRefShip->FormattingEnabled = true;
-            this->SystemsRefShip->Location = System::Drawing::Point(482, 3);
+            this->SystemsRefShip->Location = System::Drawing::Point(482, 26);
             this->SystemsRefShip->Name = L"SystemsRefShip";
             this->SystemsRefShip->Size = System::Drawing::Size(135, 21);
             this->SystemsRefShip->TabIndex = 3;
             this->BtnTooltip->SetToolTip(this->SystemsRefShip, L"Select ship reference for mishap calculation.");
             this->SystemsRefShip->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
             // 
-            // label14
-            // 
-            label14->AutoSize = true;
-            label14->Location = System::Drawing::Point(284, 6);
-            label14->Name = L"label14";
-            label14->Size = System::Drawing::Size(25, 13);
-            label14->TabIndex = 5;
-            label14->Text = L"GV:";
-            // 
             // label2
             // 
             label2->AutoSize = true;
-            label2->Location = System::Drawing::Point(367, 6);
+            label2->Location = System::Drawing::Point(515, 7);
             label2->Name = L"label2";
             label2->Size = System::Drawing::Size(53, 13);
             label2->TabIndex = 5;
@@ -1365,7 +1507,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             this->SystemsRefColony->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->SystemsRefColony->FormattingEnabled = true;
-            this->SystemsRefColony->Location = System::Drawing::Point(447, 26);
+            this->SystemsRefColony->Location = System::Drawing::Point(308, 26);
             this->SystemsRefColony->Name = L"SystemsRefColony";
             this->SystemsRefColony->Size = System::Drawing::Size(170, 21);
             this->SystemsRefColony->TabIndex = 7;
@@ -1376,7 +1518,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             this->SystemsRefHome->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->SystemsRefHome->FormattingEnabled = true;
-            this->SystemsRefHome->Location = System::Drawing::Point(272, 26);
+            this->SystemsRefHome->Location = System::Drawing::Point(134, 26);
             this->SystemsRefHome->Name = L"SystemsRefHome";
             this->SystemsRefHome->Size = System::Drawing::Size(170, 21);
             this->SystemsRefHome->TabIndex = 6;
@@ -1387,7 +1529,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             this->SystemsRefXYZ->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->SystemsRefXYZ->FormattingEnabled = true;
-            this->SystemsRefXYZ->Location = System::Drawing::Point(141, 26);
+            this->SystemsRefXYZ->Location = System::Drawing::Point(4, 26);
             this->SystemsRefXYZ->Name = L"SystemsRefXYZ";
             this->SystemsRefXYZ->Size = System::Drawing::Size(126, 21);
             this->SystemsRefXYZ->TabIndex = 5;
@@ -1400,7 +1542,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->SystemsRef->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
             this->SystemsRef->Location = System::Drawing::Point(4, 3);
             this->SystemsRef->Name = L"SystemsRef";
-            this->SystemsRef->Size = System::Drawing::Size(260, 17);
+            this->SystemsRef->Size = System::Drawing::Size(300, 17);
             this->SystemsRef->TabIndex = 0;
             this->SystemsRef->Text = L"Ref. system:";
             this->BtnTooltip->SetToolTip(this->SystemsRef, L"Reference system for distance and mishap % calculation.");
@@ -1408,7 +1550,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // label17
             // 
             label17->AutoSize = true;
-            label17->Location = System::Drawing::Point(4, 30);
+            label17->Location = System::Drawing::Point(350, 7);
             label17->Name = L"label17";
             label17->Size = System::Drawing::Size(43, 13);
             label17->TabIndex = 0;
@@ -1487,9 +1629,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             splitContainer3->Panel1->Controls->Add(label1);
             splitContainer3->Panel1->Controls->Add(label3);
             splitContainer3->Panel1->Controls->Add(this->PlanetsShipAge);
-            splitContainer3->Panel1->Controls->Add(this->PlanetsGV);
             splitContainer3->Panel1->Controls->Add(this->PlanetsRefShip);
-            splitContainer3->Panel1->Controls->Add(label4);
             splitContainer3->Panel1->Controls->Add(label18);
             splitContainer3->Panel1->Controls->Add(this->PlanetsRefColony);
             splitContainer3->Panel1->Controls->Add(this->PlanetsRefHome);
@@ -1574,7 +1714,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // PlanetsRefEdit
             // 
-            this->PlanetsRefEdit->Location = System::Drawing::Point(50, 27);
+            this->PlanetsRefEdit->Location = System::Drawing::Point(396, 4);
             this->PlanetsRefEdit->MaxLength = 12;
             this->PlanetsRefEdit->Name = L"PlanetsRefEdit";
             this->PlanetsRefEdit->Size = System::Drawing::Size(82, 20);
@@ -1624,7 +1764,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // PlanetsShipAge
             // 
-            this->PlanetsShipAge->Location = System::Drawing::Point(422, 3);
+            this->PlanetsShipAge->Location = System::Drawing::Point(570, 4);
             this->PlanetsShipAge->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {50, 0, 0, 0});
             this->PlanetsShipAge->Name = L"PlanetsShipAge";
             this->PlanetsShipAge->Size = System::Drawing::Size(47, 20);
@@ -1632,42 +1772,21 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->BtnTooltip->SetToolTip(this->PlanetsShipAge, L"Select ship age for mishap calculation.");
             this->PlanetsShipAge->ValueChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
             // 
-            // PlanetsGV
-            // 
-            this->PlanetsGV->Location = System::Drawing::Point(311, 3);
-            this->PlanetsGV->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {200, 0, 0, 0});
-            this->PlanetsGV->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
-            this->PlanetsGV->Name = L"PlanetsGV";
-            this->PlanetsGV->Size = System::Drawing::Size(47, 20);
-            this->PlanetsGV->TabIndex = 15;
-            this->BtnTooltip->SetToolTip(this->PlanetsGV, L"Set reference GV technology level for distance and mishap calculation.");
-            this->PlanetsGV->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
-            this->PlanetsGV->ValueChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
-            // 
             // PlanetsRefShip
             // 
             this->PlanetsRefShip->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->PlanetsRefShip->FormattingEnabled = true;
-            this->PlanetsRefShip->Location = System::Drawing::Point(482, 3);
+            this->PlanetsRefShip->Location = System::Drawing::Point(482, 26);
             this->PlanetsRefShip->Name = L"PlanetsRefShip";
             this->PlanetsRefShip->Size = System::Drawing::Size(135, 21);
             this->PlanetsRefShip->TabIndex = 17;
             this->BtnTooltip->SetToolTip(this->PlanetsRefShip, L"Select ship reference for mishap calculation.");
             this->PlanetsRefShip->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
             // 
-            // label4
-            // 
-            label4->AutoSize = true;
-            label4->Location = System::Drawing::Point(284, 6);
-            label4->Name = L"label4";
-            label4->Size = System::Drawing::Size(25, 13);
-            label4->TabIndex = 19;
-            label4->Text = L"GV:";
-            // 
             // label18
             // 
             label18->AutoSize = true;
-            label18->Location = System::Drawing::Point(367, 6);
+            label18->Location = System::Drawing::Point(515, 7);
             label18->Name = L"label18";
             label18->Size = System::Drawing::Size(53, 13);
             label18->TabIndex = 20;
@@ -1677,7 +1796,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             this->PlanetsRefColony->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->PlanetsRefColony->FormattingEnabled = true;
-            this->PlanetsRefColony->Location = System::Drawing::Point(447, 26);
+            this->PlanetsRefColony->Location = System::Drawing::Point(308, 26);
             this->PlanetsRefColony->Name = L"PlanetsRefColony";
             this->PlanetsRefColony->Size = System::Drawing::Size(170, 21);
             this->PlanetsRefColony->TabIndex = 23;
@@ -1688,7 +1807,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             this->PlanetsRefHome->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->PlanetsRefHome->FormattingEnabled = true;
-            this->PlanetsRefHome->Location = System::Drawing::Point(272, 26);
+            this->PlanetsRefHome->Location = System::Drawing::Point(134, 26);
             this->PlanetsRefHome->Name = L"PlanetsRefHome";
             this->PlanetsRefHome->Size = System::Drawing::Size(170, 21);
             this->PlanetsRefHome->TabIndex = 22;
@@ -1699,7 +1818,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             this->PlanetsRefXYZ->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->PlanetsRefXYZ->FormattingEnabled = true;
-            this->PlanetsRefXYZ->Location = System::Drawing::Point(141, 26);
+            this->PlanetsRefXYZ->Location = System::Drawing::Point(4, 26);
             this->PlanetsRefXYZ->Name = L"PlanetsRefXYZ";
             this->PlanetsRefXYZ->Size = System::Drawing::Size(126, 21);
             this->PlanetsRefXYZ->TabIndex = 21;
@@ -1712,7 +1831,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->PlanetsRef->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
             this->PlanetsRef->Location = System::Drawing::Point(4, 3);
             this->PlanetsRef->Name = L"PlanetsRef";
-            this->PlanetsRef->Size = System::Drawing::Size(260, 17);
+            this->PlanetsRef->Size = System::Drawing::Size(300, 17);
             this->PlanetsRef->TabIndex = 13;
             this->PlanetsRef->Text = L"Ref. system:";
             this->BtnTooltip->SetToolTip(this->PlanetsRef, L"Reference system for distance and mishap % calculation.");
@@ -1720,7 +1839,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // label20
             // 
             label20->AutoSize = true;
-            label20->Location = System::Drawing::Point(4, 30);
+            label20->Location = System::Drawing::Point(350, 7);
             label20->Name = L"label20";
             label20->Size = System::Drawing::Size(43, 13);
             label20->TabIndex = 14;
@@ -1800,9 +1919,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->splitContainer4->Panel1->Controls->Add(label8);
             this->splitContainer4->Panel1->Controls->Add(label19);
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesShipAge);
-            this->splitContainer4->Panel1->Controls->Add(this->ColoniesGV);
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesRefShip);
-            this->splitContainer4->Panel1->Controls->Add(label21);
             this->splitContainer4->Panel1->Controls->Add(label22);
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesRefColony);
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesRefXYZ);
@@ -1862,7 +1979,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             this->ColoniesRefHome->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->ColoniesRefHome->FormattingEnabled = true;
-            this->ColoniesRefHome->Location = System::Drawing::Point(272, 26);
+            this->ColoniesRefHome->Location = System::Drawing::Point(134, 26);
             this->ColoniesRefHome->Name = L"ColoniesRefHome";
             this->ColoniesRefHome->Size = System::Drawing::Size(170, 21);
             this->ColoniesRefHome->TabIndex = 40;
@@ -1882,7 +1999,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // ColoniesRefText
             // 
-            this->ColoniesRefText->Location = System::Drawing::Point(50, 27);
+            this->ColoniesRefText->Location = System::Drawing::Point(396, 4);
             this->ColoniesRefText->MaxLength = 12;
             this->ColoniesRefText->Name = L"ColoniesRefText";
             this->ColoniesRefText->Size = System::Drawing::Size(82, 20);
@@ -1932,7 +2049,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // ColoniesShipAge
             // 
-            this->ColoniesShipAge->Location = System::Drawing::Point(422, 3);
+            this->ColoniesShipAge->Location = System::Drawing::Point(570, 4);
             this->ColoniesShipAge->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {50, 0, 0, 0});
             this->ColoniesShipAge->Name = L"ColoniesShipAge";
             this->ColoniesShipAge->Size = System::Drawing::Size(47, 20);
@@ -1940,42 +2057,21 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->BtnTooltip->SetToolTip(this->ColoniesShipAge, L"Select ship age for mishap calculation.");
             this->ColoniesShipAge->ValueChanged += gcnew System::EventHandler(this, &Form1::Colonies_Update);
             // 
-            // ColoniesGV
-            // 
-            this->ColoniesGV->Location = System::Drawing::Point(311, 3);
-            this->ColoniesGV->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {200, 0, 0, 0});
-            this->ColoniesGV->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
-            this->ColoniesGV->Name = L"ColoniesGV";
-            this->ColoniesGV->Size = System::Drawing::Size(47, 20);
-            this->ColoniesGV->TabIndex = 33;
-            this->BtnTooltip->SetToolTip(this->ColoniesGV, L"Set reference GV technology level for distance and mishap calculation.");
-            this->ColoniesGV->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
-            this->ColoniesGV->ValueChanged += gcnew System::EventHandler(this, &Form1::Colonies_Update);
-            // 
             // ColoniesRefShip
             // 
             this->ColoniesRefShip->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->ColoniesRefShip->FormattingEnabled = true;
-            this->ColoniesRefShip->Location = System::Drawing::Point(482, 3);
+            this->ColoniesRefShip->Location = System::Drawing::Point(482, 26);
             this->ColoniesRefShip->Name = L"ColoniesRefShip";
             this->ColoniesRefShip->Size = System::Drawing::Size(135, 21);
             this->ColoniesRefShip->TabIndex = 35;
             this->BtnTooltip->SetToolTip(this->ColoniesRefShip, L"Select ship reference for mishap calculation.");
             this->ColoniesRefShip->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::Colonies_Update);
             // 
-            // label21
-            // 
-            label21->AutoSize = true;
-            label21->Location = System::Drawing::Point(284, 6);
-            label21->Name = L"label21";
-            label21->Size = System::Drawing::Size(25, 13);
-            label21->TabIndex = 37;
-            label21->Text = L"GV:";
-            // 
             // label22
             // 
             label22->AutoSize = true;
-            label22->Location = System::Drawing::Point(367, 6);
+            label22->Location = System::Drawing::Point(515, 7);
             label22->Name = L"label22";
             label22->Size = System::Drawing::Size(53, 13);
             label22->TabIndex = 38;
@@ -1985,7 +2081,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             this->ColoniesRefColony->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->ColoniesRefColony->FormattingEnabled = true;
-            this->ColoniesRefColony->Location = System::Drawing::Point(447, 26);
+            this->ColoniesRefColony->Location = System::Drawing::Point(308, 26);
             this->ColoniesRefColony->Name = L"ColoniesRefColony";
             this->ColoniesRefColony->Size = System::Drawing::Size(170, 21);
             this->ColoniesRefColony->TabIndex = 41;
@@ -1996,7 +2092,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             this->ColoniesRefXYZ->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->ColoniesRefXYZ->FormattingEnabled = true;
-            this->ColoniesRefXYZ->Location = System::Drawing::Point(141, 26);
+            this->ColoniesRefXYZ->Location = System::Drawing::Point(4, 26);
             this->ColoniesRefXYZ->Name = L"ColoniesRefXYZ";
             this->ColoniesRefXYZ->Size = System::Drawing::Size(126, 21);
             this->ColoniesRefXYZ->TabIndex = 39;
@@ -2009,7 +2105,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ColoniesRef->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
             this->ColoniesRef->Location = System::Drawing::Point(4, 3);
             this->ColoniesRef->Name = L"ColoniesRef";
-            this->ColoniesRef->Size = System::Drawing::Size(260, 17);
+            this->ColoniesRef->Size = System::Drawing::Size(300, 17);
             this->ColoniesRef->TabIndex = 31;
             this->ColoniesRef->Text = L"Ref. system:";
             this->BtnTooltip->SetToolTip(this->ColoniesRef, L"Reference system for distance and mishap % calculation.");
@@ -2017,7 +2113,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // label24
             // 
             label24->AutoSize = true;
-            label24->Location = System::Drawing::Point(4, 30);
+            label24->Location = System::Drawing::Point(350, 7);
             label24->Name = L"label24";
             label24->Size = System::Drawing::Size(43, 13);
             label24->TabIndex = 32;
@@ -2101,9 +2197,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->splitContainer5->Panel1->Controls->Add(this->ShipsRefText);
             this->splitContainer5->Panel1->Controls->Add(this->ShipsMaxMishap);
             this->splitContainer5->Panel1->Controls->Add(label10);
-            this->splitContainer5->Panel1->Controls->Add(this->ShipsGV);
             this->splitContainer5->Panel1->Controls->Add(this->ShipsRefShip);
-            this->splitContainer5->Panel1->Controls->Add(label23);
             this->splitContainer5->Panel1->Controls->Add(this->ShipsRefColony);
             this->splitContainer5->Panel1->Controls->Add(this->ShipsRef);
             this->splitContainer5->Panel1->Controls->Add(label27);
@@ -2120,7 +2214,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             this->ShipsRefXYZ->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->ShipsRefXYZ->FormattingEnabled = true;
-            this->ShipsRefXYZ->Location = System::Drawing::Point(141, 26);
+            this->ShipsRefXYZ->Location = System::Drawing::Point(4, 26);
             this->ShipsRefXYZ->Name = L"ShipsRefXYZ";
             this->ShipsRefXYZ->Size = System::Drawing::Size(126, 21);
             this->ShipsRefXYZ->TabIndex = 59;
@@ -2257,7 +2351,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             this->ShipsRefHome->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->ShipsRefHome->FormattingEnabled = true;
-            this->ShipsRefHome->Location = System::Drawing::Point(272, 26);
+            this->ShipsRefHome->Location = System::Drawing::Point(134, 26);
             this->ShipsRefHome->Name = L"ShipsRefHome";
             this->ShipsRefHome->Size = System::Drawing::Size(170, 21);
             this->ShipsRefHome->TabIndex = 60;
@@ -2277,7 +2371,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // ShipsRefText
             // 
-            this->ShipsRefText->Location = System::Drawing::Point(50, 27);
+            this->ShipsRefText->Location = System::Drawing::Point(396, 4);
             this->ShipsRefText->MaxLength = 12;
             this->ShipsRefText->Name = L"ShipsRefText";
             this->ShipsRefText->Size = System::Drawing::Size(82, 20);
@@ -2304,43 +2398,22 @@ private: System::Windows::Forms::Label^  SystemsRef;
             label10->TabIndex = 64;
             label10->Text = L"Max Mishap%:";
             // 
-            // ShipsGV
-            // 
-            this->ShipsGV->Location = System::Drawing::Point(311, 3);
-            this->ShipsGV->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {200, 0, 0, 0});
-            this->ShipsGV->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
-            this->ShipsGV->Name = L"ShipsGV";
-            this->ShipsGV->Size = System::Drawing::Size(47, 20);
-            this->ShipsGV->TabIndex = 53;
-            this->BtnTooltip->SetToolTip(this->ShipsGV, L"Set reference GV technology level for distance and mishap calculation.");
-            this->ShipsGV->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
-            this->ShipsGV->ValueChanged += gcnew System::EventHandler(this, &Form1::Ships_Update);
-            // 
             // ShipsRefShip
             // 
             this->ShipsRefShip->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->ShipsRefShip->FormattingEnabled = true;
-            this->ShipsRefShip->Location = System::Drawing::Point(447, 3);
+            this->ShipsRefShip->Location = System::Drawing::Point(482, 26);
             this->ShipsRefShip->Name = L"ShipsRefShip";
-            this->ShipsRefShip->Size = System::Drawing::Size(170, 21);
+            this->ShipsRefShip->Size = System::Drawing::Size(135, 21);
             this->ShipsRefShip->TabIndex = 55;
             this->BtnTooltip->SetToolTip(this->ShipsRefShip, L"Select ship reference for mishap calculation.");
             this->ShipsRefShip->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::Ships_Update);
-            // 
-            // label23
-            // 
-            label23->AutoSize = true;
-            label23->Location = System::Drawing::Point(284, 6);
-            label23->Name = L"label23";
-            label23->Size = System::Drawing::Size(25, 13);
-            label23->TabIndex = 57;
-            label23->Text = L"GV:";
             // 
             // ShipsRefColony
             // 
             this->ShipsRefColony->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->ShipsRefColony->FormattingEnabled = true;
-            this->ShipsRefColony->Location = System::Drawing::Point(447, 26);
+            this->ShipsRefColony->Location = System::Drawing::Point(308, 26);
             this->ShipsRefColony->Name = L"ShipsRefColony";
             this->ShipsRefColony->Size = System::Drawing::Size(170, 21);
             this->ShipsRefColony->TabIndex = 61;
@@ -2353,7 +2426,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ShipsRef->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
             this->ShipsRef->Location = System::Drawing::Point(4, 3);
             this->ShipsRef->Name = L"ShipsRef";
-            this->ShipsRef->Size = System::Drawing::Size(260, 17);
+            this->ShipsRef->Size = System::Drawing::Size(300, 17);
             this->ShipsRef->TabIndex = 51;
             this->ShipsRef->Text = L"Ref. system:";
             this->BtnTooltip->SetToolTip(this->ShipsRef, L"Reference system for distance and mishap % calculation.");
@@ -2361,7 +2434,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // label27
             // 
             label27->AutoSize = true;
-            label27->Location = System::Drawing::Point(4, 30);
+            label27->Location = System::Drawing::Point(350, 7);
             label27->Name = L"label27";
             label27->Size = System::Drawing::Size(43, 13);
             label27->TabIndex = 52;
@@ -2563,15 +2636,13 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // OrderTemplate
             // 
-            this->OrderTemplate->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom) 
-                | System::Windows::Forms::AnchorStyles::Left) 
-                | System::Windows::Forms::AnchorStyles::Right));
+            this->OrderTemplate->Dock = System::Windows::Forms::DockStyle::Fill;
             this->OrderTemplate->Font = (gcnew System::Drawing::Font(L"Courier New", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(0)));
-            this->OrderTemplate->Location = System::Drawing::Point(10, 10);
+            this->OrderTemplate->Location = System::Drawing::Point(0, 0);
             this->OrderTemplate->Name = L"OrderTemplate";
             this->OrderTemplate->ReadOnly = true;
-            this->OrderTemplate->Size = System::Drawing::Size(663, 543);
+            this->OrderTemplate->Size = System::Drawing::Size(683, 563);
             this->OrderTemplate->TabIndex = 0;
             this->OrderTemplate->Text = L"";
             // 
@@ -2705,19 +2776,23 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->Name = L"Form1";
             this->Text = L"FarHorizons User Interface";
             this->WindowState = System::Windows::Forms::FormWindowState::Maximized;
-            splitContainer1->Panel1->ResumeLayout(false);
-            splitContainer1->Panel2->ResumeLayout(false);
-            splitContainer1->Panel2->PerformLayout();
-            splitContainer1->ResumeLayout(false);
             TopSplitCont->Panel1->ResumeLayout(false);
             TopSplitCont->Panel2->ResumeLayout(false);
+            TopSplitCont->Panel2->PerformLayout();
             TopSplitCont->ResumeLayout(false);
             splitContainer7->Panel1->ResumeLayout(false);
             splitContainer7->Panel2->ResumeLayout(false);
             splitContainer7->Panel2->PerformLayout();
             splitContainer7->ResumeLayout(false);
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechBI))->EndInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechMI))->EndInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechMA))->EndInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechML))->EndInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechGV))->EndInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechLS))->EndInit();
             this->MenuTabs->ResumeLayout(false);
             this->TabReports->ResumeLayout(false);
+            this->TabReports->PerformLayout();
             this->TabMap->ResumeLayout(false);
             this->panel1->ResumeLayout(false);
             this->panel1->PerformLayout();
@@ -2742,7 +2817,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsMaxLSN))->EndInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsMaxMishap))->EndInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsShipAge))->EndInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsGV))->EndInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->SystemsGrid))->EndInit();
             this->TabPlanets->ResumeLayout(false);
             splitContainer3->Panel1->ResumeLayout(false);
@@ -2752,7 +2826,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsMaxLSN))->EndInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsMaxMishap))->EndInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsShipAge))->EndInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsGV))->EndInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->PlanetsGrid))->EndInit();
             this->TabColonies->ResumeLayout(false);
             this->splitContainer4->Panel1->ResumeLayout(false);
@@ -2762,7 +2835,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ColoniesMaxLSN))->EndInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ColoniesMaxMishap))->EndInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ColoniesShipAge))->EndInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ColoniesGV))->EndInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ColoniesGrid))->EndInit();
             this->TabShips->ResumeLayout(false);
             this->splitContainer5->Panel1->ResumeLayout(false);
@@ -2770,7 +2842,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->splitContainer5->Panel2->ResumeLayout(false);
             this->splitContainer5->ResumeLayout(false);
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ShipsMaxMishap))->EndInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ShipsGV))->EndInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->ShipsGrid))->EndInit();
             this->TabAliens->ResumeLayout(false);
             this->splitContainer6->Panel1->ResumeLayout(false);
@@ -2898,6 +2969,20 @@ private: System::Void Grid_CellMouseClick(System::Object^  sender, System::Windo
              {
                  ShowGridContextMenu(safe_cast<DataGridView^>(sender), e);
              }
+         }
+private: System::Void TechResetCurrent_Click(System::Object^  sender, System::EventArgs^  e) {
+             TechLevelsResetToCurrent();
+             TechLevelsChanged();
+         }
+private: System::Void TechResetTaught_Click(System::Object^  sender, System::EventArgs^  e) {
+             TechLevelsResetToTaught();
+             TechLevelsChanged();
+         }
+private: System::Void Tech_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+             TechLevelsChanged();
+         }
+private: System::Void MenuTabs_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
+             UpdateTabs();
          }
 };
 
