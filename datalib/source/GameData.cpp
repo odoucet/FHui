@@ -27,6 +27,20 @@ String^ PrintInventory(array<int> ^inv)
 
 // ---------------------------------------------------------
 
+private ref class ColonyProdOrderComparer : public IComparer<Colony^>
+{
+public:
+    virtual int Compare(Colony ^c1, Colony ^c2)
+    {
+        return c1->ProductionOrder - c2->ProductionOrder;
+    }
+};
+
+void Alien::SortColoniesByProdOrder()
+{
+    Colonies->Sort( gcnew ColonyProdOrderComparer );
+}
+
 String^ Alien::PrintHome()
 {
     if( HomeSystem == nullptr )
@@ -289,7 +303,7 @@ void StarSystem::Planets::set(int plNum, Planet ^pl)
 
 String^ Colony::PrintInventoryShort()
 {
-    return PrintInventory(m_Inventory);
+    return PrintInventory(Inventory);
 }
 
 String^ Colony::PrintRefListEntry(Alien ^player)
@@ -1060,11 +1074,11 @@ Colony^ GameData::AddColony(int turn, Alien ^sp, String ^name, StarSystem ^syste
     return nullptr;
 }
 
-void GameData::AddPlanetName(int turn, int x, int y, int z, int pl, String ^name)
+void GameData::AddPlanetName(int turn, StarSystem ^system, int pl, String ^name)
 {
     if( TurnCheck(turn) )
     {
-        m_PlanetNames[name->ToLower()] = gcnew PlanetName(x, y, z, pl, name);
+        m_PlanetNames[name->ToLower()] = gcnew PlanetName(system, pl, name);
     }
 }
 
@@ -1074,6 +1088,7 @@ void GameData::Update()
     UpdateSystems();
     LinkPlanetNames();
     UpdateHomeWorlds();
+    UpdateColonies();
 }
 
 void GameData::UpdateAliens()
@@ -1154,8 +1169,7 @@ void GameData::LinkPlanetNames()
 
     for each( PlanetName ^plName in m_PlanetNames->Values )
     {
-        StarSystem ^system = GetStarSystem( plName->X, plName->Y, plName->Z );
-        Planet ^planet = system->GetPlanet( plName->Num );
+        Planet ^planet = plName->System->GetPlanet( plName->PlanetNum );
         if( planet )
             planet->Name = plName->Name;
     }
@@ -1184,6 +1198,38 @@ void GameData::UpdateHomeWorlds()
             }
         }
     }
+}
+
+void GameData::UpdateColonies()
+{
+    int order = 0;
+
+    // Mining and resort colonies first
+    for each( Colony ^colony in GetSpecies()->Colonies )
+        if( colony->PlanetType == PLANET_COLONY_MINING ||
+            colony->PlanetType == PLANET_COLONY_RESORT )
+        {
+            colony->ProductionOrder = ++order;
+            colony->CanProduce = false;
+        }
+
+    // Colony planets
+    for each( Colony ^colony in GetSpecies()->Colonies )
+        if( colony->PlanetType == PLANET_COLONY )
+        {
+            colony->ProductionOrder = ++order;
+            colony->CanProduce = true;
+        }
+
+    // Home planet
+    for each( Colony ^colony in GetSpecies()->Colonies )
+        if( colony->PlanetType == PLANET_HOME )
+        {
+            colony->ProductionOrder = ++order;
+            colony->CanProduce = true;
+        }
+
+    GetSpecies()->SortColoniesByProdOrder();
 }
 
 Ship^ GameData::AddShip(int turn, Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system)

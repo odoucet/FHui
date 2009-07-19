@@ -16,6 +16,31 @@ using namespace System::Reflection;
 namespace FHUI
 {
 
+////////////////////////////////////////////////////////////////
+
+generic <typename T>
+ref class ToolStripMenuItemCustom : public ToolStripMenuItem
+{
+public:
+    ToolStripMenuItemCustom(String ^s, T data)
+        : ToolStripMenuItem(s)
+        , m_Data(data)
+    {}
+
+    delegate void CustomEventHandler(T);
+    event CustomEventHandler^ CustomClick;
+    virtual void OnClick(EventArgs^ e) override
+    {
+        CustomClick(m_Data);
+        ToolStripMenuItem::OnClick(e);
+    }
+
+protected:
+    T       m_Data;
+};
+
+////////////////////////////////////////////////////////////////
+
 void Form1::LoadGameData()
 {
     try
@@ -46,8 +71,8 @@ void Form1::InitControls()
 
     // -- systems
     filter = gcnew GridFilter(SystemsGrid, m_bGridUpdateEnabled);
-    filter->OnGridSetup += gcnew GridSetupHandler(this, &Form1::SystemsSetup);
-    filter->OnGridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
+    filter->GridSetup += gcnew GridSetupHandler(this, &Form1::SystemsSetup);
+    filter->GridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
 
     filter->CtrlRef         = SystemsRef;
     filter->CtrlRefHome     = SystemsRefHome;
@@ -67,8 +92,8 @@ void Form1::InitControls()
 
     // -- planets
     filter = gcnew GridFilter(PlanetsGrid, m_bGridUpdateEnabled);
-    filter->OnGridSetup += gcnew GridSetupHandler(this, &Form1::PlanetsSetup);
-    filter->OnGridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
+    filter->GridSetup += gcnew GridSetupHandler(this, &Form1::PlanetsSetup);
+    filter->GridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
 
     filter->CtrlRef         = PlanetsRef;
     filter->CtrlRefHome     = PlanetsRefHome;
@@ -88,8 +113,8 @@ void Form1::InitControls()
 
     // -- colonies
     filter = gcnew GridFilter(ColoniesGrid, m_bGridUpdateEnabled);
-    filter->OnGridSetup += gcnew GridSetupHandler(this, &Form1::ColoniesSetup);
-    filter->OnGridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
+    filter->GridSetup += gcnew GridSetupHandler(this, &Form1::ColoniesSetup);
+    filter->GridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
 
     filter->CtrlRef         = ColoniesRef;
     filter->CtrlRefHome     = ColoniesRefHome;
@@ -108,8 +133,8 @@ void Form1::InitControls()
 
     // -- ships
     filter = gcnew GridFilter(ShipsGrid, m_bGridUpdateEnabled);
-    filter->OnGridSetup += gcnew GridSetupHandler(this, &Form1::ShipsSetup);
-    filter->OnGridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
+    filter->GridSetup += gcnew GridSetupHandler(this, &Form1::ShipsSetup);
+    filter->GridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
 
     filter->CtrlRef         = ShipsRef;
     filter->CtrlRefHome     = ShipsRefHome;
@@ -132,8 +157,8 @@ void Form1::InitControls()
 
     // -- aliens
     filter = gcnew GridFilter(AliensGrid, m_bGridUpdateEnabled);
-    filter->OnGridSetup += gcnew GridSetupHandler(this, &Form1::AliensSetup);
-    filter->OnGridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
+    filter->GridSetup += gcnew GridSetupHandler(this, &Form1::AliensSetup);
+    filter->GridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
 
     filter->CtrlFiltRelA    = AliensFiltRelA;
     filter->CtrlFiltRelE    = AliensFiltRelE;
@@ -1216,6 +1241,7 @@ void Form1::ColoniesSetup()
     DataColumn ^colSize         = dataTable->Columns->Add("Size",       double::typeid );
     DataColumn ^colSeen         = dataTable->Columns->Add("Seen",       int::typeid );
     DataColumn ^colProd         = dataTable->Columns->Add("Prod.",      int::typeid );
+    DataColumn ^colProdOrder    = dataTable->Columns->Add("Order",      int::typeid );
     DataColumn ^colLSN          = dataTable->Columns->Add("LSN",        int::typeid );
     DataColumn ^colProdPerc     = dataTable->Columns->Add("Pr[%]",      int::typeid );
     DataColumn ^colBalance      = dataTable->Columns->Add("Balance",    String::typeid );
@@ -1256,6 +1282,7 @@ void Form1::ColoniesSetup()
         if( colony->Owner == sp )
         {
             row[colProd]    = colony->EUProd - colony->EUFleet;
+            row[colProdOrder] = colony->ProductionOrder;
             row[colProdPerc]= 100 - colony->ProdPenalty;
             row[colPop]     = colony->AvailPop;
 
@@ -1449,6 +1476,87 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
         "Reset Filters",
         nullptr,
         gcnew EventHandler(this, &Form1::ShipsFiltersReset_Click));
+
+    // Ship orders
+    if( m_ShipsMenuRef->Owner == m_GameData->GetSpecies() )
+    {
+        menu->Items->Add( gcnew ToolStripSeparator );
+
+        bool prodOrderPossible = false;
+        for each( Colony ^colony in m_ShipsMenuRef->Owner->Colonies )
+        {
+            if( colony->System == m_ShipsMenuRef->System &&
+                colony->CanProduce )
+            {
+                prodOrderPossible = true;
+                break;
+            }
+        }
+
+        if( prodOrderPossible )
+        {
+            menu->Items->Add( "Upgrade",
+                nullptr,
+                gcnew EventHandler(this, &Form1::ShipsMenuOrderUpgrade) );
+            menu->Items->Add( "Recycle",
+                nullptr,
+                gcnew EventHandler(this, &Form1::ShipsMenuOrderRecycle) );
+        }
+
+        if( m_ShipsMenuRef->CanJump )
+        {
+            ToolStripMenuItem ^jumpMenu = gcnew ToolStripMenuItem("Jump to:");
+            bool anyJump = false;
+
+            // Colonies
+            for each( Colony ^colony in m_GameData->GetSpecies()->Colonies )
+            {
+                if( colony->System != m_ShipsMenuRef->System )
+                {
+                    double mishap = m_ShipsMenuRef->System->CalcMishap(
+                        colony->System,
+                        Decimal::ToInt32(TechGV->Value),
+                        m_ShipsMenuRef->Age );
+
+                    ToolStripMenuItemCustom<Planet^> ^item = gcnew ToolStripMenuItemCustom<Planet^>(
+                        String::Format("PL {0}  {1:F2}%", colony->Name, mishap),
+                        colony->Planet );
+                    item->CustomClick += gcnew ToolStripMenuItemCustom<Planet^>::CustomEventHandler(this, &Form1::ShipsMenuOrderJump);
+                    jumpMenu->DropDownItems->Add( item );
+
+                    anyJump = true;
+                }
+            }
+
+            // Named planets
+            bool anyPlanet = false;
+            for each( PlanetName ^planet in m_GameData->GetPlanetNames() )
+            {
+                if( planet->System != m_ShipsMenuRef->System )
+                {
+                    if( !anyPlanet && anyJump )
+                        jumpMenu->DropDownItems->Add( gcnew ToolStripSeparator );
+
+                    double mishap = m_ShipsMenuRef->System->CalcMishap(
+                        planet->System,
+                        Decimal::ToInt32(TechGV->Value),
+                        m_ShipsMenuRef->Age );
+
+                    ToolStripMenuItemCustom<Planet^> ^item = gcnew ToolStripMenuItemCustom<Planet^>(
+                        String::Format("PL {0}  {1:F2}%", planet->Name, mishap),
+                        planet->System->GetPlanet(planet->PlanetNum) );
+                    item->CustomClick += gcnew ToolStripMenuItemCustom<Planet^>::CustomEventHandler(this, &Form1::ShipsMenuOrderJump);
+                    jumpMenu->DropDownItems->Add( item );
+
+                    anyJump = true;
+                    anyPlanet = true;
+                }
+            }
+
+            if( anyJump )
+                menu->Items->Add( jumpMenu );
+        }
+    }
 }
 
 void Form1::ShipsMenuSelectRef(Object^, EventArgs ^e)
@@ -1457,6 +1565,25 @@ void Form1::ShipsMenuSelectRef(Object^, EventArgs ^e)
         ShipsRefShip->Text = m_ShipsMenuRef->PrintRefListEntry();
     else
         m_ShipsFilter->SetRefSystem(m_ShipsMenuRef->System);
+}
+
+void Form1::ShipsMenuOrderUpgrade(Object^, EventArgs^)
+{
+    m_ShipsMenuRef->Command = gcnew Ship::Order(Ship::OrderType::Upgrade);
+    m_ShipsFilter->Update();
+}
+
+void Form1::ShipsMenuOrderRecycle(Object^, EventArgs^)
+{
+    m_ShipsMenuRef->Command = gcnew Ship::Order(Ship::OrderType::Recycle);
+    m_ShipsFilter->Update();
+}
+
+void Form1::ShipsMenuOrderJump(Planet ^planet)
+{
+    m_ShipsMenuRef->Command =
+        gcnew Ship::Order(Ship::OrderType::Jump, planet->System, planet->Number);
+    m_ShipsFilter->Update();
 }
 
 ////////////////////////////////////////////////////////////////

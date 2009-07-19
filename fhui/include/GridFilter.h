@@ -74,8 +74,8 @@ public:
     CheckBox        ^CtrlFiltTypeMl;
     CheckBox        ^CtrlFiltTypeTr;
 
-    event GridSetupHandler      ^OnGridSetup;
-    event GridExceptionHandler  ^OnGridException;
+    event GridSetupHandler      ^GridSetup;
+    event GridExceptionHandler  ^GridException;
 
     initonly static String  ^s_CaptionXYZ       = "[Select ref system]";
     initonly static String  ^s_CaptionHome      = "[Select ref home]";

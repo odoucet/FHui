@@ -884,7 +884,7 @@ void Report::MatchOtherPlanetsShipsScan(String ^s)
         String^ plName = GetMatchResult(4);
         String^ inventory = GetMatchResult(5);
 
-        m_GameData->AddPlanetName( m_Turn, m_ScanX, m_ScanY, m_ScanZ, plNum, plName);
+        m_GameData->AddPlanetName( m_Turn, system, plNum, plName);
 
         if( inventory->Length )
         {

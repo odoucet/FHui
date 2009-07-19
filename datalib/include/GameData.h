@@ -99,6 +99,8 @@ public:
     virtual SPRelType   GetFilterRelType() override     { return Relation; }
     // --------------------------------------------------
 
+    void            SortColoniesByProdOrder();
+
     String^         PrintRelation() { return FHStrings::SpRelToString(Relation); }
     String^         PrintHome();
     String^         PrintTechLevels();
@@ -287,7 +289,7 @@ public:
         LSN = 99;
         Shipyards = 0;
         LastSeen = -1;
-        m_Inventory = gcnew array<int>(INV_MAX){0};
+        Inventory = gcnew array<int>(INV_MAX){0};
     }
 
     // -------- IGridDataSrc ----------------------------
@@ -324,16 +326,12 @@ public:
     int             LSN;
     int             Shipyards;
     int             LastSeen;
+    int             ProductionOrder;
+    bool            CanProduce;
 
     property int EconomicBase { int get() { return Math::Max(-1, MiBase + MaBase); } }
 
-    property int            Inventory [int] {
-        int  get(int inv)           { return m_Inventory[inv]; }
-        void set(int inv, int val)  { m_Inventory[inv] = val; }
-    }
-
-protected:
-    array<int>     ^m_Inventory;
+    property array<int>^    Inventory;
 };
 
 // ---------------------------------------------------
@@ -341,20 +339,16 @@ protected:
 public ref class PlanetName
 {
 public:
-    PlanetName(int x, int y, int z, int num, String ^name)
+    PlanetName(StarSystem ^system, int num, String ^name)
     {
-        X = x;
-        Y = y;
-        Z = z;
-        Num = num;
-        Name = name;
+        System      = system;
+        PlanetNum   = num;
+        Name        = name;
     }
 
-    property int X;
-    property int Y;
-    property int Z;
-    property int Num;
-    property String^ Name;
+    property StarSystem^    System;
+    property int            PlanetNum;
+    property String^        Name;
 };
 
 // ---------------------------------------------------
@@ -368,6 +362,7 @@ public:
         Type = type;
         Name = name;
         SubLight = subLight;
+        CanJump = !subLight && type != SHIP_BAS;
         Age = 0;
         Size = 0;
         Location = SHIP_LOC_MAX;
@@ -403,6 +398,7 @@ public:
     property ShipType       Type;
     property String^        Name;
     property bool           SubLight;
+    property bool           CanJump;
     property int            Age;
     property ShipLocType    Location;
     property int            PlanetNum;
@@ -431,6 +427,22 @@ public:
     ref class Order
     {
     public:
+        Order(OrderType type)
+            : Type(type)
+            , JumpTarget(nullptr)
+            , PlanetNum(-1)
+        {}
+        Order(OrderType type, StarSystem ^system)
+            : Type(type)
+            , JumpTarget(system)
+            , PlanetNum(-1)
+        {}
+        Order(OrderType type, StarSystem ^system, int plNum)
+            : Type(type)
+            , JumpTarget(system)
+            , PlanetNum(plNum)
+        {}
+
         String^     Print();
         String^     PrintJumpDestination();
 
@@ -488,7 +500,7 @@ public:
     void            SetTurnStartEU(int turn, int eu);
     void            AddTurnProducedEU(int turn, int eu);
     Colony^         AddColony(int turn, Alien ^sp, String ^name, StarSystem ^system, int plNum);
-    void            AddPlanetName(int turn, int x, int y, int z, int pl, String ^name);
+    void            AddPlanetName(int turn, StarSystem ^system, int pl, String ^name);
     Ship^           AddShip(int turn, Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);
 
     // ------------------------------------------
@@ -500,6 +512,7 @@ protected:
     void            UpdateSystems();
     void            LinkPlanetNames();
     void            UpdateHomeWorlds();
+    void            UpdateColonies();
 
     String^         GetSpeciesSummary();
     String^         GetAllTechsSummary();

@@ -61,7 +61,7 @@ public:
     void        GeneratePreDeparture(List<String^>^, Ship^);
     void        GeneratePreDeparture(List<String^>^, Colony^);
     void        GenerateJumps(List<String^>^, Ship^);
-    void        GenerateProduction(List<String^>^, Colony^);
+    void        GenerateProduction(List<String^>^, Colony^, int %budget, int %colonyProd);
     void        GeneratePostArrival(List<String^>^, Ship^);
     void        GenerateStrikes(List<String^>^, StarSystem^);
 };

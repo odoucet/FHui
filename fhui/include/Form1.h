@@ -177,6 +177,9 @@ namespace FHUI {
         void        ShipsSetRef( int rowIndex );
         void        ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
         void        ShipsMenuSelectRef(Object^, EventArgs^);
+        void        ShipsMenuOrderUpgrade(Object^, EventArgs^);
+        void        ShipsMenuOrderRecycle(Object^, EventArgs^);
+        void        ShipsMenuOrderJump(Planet ^planet);
 
         IGridFilter        ^m_ShipsFilter;
         Ship               ^m_ShipsMenuRef;
@@ -201,6 +204,7 @@ namespace FHUI {
         void        GenerateStrikes();
 
         void        GenerateCombatInfo(StarSystem^);
+
         // ==================================================
         // --- MAP ---
         void        MapSetup();

@@ -34,7 +34,7 @@ void GridFilter::Update(Object ^sender)
                 if( ship && Decimal::ToInt32(CtrlShipAge->Value) != ship->Age )
                     CtrlRefShip->Text = s_CaptionShip;
 
-                OnGridSetup();
+                GridSetup();
             }
             else if( sender == m_RefreshDummy ||
                 sender == CtrlMaxMishap ||
@@ -75,14 +75,14 @@ void GridFilter::Update(Object ^sender)
                     filtMask != m_LastFiltMask )
                 {
                     m_LastFiltMask = filtMask;
-                    OnGridSetup();
+                    GridSetup();
                 }
             }
         }
     }
     catch( Exception ^e )
     {
-        OnGridException(e);
+        GridException(e);
     }
 }
 
@@ -274,7 +274,7 @@ void GridFilter::SetRefXYZ()
         CtrlRefColony->Text = s_CaptionColony;
 
         RefSystem = system;
-        OnGridSetup();
+        GridSetup();
 
         CtrlRef->Text = String::Format("Ref. system: [{0}]",
             RefSystem->PrintLocation());
@@ -299,7 +299,7 @@ void GridFilter::SetRefHome()
     CtrlRefColony->Text = s_CaptionColony;
 
     RefSystem = sp->HomeSystem;
-    OnGridSetup();
+    GridSetup();
 
     CtrlRef->Text = String::Format("Ref. system: [{0}] HOME {1}",
         RefSystem->PrintLocation(),
@@ -349,7 +349,7 @@ void GridFilter::SetRefColony()
     CtrlRefHome->Text   = s_CaptionHome;
 
     RefSystem = colony->System;
-    OnGridSetup();
+    GridSetup();
 
     CtrlRef->Text = String::Format("Ref. system: [{0}] PL {1}",
         RefSystem->PrintLocation(), ref);
@@ -368,7 +368,7 @@ void GridFilter::SetRefSystem(StarSystem ^system)
             CtrlRefColony->Text = s_CaptionColony;
 
             RefSystem = system;
-            OnGridSetup();
+            GridSetup();
 
             CtrlRef->Text = String::Format("Ref. system: [{0}] (space void)",
                 RefSystem->PrintLocation());
@@ -412,7 +412,7 @@ void GridFilter::SetRefShip()
             CtrlRefColony->Text = s_CaptionColony;
 
             RefSystem = ship->System;
-            OnGridSetup();
+            GridSetup();
 
             CtrlRef->Text = String::Format("Ref. system: [{0}] {1} {2}",
                 RefSystem->PrintLocation(),
