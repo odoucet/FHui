@@ -142,7 +142,13 @@ public:
         LSN = -1;
         Master = nullptr;
         NumColonies = 0;
-        m_Atmosphere = gcnew array<int>(GAS_MAX) {false};
+        Atmosphere = gcnew array<int>(GAS_MAX) {0};
+        SuspectedColonies = gcnew SortedList<Alien^, int>;
+    }
+
+    static Planet^ Default(StarSystem ^system, int nr)
+    {
+        return gcnew Planet(system, nr, 99, 99.99F, 99, 99, 999);
     }
 
     // -------- IGridDataSrc ----------------------------
@@ -157,6 +163,7 @@ public:
     int         CalculateLSN(AtmosphericReq^);
 
     String^     PrintLocation();
+    String^     PrintComment();
 
     property StarSystem^    System;
     property int            Number;
@@ -170,13 +177,8 @@ public:
     property int            LSN;
     property Alien^         Master;
     property int            NumColonies;
-    property int            Atmosphere [int] {
-        int  get(int gas)           { return m_Atmosphere[gas]; }
-        void set(int gas, int val)  { m_Atmosphere[gas] = val; }
-    }
-
-protected:
-    array<int> ^m_Atmosphere;
+    property array<int>^    Atmosphere;
+    property SortedList<Alien^, int>^ SuspectedColonies;
 };
 
 // ---------------------------------------------------
@@ -360,25 +362,19 @@ public:
 public ref class Ship : public GridDataSrcBase
 {
 public:
-    Ship(Alien ^owner, ShipType type, String ^name, int size, bool subLight)
+    Ship(Alien ^owner, ShipType type, String ^name, bool subLight)
     {
         Owner = owner;
         Type = type;
         Name = name;
         SubLight = subLight;
         Age = 0;
+        Size = 0;
         Location = SHIP_LOC_MAX;
-        X = -1;
-        Y = -1;
-        Z = -1;
         PlanetNum = -1;
         System = nullptr;
         Capacity = 0;
         IsPirate = false;
-
-        m_Size = size;
-        Size = m_Size;
-
         m_Cargo = gcnew array<int>(INV_MAX){0};
     }
 
@@ -409,9 +405,6 @@ public:
     property bool           SubLight;
     property int            Age;
     property ShipLocType    Location;
-    property int            X;
-    property int            Y;
-    property int            Z;
     property int            PlanetNum;
     property StarSystem^    System;
     property int            Capacity;
@@ -428,6 +421,27 @@ public:
         int  get(int inv)           { return m_Cargo[inv]; }
         void set(int inv, int val)  { m_Cargo[inv] = val; }
     }
+
+    // ---- Ship orders ----
+    enum class OrderType
+    {
+        Land, Orbit, Deep, Unload, Jump, Upgrade, Recycle
+    };
+
+    ref class Order
+    {
+    public:
+        String^     Print();
+
+        OrderType   Type;
+        StarSystem^ JumpTarget;
+        int         Planet;
+    };
+    
+    property Order^ PreDepCommand;
+    property Order^ PreDepCommand;
+    property Order^ PreDepCommand;
+    property Order^ PreDepCommand;
 
 protected:
     void            SetupTonnage();
@@ -475,9 +489,9 @@ public:
     void            AddPlanetScan(int turn, int x, int y, int z, Planet ^planet);
     void            SetTurnStartEU(int turn, int eu);
     void            AddTurnProducedEU(int turn, int eu);
-    Colony^         AddColony(int turn, Alien^, String^, StarSystem^, int);
+    Colony^         AddColony(int turn, Alien ^sp, String ^name, StarSystem ^system, int plNum);
     void            AddPlanetName(int turn, int x, int y, int z, int pl, String ^name);
-    Ship^           AddShip(int turn, Alien ^sp, ShipType type, String ^name, int size, bool subLight);
+    Ship^           AddShip(int turn, Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);
 
     // ------------------------------------------
 protected:

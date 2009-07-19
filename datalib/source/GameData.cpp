@@ -75,12 +75,12 @@ int Planet::CalculateLSN(AtmosphericReq ^atmReq)
 
     for( int i = 0; i < GAS_MAX; ++i )
     {
-        if( m_Atmosphere[i] > 0 && atmReq->Poisonous[i] )
+        if( Atmosphere[i] > 0 && atmReq->Poisonous[i] )
             lsn += 3;
     }
 
-    if( m_Atmosphere[atmReq->GasRequired] < atmReq->ReqMin ||
-        m_Atmosphere[atmReq->GasRequired] > atmReq->ReqMax )
+    if( Atmosphere[atmReq->GasRequired] < atmReq->ReqMin ||
+        Atmosphere[atmReq->GasRequired] > atmReq->ReqMax )
     {
         lsn += 3;
     }
@@ -93,6 +93,17 @@ int Planet::CalculateLSN(AtmosphericReq ^atmReq)
 String^ Planet::PrintLocation()
 {
     return String::Format("{0} {1}", System->PrintLocation(), Number);
+}
+
+String^ Planet::PrintComment()
+{
+    String ^ret = Comment;
+    for each( Alien ^sp in SuspectedColonies->Keys )
+        ret += String::Format(" SP {0} colony seen at turn {1}",
+            sp->Name,
+            SuspectedColonies[sp].ToString() );
+
+    return ret;
 }
 
 // ---------------------------------------------------------
@@ -376,16 +387,16 @@ String^ Ship::PrintLocation(Alien ^player)
     else
     {
         if( PlanetNum != -1 )
-            xyz = String::Format("[{0,2} {1,2} {2,2} {3}]", X, Y, Z, PlanetNum);
+            xyz = String::Format("[{0} {1}]", System->PrintLocation(), PlanetNum);
         else
-            xyz = String::Format("[{0,2} {1,2} {2,2}]", X, Y, Z);
+            xyz = System->PrintLocation();
     }
 
     switch( Location )
     {
-    case SHIP_LOC_DEEP_SPACE:   return String::Format("{0}, Deep", xyz);
-    case SHIP_LOC_ORBIT:        return String::Format("{0}, Orbit", xyz);
-    case SHIP_LOC_LANDED:       return String::Format("{0}, Landed", xyz);
+    case SHIP_LOC_DEEP_SPACE:   return xyz + ", Deep";
+    case SHIP_LOC_ORBIT:        return xyz + ", Orbit";
+    case SHIP_LOC_LANDED:       return xyz + ", Landed";
     }
 
     int l = Location;
@@ -639,9 +650,9 @@ private ref class ShipLocComparer : public IComparer<Ship^>
 public:
     virtual int Compare(Ship ^s1, Ship ^s2)
     {
-        if( s1->X != s2->X ) return s1->X - s2->X;
-        if( s1->Y != s2->Y ) return s1->Y - s2->Y;
-        if( s1->Z != s2->Z ) return s1->Z - s2->Z;
+        if( s1->System->X != s2->System->X ) return s1->System->X - s2->System->X;
+        if( s1->System->Y != s2->System->Y ) return s1->System->Y - s2->System->Y;
+        if( s1->System->Z != s2->System->Z ) return s1->System->Z - s2->System->Z;
         return s1->Location - s2->Location;
     }
 };
@@ -927,10 +938,22 @@ void GameData::AddPlanetScan(int turn, int x, int y, int z, Planet ^planet)
         turn == m_TurnMax )
     {
         if( system->PlanetsCount >= planet->Number &&
-            system->Planets[plNum] != nullptr &&
-            String::IsNullOrEmpty(planet->Comment) )
+            system->Planets[plNum] != nullptr )
         {
-            planet->Comment = system->Planets[plNum]->Comment;
+            Planet ^plExisting = system->Planets[plNum];
+            if( !String::IsNullOrEmpty(plExisting->Comment) )
+            {
+                if( String::IsNullOrEmpty(planet->Comment) )
+                    planet->Comment = plExisting->Comment;
+                else
+                    planet->Comment += "; " + plExisting->Comment;
+            }
+            //TODO: WTF? WHY DOES IT CRASH???
+            //planet->SuspectedColonies = plExisting->SuspectedColonies;
+
+            for each( Colony ^colony in m_Colonies->Values )
+                if( colony->Planet == plExisting )
+                    colony->Planet = planet;
         }
         system->Planets[plNum] = planet;
         system->TurnScanned   = Math::Max(system->TurnScanned, turn);
@@ -970,11 +993,16 @@ Colony^ GameData::AddColony(int turn, Alien ^sp, String ^name, StarSystem ^syste
         if( system->PlanetsCount < plNum )
         {
             // System is not yet known, initialize with defaults
-            for(int i = 0; i < plNum; i++)
+            for(int i = 0; i < plNum; ++i)
             {
-                system->Planets[i] = gcnew Planet( system, i+1, 99, 99.99F, 99, 99, 999);
+                if( system->Planets[i] == nullptr )
+                    system->Planets[i] = Planet::Default(system, i + 1);
             }
         }
+        colony->Planet = system->GetPlanet(plNum);
+        //TODO: WTF? WHY DOES IT CRASH???
+        //if( colony->Planet->SuspectedColonies->ContainsKey(sp) )
+        //    colony->Planet->SuspectedColonies->Remove(sp);
 
         // If this is species' own colony, remove alien colonies from this system.
         // They'll be restored by 'Aliens at...' parsing. If not - it means that alien
@@ -989,8 +1017,7 @@ Colony^ GameData::AddColony(int turn, Alien ^sp, String ^name, StarSystem ^syste
                 {
                     Colony ^c = iter->Value;
                     if( c->Owner != m_Species &&
-                        c->System == system &&
-                        c->PlanetNum == plNum )
+                        c->System == system )
                     {
                         m_Colonies->Remove(iter->Key);
                         bRemoved = true;
@@ -1132,28 +1159,50 @@ void GameData::UpdateHomeWorlds()
     }
 }
 
-Ship^ GameData::AddShip(int turn, Alien ^sp, ShipType type, String ^name, int size, bool subLight)
+Ship^ GameData::AddShip(int turn, Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system)
 {
-    bool createShip = false;
-
     if( TurnCheck(turn) )
     {
-        createShip = true;
-    }
-    else if( sp != m_Species )
-    {   // Turn N-1 report scanned after Turn N report
-        // and seeing an alien colony that wasn't seen next turn.
-        /*
-        //tbd: later, when history of seen ships is added this code may come in handy
-        if( m_Colonies->ContainsKey(name->ToLower()) == false )
-            createColony = true;
-        */
-    }
-
-    if( createShip )
-    {
-        Ship ^ship = gcnew Ship(sp, type, name, size, subLight);
+        Ship ^ship = gcnew Ship(sp, type, name, subLight);
+        ship->System = system;
         m_Ships[name->ToLower()] = ship;
+
+        if( sp == m_Species )
+        {
+            // Remove alien colonies from this system.
+            // They'll be restored by 'Aliens at...' parsing. If not - it means that alien
+            // colony was destroyed, assimilated or it is hiding. Add a note.
+            bool bRemoved = false;
+            do
+            {
+                bRemoved = false;
+                for each( KeyValuePair<String^, Colony^> ^iter in m_Colonies )
+                {
+                    Colony ^c = iter->Value;
+                    if( c->Owner != m_Species &&
+                        c->System == system )
+                    {
+                        if( c->Planet == nullptr )
+                        {
+                            // System is not yet known, initialize with defaults
+                            for(int i = 0; i < c->PlanetNum; ++i)
+                            {
+                                if( c->System->Planets[i] == nullptr )
+                                    c->System->Planets[i] = Planet::Default(c->System, i + 1);
+                            }
+                            c->Planet = c->System->GetPlanet(c->PlanetNum);
+                        }
+                        //TODO: WTF? WHY DOES IT CRASH???
+                        //c->Planet->SuspectedColonies[c->Owner] = c->LastSeen;
+
+                        m_Colonies->Remove(iter->Key);
+                        bRemoved = true;
+                        break; // for each
+                    }
+                }
+            } while( bRemoved );
+        }
+
         return ship;
     }
 

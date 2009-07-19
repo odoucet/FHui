@@ -784,12 +784,13 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // TechBI
             // 
-            this->TechBI->Location = System::Drawing::Point(469, 4);
+            this->TechBI->Location = System::Drawing::Point(468, 4);
             this->TechBI->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {200, 0, 0, 0});
             this->TechBI->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
             this->TechBI->Name = L"TechBI";
-            this->TechBI->Size = System::Drawing::Size(38, 20);
+            this->TechBI->Size = System::Drawing::Size(42, 20);
             this->TechBI->TabIndex = 6;
+            this->TechBI->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
             this->BtnTooltip->SetToolTip(this->TechBI, L"Set assumed BI technology level.");
             this->TechBI->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
             this->TechBI->ValueChanged += gcnew System::EventHandler(this, &Form1::Tech_ValueChanged);
@@ -805,12 +806,13 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // TechMI
             // 
-            this->TechMI->Location = System::Drawing::Point(140, 4);
+            this->TechMI->Location = System::Drawing::Point(139, 4);
             this->TechMI->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {200, 0, 0, 0});
             this->TechMI->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
             this->TechMI->Name = L"TechMI";
-            this->TechMI->Size = System::Drawing::Size(38, 20);
+            this->TechMI->Size = System::Drawing::Size(42, 20);
             this->TechMI->TabIndex = 6;
+            this->TechMI->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
             this->BtnTooltip->SetToolTip(this->TechMI, L"Set assumed MI technology level.");
             this->TechMI->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
             this->TechMI->ValueChanged += gcnew System::EventHandler(this, &Form1::Tech_ValueChanged);
@@ -826,7 +828,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // TechResetTaught
             // 
-            this->TechResetTaught->Location = System::Drawing::Point(571, 4);
+            this->TechResetTaught->Location = System::Drawing::Point(571, 3);
             this->TechResetTaught->Name = L"TechResetTaught";
             this->TechResetTaught->Size = System::Drawing::Size(50, 23);
             this->TechResetTaught->TabIndex = 12;
@@ -836,7 +838,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // TechResetCurrent
             // 
-            this->TechResetCurrent->Location = System::Drawing::Point(522, 4);
+            this->TechResetCurrent->Location = System::Drawing::Point(522, 3);
             this->TechResetCurrent->Name = L"TechResetCurrent";
             this->TechResetCurrent->Size = System::Drawing::Size(50, 23);
             this->TechResetCurrent->TabIndex = 12;
@@ -855,12 +857,13 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // TechMA
             // 
-            this->TechMA->Location = System::Drawing::Point(208, 4);
+            this->TechMA->Location = System::Drawing::Point(207, 4);
             this->TechMA->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {200, 0, 0, 0});
             this->TechMA->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
             this->TechMA->Name = L"TechMA";
-            this->TechMA->Size = System::Drawing::Size(38, 20);
+            this->TechMA->Size = System::Drawing::Size(42, 20);
             this->TechMA->TabIndex = 6;
+            this->TechMA->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
             this->BtnTooltip->SetToolTip(this->TechMA, L"Set assumed MA technology level.");
             this->TechMA->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
             this->TechMA->ValueChanged += gcnew System::EventHandler(this, &Form1::Tech_ValueChanged);
@@ -876,12 +879,13 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // TechML
             // 
-            this->TechML->Location = System::Drawing::Point(275, 4);
+            this->TechML->Location = System::Drawing::Point(274, 4);
             this->TechML->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {200, 0, 0, 0});
             this->TechML->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
             this->TechML->Name = L"TechML";
-            this->TechML->Size = System::Drawing::Size(38, 20);
+            this->TechML->Size = System::Drawing::Size(42, 20);
             this->TechML->TabIndex = 6;
+            this->TechML->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
             this->BtnTooltip->SetToolTip(this->TechML, L"Set assumed ML technology level.");
             this->TechML->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
             this->TechML->ValueChanged += gcnew System::EventHandler(this, &Form1::Tech_ValueChanged);
@@ -897,12 +901,13 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // TechGV
             // 
-            this->TechGV->Location = System::Drawing::Point(342, 4);
+            this->TechGV->Location = System::Drawing::Point(341, 4);
             this->TechGV->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {200, 0, 0, 0});
             this->TechGV->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
             this->TechGV->Name = L"TechGV";
-            this->TechGV->Size = System::Drawing::Size(38, 20);
+            this->TechGV->Size = System::Drawing::Size(42, 20);
             this->TechGV->TabIndex = 6;
+            this->TechGV->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
             this->BtnTooltip->SetToolTip(this->TechGV, L"Set assumed GV technology level.");
             this->TechGV->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
             this->TechGV->ValueChanged += gcnew System::EventHandler(this, &Form1::Tech_ValueChanged);
@@ -918,12 +923,13 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // TechLS
             // 
-            this->TechLS->Location = System::Drawing::Point(407, 4);
+            this->TechLS->Location = System::Drawing::Point(406, 4);
             this->TechLS->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {200, 0, 0, 0});
             this->TechLS->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
             this->TechLS->Name = L"TechLS";
-            this->TechLS->Size = System::Drawing::Size(38, 20);
+            this->TechLS->Size = System::Drawing::Size(42, 20);
             this->TechLS->TabIndex = 6;
+            this->TechLS->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
             this->BtnTooltip->SetToolTip(this->TechLS, L"Set assumed LS technology level.");
             this->TechLS->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
             this->TechLS->ValueChanged += gcnew System::EventHandler(this, &Form1::Tech_ValueChanged);
@@ -955,7 +961,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->MenuTabs->Location = System::Drawing::Point(0, 30);
             this->MenuTabs->Name = L"MenuTabs";
             this->MenuTabs->SelectedIndex = 0;
-            this->MenuTabs->Size = System::Drawing::Size(691, 589);
+            this->MenuTabs->Size = System::Drawing::Size(691, 561);
             this->MenuTabs->TabIndex = 0;
             this->MenuTabs->SelectedIndexChanged += gcnew System::EventHandler(this, &Form1::MenuTabs_SelectedIndexChanged);
             // 
@@ -970,7 +976,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabReports->Margin = System::Windows::Forms::Padding(0);
             this->TabReports->Name = L"TabReports";
             this->TabReports->Padding = System::Windows::Forms::Padding(3);
-            this->TabReports->Size = System::Drawing::Size(683, 563);
+            this->TabReports->Size = System::Drawing::Size(683, 535);
             this->TabReports->TabIndex = 0;
             this->TabReports->Text = L"Reports";
             // 
@@ -987,7 +993,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->RepText->Name = L"RepText";
             this->RepText->ReadOnly = true;
             this->RepText->ScrollBars = System::Windows::Forms::ScrollBars::Both;
-            this->RepText->Size = System::Drawing::Size(677, 531);
+            this->RepText->Size = System::Drawing::Size(677, 506);
             this->RepText->TabIndex = 3;
             this->RepText->WordWrap = false;
             // 
@@ -1034,7 +1040,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabMap->Location = System::Drawing::Point(4, 22);
             this->TabMap->Margin = System::Windows::Forms::Padding(0);
             this->TabMap->Name = L"TabMap";
-            this->TabMap->Size = System::Drawing::Size(683, 563);
+            this->TabMap->Size = System::Drawing::Size(683, 535);
             this->TabMap->TabIndex = 1;
             this->TabMap->Text = L"Map";
             this->TabMap->UseVisualStyleBackColor = true;
@@ -1054,7 +1060,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->panel1->Dock = System::Windows::Forms::DockStyle::Right;
             this->panel1->Location = System::Drawing::Point(483, 0);
             this->panel1->Name = L"panel1";
-            this->panel1->Size = System::Drawing::Size(200, 563);
+            this->panel1->Size = System::Drawing::Size(200, 535);
             this->panel1->TabIndex = 0;
             // 
             // MapLSNVal
@@ -1311,7 +1317,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabSystems->Controls->Add(splitContainer2);
             this->TabSystems->Location = System::Drawing::Point(4, 22);
             this->TabSystems->Name = L"TabSystems";
-            this->TabSystems->Size = System::Drawing::Size(683, 563);
+            this->TabSystems->Size = System::Drawing::Size(683, 535);
             this->TabSystems->TabIndex = 2;
             this->TabSystems->Text = L"Systems";
             this->TabSystems->UseVisualStyleBackColor = true;
@@ -1350,7 +1356,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // splitContainer2.Panel2
             // 
             splitContainer2->Panel2->Controls->Add(this->SystemsGrid);
-            splitContainer2->Size = System::Drawing::Size(683, 563);
+            splitContainer2->Size = System::Drawing::Size(683, 535);
             splitContainer2->SplitterDistance = 82;
             splitContainer2->SplitterWidth = 1;
             splitContainer2->TabIndex = 0;
@@ -1588,7 +1594,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->SystemsGrid->RowHeadersWidth = 4;
             this->SystemsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
             this->SystemsGrid->ShowCellToolTips = false;
-            this->SystemsGrid->Size = System::Drawing::Size(683, 480);
+            this->SystemsGrid->Size = System::Drawing::Size(683, 452);
             this->SystemsGrid->TabIndex = 0;
             this->SystemsGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
             this->SystemsGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
@@ -1602,7 +1608,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabPlanets->Controls->Add(splitContainer3);
             this->TabPlanets->Location = System::Drawing::Point(4, 22);
             this->TabPlanets->Name = L"TabPlanets";
-            this->TabPlanets->Size = System::Drawing::Size(683, 563);
+            this->TabPlanets->Size = System::Drawing::Size(683, 535);
             this->TabPlanets->TabIndex = 3;
             this->TabPlanets->Text = L"Planets";
             this->TabPlanets->UseVisualStyleBackColor = true;
@@ -1640,7 +1646,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // splitContainer3.Panel2
             // 
             splitContainer3->Panel2->Controls->Add(this->PlanetsGrid);
-            splitContainer3->Size = System::Drawing::Size(683, 563);
+            splitContainer3->Size = System::Drawing::Size(683, 535);
             splitContainer3->SplitterDistance = 82;
             splitContainer3->SplitterWidth = 1;
             splitContainer3->TabIndex = 1;
@@ -1877,7 +1883,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->PlanetsGrid->RowHeadersWidth = 4;
             this->PlanetsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
             this->PlanetsGrid->ShowCellToolTips = false;
-            this->PlanetsGrid->Size = System::Drawing::Size(683, 480);
+            this->PlanetsGrid->Size = System::Drawing::Size(683, 452);
             this->PlanetsGrid->TabIndex = 0;
             this->PlanetsGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
             this->PlanetsGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
@@ -1891,7 +1897,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabColonies->Controls->Add(this->splitContainer4);
             this->TabColonies->Location = System::Drawing::Point(4, 22);
             this->TabColonies->Name = L"TabColonies";
-            this->TabColonies->Size = System::Drawing::Size(683, 563);
+            this->TabColonies->Size = System::Drawing::Size(683, 535);
             this->TabColonies->TabIndex = 4;
             this->TabColonies->Text = L"Colonies";
             this->TabColonies->UseVisualStyleBackColor = true;
@@ -1929,7 +1935,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // splitContainer4.Panel2
             // 
             this->splitContainer4->Panel2->Controls->Add(this->ColoniesGrid);
-            this->splitContainer4->Size = System::Drawing::Size(683, 563);
+            this->splitContainer4->Size = System::Drawing::Size(683, 535);
             this->splitContainer4->SplitterDistance = 82;
             this->splitContainer4->SplitterWidth = 1;
             this->splitContainer4->TabIndex = 2;
@@ -2151,7 +2157,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ColoniesGrid->RowHeadersWidth = 4;
             this->ColoniesGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
             this->ColoniesGrid->ShowCellToolTips = false;
-            this->ColoniesGrid->Size = System::Drawing::Size(683, 480);
+            this->ColoniesGrid->Size = System::Drawing::Size(683, 452);
             this->ColoniesGrid->TabIndex = 0;
             this->ColoniesGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
             this->ColoniesGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
@@ -2165,7 +2171,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabShips->Controls->Add(this->splitContainer5);
             this->TabShips->Location = System::Drawing::Point(4, 22);
             this->TabShips->Name = L"TabShips";
-            this->TabShips->Size = System::Drawing::Size(683, 563);
+            this->TabShips->Size = System::Drawing::Size(683, 535);
             this->TabShips->TabIndex = 5;
             this->TabShips->Text = L"Ships";
             this->TabShips->UseVisualStyleBackColor = true;
@@ -2205,7 +2211,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // splitContainer5.Panel2
             // 
             this->splitContainer5->Panel2->Controls->Add(this->ShipsGrid);
-            this->splitContainer5->Size = System::Drawing::Size(683, 563);
+            this->splitContainer5->Size = System::Drawing::Size(683, 535);
             this->splitContainer5->SplitterDistance = 82;
             this->splitContainer5->SplitterWidth = 1;
             this->splitContainer5->TabIndex = 2;
@@ -2472,7 +2478,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ShipsGrid->RowHeadersWidth = 4;
             this->ShipsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
             this->ShipsGrid->ShowCellToolTips = false;
-            this->ShipsGrid->Size = System::Drawing::Size(683, 480);
+            this->ShipsGrid->Size = System::Drawing::Size(683, 452);
             this->ShipsGrid->TabIndex = 0;
             this->ShipsGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
             this->ShipsGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
@@ -2486,7 +2492,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabAliens->Controls->Add(this->splitContainer6);
             this->TabAliens->Location = System::Drawing::Point(4, 22);
             this->TabAliens->Name = L"TabAliens";
-            this->TabAliens->Size = System::Drawing::Size(683, 563);
+            this->TabAliens->Size = System::Drawing::Size(683, 535);
             this->TabAliens->TabIndex = 6;
             this->TabAliens->Text = L"Aliens";
             this->TabAliens->UseVisualStyleBackColor = true;
@@ -2512,7 +2518,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // splitContainer6.Panel2
             // 
             this->splitContainer6->Panel2->Controls->Add(this->AliensGrid);
-            this->splitContainer6->Size = System::Drawing::Size(683, 563);
+            this->splitContainer6->Size = System::Drawing::Size(683, 535);
             this->splitContainer6->SplitterDistance = 29;
             this->splitContainer6->SplitterWidth = 1;
             this->splitContainer6->TabIndex = 2;
@@ -2616,7 +2622,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->AliensGrid->RowHeadersWidth = 4;
             this->AliensGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
             this->AliensGrid->ShowCellToolTips = false;
-            this->AliensGrid->Size = System::Drawing::Size(683, 533);
+            this->AliensGrid->Size = System::Drawing::Size(683, 505);
             this->AliensGrid->TabIndex = 0;
             this->AliensGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
             this->AliensGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
@@ -2629,7 +2635,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabOrders->Controls->Add(this->OrderTemplate);
             this->TabOrders->Location = System::Drawing::Point(4, 22);
             this->TabOrders->Name = L"TabOrders";
-            this->TabOrders->Size = System::Drawing::Size(683, 563);
+            this->TabOrders->Size = System::Drawing::Size(683, 535);
             this->TabOrders->TabIndex = 9;
             this->TabOrders->Text = L"Orders";
             this->TabOrders->UseVisualStyleBackColor = true;
@@ -2642,7 +2648,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->OrderTemplate->Location = System::Drawing::Point(0, 0);
             this->OrderTemplate->Name = L"OrderTemplate";
             this->OrderTemplate->ReadOnly = true;
-            this->OrderTemplate->Size = System::Drawing::Size(683, 563);
+            this->OrderTemplate->Size = System::Drawing::Size(683, 535);
             this->OrderTemplate->TabIndex = 0;
             this->OrderTemplate->Text = L"";
             // 
@@ -2651,7 +2657,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabUtils->BackColor = System::Drawing::SystemColors::Control;
             this->TabUtils->Location = System::Drawing::Point(4, 22);
             this->TabUtils->Name = L"TabUtils";
-            this->TabUtils->Size = System::Drawing::Size(683, 563);
+            this->TabUtils->Size = System::Drawing::Size(683, 535);
             this->TabUtils->TabIndex = 10;
             this->TabUtils->Text = L"Utils";
             // 
@@ -2662,7 +2668,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabAbout->Location = System::Drawing::Point(4, 22);
             this->TabAbout->Name = L"TabAbout";
             this->TabAbout->Padding = System::Windows::Forms::Padding(3);
-            this->TabAbout->Size = System::Drawing::Size(683, 563);
+            this->TabAbout->Size = System::Drawing::Size(683, 535);
             this->TabAbout->TabIndex = 8;
             this->TabAbout->Text = L"About";
             this->TabAbout->UseVisualStyleBackColor = true;
@@ -2677,7 +2683,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TextAbout->Name = L"TextAbout";
             this->TextAbout->ReadOnly = true;
             this->TextAbout->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
-            this->TextAbout->Size = System::Drawing::Size(677, 557);
+            this->TextAbout->Size = System::Drawing::Size(677, 529);
             this->TextAbout->TabIndex = 0;
             // 
             // label5

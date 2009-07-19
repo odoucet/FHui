@@ -1088,12 +1088,12 @@ void Form1::PlanetsSetup()
                 (planet->System->HomeSpecies != nullptr) )
             {
                 // A home planet exists in the system. Make a note about that
-                String ^note = "";
-                if ( planet->Comment && planet->Comment->Length )
+                String ^note = planet->PrintComment();
+                if ( !String::IsNullOrEmpty(note) )
                 {
-                    note = planet->Comment + "; ";
+                    note += "; ";
                 }
-                note += String::Format(" SP {0} home system", planet->System->HomeSpecies->Name );
+                note += String::Format("SP {0} home system", planet->System->HomeSpecies->Name );
                 row[colNotes] = note;
             }
             else
@@ -1377,22 +1377,8 @@ void Form1::ShipsSetup()
         if( m_ShipsFilter->Filter(ship) )
             continue;
 
-        double distance = Calculators::Distance(
-            ship->X,
-            ship->Y,
-            ship->Z,
-            m_ShipsFilter->RefSystem->X,
-            m_ShipsFilter->RefSystem->Y,
-            m_ShipsFilter->RefSystem->Z);
-        double mishap = Calculators::Mishap(
-            ship->X,
-            ship->Y,
-            ship->Z,
-            m_ShipsFilter->RefSystem->X,
-            m_ShipsFilter->RefSystem->Y,
-            m_ShipsFilter->RefSystem->Z,
-            gv,
-            ship->Age);
+        double distance = ship->System->CalcDistance(m_ShipsFilter->RefSystem);
+        double mishap   = ship->System->CalcMishap(m_ShipsFilter->RefSystem, gv, ship->Age);
 
         DataRow^ row = dataTable->NewRow();
         row[colObject]      = ship;

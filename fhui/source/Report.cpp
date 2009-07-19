@@ -732,6 +732,9 @@ void Report::MatchShipScan(String ^s, bool bColony)
     String ^name    = nullptr;
     int age         = 0;
     String ^loc     = nullptr;
+    int capacity    = 0;
+    int planetNum   = -1;
+    ShipLocType location = SHIP_LOC_DEEP_SPACE;
 
     if( MatchWithOutput(s, "\\?\\?\\? \\(([DOLdol])") )
     {
@@ -750,54 +753,41 @@ void Report::MatchShipScan(String ^s, bool bColony)
 
     if( bMatch )
     {
-        m_ScanShip = m_GameData->AddShip(
-            m_Turn, m_GameData->GetSpecies(), type, name, size, subLight);
-
-        if( m_ScanShip == nullptr )
-            return;
-
+        StarSystem ^system;
         if( bColony )
-        {
-            m_ScanShip->X = m_ScanColony->System->X;
-            m_ScanShip->Y = m_ScanColony->System->Y;
-            m_ScanShip->Z = m_ScanColony->System->Z;
-            m_ScanShip->System = m_ScanColony->System;
-        }
+            system = m_ScanColony->System;
         else
         {
-            m_ScanShip->X = m_ScanX;
-            m_ScanShip->Y = m_ScanY;
-            m_ScanShip->Z = m_ScanZ;
             try
             {
-                m_ScanShip->System = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ);
-                m_ScanShip->System->LastVisited = m_Turn;
+                system = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ);
             }
             catch( FHUIDataIntegrityException^ )
             {   // When reading other ships and planets,
                 // ship may be outside of any system just in deep, empty space
-                m_ScanShip->System = gcnew StarSystem(m_ScanX, m_ScanY, m_ScanZ, "deep space");
+                system = gcnew StarSystem(m_ScanX, m_ScanY, m_ScanZ, "deep space");
             }
         }
-
-        m_ScanShip->Age = age;
+        system->LastVisited = m_Turn;
 
         switch( loc[0] )
         {
         case 'd':
-            m_ScanShip->Location = SHIP_LOC_DEEP_SPACE;
+            location = SHIP_LOC_DEEP_SPACE;
             break;
         case 'o':
-            m_ScanShip->Location = SHIP_LOC_ORBIT;
+            location = SHIP_LOC_ORBIT;
             break;
         case 'l':
-            m_ScanShip->Location = SHIP_LOC_LANDED;
+            location = SHIP_LOC_LANDED;
             break;
+        default:
+            throw gcnew FHUIParsingException("Invalid ship location: " + loc[0]);
         }
-        if( m_ScanShip->Location != SHIP_LOC_DEEP_SPACE )
+        if( location != SHIP_LOC_DEEP_SPACE )
         {
             if( MatchWithOutput(s, "(\\d+)") )
-                m_ScanShip->PlanetNum = GetMatchResultInt(0);
+                planetNum = GetMatchResultInt(0);
             else
                 throw gcnew FHUIParsingException(
                     String::Format("Unable to parse ship '{0}' location.", name));
@@ -806,7 +796,7 @@ void Report::MatchShipScan(String ^s, bool bColony)
         if( type == SHIP_BAS )
         {
             if( MatchWithOutput(s, ",(\\d+) tons") )
-                m_ScanShip->Size = GetMatchResultInt(0);
+                size = GetMatchResultInt(0);
             else
                 throw gcnew FHUIParsingException(
                     String::Format("Unable to parse starbase '{0}' size.", name));
@@ -815,7 +805,7 @@ void Report::MatchShipScan(String ^s, bool bColony)
         if( bColony )
         {
             if( MatchWithOutput(s, "\\)\\s+(\\d+)\\s*") )
-                m_ScanShip->Capacity = GetMatchResultInt(0);
+                capacity = GetMatchResultInt(0);
             else
                 throw gcnew FHUIParsingException(
                     String::Format("Unable to parse ship '{0}' capacity.", name));
@@ -825,11 +815,15 @@ void Report::MatchShipScan(String ^s, bool bColony)
             if( !MatchWithOutput(s, "\\)\\s*") )
                 throw gcnew FHUIParsingException(
                     String::Format("Unable to parse ship '{0}'.", name));
-            m_ScanShip->CalculateCapacity();
         }
 
         if( m_Phase != PHASE_ALIENS_REPORT )
         {
+            m_ScanShip = m_GameData->AddShip(
+                m_Turn, m_GameData->GetSpecies(), type, name, subLight, system);
+            if( m_ScanShip == nullptr )
+                return;
+
             while( !String::IsNullOrEmpty(s) )
             {
                 if( MatchWithOutput(s, ",?\\s*(\\d+)\\s+(\\w+)\\s*") )
@@ -849,14 +843,30 @@ void Report::MatchShipScan(String ^s, bool bColony)
             {
                 String ^spName = GetMatchResult(0);
                 Alien ^sp = m_GameData->AddAlien(m_Turn, spName);
+                m_ScanShip = m_GameData->AddShip(
+                    m_Turn, sp, type, name, subLight, system);
+
                 if( bInFD )
                 {
                     sp->Relation  = SP_PIRATE;
-                    m_ScanShip->IsPirate = true;
+                    if( m_ScanShip )
+                        m_ScanShip->IsPirate = true;
                 }
-                m_ScanShip->Owner = sp;
             }
         }
+    }
+
+    m_ScanShip->Age         = age;
+    m_ScanShip->Size        = size;
+    m_ScanShip->Location    = location;
+    m_ScanShip->PlanetNum   = planetNum;
+    m_ScanShip->CalculateCapacity();
+    if( capacity != 0 &&
+        capacity != m_ScanShip->Capacity )
+    {
+        throw gcnew FHUIDataIntegrityException(
+            String::Format("Calculated ship '{0}' capacity ({1}) doesn't match report ({2}).",
+                name, m_ScanShip->Capacity, capacity) );
     }
 }
 
