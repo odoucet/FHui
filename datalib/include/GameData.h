@@ -425,23 +425,21 @@ public:
     // ---- Ship orders ----
     enum class OrderType
     {
-        Land, Orbit, Deep, Unload, Jump, Upgrade, Recycle
+        Jump, Upgrade, Recycle
     };
 
     ref class Order
     {
     public:
         String^     Print();
+        String^     PrintJumpDestination();
 
         OrderType   Type;
         StarSystem^ JumpTarget;
-        int         Planet;
+        int         PlanetNum;
     };
-    
-    property Order^ PreDepCommand;
-    property Order^ PreDepCommand;
-    property Order^ PreDepCommand;
-    property Order^ PreDepCommand;
+
+    property Order^ Command;
 
 protected:
     void            SetupTonnage();

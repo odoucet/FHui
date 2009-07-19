@@ -1363,6 +1363,7 @@ void Form1::ShipsSetup()
     DataColumn ^colMaint    = dataTable->Columns->Add("Maint",      double::typeid );
     DataColumn ^colUpgCost  = dataTable->Columns->Add("Upg.Cost",   int::typeid );
     DataColumn ^colRecVal   = dataTable->Columns->Add("Rec.Val",    int::typeid );
+    DataColumn ^colOrder    = dataTable->Columns->Add("Order",      String::typeid );
 
     for each( IGridPlugin ^plugin in m_GridPlugins )
         plugin->AddColumns(GridType::Ships, dataTable);
@@ -1397,6 +1398,8 @@ void Form1::ShipsSetup()
             row[colMaint]   = ship->GetMaintenanceCost() * discount;
             row[colUpgCost] = ship->GetUpgradeCost();
             row[colRecVal]  = ship->GetRecycleValue();
+            if( ship->Command )
+                row[colOrder] = ship->Command->Print();
         }
 
         for each( IGridPlugin ^plugin in m_GridPlugins )

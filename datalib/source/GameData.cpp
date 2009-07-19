@@ -472,6 +472,33 @@ int Ship::GetMaintenanceCost()
     return OriginalCost / 5;
 }
 
+String^ Ship::Order::Print()
+{
+    switch( Type )
+    {
+    case OrderType::Jump:
+        return "Jump to " + PrintJumpDestination();
+    case OrderType::Upgrade:
+        return "Upgrade";
+    case OrderType::Recycle:
+        return "Recycle";
+    }
+
+    return "Invalid command";
+}
+
+String^ Ship::Order::PrintJumpDestination()
+{
+    if( PlanetNum != -1 )
+    {
+        Planet ^planet = JumpTarget->GetPlanet(PlanetNum);
+        if( planet )
+            return "PL " + planet->Name;
+        return JumpTarget->PrintLocation() + " " + PlanetNum.ToString();
+    }
+    return JumpTarget->PrintLocation();
+}
+
 // ---------------------------------------------------------
 
 GameData::GameData(void)
