@@ -16,6 +16,8 @@ ref class Ship;
 ref class GameData;
 interface class IGridFilter;
 
+ref class BudgetTracker;
+
 // ---------------------------------------------------------
 //
 // Base class for all plugins
@@ -61,9 +63,33 @@ public:
     void        GeneratePreDeparture(List<String^>^, Ship^);
     void        GeneratePreDeparture(List<String^>^, Colony^);
     void        GenerateJumps(List<String^>^, Ship^);
-    void        GenerateProduction(List<String^>^, Colony^, int %budget, int %colonyProd);
+    void        GenerateProduction(List<String^>^, Colony^, BudgetTracker^);
     void        GeneratePostArrival(List<String^>^, Ship^);
     void        GenerateStrikes(List<String^>^, StarSystem^);
+};
+
+// ---------------------------------------------------------
+
+public ref class BudgetTracker
+{
+public:
+    BudgetTracker(List<String^> ^orders, int euCarried);
+
+    void        SetColony(Colony^);
+
+    void        Recycle(int eu);
+    void        Spend(int eu);
+    void        UseCU(int cu);
+
+    int         GetCUAvail()        { return m_CU; }
+    int         GetBudgetAvail()    { return Math::Min(m_BudgetAvail, m_BudgetTotal); }
+    int         GetBudgetTotal()    { return m_BudgetTotal; }
+
+protected:
+    List<String^>^  m_Orders;
+    int             m_BudgetTotal;
+    int             m_BudgetAvail;
+    int             m_CU;
 };
 
 // ---------------------------------------------------------

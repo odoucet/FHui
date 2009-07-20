@@ -330,6 +330,7 @@ public:
     bool            CanProduce;
 
     property int EconomicBase { int get() { return Math::Max(-1, MiBase + MaBase); } }
+    property int EUAvail { int get() { return EUProd - EUFleet; } }
 
     property array<int>^    Inventory;
 };

@@ -109,8 +109,8 @@ void Form1::GenerateProduction()
 {
     m_OrderList->Add("START PRODUCTION");
 
-    int budget = m_GameData->GetCarriedEU();
-    m_OrderList->Add("; +" + budget.ToString() + " EUs carried" );
+    BudgetTracker ^budget = gcnew BudgetTracker(m_OrderList, m_GameData->GetCarriedEU());
+    m_OrderList->Add("; +" + budget->GetBudgetTotal().ToString() + " EUs carried" );
 
     // Sort colonies for production
     m_GameData->GetSpecies()->SortColoniesByProdOrder();
@@ -120,15 +120,15 @@ void Form1::GenerateProduction()
         m_OrderList->Add("");
         m_OrderList->Add("  PRODUCTION PL " + colony->Name);
 
-        // Production summary
-        int eu = colony->EUProd - colony->EUFleet;
-        String ^prodSummary = String::Format("  ; {0} +{1} = {2}", eu, budget, eu + budget);
-        if( colony->PlanetType == PLANET_COLONY )
-            prodSummary += "  max=" + (eu * 2).ToString();
-        m_OrderList->Add( prodSummary );
+        int euCarried = budget->GetBudgetTotal();
+        budget->SetColony(colony);
 
-        budget += eu;
-        int colonyProd = 0;
+        // Production summary
+        String ^prodSummary = String::Format("  ; {0} +{1} = {2}",
+            colony->EUAvail, euCarried, budget->GetBudgetTotal());
+        if( colony->PlanetType == PLANET_COLONY )
+            prodSummary += "  max=" + budget->GetBudgetAvail().ToString();
+        m_OrderList->Add( prodSummary );
 
         if( colony->CanProduce )
         {
@@ -143,26 +143,20 @@ void Form1::GenerateProduction()
                     case Ship::OrderType::Recycle:
                         {
                             int value = Calculators::ShipRecycleValue(ship->Age, ship->OriginalCost);
-                            budget += value;
                             m_OrderList->Add( String::Format("    Recycle {0}  ; [A] +{1} EU",
                                 ship->PrintClassWithName(),
                                 value) );
+                            budget->Recycle(value);
                         }
                         break;
 
                     case Ship::OrderType::Upgrade:
                         {
                             int value = Calculators::ShipUpgradeCost(ship->Age, ship->OriginalCost);
-                            String ^cmd = String::Format("    Upgrade {0}  ; [A] -{1} EU",
+                            m_OrderList->Add( String::Format("    Upgrade {0}  ; [A] -{1} EU",
                                 ship->PrintClassWithName(),
-                                value);
-                            if( value > budget )
-                                cmd + "; !!! NO BUDGET: " + cmd;
-
-
-                            budget -= value;
-                            colonyProd += value;
-                            m_OrderList->Add(cmd);
+                                value) );
+                            budget->Spend(value);
                         }
                         break;
                     }
@@ -171,29 +165,19 @@ void Form1::GenerateProduction()
         }
 
         for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
-            plugin->GenerateProduction(m_OrderList, colony, budget, colonyProd);
+            plugin->GenerateProduction(m_OrderList, colony, budget);
 
         // Automatic spendings summary
         if( colony->PlanetType == PLANET_COLONY )
         {
-            if( colonyProd > (2 * eu) )
-            {
-                m_OrderList->Add( String::Format("    ; !!!!!! Production limit exceeded by {0} !!!!!!",
-                    colonyProd - (2 * eu)) );
-            }
-            else
-            {
-                m_OrderList->Add( String::Format("    ; -- EU to use: {0} (total {1})",
-                    Math::Min(budget, 2 * eu - colonyProd), budget) );
-            }
+            m_OrderList->Add( String::Format("    ; -- EU to use: {0} (total {1})",
+                budget->GetBudgetAvail(),
+                budget->GetBudgetTotal() ) );
         }
         else if( colony->PlanetType == PLANET_HOME )
         {
-            m_OrderList->Add( String::Format("    ; -- EU to use: {0}", budget) );
+            m_OrderList->Add( String::Format("    ; -- EU to use: {0}", budget->GetBudgetAvail() ) );
         }
-
-        if( budget < 0 )
-            m_OrderList->Add("    ; !!!!! BUDGET EXCEEDED !!!!!!");
     }
 
     m_OrderList->Add("");
