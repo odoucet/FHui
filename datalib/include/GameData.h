@@ -260,6 +260,8 @@ public:
     String^     PrintColonies(int planetNum, Alien ^player);   // -1 for all colonies in system
     //String^     PrintShips();
 
+    void        UpdateMaster();
+
     property int        X;
     property int        Y;
     property int        Z;

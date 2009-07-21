@@ -254,27 +254,6 @@ String^ StarSystem::PrintColonies(int planetNum, Alien ^player)
                 colony->Owner->Name,
                 size );
         }
-
-        if( Master == nullptr )
-            Master = colony->Owner;
-        else if( Master != colony->Owner &&
-                 Master->Relation != SP_MIXED )
-        {
-            Master = gcnew Alien("", 0);
-            Master->Relation = SP_MIXED;
-        }
-
-        Planet ^planet = Planets[colony->PlanetNum - 1];
-        if( planet )
-        {
-            if( planet->Master == nullptr )
-                planet->Master = colony->Owner;
-            else if( planet->Master != colony->Owner &&
-                     planet->Master->Relation != SP_MIXED )
-            {
-                planet->Master = Master;
-            }
-        }
     }
 
     return ret;
@@ -1144,6 +1123,35 @@ void GameData::UpdateSystems()
 
         system->MinLSN      = minLSN;
         system->MinLSNAvail = minLSNAvail;
+
+        system->UpdateMaster();
+    }
+}
+
+void StarSystem::UpdateMaster()
+{
+    for each( Colony ^colony in Colonies )
+    {
+        if( Master == nullptr )
+            Master = colony->Owner;
+        else if( Master != colony->Owner &&
+                 Master->Relation != SP_MIXED )
+        {
+            Master = gcnew Alien("", 0);
+            Master->Relation = SP_MIXED;
+        }
+
+        Planet ^planet = Planets[colony->PlanetNum - 1];
+        if( planet )
+        {
+            if( planet->Master == nullptr )
+                planet->Master = colony->Owner;
+            else if( planet->Master != colony->Owner &&
+                     planet->Master->Relation != SP_MIXED )
+            {
+                planet->Master = Master;
+            }
+        }
     }
 }
 
