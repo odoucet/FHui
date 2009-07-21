@@ -258,7 +258,7 @@ namespace FHUI {
     private: System::Windows::Forms::RadioButton^  RepModeCommands;
     private: System::Windows::Forms::RadioButton^  RepModeReports;
     private: System::Windows::Forms::ComboBox^  RepTurnNr;
-    private: System::Windows::Forms::TextBox^  RepText;
+    private: System::Windows::Forms::RichTextBox^  RepText;
     private: System::Windows::Forms::NumericUpDown^  TechLS;
     private: System::Windows::Forms::ComboBox^  SystemsRefColony;
     private: System::Windows::Forms::NumericUpDown^  TechBI;
@@ -496,7 +496,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TechLS = (gcnew System::Windows::Forms::NumericUpDown());
             this->MenuTabs = (gcnew System::Windows::Forms::TabControl());
             this->TabReports = (gcnew System::Windows::Forms::TabPage());
-            this->RepText = (gcnew System::Windows::Forms::TextBox());
+            this->RepText = (gcnew System::Windows::Forms::RichTextBox());
             this->RepModeCommands = (gcnew System::Windows::Forms::RadioButton());
             this->RepTurnNr = (gcnew System::Windows::Forms::ComboBox());
             this->RepModeReports = (gcnew System::Windows::Forms::RadioButton());
@@ -1003,15 +1003,13 @@ private: System::Windows::Forms::Label^  SystemsRef;
                 | System::Windows::Forms::AnchorStyles::Left) 
                 | System::Windows::Forms::AnchorStyles::Right));
             this->RepText->Font = (gcnew System::Drawing::Font(L"Courier New", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
-                static_cast<System::Byte>(238)));
-            this->RepText->Location = System::Drawing::Point(0, 28);
-            this->RepText->MaxLength = 65536;
-            this->RepText->Multiline = true;
+                static_cast<System::Byte>(0)));
+            this->RepText->Location = System::Drawing::Point(0, 0);
             this->RepText->Name = L"RepText";
             this->RepText->ReadOnly = true;
-            this->RepText->ScrollBars = System::Windows::Forms::ScrollBars::Both;
             this->RepText->Size = System::Drawing::Size(677, 506);
-            this->RepText->TabIndex = 3;
+            this->RepText->TabIndex = 0;
+            this->RepText->Text = L"";
             this->RepText->WordWrap = false;
             // 
             // RepModeCommands
@@ -2815,8 +2813,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechLS))->EndInit();
             this->MenuTabs->ResumeLayout(false);
             this->TabReports->ResumeLayout(false);
-            this->TabReports->PerformLayout();
-            this->TabMap->ResumeLayout(false);
+            this->TabReports->PerformLayout();            this->TabMap->ResumeLayout(false);
             this->panel1->ResumeLayout(false);
             this->panel1->PerformLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapLSNVal))->EndInit();
