@@ -15,36 +15,6 @@ ref class StarSystem;
 ref class Ship;
 ref class Colony;
 
-generic<typename PairTypeA, typename PairTypeB>
-public ref class Pair
-{
-public:
-    Pair(PairTypeA first, PairTypeB second)
-    {
-        this->A = first;
-        this->B = second;
-    }
-
-    property PairTypeA A;
-    property PairTypeB B;
-};
-
-generic<typename TripleTypeA, typename TripleTypeB, typename TripleTypeC>
-public ref class Triple
-{
-public:
-    Triple(TripleTypeA first, TripleTypeB second, TripleTypeC third)
-    {
-        this->A = first;
-        this->B = second;
-        this->C = third;
-    }
-
-    property TripleTypeA A;
-    property TripleTypeB B;
-    property TripleTypeC C;
-};
-
 // ---------------------------------------------------
 // -- base IGridDataSrc impl --
 public ref class GridDataSrcBase : public IGridDataSrc

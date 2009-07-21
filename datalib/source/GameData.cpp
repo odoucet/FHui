@@ -256,6 +256,24 @@ String^ StarSystem::PrintColonies(int planetNum, Alien ^player)
         }
     }
 
+    for each (Planet^ planet in GetPlanets() )
+    {
+        if ( ( planet->NumColonies == 0 ) &&
+             ( String::IsNullOrEmpty( planet->Name ) == false ) )
+        {
+            // Planet has no colonies, list name if any.
+            if( String::IsNullOrEmpty(ret) == false )
+                ret += ", ";
+
+            if( planetNum == -1 )
+            {
+                ret += ("#" + planet->Number.ToString() + " ");
+            }
+
+            ret += "PL " + planet->Name;
+        }
+    }
+
     return ret;
 }
 

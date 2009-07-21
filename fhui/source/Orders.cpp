@@ -63,7 +63,7 @@ void Form1::GenerateCombatInfo(StarSystem^ system)
     Alien^ player = m_GameData->GetSpecies();
 
     String^ sysInfo = system->PrintColonies(-1, player );
-    if ( sysInfo->Length == 0 )
+    if ( String::IsNullOrEmpty(sysInfo) )
     {
         sysInfo = "empty";
     }
