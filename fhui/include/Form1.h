@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Commands.h"
+
 ref class GameData;
 ref class Alien;
 ref class StarSystem;
@@ -9,12 +11,15 @@ ref class Report;
 
 namespace FHUI {
 
-	using namespace System;
-	using namespace System::ComponentModel;
+    using namespace System;
+    using namespace System::ComponentModel;
     using namespace System::Collections::Generic;
-	using namespace System::Windows::Forms;
-	using namespace System::Data;
-	using namespace System::Drawing;
+    using namespace System::Windows::Forms;
+    using namespace System::Data;
+    using namespace System::Drawing;
+
+    generic <typename T>
+    private delegate void EventHandler1Arg(T);
 
 	/// <summary>
 	/// Summary for Form1
@@ -39,7 +44,7 @@ namespace FHUI {
         property String^    DataDir;
 
         // ==================================================
-	protected:
+	private:
 		/// <summary>
 		/// Clean up any resources being used.
 		/// </summary>
@@ -85,6 +90,12 @@ namespace FHUI {
         void        SetGridRefSystemOnMouseClick(DataGridView ^grid, int rowIndex);
         void        ShowGridContextMenu(DataGridView^ grid, DataGridViewCellMouseEventArgs ^e);
 
+        generic<typename T>
+        ToolStripMenuItem^ CreateCustomMenuItem(
+            String ^text,
+            T data,
+            EventHandler1Arg<T> ^handler );
+
         // ==================================================
 
         ////////////////////////////////////////////////////////////////
@@ -108,8 +119,6 @@ namespace FHUI {
         SortedList<int, String^>       ^m_Reports;
         SortedList<int, String^>       ^m_RepFiles;
         SortedList<String^, String^>   ^m_CmdFiles;
-
-        List<String^>      ^m_OrderList;
 
         array<String^>     ^m_RepTurnNrData;
 
@@ -166,6 +175,7 @@ namespace FHUI {
         void        ColoniesSetRef( int rowIndex );
         void        ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
         void        ColoniesMenuSelectRef(Object^, EventArgs^);
+        void        ColoniesMenuProdOrderAdjust(int adjustment);
 
         IGridFilter        ^m_ColoniesFilter;
         Colony             ^m_ColoniesMenuRef;
@@ -204,6 +214,9 @@ namespace FHUI {
         void        GenerateStrikes();
 
         void        GenerateCombatInfo(StarSystem^);
+
+        List<String^>      ^m_OrderList;
+        CommandListT       ^m_Commands;
 
         // ==================================================
         // --- MAP ---

@@ -27,8 +27,7 @@ public:
         , m_Data(data)
     {}
 
-    delegate void CustomEventHandler(T);
-    event CustomEventHandler^ CustomClick;
+    event EventHandler1Arg<T>^ CustomClick;
     virtual void OnClick(EventArgs^ e) override
     {
         CustomClick(m_Data);
@@ -184,6 +183,7 @@ void Form1::InitData()
     m_CmdFiles  = gcnew SortedList<String^, String^>;
 
     m_OrderList = gcnew List<String^>;
+    m_Commands  = gcnew CommandListT;
 }
 
 void Form1::InitRefLists()
@@ -876,6 +876,17 @@ void Form1::ShowGridContextMenu(DataGridView^ grid, DataGridViewCellMouseEventAr
     menu->Show(grid, r.Left + e->Location.X, r.Top + e->Location.Y);
 }
 
+generic<typename T>
+ToolStripMenuItem^ Form1::CreateCustomMenuItem(
+    String ^text,
+    T data,
+    EventHandler1Arg<T> ^handler )
+{
+    ToolStripMenuItemCustom<T> ^item = gcnew ToolStripMenuItemCustom<T>(text, data);
+    item->CustomClick += handler;
+    return item;
+}
+
 ////////////////////////////////////////////////////////////////
 // Systems
 
@@ -1343,11 +1354,67 @@ void Form1::ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowInde
         "Reset Filters",
         nullptr,
         gcnew EventHandler(this, &Form1::ColoniesFiltersReset_Click));
+
+    if( m_ColoniesMenuRef->Owner == m_GameData->GetSpecies() )
+    {
+        menu->Items->Add( gcnew ToolStripSeparator );
+
+        // Production order adjustment
+        if( m_ColoniesMenuRef->ProductionOrder > 0 )
+        {
+            menu->Items->Add( CreateCustomMenuItem(
+                "Prod. Order: First",
+                -1000000,
+                gcnew EventHandler1Arg<int>(this, &Form1::ColoniesMenuProdOrderAdjust) ) );
+            menu->Items->Add( CreateCustomMenuItem(
+                "Prod. Order: 1 Up",
+                -1,
+                gcnew EventHandler1Arg<int>(this, &Form1::ColoniesMenuProdOrderAdjust) ) );
+        }
+        menu->Items->Add( CreateCustomMenuItem(
+            "Prod. Order: 1 Down",
+            1,
+            gcnew EventHandler1Arg<int>(this, &Form1::ColoniesMenuProdOrderAdjust) ) );
+        menu->Items->Add( CreateCustomMenuItem(
+            "Prod. Order: Last",
+            1000000,
+            gcnew EventHandler1Arg<int>(this, &Form1::ColoniesMenuProdOrderAdjust) ) );
+    }
 }
 
 void Form1::ColoniesMenuSelectRef(Object^, EventArgs ^e)
 {
     ColoniesRefColony->Text = m_ColoniesMenuRef->PrintRefListEntry(m_GameData->GetSpecies());
+}
+
+void Form1::ColoniesMenuProdOrderAdjust(int adjustment)
+{
+    int oldOrder = m_ColoniesMenuRef->ProductionOrder;
+    int newOrder = Math::Max(0, oldOrder + adjustment);
+    int lastOrder = 0;
+    for each( Colony ^colony in m_GameData->GetSpecies()->Colonies )
+    {
+        if( colony != m_ColoniesMenuRef )
+        {
+            if( colony->ProductionOrder >= newOrder &&
+                colony->ProductionOrder < oldOrder )
+            {
+                ++colony->ProductionOrder;
+            }
+            else if( colony->ProductionOrder >= oldOrder &&
+                colony->ProductionOrder <= newOrder )
+            {
+                --colony->ProductionOrder;
+            }
+
+            lastOrder = Math::Max(lastOrder, colony->ProductionOrder);
+        }
+    }
+
+    newOrder = Math::Min(newOrder, lastOrder + 1);
+    m_ColoniesMenuRef->ProductionOrder = newOrder;
+    m_GameData->GetSpecies()->SortColoniesByProdOrder();
+    m_ColoniesFilter->Update();
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1518,11 +1585,10 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
                         Decimal::ToInt32(TechGV->Value),
                         m_ShipsMenuRef->Age );
 
-                    ToolStripMenuItemCustom<Planet^> ^item = gcnew ToolStripMenuItemCustom<Planet^>(
+                    jumpMenu->DropDownItems->Add( CreateCustomMenuItem(
                         String::Format("PL {0}  {1:F2}%", colony->Name, mishap),
-                        colony->Planet );
-                    item->CustomClick += gcnew ToolStripMenuItemCustom<Planet^>::CustomEventHandler(this, &Form1::ShipsMenuOrderJump);
-                    jumpMenu->DropDownItems->Add( item );
+                        colony->Planet,
+                        gcnew EventHandler1Arg<Planet^>(this, &Form1::ShipsMenuOrderJump) ) );
 
                     anyJump = true;
                 }
@@ -1542,11 +1608,10 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
                         Decimal::ToInt32(TechGV->Value),
                         m_ShipsMenuRef->Age );
 
-                    ToolStripMenuItemCustom<Planet^> ^item = gcnew ToolStripMenuItemCustom<Planet^>(
+                    jumpMenu->DropDownItems->Add( CreateCustomMenuItem(
                         String::Format("PL {0}  {1:F2}%", planet->Name, mishap),
-                        planet->System->GetPlanet(planet->PlanetNum) );
-                    item->CustomClick += gcnew ToolStripMenuItemCustom<Planet^>::CustomEventHandler(this, &Form1::ShipsMenuOrderJump);
-                    jumpMenu->DropDownItems->Add( item );
+                        planet->System->GetPlanet(planet->PlanetNum),
+                        gcnew EventHandler1Arg<Planet^>(this, &Form1::ShipsMenuOrderJump) ) );
 
                     anyJump = true;
                     anyPlanet = true;

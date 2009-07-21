@@ -306,6 +306,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\include\Commands.h"
+					>
+				</File>
+				<File
 					RelativePath=".\include\Form1.h"
 					FileType="3"
 					>
