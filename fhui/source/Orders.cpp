@@ -30,22 +30,28 @@ void Form1::GenerateCombat()
     m_OrderList->Add("");
 
     // TODO: Sort locations by relevance (effective tonnage)
-    List<StarSystem^> ^locations = gcnew List<StarSystem^>;
-    for each ( Ship ^ship in m_GameData->GetShips() )
+
+    for each ( StarSystem^ system in m_GameData->GetStarSystems() )
     {
-        if( ! locations->Contains( ship->System ) )
+        bool playerShipsHere = false;
+        for each ( Ship^ ship in system->Ships )
         {
-            locations->Add( ship->System );
+            if ( ship->Owner == m_GameData->GetSpecies() )
+            {
+                playerShipsHere = true;
+                break;
+            }
         }
-    }
+        if ( playerShipsHere )
+        {
+            GenerateCombatInfo( system );
+            for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
+            {
+                plugin->GenerateCombat( m_OrderList, system );
+            }
 
-    for each ( StarSystem^ system in locations )
-    {
-        GenerateCombatInfo(system);
-        for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
-            plugin->GenerateCombat(m_OrderList, system);
-
-        m_OrderList->Add("");
+            m_OrderList->Add("");
+        }
     }
 
     m_OrderList->Add("END");
@@ -54,7 +60,46 @@ void Form1::GenerateCombat()
 
 void Form1::GenerateCombatInfo(StarSystem^ system)
 {
-    m_OrderList->Add(String::Format("; Comment about {0} (ships + aliens) goes here", system->PrintLocation() ) );
+    Alien^ player = m_GameData->GetSpecies();
+
+    String^ sysInfo = system->PrintColonies(-1, player );
+    if ( sysInfo->Length == 0 )
+    {
+        sysInfo = "empty";
+    }
+
+    m_OrderList->Add(
+        String::Format("; Location: {0} ({1})", system->PrintLocation(), sysInfo ) );
+
+    List<String^>^ MyShipInfo = gcnew List<String^>;
+    List<String^>^ AlienShipInfo = gcnew List<String^>;
+
+    for each ( Ship^ ship in system->Ships )
+    {
+        String^ shipLoc;
+        if (ship->Location == SHIP_LOC_DEEP_SPACE )
+        {
+            shipLoc = "Deep";
+        }
+        else
+        {
+            shipLoc = ship->PrintLocation(player);
+        }
+
+        if ( ship->Owner == player )
+        {
+            MyShipInfo->Add(
+                String::Format(";    {0} ({1}) [{2}]", ship->PrintClassWithName(), shipLoc, ship->PrintCargo() ) );
+        }
+        else
+        {
+            AlienShipInfo->Add(
+                String::Format(";    {0} ({1})    SP {2}", ship->PrintClassWithName(), shipLoc, ship->Owner->Name ) );
+        }
+    }
+    m_OrderList->AddRange( MyShipInfo );
+    m_OrderList->Add( String::Format("; Alien ships: {0}", ( AlienShipInfo->Count ? "" : "none" ) ) );
+    m_OrderList->AddRange( AlienShipInfo );
 }
 
 void Form1::GeneratePreDeparture()
