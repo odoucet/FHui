@@ -601,7 +601,7 @@ String^ GameData::GetEconomicSummary()
         "EUs  carried: {0,7}\r\n"
         "    produced: {1,7}\r\n"
         "Fleet maint.: {2} ({3:F2}%)\r\n"
-        "Production  : {4,7}\r\n",
+        "     Budget : {4,7}\r\n",
         m_TurnEUStart,
         m_TurnEUProduced,
         m_FleetCost, m_FleetCostPercent,
