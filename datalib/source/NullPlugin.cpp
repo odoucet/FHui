@@ -30,20 +30,9 @@ BudgetTracker::BudgetTracker(List<String^> ^orders, int euCarried)
 
 void BudgetTracker::SetColony(Colony ^colony)
 {
-    m_CU = colony->AvailPop;
+    m_PopAvail = colony->AvailPop;
     m_BudgetTotal += colony->EUAvail;
-    switch( colony->PlanetType )
-    {
-    case PLANET_HOME:
-        m_BudgetAvail = int::MaxValue;
-        break;
-    case PLANET_COLONY:
-        m_BudgetAvail = colony->EUAvail * 2;
-        break;
-    default:
-        m_BudgetAvail = 0;
-        break;
-    }
+    m_BudgetAvail = colony->GetMaxProductionBudget();
 }
 
 void BudgetTracker::Recycle(int eu)
@@ -63,11 +52,14 @@ void BudgetTracker::Spend(int eu)
         m_Orders->Add( String::Format("; !!!!!! BUDGET EXCEEDED by {0} !!!!!!", -m_BudgetTotal) );
 }
 
-void BudgetTracker::UseCU(int cu)
+void BudgetTracker::UsePopulation(int pop)
 {
-    m_CU -= cu;
-    if( m_CU < 0 )
-        m_Orders->Add( String::Format("; !!!!!! NOT ENOUGH CU Available ({0} left) !!!!!!", m_CU + cu) );
+    m_PopAvail -= pop;
+    if( m_PopAvail < 0 )
+    {
+        m_Orders->Add( String::Format("; !!!!!! NOT ENOUGH CU Available ({0} left) !!!!!!", m_PopAvail + pop) );
+        m_PopAvail = 0;
+    }
 }
 
 // ---------------------------------------------------------

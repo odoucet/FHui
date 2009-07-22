@@ -155,79 +155,132 @@ void Form1::GenerateProduction()
     m_OrderList->Add("START PRODUCTION");
 
     BudgetTracker ^budget = gcnew BudgetTracker(m_OrderList, m_GameData->GetCarriedEU());
-    m_OrderList->Add("; +" + budget->GetBudgetTotal().ToString() + " EUs carried" );
+    m_OrderList->Add("; +" + budget->GetTotalBudget().ToString() + " EUs carried" );
+
+    // Mark ships for upgrade
+    for each( Ship ^ship in m_GameData->GetSpecies()->Ships )
+    {
+        if( ship->Command != nullptr &&
+            (   ship->Command->Type == Ship::OrderType::Upgrade ||
+                ship->Command->Type == Ship::OrderType::Recycle ) )
+        {
+            ship->Command->PlanetNum = -1;
+        }
+    }
 
     // Sort colonies for production
     m_GameData->GetSpecies()->SortColoniesByProdOrder();
 
+    // Generate production template for each colony
     for each( Colony ^colony in m_GameData->GetSpecies()->Colonies )
     {
         m_OrderList->Add("");
         m_OrderList->Add("  PRODUCTION PL " + colony->Name);
 
-        int euCarried = budget->GetBudgetTotal();
+        int euCarried = budget->GetTotalBudget();
         budget->SetColony(colony);
 
         // Production summary
         String ^prodSummary = String::Format("  ; {0} +{1} = {2}",
-            colony->EUAvail, euCarried, budget->GetBudgetTotal());
+            colony->EUAvail, euCarried, budget->GetTotalBudget());
         if( colony->PlanetType == PLANET_COLONY )
-            prodSummary += "  max=" + budget->GetBudgetAvail().ToString();
+            prodSummary += "  max=" + budget->GetAvailBudget().ToString();
         m_OrderList->Add( prodSummary );
 
-        if( colony->CanProduce )
-        {
-            // Recycle / upgrade ships
-            for each( Ship ^ship in m_GameData->GetSpecies()->Ships )
-            {
-                if( ship->System == colony->System &&
-                    ship->Command != nullptr )
-                {
-                    switch( ship->Command->Type )
-                    {
-                    case Ship::OrderType::Recycle:
-                        {
-                            int value = Calculators::ShipRecycleValue(ship->Age, ship->OriginalCost);
-                            m_OrderList->Add( String::Format("    Recycle {0}  ; [A] +{1} EU",
-                                ship->PrintClassWithName(),
-                                value) );
-                            budget->Recycle(value);
-                        }
-                        break;
+        // First RECYCLE all ships
+        GenerateProductionRecycle(colony, budget);
 
-                    case Ship::OrderType::Upgrade:
-                        {
-                            int value = Calculators::ShipUpgradeCost(ship->Age, ship->OriginalCost);
-                            m_OrderList->Add( String::Format("    Upgrade {0}  ; [A] -{1} EU",
-                                ship->PrintClassWithName(),
-                                value) );
-                            budget->Spend(value);
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-
+        // Launch plugin actions
         for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
             plugin->GenerateProduction(m_OrderList, colony, budget);
+
+        // Now try to UPGRADE ships here
+        GenerateProductionUpgrade(colony, budget);
 
         // Automatic spendings summary
         if( colony->PlanetType == PLANET_COLONY )
         {
             m_OrderList->Add( String::Format("    ; -- EU to use: {0} (total {1})",
-                budget->GetBudgetAvail(),
-                budget->GetBudgetTotal() ) );
+                budget->GetAvailBudget(),
+                budget->GetTotalBudget() ) );
         }
         else if( colony->PlanetType == PLANET_HOME )
         {
-            m_OrderList->Add( String::Format("    ; -- EU to use: {0}", budget->GetBudgetAvail() ) );
+            m_OrderList->Add( String::Format("    ; -- EU to use: {0}", budget->GetAvailBudget() ) );
         }
     }
 
     m_OrderList->Add("");
     m_OrderList->Add("END");
     m_OrderList->Add("");
+}
+
+void Form1::GenerateProductionRecycle(Colony ^colony, BudgetTracker ^budget)
+{
+    if( colony->CanProduce == false )
+        return;
+
+    for each( Ship ^ship in colony->System->ShipsOwned )
+    {
+        if( ship->Command != nullptr &&
+            ship->Command->Type == Ship::OrderType::Recycle &&
+            ship->Command->PlanetNum == -1 )    // not yet done
+        {
+            int value = Calculators::ShipRecycleValue(ship->Age, ship->OriginalCost);
+            m_OrderList->Add( String::Format("    Recycle {0}  ; [A] +{1} EU",
+                ship->PrintClassWithName(),
+                value) );
+            budget->Recycle(value);
+
+            // Mark the recycle was done on this planet.
+            ship->Command->PlanetNum = colony->PlanetNum;
+        }
+    }
+}
+
+void Form1::GenerateProductionUpgrade(Colony ^colony, BudgetTracker ^budget)
+{
+    if( colony->CanProduce == false )
+        return;
+
+    for each( Ship ^ship in colony->System->ShipsOwned )
+    {
+        if( ship->Command != nullptr &&
+            ship->Command->Type == Ship::OrderType::Upgrade &&
+            ship->Command->PlanetNum == -1 )    // not yet done
+        {
+            int value = Calculators::ShipUpgradeCost(ship->Age, ship->OriginalCost);
+            bool doUpgrade = true;
+            // Does this colony has budget for upgrade?
+            // If budget exceeded search for another colony
+            // that could handle the upgrade.
+            if( value > budget->GetAvailBudget() )
+            {
+                for each( Colony ^otherCol in colony->System->ColoniesOwned )
+                {
+                    if( otherCol->CanProduce &&
+                        otherCol->ProductionOrder > colony->ProductionOrder &&
+                        otherCol->GetMaxProductionBudget() >= value )
+                    {   // Other candidate found, don't upgrade on this colony.
+                        doUpgrade = false;
+                    }
+                }
+            }
+
+            // Even if budget for upgrade not available, but no other
+            // colony able to do the upgrade found, add the command.
+            if( doUpgrade )
+            {
+                m_OrderList->Add( String::Format("    Upgrade {0}  ; [A] -{1} EU",
+                    ship->PrintClassWithName(),
+                    value) );
+                budget->Spend(value);
+
+                // Mark the upgrade was done on this planet.
+                ship->Command->PlanetNum = colony->PlanetNum;
+            }
+        }
+    }
 }
 
 void Form1::GeneratePostArrival()

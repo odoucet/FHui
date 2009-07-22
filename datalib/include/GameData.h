@@ -201,7 +201,11 @@ public:
         MinLSNAvail = 99999;
         Master = nullptr;
         Ships = gcnew List<Ship^>;
+        ShipsOwned = gcnew List<Ship^>;
+        ShipsAlien = gcnew List<Ship^>;
         Colonies = gcnew List<Colony^>;
+        ColoniesOwned = gcnew List<Colony^>;
+        ColoniesAlien = gcnew List<Colony^>;
         IsVoid = true;
     }
 
@@ -246,7 +250,11 @@ public:
     property Alien^     HomeSpecies;
 
     property List<Ship^>^   Ships;
+    property List<Ship^>^   ShipsOwned;
+    property List<Ship^>^   ShipsAlien;
     property List<Colony^>^ Colonies;
+    property List<Colony^>^ ColoniesOwned;
+    property List<Colony^>^ ColoniesAlien;
     property Alien^         Master;
 
     property int        PlanetsCount { int get() { return m_Planets->Length; } }
@@ -308,6 +316,7 @@ public:
     String^         PrintBalance();
 
     void            CalculateBalance(bool MiMaBalanced);
+    int             GetMaxProductionBudget();
 
     Alien^          Owner;
     String^         Name;

@@ -344,6 +344,16 @@ void Colony::CalculateBalance(bool MiMaBalanced)
     }
 }
 
+int Colony::GetMaxProductionBudget()
+{
+    switch( PlanetType )
+    {
+    case PLANET_HOME:   return int::MaxValue;
+    case PLANET_COLONY: return EUAvail * 2;
+    default:            return 0;
+    }
+}
+
 // ---------------------------------------------------------
 
 String^ Ship::PrintClass()
@@ -1101,8 +1111,28 @@ void GameData::UpdateSystems()
 {
     for each( StarSystem ^system in m_Systems )
     {
-        system->Colonies = GetColonies(system, nullptr);
-        system->Ships    = GetShips(system, nullptr);
+        for each( Colony ^colony in GetColonies() )
+        {
+            if( colony->System == system )
+            {
+                system->Colonies->Add(colony);
+                if( colony->Owner == GetSpecies() )
+                    system->ColoniesOwned->Add(colony);
+                else
+                    system->ColoniesAlien->Add(colony);
+            }
+        }
+        for each( Ship ^ship in GetShips() )
+        {
+            if( ship->System == system )
+            {
+                system->Ships->Add(ship);
+                if( ship->Owner == GetSpecies() )
+                    system->ShipsOwned->Add(ship);
+                else
+                    system->ShipsAlien->Add(ship);
+            }
+        }
 
         // Calculate LSN
         int minLSN = 99999;

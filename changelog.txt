@@ -4,9 +4,13 @@ Major new features and bug fixes will be listed here.
 * Bug fixes
 
 FHUI build ??
++ Orders template is generated with more data than the default one in report.
 + Context menu added on grids after right mouse button click.
 + Assumed tech levels toolbar added. It is used for calculating colony balance,
   jump mishap probability, and more in the future.
++ Colony production order added, it is used for generating orders template.
+  Use context menu on Colonies tab to edit the order.
++ Orders for ships: Upgrade, Recycle and Jump in context menu on Ships tab.
 
 FHUI build 70
 * Fixed misreporting alien colony size by 0.1

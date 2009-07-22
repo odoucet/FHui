@@ -214,6 +214,8 @@ namespace FHUI {
         void        GenerateStrikes();
 
         void        GenerateCombatInfo(StarSystem^);
+        void        GenerateProductionRecycle(Colony ^colony, BudgetTracker ^budget);
+        void        GenerateProductionUpgrade(Colony ^colony, BudgetTracker ^budget);
 
         List<String^>      ^m_OrderList;
         CommandListT       ^m_Commands;

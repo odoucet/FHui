@@ -79,17 +79,17 @@ public:
 
     void        Recycle(int eu);
     void        Spend(int eu);
-    void        UseCU(int cu);
+    void        UsePopulation(int pop);
 
-    int         GetCUAvail()        { return m_CU; }
-    int         GetBudgetAvail()    { return Math::Min(m_BudgetAvail, m_BudgetTotal); }
-    int         GetBudgetTotal()    { return m_BudgetTotal; }
+    int         GetAvailPopulation()    { return m_PopAvail; }
+    int         GetAvailBudget()        { return Math::Min(m_BudgetAvail, m_BudgetTotal); }
+    int         GetTotalBudget()        { return m_BudgetTotal; }
 
 protected:
     List<String^>^  m_Orders;
     int             m_BudgetTotal;
     int             m_BudgetAvail;
-    int             m_CU;
+    int             m_PopAvail;
 };
 
 // ---------------------------------------------------------
