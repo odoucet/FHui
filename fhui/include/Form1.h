@@ -187,7 +187,14 @@ namespace FHUI {
         void        ShipsSetRef( int rowIndex );
         void        ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
         void        ShipsMenuSelectRef(Object^, EventArgs^);
-        void        ShipsMenuOrderSet(Ship::Order ^command);
+
+        typedef Pair<Ship^, Ship::Order^> ShipOrderData;
+        void        ShipsMenuOrderSet(ShipOrderData ^data);
+
+        ToolStripMenuItem^ ShipsMenuAddJumpsHere(
+                        StarSystem ^system, int planetNum );
+        ToolStripMenuItem^ ShipsMenuCreateJumpItem(
+                        Ship ^ship, StarSystem ^system, int planetNum, String ^text );
 
         IGridFilter        ^m_ShipsFilter;
         Ship               ^m_ShipsMenuRef;

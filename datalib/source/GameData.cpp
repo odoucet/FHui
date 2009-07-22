@@ -514,7 +514,12 @@ String^ Ship::Order::PrintJumpDestination()
     {
         Planet ^planet = JumpTarget->GetPlanet(PlanetNum);
         if( planet )
-            return "PL " + planet->Name;
+        {
+            if( String::IsNullOrEmpty(planet->Name) )
+                return planet->PrintLocation();
+            else
+                return "PL " + planet->Name;
+        }
         return JumpTarget->PrintLocation() + " " + PlanetNum.ToString();
     }
     return JumpTarget->PrintLocation();

@@ -233,6 +233,10 @@
 					RelativePath=".\Include\Stdafx.h"
 					>
 				</File>
+				<File
+					RelativePath=".\include\Utils.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Source"
