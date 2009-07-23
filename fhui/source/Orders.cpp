@@ -33,16 +33,7 @@ void Form1::GenerateCombat()
 
     for each ( StarSystem^ system in m_GameData->GetStarSystems() )
     {
-        bool playerShipsHere = false;
-        for each ( Ship^ ship in system->Ships )
-        {
-            if ( ship->Owner == m_GameData->GetSpecies() )
-            {
-                playerShipsHere = true;
-                break;
-            }
-        }
-        if ( playerShipsHere )
+        if ( system->ShipsOwned->Count > 0 )
         {
             GenerateCombatInfo( system );
             for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
@@ -83,7 +74,7 @@ void Form1::GenerateCombatInfo(StarSystem^ system)
         }
         else
         {
-            shipLoc = ship->PrintLocation(player);
+            shipLoc = ship->PrintLocation();
         }
 
         if ( ship->Owner == player )

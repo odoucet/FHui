@@ -396,7 +396,7 @@ public:
 
     String^         PrintClass();
     String^         PrintClassWithName()                { return PrintClass() + " " + Name; }
-    String^         PrintLocation(Alien ^player);
+    String^         PrintLocation();
     String^         PrintCargo();
     String^         PrintRefListEntry();
 
@@ -418,6 +418,7 @@ public:
     property int            Capacity;
     property bool           IsPirate;
     property int            Tonnage;
+    property int            WarTonnage;
     property int            OriginalCost;
 
     property int            Size {
@@ -494,7 +495,7 @@ public:
     IList<Alien^>^          GetAliens()                         { return m_Aliens->Values; }
     array<StarSystem^>^     GetStarSystems()                    { return m_Systems; }
     IList<PlanetName^>^     GetPlanetNames()                    { return m_PlanetNames->Values; }
-    IList<Ship^>^           GetShips()                          { return m_Ships->Values; }
+    IList<Ship^>^           GetShips()                          { return m_ShipsByTonnage; }
     IList<Colony^>^         GetColonies()                       { return m_Colonies->Values; }
 
     // ------------------------------------------
@@ -520,6 +521,7 @@ protected:
     bool            TurnCheck(int turn);
     int             TurnAlign(int turn);
 
+    void            UpdateShips();
     void            UpdateAliens();
     void            UpdateSystems();
     void            LinkPlanetNames();
@@ -552,6 +554,7 @@ protected:
     SortedList<String^, Colony^>       ^m_Colonies;
     SortedList<String^, PlanetName^>   ^m_PlanetNames;
     SortedList<String^, Ship^>         ^m_Ships;
+    List<Ship^>                        ^m_ShipsByTonnage;
 
     int                 m_TurnMax;
 };

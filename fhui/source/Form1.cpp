@@ -1268,7 +1268,6 @@ void Form1::ColoniesSetup()
     DataColumn ^colSize         = dataTable->Columns->Add("Size",       double::typeid );
     DataColumn ^colSeen         = dataTable->Columns->Add("Seen",       int::typeid );
     DataColumn ^colProd         = dataTable->Columns->Add("Prod.",      int::typeid );
-    DataColumn ^colProdOrder    = dataTable->Columns->Add("Order",      int::typeid );
     DataColumn ^colLSN          = dataTable->Columns->Add("LSN",        int::typeid );
     DataColumn ^colProdPerc     = dataTable->Columns->Add("Pr[%]",      int::typeid );
     DataColumn ^colBalance      = dataTable->Columns->Add("Balance",    String::typeid );
@@ -1276,6 +1275,7 @@ void Form1::ColoniesSetup()
     DataColumn ^colDist         = dataTable->Columns->Add("Dist.",      double::typeid );
     DataColumn ^colMishap       = dataTable->Columns->Add("Mishap %",   String::typeid );
     DataColumn ^colInventory    = dataTable->Columns->Add("Inventory",  String::typeid );
+    DataColumn ^colProdOrder    = dataTable->Columns->Add("Order",      int::typeid );
 
     for each( IGridPlugin ^plugin in m_GridPlugins )
         plugin->AddColumns(GridType::Colonies, dataTable);
@@ -1506,7 +1506,7 @@ void Form1::ShipsSetup()
         row[colOwner]       = ship->Owner == sp ? String::Format("* {0}", sp->Name) : ship->Owner->Name;
         row[colClass]       = ship->PrintClass();
         row[colName]        = ship->Name;
-        row[colLocation]    = ship->PrintLocation( m_GameData->GetSpecies() );
+        row[colLocation]    = ship->PrintLocation();
         if( !ship->IsPirate )
             row[colAge]     = ship->Age;
         row[colCap]         = ship->Capacity;
@@ -1695,12 +1695,14 @@ ToolStripMenuItem^ Form1::ShipsMenuCreateJumpItem(
         Decimal::ToInt32(TechGV->Value),
         ship->Age );
 
-    ToolStripMenuItem ^menuItem = CreateCustomMenuItem(
-        String::Format("{0}  [{1}] -> [{2}]  {3:F2}%",
+    String ^itemText = String::Format("{0}  \t{1:F2}% ({2} FS)  From {3}",
             text,
-            ship->System->PrintLocation(),
-            system->PrintLocation(),
-            mishap),
+            mishap,
+            ship->Cargo[INV_FS],
+            ship->PrintLocation() );
+
+    ToolStripMenuItem ^menuItem = CreateCustomMenuItem(
+        itemText,
         gcnew ShipOrderData(ship, gcnew Ship::Order(Ship::OrderType::Jump, system, planetNum)),
         gcnew EventHandler1Arg<ShipOrderData^>(this, &Form1::ShipsMenuOrderSet) );
 

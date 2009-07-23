@@ -370,7 +370,7 @@ String^ Ship::PrintRefListEntry()
     return PrintClass() + " " + Name + " (A" + Age.ToString() + ")";
 }
 
-String^ Ship::PrintLocation(Alien ^player)
+String^ Ship::PrintLocation()
 {
     String ^xyz;
 
@@ -379,12 +379,13 @@ String^ Ship::PrintLocation(Alien ^player)
         if( PlanetNum == -1 )
         {
             // check if there is player colony in the system
-            for each( Colony ^colony in System->Colonies )
+            int biggest = 0;
+            for each( Colony ^colony in System->ColoniesOwned )
             {
-                if ( colony->System == System && colony->Owner == player )
+                if( colony->EconomicBase > biggest )
                 {
                     PlanetNum = colony->PlanetNum;
-                    break;
+                    biggest = colony->EconomicBase;
                 }
             }
         }
@@ -482,6 +483,11 @@ void Ship::SetupTonnage()
     OriginalCost = Tonnage / 100;
     if( SubLight )
         OriginalCost = (3 * OriginalCost) / 4;
+
+    if( Type == SHIP_TR )
+        WarTonnage = Tonnage / 10;
+    else
+        WarTonnage = Tonnage;
 }
 
 int Ship::GetMaintenanceCost()
@@ -723,7 +729,7 @@ String^ GameData::GetShipsSummary()
         ret += String::Format("{0} {1} @{2}\r\n",
             ship->PrintClass(),
             ship->Name,
-            ship->PrintLocation( GetSpecies() ) );
+            ship->PrintLocation() );
 
     return ret;
 }
@@ -1096,11 +1102,31 @@ void GameData::AddPlanetName(int turn, StarSystem ^system, int pl, String ^name)
 
 void GameData::Update()
 {
+    UpdateShips();
     UpdateAliens();
     UpdateSystems();
     LinkPlanetNames();
     UpdateHomeWorlds();
     UpdateColonies();
+}
+
+private ref class ShipWarTonnageComparer : public IComparer<Ship^>
+{
+public:
+    virtual int Compare(Ship ^s1, Ship ^s2)
+    {
+        // Newer, Bigger ships first
+        if( s2->WarTonnage == s1->WarTonnage )
+            return s1->Age - s2->Age;
+        return s2->WarTonnage - s1->WarTonnage;
+    }
+};
+
+void GameData::UpdateShips()
+{
+    m_ShipsByTonnage = gcnew List<Ship^>;
+    m_ShipsByTonnage->AddRange(m_Ships->Values);
+    m_ShipsByTonnage->Sort( gcnew ShipWarTonnageComparer );
 }
 
 void GameData::UpdateAliens()
