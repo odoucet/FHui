@@ -1860,6 +1860,7 @@ void Form1::AliensSetup()
     DataColumn ^colTechLev  = dataTable->Columns->Add("Tech Levels",    String::typeid );
     DataColumn ^colTemp     = dataTable->Columns->Add("Temp",           int::typeid );
     DataColumn ^colPress    = dataTable->Columns->Add("Press",          int::typeid );
+    DataColumn ^colTeach    = dataTable->Columns->Add("Teach",          String::typeid );
     DataColumn ^colEMail    = dataTable->Columns->Add("EMail",          String::typeid );
 
     for each( IGridPlugin ^plugin in m_GridPlugins )
@@ -1884,6 +1885,19 @@ void Form1::AliensSetup()
         }
         row[colEMail]       = alien->Email;
 
+        if( alien->TeachOrders )
+        {
+            String ^teach = "";
+            if( alien->TeachOrders & (1 << TECH_MI) ) teach += ", MI";
+            if( alien->TeachOrders & (1 << TECH_MA) ) teach += ", MA";
+            if( alien->TeachOrders & (1 << TECH_ML) ) teach += ", ML";
+            if( alien->TeachOrders & (1 << TECH_GV) ) teach += ", GV";
+            if( alien->TeachOrders & (1 << TECH_LS) ) teach += ", LS";
+            if( alien->TeachOrders & (1 << TECH_BI) ) teach += ", BI";
+            if( !String::IsNullOrEmpty(teach) )
+                row[colTeach] = teach->Substring(2);
+        }
+
         for each( IGridPlugin ^plugin in m_GridPlugins )
             plugin->AddRowData(row, alien, m_SystemsFilter);
 
@@ -1901,12 +1915,206 @@ void Form1::AliensSetup()
 void Form1::AliensFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
 {
     int index = AliensGrid->Columns[0]->Index;
-    IGridDataSrc ^iDataSrc = safe_cast<IGridDataSrc^>(AliensGrid->Rows[ rowIndex ]->Cells[index]->Value);
+    Alien ^alien = safe_cast<Alien^>(AliensGrid->Rows[ rowIndex ]->Cells[index]->Value);
+    m_AliensMenuRef = alien;
 
     menu->Items->Add(
         "Reset Filters",
         nullptr,
         gcnew EventHandler(this, &Form1::AliensFiltersReset_Click));
+
+    if( alien->Relation == SP_NEUTRAL ||
+        alien->Relation == SP_ENEMY ||
+        alien->Relation == SP_ALLY )
+    {
+        menu->Items->Add( gcnew ToolStripSeparator );
+
+        ToolStripMenuItem ^teachMenu = gcnew ToolStripMenuItem("Teach");
+        bool teachAny = false;
+
+        if( alien->Relation != SP_NEUTRAL )
+        {   // Declare neutrality
+            ToolStripMenuItem ^menuItem = CreateCustomMenuItem(
+                "Declare Neutral",
+                gcnew AlienRelationData(alien, SP_NEUTRAL),
+                gcnew EventHandler1Arg<AlienRelationData^>(this, &Form1::AliensMenuSetRelation) );
+            menu->Items->Add( menuItem );
+        }
+        if( alien->Relation != SP_ALLY )
+        {   // Declare alliance
+            ToolStripMenuItem ^menuItem = CreateCustomMenuItem(
+                "Declare Ally",
+                gcnew AlienRelationData(alien, SP_ALLY),
+                gcnew EventHandler1Arg<AlienRelationData^>(this, &Form1::AliensMenuSetRelation) );
+            menu->Items->Add( menuItem );
+        }
+        if( alien->Relation != SP_ENEMY )
+        {   // Declare enemy
+            ToolStripMenuItem ^menuItem = CreateCustomMenuItem(
+                "Declare Enemy",
+                gcnew AlienRelationData(alien, SP_ENEMY),
+                gcnew EventHandler1Arg<AlienRelationData^>(this, &Form1::AliensMenuSetRelation) );
+            menu->Items->Add( menuItem );
+        }
+
+        // Teach
+        if( alien->TeachOrders )
+        {
+            teachMenu->DropDownItems->Add( "Cancel ALL",
+                nullptr,
+                gcnew EventHandler(this, &Form1::AliensMenuTeachCancel));
+            teachAny = true;
+        }
+        if( alien->Relation != SP_ENEMY )
+        {
+            if( teachAny )
+                teachMenu->DropDownItems->Add( gcnew ToolStripSeparator );
+
+            teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Mining", TECH_MI) );
+            teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Manufacturing", TECH_MA) );
+            teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Military", TECH_ML) );
+            teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Gravitics", TECH_GV) );
+            teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Life Support", TECH_LS) );
+            teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Biology", TECH_BI) );
+
+            teachMenu->DropDownItems->Add( gcnew ToolStripSeparator );
+            teachMenu->DropDownItems->Add( "Teach ALL",
+                nullptr,
+                gcnew EventHandler(this, &Form1::AliensMenuTeachAll));
+            teachAny = true;
+        }
+
+        if( teachAny )
+            menu->Items->Add( teachMenu );
+    }
+}
+
+ToolStripMenuItem^ Form1::AliensMenuCreateTeach(String ^text, TechType tech)
+{
+    ToolStripMenuItem ^menuItem = CreateCustomMenuItem(
+        text,
+        gcnew TeachData(m_AliensMenuRef, tech, m_GameData->GetSpecies()->TechLevels[tech]),
+        gcnew EventHandler1Arg<TeachData^>(this, &Form1::AliensMenuTeach) );
+
+    return menuItem;
+}
+
+void Form1::AliensMenuTeach(TeachData ^data)
+{
+    Alien ^alien = data->A;
+    TechType tech = (TechType)data->B;
+    int level = data->C;
+
+    for each( ICommand ^iCmd in m_Commands )
+    {
+        if( iCmd->GetType() == CommandType::Teach )
+        {
+            CmdTeach ^cmd = safe_cast<CmdTeach^>(iCmd);
+            if( cmd->m_Alien == alien &&
+                cmd->m_Tech == tech )
+            {   // Cmd already exists
+                return;
+            }
+        }
+    }
+
+    m_Commands->Add( gcnew CmdTeach(alien, tech, level) );
+
+    alien->TeachOrders |= 1 << tech;
+    m_AliensFilter->Update();
+}
+
+void Form1::AliensMenuTeachAll(Object^, EventArgs^)
+{
+    m_AliensFilter->EnableUpdates = false;
+
+    TeachData ^data = gcnew TeachData(m_AliensMenuRef, TECH_MI, m_GameData->GetSpecies()->TechLevels[TECH_MI]);
+    AliensMenuTeach(data);
+
+    data->B = TECH_MA;
+    data->C = m_GameData->GetSpecies()->TechLevels[TECH_MA];
+    AliensMenuTeach(data);
+
+    data->B = TECH_ML;
+    data->C = m_GameData->GetSpecies()->TechLevels[TECH_ML];
+    AliensMenuTeach(data);
+
+    data->B = TECH_GV;
+    data->C = m_GameData->GetSpecies()->TechLevels[TECH_GV];
+    AliensMenuTeach(data);
+
+    data->B = TECH_LS;
+    data->C = m_GameData->GetSpecies()->TechLevels[TECH_LS];
+    AliensMenuTeach(data);
+
+    data->B = TECH_BI;
+    data->C = m_GameData->GetSpecies()->TechLevels[TECH_BI];
+    AliensMenuTeach(data);
+
+    m_AliensFilter->EnableUpdates = true;
+    m_AliensFilter->Update();
+}
+
+void Form1::AliensMenuTeachCancel(Object^, EventArgs^)
+{
+    bool removed = false;
+    do
+    {
+        removed = false;
+        for each( ICommand ^iCmd in m_Commands )
+        {
+            if( iCmd->GetType() == CommandType::Teach )
+            {
+                CmdTeach ^cmd = safe_cast<CmdTeach^>(iCmd);
+                if( cmd->m_Alien == m_AliensMenuRef )
+                {
+                    removed = true;
+                    m_Commands->Remove(iCmd);
+                    break;
+                }
+            }
+        }
+    } while( removed );
+
+    m_AliensMenuRef->TeachOrders = 0;
+    m_AliensFilter->Update();
+}
+
+void Form1::AliensMenuSetRelation(AlienRelationData ^data)
+{
+    Alien ^alien = data->A;
+    SPRelType rel = (SPRelType)data->B;
+
+    if( alien->Relation == alien->RelationOriginal )
+    {   // Add relation command
+        m_Commands->Add( gcnew CmdAlienRelation(alien, rel) );
+    }
+    else
+    {   // Modify existing relation command
+        for each( ICommand ^iCmd in m_Commands )
+        {
+            if( iCmd->GetType() == CommandType::AlienRelation )
+            {
+                CmdAlienRelation ^cmd = safe_cast<CmdAlienRelation^>(iCmd);
+                if( cmd->m_Alien == alien )
+                {
+                    cmd->m_Relation = rel;
+                    break;
+                }
+            }
+        }
+    }
+
+    if( rel == SP_ENEMY && alien->TeachOrders )
+        AliensMenuTeachCancel(nullptr, nullptr);
+
+    alien->Relation = rel;
+    m_AliensFilter->Update();
+    // Update other grids to reflect new colors
+    m_SystemsFilter->Update();
+    m_PlanetsFilter->Update();
+    m_ColoniesFilter->Update();
+    m_ShipsFilter->Update();
 }
 
 ////////////////////////////////////////////////////////////////

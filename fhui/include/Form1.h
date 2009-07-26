@@ -208,7 +208,17 @@ namespace FHUI {
         void        AliensUpdateControls();
         void        AliensFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
 
+        typedef Pair<Alien^, int> AlienRelationData;
+        void        AliensMenuSetRelation(AlienRelationData ^data);
+        typedef Triple<Alien^, int, int> TeachData;
+        void        AliensMenuTeach(TeachData ^data);
+        void        AliensMenuTeachAll(Object^, EventArgs^);
+        void        AliensMenuTeachCancel(Object^, EventArgs^);
+
+        ToolStripMenuItem^ AliensMenuCreateTeach(String ^text, TechType tech);
+
         IGridFilter        ^m_AliensFilter;
+        Alien              ^m_AliensMenuRef;
 
         // ==================================================
         // --- ORDER TEMPLATE ---

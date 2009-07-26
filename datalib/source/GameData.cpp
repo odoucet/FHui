@@ -1133,6 +1133,8 @@ void GameData::UpdateAliens()
 {
     for each( Alien ^alien in GetAliens() )
     {
+        alien->RelationOriginal = alien->Relation;
+
         alien->Colonies = GetColonies(nullptr, alien);
         alien->Ships    = GetShips(nullptr, alien);
     }

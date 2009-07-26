@@ -24,6 +24,7 @@ private enum class CommandType
 {
     Name,
     AlienRelation,  // Enemy/Neutral/Ally
+    Teach
 };
 
 interface class ICommand
@@ -71,6 +72,26 @@ public:
 
     Alien^          m_Alien;
     SPRelType       m_Relation;
+};
+
+////////////////////////////////////////////////////////////
+
+private ref class CmdTeach : public ICommand
+{
+public:
+    CmdTeach(Alien ^alien, TechType tech, int level)
+        : m_Alien(alien)
+        , m_Tech(tech)
+        , m_Level(level)
+    {}
+
+    virtual CommandPhase    GetPhase()  { return CommandPhase::PostArrival; }
+    virtual CommandType     GetType()   { return CommandType::Teach; }
+    virtual void    Print(List<String^> ^orders);
+
+    Alien^          m_Alien;
+    TechType        m_Tech;
+    int             m_Level;
 };
 
 } // end namespace FHUI

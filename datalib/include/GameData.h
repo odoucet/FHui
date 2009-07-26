@@ -80,6 +80,7 @@ public:
         GovName = nullptr;
         GovType = nullptr;
         Relation = SP_NEUTRAL;
+        RelationOriginal = SP_NEUTRAL;
         TurnMet = turn;
         Email = nullptr;
         HomeSystem = nullptr;
@@ -92,6 +93,7 @@ public:
         TechLevels        = gcnew array<int>(TECH_MAX){0};
         TechLevelsTeach   = gcnew array<int>(TECH_MAX){0};
         TechLevelsAssumed = gcnew array<int>(TECH_MAX){0};
+        TeachOrders = 0;
     }
 
     // -------- IGridDataSrc ----------------------------
@@ -109,6 +111,7 @@ public:
     property String^            GovName;
     property String^            GovType;
     property SPRelType          Relation;
+    property SPRelType          RelationOriginal;
     property int                TurnMet;
     property String^            Email;
 
@@ -123,6 +126,7 @@ public:
     property array<int>^        TechLevels;
     property array<int>^        TechLevelsTeach;
     property array<int>^        TechLevelsAssumed;
+    property int                TeachOrders;
 };
 
 // ---------------------------------------------------
