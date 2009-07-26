@@ -2,13 +2,6 @@
 
 #include "Commands.h"
 
-ref class GameData;
-ref class Alien;
-ref class StarSystem;
-ref class Ship;
-ref class PlanetView;
-ref class Report;
-
 namespace FHUI {
 
     using namespace System;
@@ -20,6 +13,8 @@ namespace FHUI {
 
     generic <typename T>
     private delegate void EventHandler1Arg(T);
+
+    ref class RegexMatcher;
 
 	/// <summary>
 	/// Summary for Form1
@@ -61,7 +56,7 @@ namespace FHUI {
         void        LoadGalaxy();
         void        LoadGameTurn(int turn);
         void        LoadReport(String ^fileName);
-        void        LoadCommands();
+        void        LoadOrders();
         void        TurnReload();
         void        InitData();
         void        InitRefLists();
@@ -78,6 +73,8 @@ namespace FHUI {
         void        TechLevelsResetToCurrent();
         void        TechLevelsResetToTaught();
         void        TechLevelsChanged();
+
+        String^     GetDataDir(String ^suffix);
 
         // -- Data grids formatting
         void        ApplyDataAndFormat(
@@ -114,7 +111,8 @@ namespace FHUI {
         };
         ////////////////////////////////////////////////////////////////
 
-        GameData   ^m_GameData;
+        GameData^           m_GameData;
+        RegexMatcher^       m_RM;
         SortedList<int, GameData^>     ^m_GameTurns;
         SortedList<int, String^>       ^m_Reports;
         SortedList<int, String^>       ^m_RepFiles;
@@ -223,6 +221,9 @@ namespace FHUI {
         // ==================================================
         // --- ORDER TEMPLATE ---
         void        GenerateTemplate();
+        void        SortCommands();
+        void        SaveCommands();
+        void        LoadCommands();
 
         void        GenerateCombat();
         void        GeneratePreDeparture();

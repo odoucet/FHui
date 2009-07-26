@@ -464,6 +464,7 @@ public:
         {}
 
         String^     Print();
+        String^     PrintNumeric();
         String^     PrintJumpDestination();
 
         OrderType   Type;

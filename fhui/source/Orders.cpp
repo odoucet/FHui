@@ -1,6 +1,9 @@
 #include "StdAfx.h"
 #include "Form1.h"
+#include "Report.h"
 #include "Enums.h"
+
+using namespace System::IO;
 
 ////////////////////////////////////////////////////////////////
 
@@ -8,11 +11,128 @@ namespace FHUI
 {
 
 ////////////////////////////////////////////////////////////////
+
+private value struct OrdersDir
+{
+    static initonly String^ Folder   = "orders/FHUI.Data/";
+    static initonly String^ Commands = "cmd_t{0}.txt";
+};
+
+private ref class CommandComparer : public IComparer<ICommand^>
+{
+public:
+    virtual int Compare(ICommand ^c1, ICommand ^c2)
+    {
+        return (int)c1->GetType() - (int)c2->GetType();
+    }
+};
+
+void Form1::SortCommands()
+{
+    m_Commands->Sort( gcnew CommandComparer );
+}
+
+void Form1::SaveCommands()
+{
+    // Create directory
+    String^ dir = GetDataDir(OrdersDir::Folder);
+    DirectoryInfo ^dirInfo = gcnew DirectoryInfo(dir);
+    if( !dirInfo->Exists )
+        dirInfo->Create();
+
+    // Create stream
+    StreamWriter ^sw = File::CreateText(
+        dir + String::Format(OrdersDir::Commands, m_GameData->GetLastTurn()) );
+
+    // Header
+    sw->WriteLine("; FHUI generated file. Please don't edit.");
+
+    // Prepare commands
+    m_OrderList->Clear();
+
+    // -- Colonies
+    m_GameData->GetSpecies()->SortColoniesByProdOrder();
+    for each( Colony ^colony in m_GameData->GetSpecies()->Colonies )
+        m_OrderList->Add( "COLONY " + colony->Name );
+
+    // -- Ships
+    for each( Ship ^ship in m_GameData->GetSpecies()->Ships )
+        if( ship->Command )
+            m_OrderList->Add( String::Format("SHIP {0} {1}",
+                ship->PrintClassWithName(),
+                ship->Command->PrintNumeric()) );
+
+    // -- Commands
+    SortCommands();
+    for each( ICommand ^cmd in m_Commands )
+        cmd->Print(m_OrderList);
+
+    // Write to stream
+    for each( String ^cmd in m_OrderList )
+        sw->WriteLine(cmd);
+    sw->Close();
+}
+
+void Form1::LoadCommands()
+{
+    // Open file
+    StreamReader ^sr;
+    //try {
+        sr = File::OpenText(
+            GetDataDir(OrdersDir::Folder) + String::Format(OrdersDir::Commands, m_GameData->GetLastTurn()) );
+    //}
+
+    String ^line;
+    int colonyProdOrder = 1;
+    while( (line = sr->ReadLine()) != nullptr ) 
+    {
+        line->Trim();
+        if( String::IsNullOrEmpty(line) ||
+            line[0] == ';' )
+            continue;
+
+        if( m_RM->Match(line, m_RM->ExpCmdColony) )
+        {
+            Colony ^colony = m_GameData->GetColony(m_RM->Results[0]);
+            if( colony->Owner == m_GameData->GetSpecies() )
+                colony->ProductionOrder = colonyProdOrder++;
+            else
+                throw gcnew FHUIParsingException("Inconsistent commands template!");
+        }
+        else if( m_RM->Match(line, m_RM->ExpCmdShipJump) )
+        {
+            m_GameData->GetShip(m_RM->Results[1])->Command =
+                gcnew Ship::Order(
+                    Ship::OrderType::Jump,
+                    m_GameData->GetStarSystem(
+                        m_RM->GetResultInt(2),
+                        m_RM->GetResultInt(3),
+                        m_RM->GetResultInt(4)),
+                    m_RM->GetResultInt(5) );
+        }
+        else if( m_RM->Match(line, m_RM->ExpCmdShipUpg) )
+        {
+            m_GameData->GetShip(m_RM->Results[1])->Command =
+                gcnew Ship::Order( Ship::OrderType::Upgrade );
+        }
+        else if( m_RM->Match(line, m_RM->ExpCmdShipRec) )
+        {
+            m_GameData->GetShip(m_RM->Results[1])->Command =
+                gcnew Ship::Order( Ship::OrderType::Recycle );
+        }
+        else
+            throw gcnew FHUIParsingException("Unrecognized line in commands template: " + line);
+    }
+}
+
+////////////////////////////////////////////////////////////////
 // Order Template
 
 void Form1::GenerateTemplate()
 {
     m_OrderList->Clear();
+
+    SortCommands();
 
     GenerateCombat();
     GeneratePreDeparture();

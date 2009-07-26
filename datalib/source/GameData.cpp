@@ -514,6 +514,18 @@ String^ Ship::Order::Print()
     return "Invalid command";
 }
 
+String^ Ship::Order::PrintNumeric()
+{
+    if( Type == OrderType::Jump )
+        return String::Format("Jump to {0} {1} {2} {3}",
+            JumpTarget->X,
+            JumpTarget->Y,
+            JumpTarget->Z,
+            PlanetNum );
+
+    return Print();
+}
+
 String^ Ship::Order::PrintJumpDestination()
 {
     if( PlanetNum != -1 )

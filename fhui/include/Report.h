@@ -3,9 +3,41 @@
 #include "enums.h"
 
 using namespace System;
+using namespace System::Text::RegularExpressions;
 
 namespace FHUI
 {
+
+private ref class RegexMatcher
+{
+public:
+    RegexMatcher();
+
+    bool        Match(String ^%s, String ^exp);
+    bool        Match(String ^%s, Regex ^exp);
+    bool        MatchList(String ^s, String ^prefix, String ^exp);
+
+    int         GetResultInt(int arg);
+    float       GetResultFloat(int arg);
+
+    property array<String^>^ Results { array<String^>^ get() { return m_Results; } }
+
+private:
+    array<String^>^     m_Results;
+
+public:
+    // --------------------------
+    // Commands
+    initonly Regex^      ExpCmdColony;
+    initonly Regex^      ExpCmdShipJump;
+    initonly Regex^      ExpCmdShipUpg;
+    initonly Regex^      ExpCmdShipRec;
+    initonly Regex^      ExpCmdPLName;
+    initonly Regex^      ExpCmdSPNeutral;
+    initonly Regex^      ExpCmdSPAlly;
+    initonly Regex^      ExpCmdSPEnemy;
+    initonly Regex^      ExpCmdSPTeach;
+};
 
 enum PhaseType
 {
@@ -34,10 +66,10 @@ enum PhaseType
 
 #define AGGREGATE_LINES_MAX  -1
 
-ref class Report
+private ref class Report
 {
 public:
-    Report(GameData^);
+    Report(GameData^, RegexMatcher^);
 
     bool            IsValid();
     int             GetTurn()       { return m_Turn; }
@@ -51,8 +83,6 @@ private:
     String^         FinishLineAggregate(bool resetPhase);
 
     bool            MatchSectionEnd(String ^s);
-    bool            MatchWithOutput(String ^%s, String ^exp);
-    bool            MatchAggregateList(String ^s, String ^prefix, String ^exp);
     bool            MatchTech(String ^s, String ^techName, TechType tech);
     bool            MatchSystemScanStart(String ^s);
     void            MatchPlanetScan(String ^s);
@@ -63,18 +93,14 @@ private:
     void            MatchShipScan(String ^s, bool bColony);
     void            MatchAliensReport(String ^s);
 
-    String^         GetMatchResult(int arg)      { return m_TmpRegexResult[arg]; }
-    int             GetMatchResultInt(int arg);
-    float           GetMatchResultFloat(int arg);
-
     GameData       ^m_GameData;
+    RegexMatcher   ^m_RM;
     String         ^m_Content;
     int             m_Turn;
     int             m_LineCnt;
 
     PhaseType       m_Phase;
     PhaseType       m_PhasePreAggregate;
-    array<String^> ^m_TmpRegexResult;
 
     bool            m_bParsingAggregate;
     String         ^m_StringAggregate;

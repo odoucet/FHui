@@ -51,7 +51,7 @@ void Form1::LoadGameData()
         InitControls();
         LoadPlugins();
         ScanReports();
-        LoadCommands(); // TBD: Do czego to ma sluzyc?
+        LoadOrders();
     }
     catch( Exception ^e )
     {
@@ -169,6 +169,8 @@ void Form1::InitControls()
 
 void Form1::InitData()
 {
+    m_RM = gcnew RegexMatcher;
+
     m_HadException = false;
 
     m_bGridUpdateEnabled = gcnew bool(false);
@@ -389,11 +391,17 @@ void Form1::FillAboutBox()
             changeLog );
 }
 
+String^ Form1::GetDataDir(String ^suffix)
+{
+    String ^ret = suffix;
+    if( !String::IsNullOrEmpty(DataDir) )
+        ret = DataDir + "/" + ret;
+    return ret;
+}
+
 void Form1::LoadGalaxy()
 {
-    String^ galaxyList = "galaxy_list.txt";
-    if( !String::IsNullOrEmpty(DataDir) )
-        galaxyList = DataDir + "/" + galaxyList;
+    String^ galaxyList = GetDataDir("galaxy_list.txt");
 
     StreamReader ^sr = File::OpenText(galaxyList);
     String ^line;
@@ -431,10 +439,7 @@ void Form1::LoadGalaxy()
 
 void Form1::ScanReports()
 {
-    String^ reportsDir = "reports";
-    if( !String::IsNullOrEmpty(DataDir) )
-        reportsDir = DataDir + "/" + reportsDir;
-
+    String^ reportsDir = GetDataDir("reports");
     DirectoryInfo ^dir = gcnew DirectoryInfo(reportsDir);
 
     for each( FileInfo ^f in dir->GetFiles("*"))
@@ -533,7 +538,7 @@ void Form1::LoadGameTurn(int turn)
 
 int Form1::CheckReport(String ^fileName)
 {
-    Report ^report = gcnew Report(nullptr); // turn scan mode
+    Report ^report = gcnew Report(nullptr, m_RM); // turn scan mode
 
     StreamReader ^sr = File::OpenText(fileName);
     String ^line;
@@ -567,7 +572,7 @@ int Form1::CheckReport(String ^fileName)
 
 void Form1::LoadReport(String ^fileName)
 {
-    Report ^report = gcnew Report(m_GameData);
+    Report ^report = gcnew Report(m_GameData, m_RM);
 
     StreamReader ^sr = File::OpenText(fileName);
     String ^line;
@@ -642,16 +647,13 @@ void Form1::DisplayReport()
     }
 }
 
-void Form1::LoadCommands()
+void Form1::LoadOrders()
 {
     m_CmdFiles->Clear();
 
     try
     {
-        String^ ordersDir = "orders";
-        if( !String::IsNullOrEmpty(DataDir) )
-            ordersDir = DataDir + "/" + ordersDir;
-
+        String^ ordersDir = GetDataDir("orders");
         DirectoryInfo ^dir = gcnew DirectoryInfo(ordersDir);
 
         for each( FileInfo ^f in dir->GetFiles("*"))
@@ -1274,6 +1276,7 @@ void Form1::PlanetsMenuAddName(DataGridViewCellEventArgs ^cell)
             m_PlanetsMenuRef->System,
             m_PlanetsMenuRef->Number,
             name ) );
+    SaveCommands();
 
     m_PlanetsMenuRef->Name = name;
     m_PlanetsMenuRef->NameIsNew = true;
@@ -1293,6 +1296,7 @@ void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
                     cmd->m_PlanetNum == m_PlanetsMenuRef->Number )
                 {
                     m_Commands->Remove(iCmd);
+                    SaveCommands();
                     break;
                 }
             }
@@ -1305,6 +1309,7 @@ void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
                 m_PlanetsMenuRef->System,
                 m_PlanetsMenuRef->Number,
                 nullptr ) );
+        SaveCommands();
     }
 
     m_PlanetsMenuRef->Name = nullptr;
@@ -1519,6 +1524,8 @@ void Form1::ColoniesMenuProdOrderAdjust(int adjustment)
     m_ColoniesMenuRef->ProductionOrder = newOrder;
     m_GameData->GetSpecies()->SortColoniesByProdOrder();
     m_ColoniesFilter->Update();
+
+    SaveCommands();
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1837,6 +1844,7 @@ void Form1::ShipsMenuOrderSet(ShipOrderData ^data)
 {
     data->A->Command = data->B;
     m_ShipsFilter->Update();
+    SaveCommands();
 }
 
 ////////////////////////////////////////////////////////////////
@@ -2019,6 +2027,7 @@ void Form1::AliensMenuTeach(TeachData ^data)
     }
 
     m_Commands->Add( gcnew CmdTeach(alien, tech, level) );
+    SaveCommands();
 
     alien->TeachOrders |= 1 << tech;
     m_AliensFilter->Update();
@@ -2058,6 +2067,7 @@ void Form1::AliensMenuTeachAll(Object^, EventArgs^)
 void Form1::AliensMenuTeachCancel(Object^, EventArgs^)
 {
     bool removed = false;
+    bool removedAny = false;
     do
     {
         removed = false;
@@ -2068,13 +2078,15 @@ void Form1::AliensMenuTeachCancel(Object^, EventArgs^)
                 CmdTeach ^cmd = safe_cast<CmdTeach^>(iCmd);
                 if( cmd->m_Alien == m_AliensMenuRef )
                 {
-                    removed = true;
+                    removed = removedAny = true;
                     m_Commands->Remove(iCmd);
                     break;
                 }
             }
         }
     } while( removed );
+    if( removedAny )
+        SaveCommands();
 
     m_AliensMenuRef->TeachOrders = 0;
     m_AliensFilter->Update();
@@ -2088,6 +2100,7 @@ void Form1::AliensMenuSetRelation(AlienRelationData ^data)
     if( alien->Relation == alien->RelationOriginal )
     {   // Add relation command
         m_Commands->Add( gcnew CmdAlienRelation(alien, rel) );
+        SaveCommands();
     }
     else
     {   // Modify existing relation command
