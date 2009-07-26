@@ -238,6 +238,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\source\Commands.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\source\fhui.cpp"
 					>
 				</File>
@@ -321,6 +325,10 @@
 				</File>
 				<File
 					RelativePath=".\include\GridFilter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\source\InputBox.h"
 					>
 				</File>
 				<File

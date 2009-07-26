@@ -29,6 +29,13 @@ void Form1::GenerateCombat()
     m_OrderList->Add("START COMBAT");
     m_OrderList->Add("");
 
+    // Print UI commands
+    for each( ICommand ^cmd in m_Commands )
+    {
+        if( cmd->GetPhase() == CommandPhase::Combat )
+            cmd->Print(m_OrderList);
+    }
+
     // TODO: Sort locations by relevance (effective tonnage)
 
     for each ( StarSystem^ system in m_GameData->GetStarSystems() )
@@ -97,6 +104,13 @@ void Form1::GeneratePreDeparture()
 {
     m_OrderList->Add("START PRE-DEPARTURE");
 
+    // Print UI commands
+    for each( ICommand ^cmd in m_Commands )
+    {
+        if( cmd->GetPhase() == CommandPhase::PreDeparture )
+            cmd->Print(m_OrderList);
+    }
+
     for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
     {
         for each( Ship ^ship in m_GameData->GetSpecies()->Ships )
@@ -115,6 +129,13 @@ void Form1::GeneratePreDeparture()
 void Form1::GenerateJumps()
 {
     m_OrderList->Add("START JUMPS");
+
+    // Print UI commands
+    for each( ICommand ^cmd in m_Commands )
+    {
+        if( cmd->GetPhase() == CommandPhase::Jump )
+            cmd->Print(m_OrderList);
+    }
 
     for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
     {
@@ -279,6 +300,13 @@ void Form1::GeneratePostArrival()
     m_OrderList->Add("START POST-ARRIVAL");
     m_OrderList->Add("");
 
+    // Print UI commands
+    for each( ICommand ^cmd in m_Commands )
+    {
+        if( cmd->GetPhase() == CommandPhase::PostArrival )
+            cmd->Print(m_OrderList);
+    }
+
     for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
     {
         for each( Ship ^ship in m_GameData->GetSpecies()->Ships )
@@ -293,6 +321,13 @@ void Form1::GenerateStrikes()
 {
     m_OrderList->Add("START STRIKES");
     m_OrderList->Add("");
+
+    // Print UI commands
+    for each( ICommand ^cmd in m_Commands )
+    {
+        if( cmd->GetPhase() == CommandPhase::Strike )
+            cmd->Print(m_OrderList);
+    }
 
     m_OrderList->Add("END");
     m_OrderList->Add("");

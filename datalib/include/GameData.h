@@ -135,6 +135,7 @@ public:
         System = s;
         Number = nr;
         Name = nullptr;
+        NameIsNew = false;
         Comment = nullptr;
         Diameter = dia;
         Grav = gv;
@@ -170,6 +171,7 @@ public:
     property StarSystem^    System;
     property int            Number;
     property String^        Name;
+    property bool           NameIsNew;
     property String^        Comment;
     property int            Diameter;
     property float          Grav;
@@ -179,6 +181,7 @@ public:
     property int            LSN;
     property Alien^         Master;
     property int            NumColonies;
+    property int            NumColoniesOwned;
     property array<int>^    Atmosphere;
     property SortedList<Alien^, int>^ SuspectedColonies;
 };

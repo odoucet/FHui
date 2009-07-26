@@ -1214,6 +1214,24 @@ void Form1::PlanetsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex
         nullptr,
         gcnew EventHandler(this, &Form1::PlanetsFiltersReset_Click));
 
+    if( String::IsNullOrEmpty(planet->Name) )
+    {
+        menu->Items->Add( gcnew ToolStripSeparator );
+        menu->Items->Add(
+            "Name this planet...",
+            nullptr,
+            gcnew EventHandler(this, &Form1::PlanetsMenuAddNameStart) );
+    }
+    else if( planet->NameIsNew ||
+        planet->NumColoniesOwned == 0 )
+    {
+        menu->Items->Add( gcnew ToolStripSeparator );
+        menu->Items->Add(
+            "Remove Name",
+            nullptr,
+            gcnew EventHandler(this, &Form1::PlanetsMenuRemoveName) );
+    }
+
     // Ship jumps to this planet
     ToolStripMenuItem ^jumpMenu = ShipsMenuAddJumpsHere( planet->System, planet->Number );
     if( jumpMenu )
@@ -1231,6 +1249,66 @@ void Form1::PlanetsMenuShowColonies(Object^, EventArgs^)
 void Form1::PlanetsMenuSelectRef(Object^, EventArgs^)
 {
     m_PlanetsFilter->SetRefSystem(m_PlanetsMenuRef->System);
+}
+
+void Form1::PlanetsMenuAddNameStart(Object^, EventArgs^)
+{
+    PlanetsGrid->ClearSelection();
+    PlanetsGrid->CurrentCell = PlanetsGrid[
+        PlanetsGrid->Columns["Name"]->Index,
+        m_PlanetsMenuRefRow];
+    PlanetsGrid->ReadOnly = false;
+    PlanetsGrid->BeginEdit(true);
+}
+
+void Form1::PlanetsMenuAddName(DataGridViewCellEventArgs ^cell)
+{
+    PlanetsGrid->ReadOnly = true;
+    String ^name = PlanetsGrid[cell->ColumnIndex, cell->RowIndex]->Value->ToString();
+    name->Trim();
+    if( String::IsNullOrEmpty(name) )
+        return;
+
+    m_Commands->Add(
+        gcnew CmdPlanetName(
+            m_PlanetsMenuRef->System,
+            m_PlanetsMenuRef->Number,
+            name ) );
+
+    m_PlanetsMenuRef->Name = name;
+    m_PlanetsMenuRef->NameIsNew = true;
+    m_PlanetsFilter->Update();
+}
+
+void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
+{
+    if( m_PlanetsMenuRef->NameIsNew )
+    {   // Remove Name command
+        for each( ICommand ^iCmd in m_Commands )
+        {
+            if( iCmd->GetType() == CommandType::Name )
+            {
+                CmdPlanetName ^cmd = safe_cast<CmdPlanetName^>(iCmd);
+                if( cmd->m_System == m_PlanetsMenuRef->System &&
+                    cmd->m_PlanetNum == m_PlanetsMenuRef->Number )
+                {
+                    m_Commands->Remove(iCmd);
+                    break;
+                }
+            }
+        }
+    }
+    else
+    {   // Add Disband command
+        m_Commands->Add(
+            gcnew CmdPlanetName(
+                m_PlanetsMenuRef->System,
+                m_PlanetsMenuRef->Number,
+                nullptr ) );
+    }
+
+    m_PlanetsMenuRef->Name = nullptr;
+    m_PlanetsFilter->Update();
 }
 
 ////////////////////////////////////////////////////////////////

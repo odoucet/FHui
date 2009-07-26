@@ -163,6 +163,9 @@ namespace FHUI {
         void        PlanetsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
         void        PlanetsMenuShowColonies(Object^, EventArgs^);
         void        PlanetsMenuSelectRef(Object^, EventArgs^);
+        void        PlanetsMenuAddNameStart(Object^, EventArgs^);
+        void        PlanetsMenuAddName(DataGridViewCellEventArgs ^cell);
+        void        PlanetsMenuRemoveName(Object^, EventArgs^);
 
         IGridFilter        ^m_PlanetsFilter;
         Planet             ^m_PlanetsMenuRef;
@@ -1910,6 +1913,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->PlanetsGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
             this->PlanetsGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
             this->PlanetsGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseEnter);
+            this->PlanetsGrid->CellEndEdit += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::PlanetsGrid_CellEndEdit);
             this->PlanetsGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::PlanetsGrid_CellMouseDoubleClick);
             this->PlanetsGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
             // 
@@ -2820,7 +2824,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechLS))->EndInit();
             this->MenuTabs->ResumeLayout(false);
             this->TabReports->ResumeLayout(false);
-            this->TabReports->PerformLayout();            this->TabMap->ResumeLayout(false);
+            this->TabMap->ResumeLayout(false);
             this->panel1->ResumeLayout(false);
             this->panel1->PerformLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapLSNVal))->EndInit();
@@ -3010,6 +3014,9 @@ private: System::Void Tech_ValueChanged(System::Object^  sender, System::EventAr
          }
 private: System::Void MenuTabs_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
              UpdateTabs();
+         }
+private: System::Void PlanetsGrid_CellEndEdit(System::Object^  sender, System::Windows::Forms::DataGridViewCellEventArgs^  e) {
+             PlanetsMenuAddName(e);
          }
 };
 

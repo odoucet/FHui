@@ -1172,6 +1172,7 @@ void GameData::UpdateSystems()
         {
             planet->LSN = planet->CalculateLSN(m_Species->AtmReq);
             planet->NumColonies = 0;
+            planet->NumColoniesOwned = 0;
 
             // Update min LSN and num colonies
             minLSN = Math::Min(planet->LSN, minLSN);
@@ -1181,6 +1182,8 @@ void GameData::UpdateSystems()
                 if( colony->PlanetNum == planet->Number )
                 {
                     ++planet->NumColonies;
+                    if( colony->Owner == GetSpecies() )
+                        ++planet->NumColoniesOwned;
                     available = false;
 
                     // Update planet info with colony info, if there is any difference
