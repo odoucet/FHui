@@ -328,10 +328,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\source\InputBox.h"
-					>
-				</File>
-				<File
 					RelativePath=".\include\Report.h"
 					>
 				</File>
