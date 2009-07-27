@@ -222,6 +222,7 @@ namespace FHUI {
         // --- ORDER TEMPLATE ---
         void        GenerateTemplate();
         void        SaveCommands();
+        void        DeleteCommands();
         void        LoadCommands();
         void        AddCommand(ICommand ^cmd);
         void        DelCommand(ICommand ^cmd);

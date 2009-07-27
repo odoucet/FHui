@@ -30,6 +30,14 @@ void Form1::DelCommand(ICommand ^cmd)
     SaveCommands();
 }
 
+void Form1::DeleteCommands()
+{
+    FileInfo ^fileInfo = gcnew FileInfo(
+        GetDataDir(OrdersDir::Folder) + String::Format(OrdersDir::Commands, m_GameData->GetLastTurn()) );
+    if( fileInfo->Exists )
+        fileInfo->Delete();
+}
+
 void Form1::SaveCommands()
 {
     // Create directory

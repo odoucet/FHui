@@ -477,8 +477,20 @@ void Form1::ScanReports()
 
 void Form1::TurnReload()
 {
-    m_GameTurns->Remove( m_GameData->GetLastTurn() );
-    DisplayTurn();
+    System::Windows::Forms::DialogResult result = MessageBox::Show(
+        this,
+        "Delete ALL FHUI Commands?",
+        "Reload Turn",
+        MessageBoxButtons::YesNo,
+        MessageBoxIcon::Question,
+        MessageBoxDefaultButton::Button1);
+    if( result == System::Windows::Forms::DialogResult::Yes )
+    {
+        m_GameTurns->Remove( m_GameData->GetLastTurn() );
+        DeleteCommands();
+
+        DisplayTurn();
+    }
 }
 
 void Form1::DisplayTurn()
