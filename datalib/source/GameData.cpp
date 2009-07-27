@@ -289,6 +289,15 @@ String^ StarSystem::PrintColonies(int planetNum, Alien ^player)
     return ret;
 }
 
+String^ StarSystem::PrintAlienShipSummary()
+{
+    // TODO: Generate summary, examples below
+    // "TR1, TR10, 2x TR12"
+    // "2x DDS, 4x CLS"
+    // TODO2: Generate one list for each species
+    return "";
+}
+
 /*
 String^ StarSystem::PrintShips()
 {

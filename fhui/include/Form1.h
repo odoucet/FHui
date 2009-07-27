@@ -16,20 +16,20 @@ namespace FHUI {
 
     ref class RegexMatcher;
 
-	/// <summary>
-	/// Summary for Form1
-	///
-	/// WARNING: If you change the name of this class, you will need to change the
-	///          'Resource File Name' property for the managed resource compiler tool
-	///          associated with all .resx files this class depends on.  Otherwise,
-	///          the designers will not be able to interact properly with localized
-	///          resources associated with this form.
-	/// </summary>
-	public ref class Form1 : public System::Windows::Forms::Form
-	{
-	public:
-		Form1(void)
-		{
+    /// <summary>
+    /// Summary for Form1
+    ///
+    /// WARNING: If you change the name of this class, you will need to change the
+    ///          'Resource File Name' property for the managed resource compiler tool
+    ///          associated with all .resx files this class depends on.  Otherwise,
+    ///          the designers will not be able to interact properly with localized
+    ///          resources associated with this form.
+    /// </summary>
+    public ref class Form1 : public System::Windows::Forms::Form
+    {
+    public:
+        Form1(void)
+        {
         }
 
         void        LoadGameData();
@@ -39,17 +39,17 @@ namespace FHUI {
         property String^    DataDir;
 
         // ==================================================
-	private:
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		~Form1()
-		{
-			if (components)
-			{
-				delete components;
-			}
-		}
+    private:
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        ~Form1()
+        {
+            if (components)
+            {
+                delete components;
+            }
+        }
 
         void        ScanReports();
         int         CheckReport(String ^fileName);
@@ -235,6 +235,9 @@ namespace FHUI {
         void        GenerateStrikes();
 
         void        GenerateCombatInfo(StarSystem^);
+        void        GeneratePreDepartureInfo(StarSystem^);
+        void        GenerateJumpInfo(Ship^);
+        
         void        GenerateProductionRecycle(Colony ^colony, BudgetTracker ^budget);
         void        GenerateProductionUpgrade(Colony ^colony, BudgetTracker ^budget);
 
@@ -445,19 +448,19 @@ private: System::Windows::Forms::Label^  SystemsRef;
 
     private: System::ComponentModel::IContainer^  components;
 
-	private:
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
+    private:
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
 
 
 #pragma region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		void InitializeComponent(void)
-		{
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        void InitializeComponent(void)
+        {
             this->components = (gcnew System::ComponentModel::Container());
             System::Windows::Forms::SplitContainer^  TopSplitCont;
             System::Windows::Forms::SplitContainer^  splitContainer7;

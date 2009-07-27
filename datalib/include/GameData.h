@@ -243,6 +243,7 @@ public:
     String^     PrintLocation() { return String::Format("{0,2} {1,2} {2,2}", X, Y, Z); }
     String^     PrintScanStatus();
     String^     PrintColonies(int planetNum, Alien ^player);   // -1 for all colonies in system
+    String^     PrintAlienShipSummary();
     //String^     PrintShips();
 
     void        UpdateMaster();

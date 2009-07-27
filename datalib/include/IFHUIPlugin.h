@@ -60,8 +60,7 @@ public interface class IOrdersPlugin : public IPluginBase
 {
 public:
     void        GenerateCombat(List<String^>^, StarSystem^);
-    void        GeneratePreDeparture(List<String^>^, Ship^);
-    void        GeneratePreDeparture(List<String^>^, Colony^);
+    void        GeneratePreDeparture(List<String^>^, StarSystem^);
     void        GenerateJumps(List<String^>^, Ship^);
     void        GenerateProduction(List<String^>^, Colony^, BudgetTracker^);
     void        GeneratePostArrival(List<String^>^, Ship^);

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1250"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="fhui"
 	ProjectGUID="{4216ED73-322C-4030-BDEB-1580ABE843CF}"
 	RootNamespace="fhui"
@@ -96,7 +96,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy changelog to build output dir."
-				CommandLine="copy $(SolutionDir)\changelog.txt $(TargetDir)"
+				CommandLine="echo copy $(SolutionDir)\changelog.txt $(TargetDir) &gt; error.txt"
 			/>
 		</Configuration>
 		<Configuration
