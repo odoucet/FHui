@@ -8,9 +8,12 @@ using namespace System::Collections::Generic;
 namespace FHUI
 {
 
+ref class StarSystem;
+ref class Alien;
+
 ////////////////////////////////////////////////////////////
 
-private enum class CommandPhase
+public enum class CommandPhase
 {
     Combat,
     PreDeparture,
@@ -20,25 +23,23 @@ private enum class CommandPhase
     Strike
 };
 
-private enum class CommandType
+public enum class CommandType
 {
     Name,
     AlienRelation,  // Enemy/Neutral/Ally
     Teach
 };
 
-interface class ICommand
+public interface class ICommand
 {
     CommandPhase    GetPhase();
     CommandType     GetType();
     void            Print(List<String^>^);
 };
 
-typedef List<ICommand^>     CommandListT;
-
 ////////////////////////////////////////////////////////////
 
-private ref class CmdPlanetName : public ICommand
+public ref class CmdPlanetName : public ICommand
 {
 public:
     CmdPlanetName(StarSystem ^system, int plNum, String ^name)
@@ -58,7 +59,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-private ref class CmdAlienRelation : public ICommand
+public ref class CmdAlienRelation : public ICommand
 {
 public:
     CmdAlienRelation(Alien ^alien, SPRelType rel)
@@ -76,7 +77,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-private ref class CmdTeach : public ICommand
+public ref class CmdTeach : public ICommand
 {
 public:
     CmdTeach(Alien ^alien, TechType tech, int level)

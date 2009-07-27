@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Commands.h"
+#include "enums.h"
 
 namespace FHUI {
 
@@ -221,9 +221,10 @@ namespace FHUI {
         // ==================================================
         // --- ORDER TEMPLATE ---
         void        GenerateTemplate();
-        void        SortCommands();
         void        SaveCommands();
         void        LoadCommands();
+        void        AddCommand(ICommand ^cmd);
+        void        DelCommand(ICommand ^cmd);
 
         void        GenerateCombat();
         void        GeneratePreDeparture();
@@ -237,7 +238,6 @@ namespace FHUI {
         void        GenerateProductionUpgrade(Colony ^colony, BudgetTracker ^budget);
 
         List<String^>      ^m_OrderList;
-        CommandListT       ^m_Commands;
 
         // ==================================================
         // --- MAP ---

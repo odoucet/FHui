@@ -238,10 +238,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\source\Commands.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\source\fhui.cpp"
 					>
 				</File>
@@ -307,10 +303,6 @@
 				>
 				<File
 					RelativePath=".\include\BuildInfo.h"
-					>
-				</File>
-				<File
-					RelativePath=".\include\Commands.h"
 					>
 				</File>
 				<File

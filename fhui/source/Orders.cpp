@@ -18,18 +18,16 @@ private value struct OrdersDir
     static initonly String^ Commands = "cmd_t{0}.txt";
 };
 
-private ref class CommandComparer : public IComparer<ICommand^>
+void Form1::AddCommand(ICommand ^cmd)
 {
-public:
-    virtual int Compare(ICommand ^c1, ICommand ^c2)
-    {
-        return (int)c1->GetType() - (int)c2->GetType();
-    }
-};
+    m_GameData->AddCommand(cmd);
+    SaveCommands();
+}
 
-void Form1::SortCommands()
+void Form1::DelCommand(ICommand ^cmd)
 {
-    m_Commands->Sort( gcnew CommandComparer );
+    m_GameData->DelCommand(cmd);
+    SaveCommands();
 }
 
 void Form1::SaveCommands()
@@ -63,8 +61,8 @@ void Form1::SaveCommands()
                 ship->Command->PrintNumeric()) );
 
     // -- Commands
-    SortCommands();
-    for each( ICommand ^cmd in m_Commands )
+    m_GameData->SortCommands();
+    for each( ICommand ^cmd in m_GameData->GetCommands() )
         cmd->Print(m_OrderList);
 
     // Write to stream
@@ -132,7 +130,7 @@ void Form1::GenerateTemplate()
 {
     m_OrderList->Clear();
 
-    SortCommands();
+    m_GameData->SortCommands();
 
     GenerateCombat();
     GeneratePreDeparture();
@@ -150,7 +148,7 @@ void Form1::GenerateCombat()
     m_OrderList->Add("");
 
     // Print UI commands
-    for each( ICommand ^cmd in m_Commands )
+    for each( ICommand ^cmd in m_GameData->GetCommands() )
     {
         if( cmd->GetPhase() == CommandPhase::Combat )
             cmd->Print(m_OrderList);
@@ -225,7 +223,7 @@ void Form1::GeneratePreDeparture()
     m_OrderList->Add("START PRE-DEPARTURE");
 
     // Print UI commands
-    for each( ICommand ^cmd in m_Commands )
+    for each( ICommand ^cmd in m_GameData->GetCommands() )
     {
         if( cmd->GetPhase() == CommandPhase::PreDeparture )
             cmd->Print(m_OrderList);
@@ -251,7 +249,7 @@ void Form1::GenerateJumps()
     m_OrderList->Add("START JUMPS");
 
     // Print UI commands
-    for each( ICommand ^cmd in m_Commands )
+    for each( ICommand ^cmd in m_GameData->GetCommands() )
     {
         if( cmd->GetPhase() == CommandPhase::Jump )
             cmd->Print(m_OrderList);
@@ -421,7 +419,7 @@ void Form1::GeneratePostArrival()
     m_OrderList->Add("");
 
     // Print UI commands
-    for each( ICommand ^cmd in m_Commands )
+    for each( ICommand ^cmd in m_GameData->GetCommands() )
     {
         if( cmd->GetPhase() == CommandPhase::PostArrival )
             cmd->Print(m_OrderList);
@@ -443,7 +441,7 @@ void Form1::GenerateStrikes()
     m_OrderList->Add("");
 
     // Print UI commands
-    for each( ICommand ^cmd in m_Commands )
+    for each( ICommand ^cmd in m_GameData->GetCommands() )
     {
         if( cmd->GetPhase() == CommandPhase::Strike )
             cmd->Print(m_OrderList);

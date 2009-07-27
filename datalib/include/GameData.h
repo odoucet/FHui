@@ -14,6 +14,7 @@ namespace FHUI
 ref class StarSystem;
 ref class Ship;
 ref class Colony;
+interface class ICommand;
 
 // ---------------------------------------------------
 // -- base IGridDataSrc impl --
@@ -506,6 +507,11 @@ public:
     IList<Ship^>^           GetShips()                          { return m_ShipsByTonnage; }
     IList<Colony^>^         GetColonies()                       { return m_Colonies->Values; }
 
+    List<ICommand^>^    GetCommands()                       { return m_Commands; }
+    void                AddCommand(ICommand ^cmd)           { m_Commands->Add(cmd); }
+    void                DelCommand(ICommand ^cmd)           { m_Commands->Remove(cmd); }
+    void                SortCommands();
+
     // ------------------------------------------
     void            Update();
     void            SetSpecies(String ^sp);
@@ -544,12 +550,12 @@ protected:
     String^         GetPlanetsSummary();
     String^         GetShipsSummary();
 
-    List<Ship^>^            GetShips(Alien ^sp)                 { return GetShips(nullptr, sp); }
-    List<Ship^>^            GetShips(StarSystem ^sys)           { return GetShips(sys, nullptr); }
-    List<Ship^>^            GetShips(StarSystem^, Alien^);
-    List<Colony^>^          GetColonies(Alien ^sp)              { return GetColonies(nullptr, sp); }
-    List<Colony^>^          GetColonies(StarSystem ^sys)        { return GetColonies(sys, nullptr); }
-    List<Colony^>^          GetColonies(StarSystem^, Alien^);
+    List<Ship^>^        GetShips(Alien ^sp)                 { return GetShips(nullptr, sp); }
+    List<Ship^>^        GetShips(StarSystem ^sys)           { return GetShips(sys, nullptr); }
+    List<Ship^>^        GetShips(StarSystem^, Alien^);
+    List<Colony^>^      GetColonies(Alien ^sp)              { return GetColonies(nullptr, sp); }
+    List<Colony^>^      GetColonies(StarSystem ^sys)        { return GetColonies(sys, nullptr); }
+    List<Colony^>^      GetColonies(StarSystem^, Alien^);
 
     // ------------------------------------------
     Alien              ^m_Species;
@@ -563,6 +569,8 @@ protected:
     SortedList<String^, PlanetName^>   ^m_PlanetNames;
     SortedList<String^, Ship^>         ^m_Ships;
     List<Ship^>                        ^m_ShipsByTonnage;
+
+    List<ICommand^>^    m_Commands;
 
     int                 m_TurnMax;
 };

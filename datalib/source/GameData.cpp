@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "GameData.h"
+#include "Commands.h"
 
 namespace FHUI
 {
@@ -556,6 +557,7 @@ GameData::GameData(void)
     , m_Colonies(gcnew SortedList<String^, Colony^>)
     , m_PlanetNames(gcnew SortedList<String^, PlanetName^>)
     , m_Ships(gcnew SortedList<String^, Ship^>)
+    , m_Commands(gcnew List<ICommand^>)
     , m_TurnMax(0)
 {
 }
@@ -1384,6 +1386,20 @@ Ship^ GameData::AddShip(int turn, Alien ^sp, ShipType type, String ^name, bool s
     }
 
     return nullptr;
+}
+
+private ref class CommandComparer : public IComparer<ICommand^>
+{
+public:
+    virtual int Compare(ICommand ^c1, ICommand ^c2)
+    {
+        return (int)c1->GetType() - (int)c2->GetType();
+    }
+};
+
+void GameData::SortCommands()
+{
+    m_Commands->Sort( gcnew CommandComparer );
 }
 
 } // end namespace FHUI

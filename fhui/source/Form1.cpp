@@ -185,7 +185,6 @@ void Form1::InitData()
     m_CmdFiles  = gcnew SortedList<String^, String^>;
 
     m_OrderList = gcnew List<String^>;
-    m_Commands  = gcnew CommandListT;
 }
 
 void Form1::InitRefLists()
@@ -1271,12 +1270,10 @@ void Form1::PlanetsMenuAddName(DataGridViewCellEventArgs ^cell)
     if( String::IsNullOrEmpty(name) )
         return;
 
-    m_Commands->Add(
-        gcnew CmdPlanetName(
-            m_PlanetsMenuRef->System,
-            m_PlanetsMenuRef->Number,
-            name ) );
-    SaveCommands();
+    AddCommand( gcnew CmdPlanetName(
+        m_PlanetsMenuRef->System,
+        m_PlanetsMenuRef->Number,
+        name ) );
 
     m_PlanetsMenuRef->Name = name;
     m_PlanetsMenuRef->NameIsNew = true;
@@ -1287,7 +1284,7 @@ void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
 {
     if( m_PlanetsMenuRef->NameIsNew )
     {   // Remove Name command
-        for each( ICommand ^iCmd in m_Commands )
+        for each( ICommand ^iCmd in m_GameData->GetCommands() )
         {
             if( iCmd->GetType() == CommandType::Name )
             {
@@ -1295,8 +1292,7 @@ void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
                 if( cmd->m_System == m_PlanetsMenuRef->System &&
                     cmd->m_PlanetNum == m_PlanetsMenuRef->Number )
                 {
-                    m_Commands->Remove(iCmd);
-                    SaveCommands();
+                    DelCommand(iCmd);
                     break;
                 }
             }
@@ -1304,12 +1300,10 @@ void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
     }
     else
     {   // Add Disband command
-        m_Commands->Add(
-            gcnew CmdPlanetName(
-                m_PlanetsMenuRef->System,
-                m_PlanetsMenuRef->Number,
-                nullptr ) );
-        SaveCommands();
+        AddCommand( gcnew CmdPlanetName(
+            m_PlanetsMenuRef->System,
+            m_PlanetsMenuRef->Number,
+            nullptr ) );
     }
 
     m_PlanetsMenuRef->Name = nullptr;
@@ -2013,7 +2007,7 @@ void Form1::AliensMenuTeach(TeachData ^data)
     TechType tech = (TechType)data->B;
     int level = data->C;
 
-    for each( ICommand ^iCmd in m_Commands )
+    for each( ICommand ^iCmd in m_GameData->GetCommands() )
     {
         if( iCmd->GetType() == CommandType::Teach )
         {
@@ -2026,8 +2020,7 @@ void Form1::AliensMenuTeach(TeachData ^data)
         }
     }
 
-    m_Commands->Add( gcnew CmdTeach(alien, tech, level) );
-    SaveCommands();
+    AddCommand( gcnew CmdTeach(alien, tech, level) );
 
     alien->TeachOrders |= 1 << tech;
     m_AliensFilter->Update();
@@ -2071,7 +2064,7 @@ void Form1::AliensMenuTeachCancel(Object^, EventArgs^)
     do
     {
         removed = false;
-        for each( ICommand ^iCmd in m_Commands )
+        for each( ICommand ^iCmd in m_GameData->GetCommands() )
         {
             if( iCmd->GetType() == CommandType::Teach )
             {
@@ -2079,7 +2072,7 @@ void Form1::AliensMenuTeachCancel(Object^, EventArgs^)
                 if( cmd->m_Alien == m_AliensMenuRef )
                 {
                     removed = removedAny = true;
-                    m_Commands->Remove(iCmd);
+                    m_GameData->DelCommand(iCmd);
                     break;
                 }
             }
@@ -2099,12 +2092,11 @@ void Form1::AliensMenuSetRelation(AlienRelationData ^data)
 
     if( alien->Relation == alien->RelationOriginal )
     {   // Add relation command
-        m_Commands->Add( gcnew CmdAlienRelation(alien, rel) );
-        SaveCommands();
+        AddCommand( gcnew CmdAlienRelation(alien, rel) );
     }
     else
     {   // Modify existing relation command
-        for each( ICommand ^iCmd in m_Commands )
+        for each( ICommand ^iCmd in m_GameData->GetCommands() )
         {
             if( iCmd->GetType() == CommandType::AlienRelation )
             {
