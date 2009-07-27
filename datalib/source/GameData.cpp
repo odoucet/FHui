@@ -105,6 +105,17 @@ int Planet::CalculateLSN(AtmosphericReq ^atmReq)
     return lsn;
 }
 
+void Planet::AddName(String ^name)
+{
+    Name = name;
+    NameIsNew = true;
+}
+
+void Planet::DelName()
+{
+    Name = nullptr;
+}
+
 String^ Planet::PrintLocation()
 {
     return String::Format("{0} {1}", System->PrintLocation(), Number);

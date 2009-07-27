@@ -25,6 +25,7 @@ public enum class CommandPhase
 
 public enum class CommandType
 {
+    Disband,
     Name,
     AlienRelation,  // Enemy/Neutral/Ally
     Teach
@@ -35,6 +36,22 @@ public interface class ICommand
     CommandPhase    GetPhase();
     CommandType     GetType();
     void            Print(List<String^>^);
+};
+
+////////////////////////////////////////////////////////////
+
+public ref class CmdDisband : public ICommand
+{
+public:
+    CmdDisband(String ^name)
+        : m_Name(name)
+    {}
+
+    virtual CommandPhase    GetPhase()  { return CommandPhase::PreDeparture; }
+    virtual CommandType     GetType()   { return CommandType::Disband; }
+    virtual void    Print(List<String^> ^orders);
+
+    String^         m_Name;
 };
 
 ////////////////////////////////////////////////////////////

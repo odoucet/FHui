@@ -75,16 +75,19 @@ void Form1::LoadCommands()
 {
     // Open file
     StreamReader ^sr;
-    //try {
+    try {
         sr = File::OpenText(
             GetDataDir(OrdersDir::Folder) + String::Format(OrdersDir::Commands, m_GameData->GetLastTurn()) );
-    //}
+    } catch( FileNotFoundException^ )
+    {
+        return;
+    }
 
     String ^line;
     int colonyProdOrder = 1;
     while( (line = sr->ReadLine()) != nullptr ) 
     {
-        line->Trim();
+        line = line->Trim();
         if( String::IsNullOrEmpty(line) ||
             line[0] == ';' )
             continue;
@@ -117,6 +120,75 @@ void Form1::LoadCommands()
         {
             m_GameData->GetShip(m_RM->Results[1])->Command =
                 gcnew Ship::Order( Ship::OrderType::Recycle );
+        }
+        else if( m_RM->Match(line, m_RM->ExpCmdPLName) )
+        {
+            StarSystem ^system = m_GameData->GetStarSystem(
+                m_RM->GetResultInt(0),
+                m_RM->GetResultInt(1),
+                m_RM->GetResultInt(2));
+            Planet ^planet = system->GetPlanet( m_RM->GetResultInt(3) );
+            String ^name = m_RM->Results[4];
+            m_GameData->AddCommand(
+                gcnew CmdPlanetName(system, planet->Number, name) );
+            planet->AddName(name);
+        }
+        else if( m_RM->Match(line, m_RM->ExpCmdPLDisband) )
+        {
+            String ^name = m_RM->Results[0];
+            for each( PlanetName ^pn in m_GameData->GetPlanetNames() )
+            {
+                if( pn->Name == name )
+                {
+                    m_GameData->AddCommand( gcnew CmdDisband(name) );
+                    pn->System->GetPlanet( pn->PlanetNum )->DelName();
+                    break;
+                }
+            }
+        }
+        else if( m_RM->Match(line, m_RM->ExpCmdSPNeutral) )
+        {
+            Alien ^alien = m_GameData->GetAlien(m_RM->Results[0]);
+            if( alien->Relation != SP_ENEMY &&
+                alien->Relation != SP_ALLY )
+                throw gcnew FHUIParsingException("Inconsistent alien relation command!");
+
+            alien->Relation = SP_NEUTRAL;
+            m_GameData->AddCommand(gcnew CmdAlienRelation(alien, SP_NEUTRAL));
+        }
+        else if( m_RM->Match(line, m_RM->ExpCmdSPAlly) )
+        {
+            Alien ^alien = m_GameData->GetAlien(m_RM->Results[0]);
+            if( alien->Relation != SP_ENEMY &&
+                alien->Relation != SP_NEUTRAL )
+                throw gcnew FHUIParsingException("Inconsistent alien relation command!");
+
+            alien->Relation = SP_ALLY;
+            m_GameData->AddCommand(gcnew CmdAlienRelation(alien, SP_ALLY));
+        }
+        else if( m_RM->Match(line, m_RM->ExpCmdSPEnemy) )
+        {
+            Alien ^alien = m_GameData->GetAlien(m_RM->Results[0]);
+            if( alien->Relation != SP_NEUTRAL &&
+                alien->Relation != SP_ALLY )
+                throw gcnew FHUIParsingException("Inconsistent alien relation command!");
+
+            alien->Relation = SP_ENEMY;
+            m_GameData->AddCommand(gcnew CmdAlienRelation(alien, SP_ENEMY));
+        }
+        else if( m_RM->Match(line, m_RM->ExpCmdSPTeach) )
+        {
+            TechType tech = FHStrings::TechFromString(m_RM->Results[0]);
+            int level = m_RM->GetResultInt(1);
+            Alien ^alien = m_GameData->GetAlien(m_RM->Results[2]);
+            if( alien->Relation != SP_NEUTRAL &&
+                alien->Relation != SP_ALLY )
+                throw gcnew FHUIParsingException("Inconsistent alien relation for Teach command!");
+            if( level != m_GameData->GetSpecies()->TechLevels[tech] )
+                throw gcnew FHUIParsingException("Inconsistent tech level for Teach command!");
+
+            m_GameData->AddCommand( gcnew CmdTeach(alien, tech, level) );
+            alien->TeachOrders |= 1 << tech;
         }
         else
             throw gcnew FHUIParsingException("Unrecognized line in commands template: " + line);

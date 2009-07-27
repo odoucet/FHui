@@ -15,9 +15,10 @@ RegexMatcher::RegexMatcher()
     ExpCmdShipUpg   = gcnew Regex("^SHIP ([A-Z0-9]+) ([^,;]+) Upgrade$");
     ExpCmdShipRec   = gcnew Regex("^SHIP ([A-Z0-9]+) ([^,;]+) Recycle$");
     ExpCmdPLName    = gcnew Regex("^Name\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+) PL ([^,;]+)$");
+    ExpCmdPLDisband = gcnew Regex("^Disband PL ([^,;]+)$");
     ExpCmdSPNeutral = gcnew Regex("^Neutral SP ([^,;]+)$");
-    ExpCmdSPAlly    = gcnew Regex("^Neutral SP ([^,;]+)$");
-    ExpCmdSPEnemy   = gcnew Regex("^Neutral SP ([^,;]+)$");
+    ExpCmdSPAlly    = gcnew Regex("^Ally SP ([^,;]+)$");
+    ExpCmdSPEnemy   = gcnew Regex("^Enemy SP ([^,;]+)$");
     ExpCmdSPTeach   = gcnew Regex("^Teach ([A-Z]{2}) (\\d+) SP ([^,;]+)$");
 }
 

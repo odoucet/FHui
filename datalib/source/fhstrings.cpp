@@ -40,6 +40,19 @@ String^ FHStrings::TechToString(TechType tech)
     }
 }
 
+TechType FHStrings::TechFromString(String ^tech)
+{
+    tech = tech->ToUpper();
+         if( tech == "MI" ) return TECH_MI;
+    else if( tech == "MA" ) return TECH_MA;
+    else if( tech == "ML" ) return TECH_ML;
+    else if( tech == "GV" ) return TECH_GV;
+    else if( tech == "LS" ) return TECH_LS;
+    else if( tech == "BI" ) return TECH_BI;
+    else
+        throw gcnew FHUIParsingException("Invalid technlology: " + tech);
+}
+
 struct GasStr
 {
     GasType     type;

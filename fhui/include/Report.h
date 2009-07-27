@@ -28,15 +28,16 @@ private:
 public:
     // --------------------------
     // Commands
-    initonly Regex^      ExpCmdColony;
-    initonly Regex^      ExpCmdShipJump;
-    initonly Regex^      ExpCmdShipUpg;
-    initonly Regex^      ExpCmdShipRec;
-    initonly Regex^      ExpCmdPLName;
-    initonly Regex^      ExpCmdSPNeutral;
-    initonly Regex^      ExpCmdSPAlly;
-    initonly Regex^      ExpCmdSPEnemy;
-    initonly Regex^      ExpCmdSPTeach;
+    initonly Regex^     ExpCmdColony;
+    initonly Regex^     ExpCmdShipJump;
+    initonly Regex^     ExpCmdShipUpg;
+    initonly Regex^     ExpCmdShipRec;
+    initonly Regex^     ExpCmdPLName;
+    initonly Regex^     ExpCmdPLDisband;
+    initonly Regex^     ExpCmdSPNeutral;
+    initonly Regex^     ExpCmdSPAlly;
+    initonly Regex^     ExpCmdSPEnemy;
+    initonly Regex^     ExpCmdSPTeach;
 };
 
 enum PhaseType

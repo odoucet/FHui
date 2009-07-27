@@ -533,6 +533,8 @@ void Form1::LoadGameTurn(int turn)
 
     m_GameData->Update();
     m_GameTurns[turn] = m_GameData;
+
+    LoadCommands();
 }
 
 int Form1::CheckReport(String ^fileName)
@@ -1266,7 +1268,7 @@ void Form1::PlanetsMenuAddName(DataGridViewCellEventArgs ^cell)
 {
     PlanetsGrid->ReadOnly = true;
     String ^name = PlanetsGrid[cell->ColumnIndex, cell->RowIndex]->Value->ToString();
-    name->Trim();
+    name = name->Trim();
     if( String::IsNullOrEmpty(name) )
         return;
 
@@ -1275,8 +1277,8 @@ void Form1::PlanetsMenuAddName(DataGridViewCellEventArgs ^cell)
         m_PlanetsMenuRef->Number,
         name ) );
 
-    m_PlanetsMenuRef->Name = name;
-    m_PlanetsMenuRef->NameIsNew = true;
+    m_PlanetsMenuRef->AddName(name);
+
     m_PlanetsFilter->Update();
 }
 
@@ -1300,13 +1302,11 @@ void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
     }
     else
     {   // Add Disband command
-        AddCommand( gcnew CmdPlanetName(
-            m_PlanetsMenuRef->System,
-            m_PlanetsMenuRef->Number,
-            nullptr ) );
+        AddCommand( gcnew CmdDisband( m_PlanetsMenuRef->Name ) );
     }
 
-    m_PlanetsMenuRef->Name = nullptr;
+    m_PlanetsMenuRef->DelName();
+
     m_PlanetsFilter->Update();
 }
 
@@ -1493,7 +1493,7 @@ void Form1::ColoniesMenuSelectRef(Object^, EventArgs ^e)
 void Form1::ColoniesMenuProdOrderAdjust(int adjustment)
 {
     int oldOrder = m_ColoniesMenuRef->ProductionOrder;
-    int newOrder = Math::Max(0, oldOrder + adjustment);
+    int newOrder = Math::Max(1, oldOrder + adjustment);
     int lastOrder = 0;
     for each( Colony ^colony in m_GameData->GetSpecies()->Colonies )
     {

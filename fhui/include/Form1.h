@@ -1025,10 +1025,10 @@ private: System::Windows::Forms::Label^  SystemsRef;
                 | System::Windows::Forms::AnchorStyles::Right));
             this->RepText->Font = (gcnew System::Drawing::Font(L"Courier New", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(0)));
-            this->RepText->Location = System::Drawing::Point(0, 0);
+            this->RepText->Location = System::Drawing::Point(0, 30);
             this->RepText->Name = L"RepText";
             this->RepText->ReadOnly = true;
-            this->RepText->Size = System::Drawing::Size(677, 506);
+            this->RepText->Size = System::Drawing::Size(677, 507);
             this->RepText->TabIndex = 0;
             this->RepText->Text = L"";
             this->RepText->WordWrap = false;

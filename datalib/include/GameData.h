@@ -170,6 +170,9 @@ public:
 
     int         CalculateLSN(AtmosphericReq^);
 
+    void        AddName(String ^name);
+    void        DelName();
+
     String^     PrintLocation();
     String^     PrintComment();
 
