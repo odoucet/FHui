@@ -284,13 +284,13 @@ void Form1::GenerateCombatInfo(StarSystem^ system)
 
         if ( ship->Owner == player )
         {
-            MyShipInfo->Add(
-                String::Format(";    {0} ({1}) [{2}]", ship->PrintClassWithName(), shipLoc, ship->PrintCargo() ) );
+            MyShipInfo->Add( String::Format(";    {0} (age {1}; {2}) [{3}]",
+                ship->PrintClassWithName(), ship->Age, shipLoc, ship->PrintCargo() ) );
         }
         else
         {
-            AlienShipInfo->Add(
-                String::Format(";    {0} ({1})    SP {2}", ship->PrintClassWithName(), shipLoc, ship->Owner->Name ) );
+            AlienShipInfo->Add( String::Format(";    {0} (age {1}; {2})    SP {3}",
+                ship->PrintClassWithName(), ship->Age, shipLoc, ship->Owner->Name ) );
         }
     }
     m_OrderList->AddRange( MyShipInfo );
