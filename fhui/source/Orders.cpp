@@ -314,6 +314,7 @@ void Form1::GeneratePreDeparture()
         if ( system->ColoniesOwned->Count + system->ShipsOwned->Count == 0 )
             continue;
 
+        m_OrderList->Add("");
         GeneratePreDepartureInfo( system );
 
         for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
