@@ -309,55 +309,181 @@ void Form1::GeneratePreDeparture()
             cmd->Print(m_OrderList);
     }
 
-    for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
+    for each ( StarSystem^ system in m_GameData->GetStarSystems() )
     {
-        for each( Ship ^ship in m_GameData->GetSpecies()->Ships )
-            plugin->GeneratePreDeparture(m_OrderList, ship);
+        if ( system->ColoniesOwned->Count + system->ShipsOwned->Count == 0 )
+            continue;
 
-        m_OrderList->Add("");
+        GeneratePreDepartureInfo( system );
 
-        for each( Colony ^colony in m_GameData->GetSpecies()->Colonies )
-            plugin->GeneratePreDeparture(m_OrderList, colony);
+        for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
+        {
+            plugin->GeneratePreDeparture(m_OrderList, system);
+        }
     }
 
     m_OrderList->Add("END");
     m_OrderList->Add("");
 }
 
+void Form1::GeneratePreDepartureInfo(StarSystem^ system)
+{
+    // TODO: Use StarSystem->PrintAlienShipSummary
+
+    int alienScouts = 0;
+    int alienTransports = 0;
+    int alienWarships = 0;
+    for each (Ship ^ship in system->ShipsAlien)
+    {
+        if ( ship->Type == SHIP_TR )
+        {
+            if (ship->Tonnage == 10000)
+            {
+                alienScouts++;
+            }
+            else
+            {
+                alienTransports++;
+            }
+        }
+        else if ( ship->Type != SHIP_BAS )
+        {
+            alienWarships++;
+        }
+    }
+
+    String^ aliens;
+    if ( system->ColoniesAlien->Count )
+    {
+        if ( system->ColoniesAlien->Count == 1 )
+        {
+            aliens += "colony";
+        }
+        else
+        {
+            aliens += String::Format("{0} colonies", system->ColoniesAlien->Count );
+        }
+    }
+
+    if ( alienScouts )
+    {
+        if ( ! String::IsNullOrEmpty(aliens) )
+            aliens += ", ";
+
+        if ( alienScouts == 1 )
+        {
+            aliens += "scout";
+        }
+        else
+        {
+            aliens += String::Format("{0} scouts", alienScouts );
+        }
+    }
+
+    if ( alienTransports )
+    {
+        if ( ! String::IsNullOrEmpty(aliens) )
+            aliens += ", ";
+
+        if ( alienTransports == 1 )
+        {
+            aliens += "transport";
+        }
+        else
+        {
+            aliens += String::Format("{0} transports", alienTransports );
+        }
+    }
+
+    if ( alienWarships )
+    {
+        if ( ! String::IsNullOrEmpty(aliens) )
+            aliens += ", ";
+
+        if ( alienWarships == 1 )
+        {
+            aliens += "warship";
+        }
+        else
+        {
+            aliens += String::Format("{0} warships", alienWarships );
+        }
+    }
+
+    if ( String::IsNullOrEmpty(aliens) )
+    {
+        aliens = "none";
+    }
+
+    m_OrderList->Add(String::Format("; Location: [{0}] Aliens: [{1}]", system->PrintLocation(), aliens ) );
+
+    for each (Colony^ colony in system->ColoniesOwned)
+    {
+        m_OrderList->Add( String::Format( ";    PL {0} : {1}", colony->Name, colony->PrintInventoryShort() ) );
+    }
+    for each (Ship^ ship in system->ShipsOwned)
+    {
+        m_OrderList->Add( String::Format( ";    {0} : {1}", ship->PrintClassWithName(), ship->PrintCargo() ) );
+    }
+}
+
+private ref class ShipJumpComparer : public IComparer<Ship^>
+{
+public:
+    virtual int Compare(Ship ^s1, Ship ^s2)
+    {
+        if( s1->Type != s2->Type ) return ((int)s1->Type - (int)s2->Type);
+        if( s1->Tonnage != s2->Tonnage ) return s1->Tonnage - s2->Tonnage;
+        if( s1->System->X != s2->System->X ) return s1->System->X - s2->System->X;
+        if( s1->System->Y != s2->System->Y ) return s1->System->Y - s2->System->Y;
+        if( s1->System->Z != s2->System->Z ) return s1->System->Z - s2->System->Z;
+        if( s1->Age != s2->Age) return s1->Age - s2->Age;
+        return s1->Location - s2->Location;
+    }
+};
+
 void Form1::GenerateJumps()
 {
     m_OrderList->Add("START JUMPS");
+    
+    List<Ship^>^ jumpList = m_GameData->GetSpecies()->Ships;
+    jumpList->Sort( gcnew ShipJumpComparer );
 
-    // Print UI commands
-    for each( ICommand ^cmd in m_GameData->GetCommands() )
+    for each( Ship ^ship in jumpList )
     {
-        if( cmd->GetPhase() == CommandPhase::Jump )
-            cmd->Print(m_OrderList);
-    }
+        GenerateJumpInfo(ship);
 
-    for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
-    {
-        for each( Ship ^ship in m_GameData->GetSpecies()->Ships )
+        for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
         {
             plugin->GenerateJumps(m_OrderList, ship);
+        }
 
-            if( ship->Command && ship->Command->Type == Ship::OrderType::Jump )
-            {
-                m_OrderList->Add( String::Format("    Jump {0}, {1}  ; [{2}] -> [{3}]; Mishap: {4:F2}%",
-                    ship->PrintClassWithName(),
-                    ship->Command->PrintJumpDestination(),
-                    ship->System->PrintLocation(),
-                    ship->Command->JumpTarget->PrintLocation(),
-                    ship->System->CalcMishap(
-                        ship->Command->JumpTarget,
-                        ship->Owner->TechLevelsAssumed[TECH_GV],
-                        ship->Age) ) );
-            }
+        if( ship->Command && ship->Command->Type == Ship::OrderType::Jump )
+        {
+            m_OrderList->Add( String::Format("    Jump {0}, {1}  ; [{2}] -> [{3}]; Mishap: {4:F2}%",
+                ship->PrintClassWithName(),
+                ship->Command->PrintJumpDestination(),
+                ship->System->PrintLocation(),
+                ship->Command->JumpTarget->PrintLocation(),
+                ship->System->CalcMishap(
+                    ship->Command->JumpTarget,
+                    ship->Owner->TechLevelsAssumed[TECH_GV],
+                    ship->Age) ) );
         }
     }
 
     m_OrderList->Add("END");
     m_OrderList->Add("");
+}
+
+void Form1::GenerateJumpInfo(Ship^ ship)
+{
+    m_OrderList->Add(
+        String::Format("; {0} (age {1}) at {2} with [{3}]",
+            ship->PrintClassWithName(),
+            ship->Age,
+            ship->PrintLocation(),
+            ship->PrintCargo() ) );
 }
 
 void Form1::GenerateProduction()
