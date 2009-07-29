@@ -196,7 +196,7 @@ public:
 
 // ---------------------------------------------------
 // Star system
-public ref class StarSystem : public GridDataSrcBase
+public ref class StarSystem : public GridDataSrcBase, public IComparable
 {
 public:
     StarSystem(int x, int y, int z, String ^type)
@@ -218,6 +218,18 @@ public:
         ColoniesOwned = gcnew List<Colony^>;
         ColoniesAlien = gcnew List<Colony^>;
         IsVoid = true;
+    }
+
+    virtual Int32 CompareTo( Object^ obj )
+    {
+        if ( obj->GetType() == StarSystem::typeid )
+        {
+            StarSystem^ system = dynamic_cast<StarSystem^>(obj);
+            if ( X != system->X ) return X - system->X;
+            if ( Y != system->Y ) return Y - system->Y;
+            return Z - system->Z;
+        }
+        throw gcnew ArgumentException(  "object is not a StarSystem" );
     }
 
     // -------- IGridDataSrc ----------------------------
@@ -287,7 +299,7 @@ protected:
 
 // ---------------------------------------------------
 // Colony
-public ref class Colony : public GridDataSrcBase
+public ref class Colony : public GridDataSrcBase, public IComparable
 {
 public:
     Colony(Alien ^owner, String ^name, StarSystem ^system, int planetNum)
@@ -312,6 +324,16 @@ public:
         Shipyards = 0;
         LastSeen = -1;
         Inventory = gcnew array<int>(INV_MAX){0};
+    }
+
+    virtual Int32 CompareTo( Object^ obj )
+    {
+        if ( obj->GetType() == Colony::typeid )
+        {
+            Colony^ colony = dynamic_cast<Colony^>(obj);
+            return Name->CompareTo( colony->Name );
+        }
+        throw gcnew ArgumentException(  "object is not a Colony" );
     }
 
     // -------- IGridDataSrc ----------------------------
@@ -377,7 +399,7 @@ public:
 
 // ---------------------------------------------------
 // Ship or starbase
-public ref class Ship : public GridDataSrcBase
+public ref class Ship : public GridDataSrcBase, public IComparable
 {
 public:
     Ship(Alien ^owner, ShipType type, String ^name, bool subLight)
@@ -397,6 +419,15 @@ public:
         m_Cargo = gcnew array<int>(INV_MAX){0};
     }
 
+    virtual Int32 CompareTo( Object^ obj )
+    {
+        if ( obj->GetType() == Ship::typeid )
+        {
+            Ship^ ship = dynamic_cast<Ship^>(obj);
+            return Name->CompareTo( ship->Name );
+        }
+        throw gcnew ArgumentException(  "object is not a Ship" );
+    }
     // -------- IGridDataSrc ----------------------------
     virtual Alien^      GetAlienForBgColor() override   { return Owner; }
 
@@ -502,6 +533,7 @@ public:
     void            GetFleetCost(int%, float%);
     Alien^          GetAlien(String ^sp);
     StarSystem^     GetStarSystem(int x, int y, int z);
+    StarSystem^     GetStarSystem(String ^name);
     Colony^         GetColony(String ^name);
     Ship^           GetShip(String ^name);
 
@@ -533,6 +565,16 @@ public:
     Colony^         AddColony(int turn, Alien ^sp, String ^name, StarSystem ^system, int plNum);
     void            AddPlanetName(int turn, StarSystem ^system, int pl, String ^name);
     Ship^           AddShip(int turn, Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);
+
+    property bool   AutoEnabled;
+
+    void            SetAutoOrderPreDeparture(int turn, StarSystem^, String^);
+    void            SetAutoOrderJumps(int turn, Ship^, String^);
+    void            SetAutoOrderProduction(int turn, Colony^, String^);
+
+    List<String^>^  GetAutoOrdersPreDeparture(StarSystem^);
+    List<String^>^  GetAutoOrdersJumps(Ship^);
+    List<String^>^  GetAutoOrdersProduction(Colony^);
 
     // ------------------------------------------
 protected:
@@ -575,6 +617,10 @@ protected:
     List<Ship^>                        ^m_ShipsByTonnage;
 
     List<ICommand^>^    m_Commands;
+
+    SortedList<StarSystem^, List<String^>^> ^m_AutoOrdersPreDeparture;
+    SortedList<Ship^, List<String^>^>       ^m_AutoOrdersJumps;
+    SortedList<Colony^, List<String^>^>     ^m_AutoOrdersProduction;
 
     int                 m_TurnMax;
 };

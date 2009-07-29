@@ -578,8 +578,12 @@ GameData::GameData(void)
     , m_PlanetNames(gcnew SortedList<String^, PlanetName^>)
     , m_Ships(gcnew SortedList<String^, Ship^>)
     , m_Commands(gcnew List<ICommand^>)
+    , m_AutoOrdersPreDeparture(gcnew SortedList<StarSystem^, List<String^>^>)
+    , m_AutoOrdersJumps(gcnew SortedList<Ship^, List<String^>^>)
+    , m_AutoOrdersProduction(gcnew SortedList<Colony^, List<String^>^>)
     , m_TurnMax(0)
 {
+    AutoEnabled = false;
 }
 
 // ---------------------------------------------------------
@@ -805,6 +809,22 @@ List<Ship^>^ GameData::GetShips(StarSystem ^sys, Alien ^sp)
     return ret;
 }
 
+StarSystem^ GameData::GetStarSystem(String ^name)
+{
+    if ( m_Colonies->ContainsKey( name->ToLower() ) )
+    {
+        return m_Colonies[name->ToLower()]->System;
+    }
+    else if ( m_PlanetNames->ContainsKey( name->ToLower() ) )
+    {
+        return m_PlanetNames[name->ToLower()]->System;
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
 Colony^ GameData::GetColony(String ^name)
 {
     return safe_cast<Colony^>(m_Colonies[name->ToLower()]);
@@ -865,6 +885,11 @@ bool GameData::TurnCheck(int turn)
         m_PlanetNames->Clear();
         // remove ships
         m_Ships->Clear();
+        // clear auto orders
+        AutoEnabled = false;
+        m_AutoOrdersPreDeparture->Clear();
+        m_AutoOrdersJumps->Clear();
+        m_AutoOrdersProduction->Clear();
     }
     return turn == m_TurnMax;
 }
@@ -1420,6 +1445,87 @@ public:
 void GameData::SortCommands()
 {
     m_Commands->Sort( gcnew CommandComparer );
+}
+
+void GameData::SetAutoOrderPreDeparture(int turn, StarSystem^ system, String^ line)
+{   
+    if( TurnCheck(turn) )
+    {
+        AutoEnabled = true;
+        if ( m_AutoOrdersPreDeparture->ContainsKey( system ) )
+        {
+            m_AutoOrdersPreDeparture[system]->Add(line);
+        }
+        else
+        {
+            List<String^>^ list = gcnew List<String^>;
+            list->Add(line);
+            m_AutoOrdersPreDeparture->Add(system, list);
+        }
+    }
+}
+
+void GameData::SetAutoOrderJumps(int turn, Ship^ ship, String^ line)
+{
+    if( TurnCheck(turn) )
+    {
+        AutoEnabled = true;
+        if ( m_AutoOrdersJumps->ContainsKey( ship ) )
+        {
+            m_AutoOrdersJumps[ship]->Add(line);
+        }
+        else
+        {
+            List<String^>^ list = gcnew List<String^>;
+            list->Add(line);
+            m_AutoOrdersJumps->Add(ship, list);
+        }
+    }
+}
+
+void GameData::SetAutoOrderProduction(int turn, Colony^ colony, String^ line)
+{
+    if( TurnCheck(turn) )
+    {
+        AutoEnabled = true;
+        if ( m_AutoOrdersProduction->ContainsKey( colony ) )
+        {
+            m_AutoOrdersProduction[colony]->Add(line);
+        }
+        else
+        {
+            List<String^>^ list = gcnew List<String^>;
+            list->Add(line);
+            m_AutoOrdersProduction->Add(colony, list);
+        }
+    }
+}
+
+List<String^>^ GameData::GetAutoOrdersPreDeparture(StarSystem^ system)
+{
+    if ( m_AutoOrdersPreDeparture->ContainsKey( system ) )
+    {
+        return m_AutoOrdersPreDeparture[system];
+    }
+    return nullptr;
+}
+
+List<String^>^ GameData::GetAutoOrdersJumps(Ship^ ship)
+{
+    if ( m_AutoOrdersJumps->ContainsKey( ship ) )
+    {
+        return m_AutoOrdersJumps[ship];
+    }
+    return nullptr;
+}
+
+List<String^>^ GameData::GetAutoOrdersProduction(Colony^ colony)
+{
+    if ( m_AutoOrdersProduction->ContainsKey( colony ) )
+    {
+        return m_AutoOrdersProduction[colony];
+    }
+    return nullptr;
 }
 
 } // end namespace FHUI

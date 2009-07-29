@@ -156,9 +156,6 @@ bool Report::Parse(String ^s)
         return true;
     }
 
-    if( m_Phase == PHASE_ORDERS_TEMPLATE )
-        return true;
-
     if( m_bParsingAggregate )
     {
         if( !String::IsNullOrEmpty(s) )
@@ -455,6 +452,12 @@ bool Report::Parse(String ^s)
         else
             MatchAliensReport(s);
         break;
+
+    case PHASE_ORDERS_TEMPLATE:
+        if( ! String::IsNullOrEmpty(s) )
+        {
+            MatchOrdersTemplate(s);
+        }
     }
 
     return true;
@@ -1062,6 +1065,99 @@ void Report::MatchAliensReport(String ^s)
     }
     else
         MatchShipScan(s, false);
+}
+
+void Report::MatchOrdersTemplate(String ^s)
+{
+    String^ line = s->Replace("\t", " ");
+
+    // INSTALL
+    if( m_RM->Match(s, "^Install\\s+\\d+\\s+\\S+\\s+PL\\s+([^,]+)$") )
+    {
+        StarSystem^ system = m_GameData->GetStarSystem(m_RM->Results[0]);  
+        if ( system )
+        {
+            m_GameData->SetAutoOrderPreDeparture(m_Turn, system, line );
+            return;
+        }
+        throw gcnew FHUIParsingException(
+            String::Format("INSTALL order for unknown planet: PL {0}", m_RM->Results[0]) );
+    }
+
+    // UNLOAD
+    if( m_RM->Match(s, "^Unload\\s+(\\S+)\\s+([^,]+)$") )
+    {
+        Ship^ ship = m_GameData->GetShip(m_RM->Results[1]);  
+        if ( ship )
+        {
+            m_GameData->SetAutoOrderPreDeparture(m_Turn, ship->System, line );
+            return;
+        }
+        throw gcnew FHUIParsingException(
+            String::Format("UNLOAD order for unknown ship: {0} {1}", m_RM->Results[0], m_RM->Results[1]) );
+    }
+
+    // JUMP
+    if( m_RM->Match(s, "^Jump\\s+(\\S+)\\s+([^,]+),.+$") )
+    {
+        Ship^ ship = m_GameData->GetShip(m_RM->Results[1]);  
+        if ( ship )
+        {
+            m_GameData->SetAutoOrderJumps(m_Turn, ship, line );
+            return;
+        }
+        throw gcnew FHUIParsingException(
+            String::Format("JUMP order for unknown ship: {0} {1}", m_RM->Results[0], m_RM->Results[1]) );
+    }
+
+    // START PRODUCTION
+    if( m_RM->Match(s, "^PRODUCTION\\s+PL\\s+([^,]+)$") )
+    {
+        Colony^ colony = m_GameData->GetColony(m_RM->Results[0]);
+        if ( colony )
+        {
+            m_ColonyProduction = colony;
+            return;
+        }
+        throw gcnew FHUIParsingException(
+            String::Format("PRODUCTION order for unknown colony: PL {0}", m_RM->Results[0]) );
+    }
+
+    // DEVELOP
+    if( m_RM->Match(s, "^Develop\\s+\\d+\\s+PL\\s+([^,]+)$") )
+    {
+        Colony^ colony = m_GameData->GetColony(m_RM->Results[0]);
+        if ( colony )
+        {
+            m_GameData->SetAutoOrderProduction(m_Turn, m_ColonyProduction, line );
+            return;
+        }
+        throw gcnew FHUIParsingException(
+            String::Format("DEVELOP order for unknown colony: PL {0}", m_RM->Results[0]) );
+    }
+
+    // CONTINUE
+    if( m_RM->Match(s, "^Continue\\s+(\\S+)\\s+([^,]+).*$") )
+    {
+        Ship^ ship = m_GameData->GetShip(m_RM->Results[1]);
+        if ( ship )
+        {
+            m_GameData->SetAutoOrderProduction(m_Turn, m_ColonyProduction, line );
+            return;
+        }
+        throw gcnew FHUIParsingException(
+            String::Format("CONTINUE order for unknown ship: {0} {1}", m_RM->Results[0], m_RM->Results[1]) );
+    }
+
+    // RECYCLE
+    if( m_RM->Match(s, "^Recycle\\s+\\d+\\s+\\S+$") )
+    {
+        m_GameData->SetAutoOrderProduction(m_Turn, m_ColonyProduction, line );
+        return;
+    }
+ 
+    // SCAN (ignore) assume it is generated for all scouts
+    // AUTO (ignore) assume it is enabled when at least one other order is found
 }
 
 void Report::StartLineAggregate(PhaseType phase, String ^s, int maxLines)

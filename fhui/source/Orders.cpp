@@ -317,6 +317,15 @@ void Form1::GeneratePreDeparture()
         m_OrderList->Add("");
         GeneratePreDepartureInfo( system );
 
+        List<String^>^ autoOrders = m_GameData->GetAutoOrdersPreDeparture( system );
+        if ( autoOrders )
+        {
+            for each (String^ line in autoOrders )
+            {
+                m_OrderList->Add( "  " + line + " ; AUTO" );
+            }
+        }
+
         for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
         {
             plugin->GeneratePreDeparture(m_OrderList, system);
@@ -454,6 +463,15 @@ void Form1::GenerateJumps()
     {
         GenerateJumpInfo(ship);
 
+        List<String^>^ autoOrders = m_GameData->GetAutoOrdersJumps( ship );
+        if ( autoOrders )
+        {
+            for each (String^ line in autoOrders )
+            {
+                m_OrderList->Add( "  " + line + " ; AUTO" );
+            }
+        }
+
         for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
         {
             plugin->GenerateJumps(m_OrderList, ship);
@@ -523,6 +541,16 @@ void Form1::GenerateProduction()
         if( colony->PlanetType == PLANET_COLONY )
             prodSummary += "  max=" + budget->GetAvailBudget().ToString();
         m_OrderList->Add( prodSummary );
+
+        // TODO: include auto orders in Budget Tracker
+        List<String^>^ autoOrders = m_GameData->GetAutoOrdersProduction( colony );
+        if ( autoOrders )
+        {
+            for each (String^ line in autoOrders )
+            {
+                m_OrderList->Add( "    " + line + " ; AUTO" );
+            }
+        }
 
         // First RECYCLE all ships
         GenerateProductionRecycle(colony, budget);
@@ -630,6 +658,12 @@ void Form1::GeneratePostArrival()
     {
         if( cmd->GetPhase() == CommandPhase::PostArrival )
             cmd->Print(m_OrderList);
+    }
+
+    if ( m_GameData->AutoEnabled )
+    {
+        m_OrderList->Add( "  AUTO" );
+        // TODO: Scan orders for scouts
     }
 
     for each( IOrdersPlugin ^plugin in m_OrdersPlugins )

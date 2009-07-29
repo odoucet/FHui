@@ -93,6 +93,7 @@ private:
     void            MatchOtherPlanetsShipsScan(String ^s);
     void            MatchShipScan(String ^s, bool bColony);
     void            MatchAliensReport(String ^s);
+    void            MatchOrdersTemplate(String ^s);
 
     GameData       ^m_GameData;
     RegexMatcher   ^m_RM;
@@ -116,6 +117,7 @@ private:
     Ship           ^m_ScanShip;
     int             m_PirateShipsCnt;
 
+    Colony         ^m_ColonyProduction;
     Alien          ^m_EstimateAlien;
 };
 
