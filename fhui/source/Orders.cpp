@@ -222,7 +222,45 @@ void Form1::GenerateTemplate()
     GeneratePostArrival();
     GenerateStrikes();
 
+    OrderTemplate->Font = gcnew System::Drawing::Font("Courier New", 8, FontStyle::Regular);
+
     OrderTemplate->Lines = m_OrderList->ToArray();
+
+    // Primitive orders coloring
+    int start = 0;
+    System::Drawing::Font ^sectionFont = gcnew System::Drawing::Font("Courier New", 11, FontStyle::Bold);
+
+    for each( String ^s in m_OrderList )
+    {
+        if( s->Length == 0 )
+        {
+            ++start;
+            continue;
+        }
+
+        if( s[0] != ' ' )
+        {   // section start/end
+            OrderTemplate->Select(start, s->Length + 1);
+            OrderTemplate->SelectionFont = sectionFont;
+        }
+        else if( s->Trim()[0] == ';' )
+        {   // comments
+            OrderTemplate->Select(start, s->Length + 1);
+            OrderTemplate->SelectionColor = Color::Green;
+        }
+        else if( s->IndexOf("[A]") != -1 )
+        {   // UI generated
+            OrderTemplate->Select(start, s->Length + 1);
+            OrderTemplate->SelectionColor = Color::FromArgb(0xFF800080);
+        }
+        else if( s->IndexOf("[A+]") != -1 )
+        {   // plugin generated
+            OrderTemplate->Select(start, s->Length + 1);
+            OrderTemplate->SelectionColor = Color::Blue;
+        }
+        
+        start += s->Length + 1;
+    }
 }
 
 void Form1::GenerateCombat()

@@ -1786,7 +1786,7 @@ ToolStripMenuItem^ Form1::ShipsMenuCreateJumpItem(
         Decimal::ToInt32(TechGV->Value),
         ship->Age );
 
-    String ^itemText = String::Format("{0}  \t{1:F2}% ({2} FS)  From {3}",
+    String ^itemText = String::Format("{0}   {1:F2}% ({2} FS)  From {3}",
             text,
             mishap,
             ship->Cargo[INV_FS],
