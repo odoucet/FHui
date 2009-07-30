@@ -11,7 +11,7 @@ RegexMatcher::RegexMatcher()
     m_Results = gcnew array<String^>(1);
 
     ExpCmdColony    = gcnew Regex("^COLONY ([^,;]+)$");
-    ExpCmdShipJump  = gcnew Regex("^SHIP ([A-Z0-9]+) ([^,;]+) Jump to\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)$");
+    ExpCmdShipJump  = gcnew Regex("^SHIP ([A-Z0-9]+) ([^,;]+) Jump to\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+([0-9-]+)$");
     ExpCmdShipUpg   = gcnew Regex("^SHIP ([A-Z0-9]+) ([^,;]+) Upgrade$");
     ExpCmdShipRec   = gcnew Regex("^SHIP ([A-Z0-9]+) ([^,;]+) Recycle$");
     ExpCmdPLName    = gcnew Regex("^Name\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+) PL ([^,;]+)$");

@@ -237,7 +237,7 @@ namespace FHUI {
         void        GenerateCombatInfo(StarSystem^);
         void        GeneratePreDepartureInfo(StarSystem^);
         void        GenerateJumpInfo(Ship^);
-        
+        void        GenerateScanOrders();
         void        GenerateProductionRecycle(Colony ^colony, BudgetTracker ^budget);
         void        GenerateProductionUpgrade(Colony ^colony, BudgetTracker ^budget);
 

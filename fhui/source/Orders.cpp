@@ -228,7 +228,6 @@ void Form1::GenerateTemplate()
 void Form1::GenerateCombat()
 {
     m_OrderList->Add("START COMBAT");
-    m_OrderList->Add("");
 
     // Print UI commands
     for each( ICommand ^cmd in m_GameData->GetCommands() )
@@ -268,7 +267,7 @@ void Form1::GenerateCombatInfo(StarSystem^ system)
     }
 
     m_OrderList->Add(
-        String::Format("; Location: {0} ({1})", system->PrintLocation(), sysInfo ) );
+        String::Format("  ; Location: {0} ({1})", system->PrintLocation(), sysInfo ) );
 
     List<String^>^ MyShipInfo = gcnew List<String^>;
     List<String^>^ AlienShipInfo = gcnew List<String^>;
@@ -287,17 +286,17 @@ void Form1::GenerateCombatInfo(StarSystem^ system)
 
         if ( ship->Owner == player )
         {
-            MyShipInfo->Add( String::Format(";    {0} (age {1}; {2}) [{3}]",
+            MyShipInfo->Add( String::Format("  ;    {0} (age {1}; {2}) [{3}]",
                 ship->PrintClassWithName(), ship->Age, shipLoc, ship->PrintCargo() ) );
         }
         else
         {
-            AlienShipInfo->Add( String::Format(";    {0} (age {1}; {2})    SP {3}",
+            AlienShipInfo->Add( String::Format("  ;    {0} (age {1}; {2})    SP {3}",
                 ship->PrintClassWithName(), ship->Age, shipLoc, ship->Owner->Name ) );
         }
     }
     m_OrderList->AddRange( MyShipInfo );
-    m_OrderList->Add( String::Format("; Alien ships: {0}", ( AlienShipInfo->Count ? "" : "none" ) ) );
+    m_OrderList->Add( String::Format("  ; Alien ships: {0}", ( AlienShipInfo->Count ? "" : "none" ) ) );
     m_OrderList->AddRange( AlienShipInfo );
 }
 
@@ -428,15 +427,15 @@ void Form1::GeneratePreDepartureInfo(StarSystem^ system)
         aliens = "none";
     }
 
-    m_OrderList->Add(String::Format("; Location: [{0}] Aliens: [{1}]", system->PrintLocation(), aliens ) );
+    m_OrderList->Add(String::Format("  ; Location: [{0}] Aliens: [{1}]", system->PrintLocation(), aliens ) );
 
     for each (Colony^ colony in system->ColoniesOwned)
     {
-        m_OrderList->Add( String::Format( ";    PL {0} : {1}", colony->Name, colony->PrintInventoryShort() ) );
+        m_OrderList->Add( String::Format( "  ;    PL {0} : {1}", colony->Name, colony->PrintInventoryShort() ) );
     }
     for each (Ship^ ship in system->ShipsOwned)
     {
-        m_OrderList->Add( String::Format( ";    {0} : {1}", ship->PrintClassWithName(), ship->PrintCargo() ) );
+        m_OrderList->Add( String::Format( "  ;    {0} : {1}", ship->PrintClassWithName(), ship->PrintCargo() ) );
     }
 }
 
@@ -466,14 +465,7 @@ void Form1::GenerateJumps()
     {
         GenerateJumpInfo(ship);
 
-        List<String^>^ autoOrders = m_GameData->GetAutoOrdersJumps( ship );
-        if ( autoOrders )
-        {
-            for each (String^ line in autoOrders )
-            {
-                m_OrderList->Add( "  " + line + " ; AUTO" );
-            }
-        }
+        int prevLines = m_OrderList->Count;
 
         for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
         {
@@ -482,7 +474,7 @@ void Form1::GenerateJumps()
 
         if( ship->Command && ship->Command->Type == Ship::OrderType::Jump )
         {
-            m_OrderList->Add( String::Format("    Jump {0}, {1}  ; [{2}] -> [{3}]; Mishap: {4:F2}%",
+            m_OrderList->Add( String::Format("  Jump {0}, {1}  ; [{2}] -> [{3}]; Mishap: {4:F2}%",
                 ship->PrintClassWithName(),
                 ship->Command->PrintJumpDestination(),
                 ship->System->PrintLocation(),
@@ -491,6 +483,29 @@ void Form1::GenerateJumps()
                     ship->Command->JumpTarget,
                     ship->Owner->TechLevelsAssumed[TECH_GV],
                     ship->Age) ) );
+        }
+
+        String ^prefix = "  ";
+        bool commentOutAuto = false;
+        // Comment out auto jumps, if UI or plugin jumps were added
+        if( m_OrderList->Count > prevLines )
+        {
+            commentOutAuto = true;
+            prefix += "; ";
+        }
+
+        List<String^>^ autoOrders = m_GameData->GetAutoOrdersJumps( ship );
+        if ( autoOrders )
+        {
+            for each (String^ line in autoOrders )
+            {
+                // If auto is to be commented out, and auto target is "???",
+                // completely skip this order
+                if( commentOutAuto && line->IndexOf("???") != -1 )
+                    continue;
+
+                m_OrderList->Add( prefix + line + " ; AUTO" );
+            }
         }
     }
 
@@ -501,7 +516,7 @@ void Form1::GenerateJumps()
 void Form1::GenerateJumpInfo(Ship^ ship)
 {
     m_OrderList->Add(
-        String::Format("; {0} (age {1}) at {2} with [{3}]",
+        String::Format("  ; {0} (age {1}) at {2} with [{3}]",
             ship->PrintClassWithName(),
             ship->Age,
             ship->PrintLocation(),
@@ -513,7 +528,7 @@ void Form1::GenerateProduction()
     m_OrderList->Add("START PRODUCTION");
 
     BudgetTracker ^budget = gcnew BudgetTracker(m_OrderList, m_GameData->GetCarriedEU());
-    m_OrderList->Add("; +" + budget->GetTotalBudget().ToString() + " EUs carried" );
+    m_OrderList->Add("  ; +" + budget->GetTotalBudget().ToString() + " EUs carried" );
 
     // Mark ships for upgrade
     for each( Ship ^ship in m_GameData->GetSpecies()->Ships )
@@ -654,7 +669,6 @@ void Form1::GenerateProductionUpgrade(Colony ^colony, BudgetTracker ^budget)
 void Form1::GeneratePostArrival()
 {
     m_OrderList->Add("START POST-ARRIVAL");
-    m_OrderList->Add("");
 
     // Print UI commands
     for each( ICommand ^cmd in m_GameData->GetCommands() )
@@ -666,7 +680,7 @@ void Form1::GeneratePostArrival()
     if ( m_GameData->AutoEnabled )
     {
         m_OrderList->Add( "  AUTO" );
-        // TODO: Scan orders for scouts
+        GenerateScanOrders();
     }
 
     for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
@@ -679,10 +693,22 @@ void Form1::GeneratePostArrival()
     m_OrderList->Add("");
 }
 
+void Form1::GenerateScanOrders()
+{
+    for each( Ship ^ship in m_GameData->GetSpecies()->Ships )
+    {
+        if( ship->CanJump &&
+            ship->Type == SHIP_TR &&
+            ship->Size == 1 )
+        {
+            m_OrderList->Add("  Scan " + ship->PrintClassWithName());
+        }
+    }
+}
+
 void Form1::GenerateStrikes()
 {
     m_OrderList->Add("START STRIKES");
-    m_OrderList->Add("");
 
     // Print UI commands
     for each( ICommand ^cmd in m_GameData->GetCommands() )
