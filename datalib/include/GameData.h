@@ -220,17 +220,8 @@ public:
         IsVoid = true;
     }
 
-    virtual Int32 CompareTo( Object^ obj )
-    {
-        if ( obj->GetType() == StarSystem::typeid )
-        {
-            StarSystem^ system = dynamic_cast<StarSystem^>(obj);
-            if ( X != system->X ) return X - system->X;
-            if ( Y != system->Y ) return Y - system->Y;
-            return Z - system->Z;
-        }
-        throw gcnew ArgumentException(  "object is not a StarSystem" );
-    }
+    // -------- IComparable ----------------------------
+    virtual Int32 CompareTo( Object^ obj );
 
     // -------- IGridDataSrc ----------------------------
     virtual Alien^      GetAlienForBgColor() override   { return Master; }
@@ -326,15 +317,8 @@ public:
         Inventory = gcnew array<int>(INV_MAX){0};
     }
 
-    virtual Int32 CompareTo( Object^ obj )
-    {
-        if ( obj->GetType() == Colony::typeid )
-        {
-            Colony^ colony = dynamic_cast<Colony^>(obj);
-            return Name->CompareTo( colony->Name );
-        }
-        throw gcnew ArgumentException(  "object is not a Colony" );
-    }
+    // -------- IComparable ----------------------------
+    virtual Int32 CompareTo( Object^ obj );
 
     // -------- IGridDataSrc ----------------------------
     virtual Alien^      GetAlienForBgColor() override   { return Owner; }
@@ -419,15 +403,9 @@ public:
         m_Cargo = gcnew array<int>(INV_MAX){0};
     }
 
-    virtual Int32 CompareTo( Object^ obj )
-    {
-        if ( obj->GetType() == Ship::typeid )
-        {
-            Ship^ ship = dynamic_cast<Ship^>(obj);
-            return Name->CompareTo( ship->Name );
-        }
-        throw gcnew ArgumentException(  "object is not a Ship" );
-    }
+    // -------- IComparable ----------------------------
+    virtual Int32 CompareTo( Object^ obj );
+
     // -------- IGridDataSrc ----------------------------
     virtual Alien^      GetAlienForBgColor() override   { return Owner; }
 

@@ -11,6 +11,8 @@ FHUI build ??
 + Colony production order added, it is used for generating orders template.
   Use context menu on Colonies tab to edit the order.
 + Orders for ships: Upgrade, Recycle and Jump in context menu on Ships tab.
++ Orders for aliens: Teach, declare Enemy/Ally/Neutral.
++ Orders for planets: add/remove planet name.
 
 FHUI build 70
 * Fixed misreporting alien colony size by 0.1

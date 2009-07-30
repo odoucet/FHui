@@ -134,6 +134,14 @@ String^ Planet::PrintComment()
 
 // ---------------------------------------------------------
 
+Int32 StarSystem::CompareTo( Object^ obj )
+{
+    StarSystem^ system = safe_cast<StarSystem^>(obj);
+    if ( X != system->X ) return X - system->X;
+    if ( Y != system->Y ) return Y - system->Y;
+    return Z - system->Z;
+}
+
 Planet^ StarSystem::GetPlanet(int plNum)
 {
     if( plNum < 1 )
@@ -319,6 +327,12 @@ void StarSystem::Planets::set(int plNum, Planet ^pl)
 
 // ---------------------------------------------------------
 
+Int32 Colony::CompareTo( Object^ obj )
+{
+    Colony^ colony = safe_cast<Colony^>(obj);
+    return Name->CompareTo( colony->Name );
+}
+
 String^ Colony::PrintInventoryShort()
 {
     return PrintInventory(Inventory);
@@ -376,6 +390,12 @@ int Colony::GetMaxProductionBudget()
 }
 
 // ---------------------------------------------------------
+
+Int32 Ship::CompareTo( Object^ obj )
+{
+    Ship^ ship = safe_cast<Ship^>(obj);
+    return Name->CompareTo( ship->Name );
+}
 
 String^ Ship::PrintClass()
 {
@@ -790,7 +810,7 @@ Alien^ GameData::GetAlien(String ^sp)
 
 Ship^ GameData::GetShip(String ^name)
 {
-    return safe_cast<Ship^>(m_Ships[name->ToLower()]);
+    return m_Ships[name->ToLower()];
 }
 
 List<Ship^>^ GameData::GetShips(StarSystem ^sys, Alien ^sp)
@@ -827,7 +847,7 @@ StarSystem^ GameData::GetStarSystem(String ^name)
 
 Colony^ GameData::GetColony(String ^name)
 {
-    return safe_cast<Colony^>(m_Colonies[name->ToLower()]);
+    return m_Colonies[name->ToLower()];
 }
 
 List<Colony^>^ GameData::GetColonies(StarSystem ^sys, Alien ^sp)

@@ -86,6 +86,9 @@ void Form1::LoadCommands()
     try {
         sr = File::OpenText(
             GetDataDir(OrdersDir::Folder) + String::Format(OrdersDir::Commands, m_GameData->GetLastTurn()) );
+    } catch( DirectoryNotFoundException^ )
+    {
+        return;
     } catch( FileNotFoundException^ )
     {
         return;
