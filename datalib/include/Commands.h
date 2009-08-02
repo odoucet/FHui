@@ -84,7 +84,7 @@ public:
         , m_Relation(rel)
     {}
 
-    virtual CommandPhase    GetPhase()  { return CommandPhase::Combat; }
+    virtual CommandPhase    GetPhase()  { return CommandPhase::PreDeparture; }
     virtual CommandType     GetType()   { return CommandType::AlienRelation; }
     virtual void    Print(List<String^> ^orders);
 
