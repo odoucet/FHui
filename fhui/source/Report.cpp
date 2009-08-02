@@ -1124,16 +1124,10 @@ void Report::MatchOrdersTemplate(String ^s)
     }
 
     // DEVELOP
-    if( m_RM->Match(s, "^Develop\\s+\\d+\\s+PL\\s+([^,]+)$") )
+    if( m_RM->Match(s, "^Develop.*" ) ) // "^Develop\\s+\\d+(\\s+PL\\s+([^,]+)(,\\s+TR\\d+\\s+([^,]+))?)?$") )
     {
-        Colony^ colony = m_GameData->GetColony(m_RM->Results[0]);
-        if ( colony )
-        {
-            m_GameData->SetAutoOrderProduction(m_Turn, m_ColonyProduction, line );
-            return;
-        }
-        throw gcnew FHUIParsingException(
-            String::Format("DEVELOP order for unknown colony: PL {0}", m_RM->Results[0]) );
+        m_GameData->SetAutoOrderProduction(m_Turn, m_ColonyProduction, line );
+        return;
     }
 
     // CONTINUE
