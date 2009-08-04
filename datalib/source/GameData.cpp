@@ -105,6 +105,17 @@ int Planet::CalculateLSN(AtmosphericReq ^atmReq)
     return lsn;
 }
 
+String^ Planet::GetNameWithOrders()
+{
+    String ^n = Name;
+    if( NameIsNew )
+        n += " (new)";
+    else if( NameIsDisband )
+        n += " (disband)";
+
+    return n;
+}
+
 void Planet::AddName(String ^name)
 {
     Name = name;
@@ -113,7 +124,13 @@ void Planet::AddName(String ^name)
 
 void Planet::DelName()
 {
-    Name = nullptr;
+    if( NameIsNew )
+    {
+        Name = nullptr;
+        NameIsNew = false;
+    }
+    else
+        NameIsDisband = true;
 }
 
 String^ Planet::PrintLocation()

@@ -15,6 +15,7 @@ public:
     static int      ShipRecycleValue(int age, int originalCost);
 
     static int      ResearchCost(int startLevel, int endLevel, bool guided);
+    static int      ShipyardCost(int maTechLevel);
 
     static int      TransportCapacity(int size);
 };

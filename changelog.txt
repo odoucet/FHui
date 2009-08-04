@@ -5,6 +5,9 @@ Major new features and bug fixes will be listed here.
 
 FHUI build ??
 * Ally / Enemy commands are no longer put incorrectly into Combat section
+* Fixed planet naming and name disbanding. Disband order may be canceled.
++ Added shipyards column on Colonies tab and shipyard build order
+  in context menu on colonies that are able to build one.
 
 FHUI build 117
 + Orders template is generated with more data than the default one in report.

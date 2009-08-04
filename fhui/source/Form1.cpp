@@ -1130,7 +1130,7 @@ void Form1::PlanetsSetup()
 
             DataRow^ row = dataTable->NewRow();
             row[colObject]   = planet;
-            row[colName]     = planet->Name;
+            row[colName]     = planet->GetNameWithOrders();
             row[colCoords]   = planet->PrintLocation();
             row[colTemp]     = planet->TempClass;
             row[colPress]    = planet->PressClass;
@@ -1237,6 +1237,14 @@ void Form1::PlanetsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex
             nullptr,
             gcnew EventHandler(this, &Form1::PlanetsMenuAddNameStart) );
     }
+    else if( planet->NameIsDisband )
+    {
+        menu->Items->Add( gcnew ToolStripSeparator );
+        menu->Items->Add(
+            "Cancel Disband",
+            nullptr,
+            gcnew EventHandler(this, &Form1::PlanetsMenuRemoveNameCancel) );
+    }
     else if( planet->NameIsNew ||
         planet->NumColoniesOwned == 0 )
     {
@@ -1284,12 +1292,37 @@ void Form1::PlanetsMenuAddName(DataGridViewCellEventArgs ^cell)
     if( String::IsNullOrEmpty(name) )
         return;
 
-    AddCommand( gcnew CmdPlanetName(
-        m_PlanetsMenuRef->System,
-        m_PlanetsMenuRef->Number,
-        name ) );
+    bool addName = true;
 
-    m_PlanetsMenuRef->AddName(name);
+    // Check for duplicate name
+    String ^nameLower = name->ToLower();
+    for each( StarSystem ^system in m_GameData->GetStarSystems() )
+    {
+        for each( Planet ^planet in system->GetPlanets() )
+            if( planet &&
+                !String::IsNullOrEmpty(planet->Name) &&
+                planet->Name->ToLower() == nameLower )
+            {
+                MessageBox::Show(
+                    this,
+                    "Planet named '" + name + "' already exists.",
+                    "Planet Name",
+                    MessageBoxButtons::OK,
+                    MessageBoxIcon::Error);
+
+                addName = false;
+            }
+    }
+
+    if( addName )
+    {
+        AddCommand( gcnew CmdPlanetName(
+            m_PlanetsMenuRef->System,
+            m_PlanetsMenuRef->Number,
+            name ) );
+
+        m_PlanetsMenuRef->AddName(name);
+    }
 
     m_PlanetsFilter->Update();
 }
@@ -1320,6 +1353,25 @@ void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
     m_PlanetsMenuRef->DelName();
 
     m_PlanetsFilter->Update();
+}
+
+void Form1::PlanetsMenuRemoveNameCancel(Object^, EventArgs^)
+{
+    // Remove Disband command
+    for each( ICommand ^iCmd in m_GameData->GetCommands() )
+    {
+        if( iCmd->GetType() == CommandType::Disband )
+        {
+            CmdDisband ^cmd = safe_cast<CmdDisband^>(iCmd);
+            if( cmd->m_Name == m_PlanetsMenuRef->Name )
+            {
+                DelCommand(iCmd);
+                m_PlanetsMenuRef->NameIsDisband = false;
+                m_PlanetsFilter->Update();
+                return;
+            }
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1353,15 +1405,16 @@ void Form1::ColoniesSetup()
     DataColumn ^colOwner        = dataTable->Columns->Add("Owner",      String::typeid );
     DataColumn ^colName         = dataTable->Columns->Add("Name",       String::typeid );
     DataColumn ^colType         = dataTable->Columns->Add("Type",       String::typeid );
-    DataColumn ^colLocation     = dataTable->Columns->Add("Location",   String::typeid );
+    DataColumn ^colLocation     = dataTable->Columns->Add("Loc.",       String::typeid );
     DataColumn ^colSize         = dataTable->Columns->Add("Size",       double::typeid );
     DataColumn ^colSeen         = dataTable->Columns->Add("Seen",       int::typeid );
-    DataColumn ^colProd         = dataTable->Columns->Add("Prod.",      int::typeid );
+    DataColumn ^colProd         = dataTable->Columns->Add("Prod",       int::typeid );
+    DataColumn ^colShipyards    = dataTable->Columns->Add("S-yards",    int::typeid );
     DataColumn ^colLSN          = dataTable->Columns->Add("LSN",        int::typeid );
     DataColumn ^colProdPerc     = dataTable->Columns->Add("Pr[%]",      int::typeid );
     DataColumn ^colBalance      = dataTable->Columns->Add("Balance",    String::typeid );
     DataColumn ^colPop          = dataTable->Columns->Add("Pop",        int::typeid );
-    DataColumn ^colDist         = dataTable->Columns->Add("Dist.",      double::typeid );
+    DataColumn ^colDist         = dataTable->Columns->Add("Dist",       double::typeid );
     DataColumn ^colMishap       = dataTable->Columns->Add("Mishap %",   String::typeid );
     DataColumn ^colInventory    = dataTable->Columns->Add("Inventory",  String::typeid );
     DataColumn ^colProdOrder    = dataTable->Columns->Add("Order",      int::typeid );
@@ -1414,6 +1467,8 @@ void Form1::ColoniesSetup()
             if( colony->LastSeen > 0 )
                 row[colSeen] = colony->LastSeen;
         }
+        if( colony->Shipyards != -1 )
+            row[colShipyards] = colony->Shipyards;
 
         for each( IGridPlugin ^plugin in m_GridPlugins )
             plugin->AddRowData(row, colony, m_SystemsFilter);
@@ -1448,10 +1503,11 @@ void Form1::ColoniesSetRef( int rowIndex )
 void Form1::ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
 {
     int index = ColoniesGrid->Columns[0]->Index;
-    m_ColoniesMenuRef = safe_cast<Colony^>(ColoniesGrid->Rows[ rowIndex ]->Cells[index]->Value);
+    Colony ^colony = safe_cast<Colony^>(ColoniesGrid->Rows[ rowIndex ]->Cells[index]->Value);
+    m_ColoniesMenuRef = colony;
 
     menu->Items->Add(
-        "Select ref: PL " + m_ColoniesMenuRef->PrintRefListEntry(m_GameData->GetSpecies()),
+        "Select ref: PL " + colony->PrintRefListEntry(m_GameData->GetSpecies()),
         nullptr,
         gcnew EventHandler(this, &Form1::ColoniesMenuSelectRef) );
 
@@ -1460,12 +1516,12 @@ void Form1::ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowInde
         nullptr,
         gcnew EventHandler(this, &Form1::ColoniesFiltersReset_Click));
 
-    if( m_ColoniesMenuRef->Owner == m_GameData->GetSpecies() )
+    if( colony->Owner == m_GameData->GetSpecies() )
     {
         menu->Items->Add( gcnew ToolStripSeparator );
 
         // Production order adjustment
-        if( m_ColoniesMenuRef->ProductionOrder > 0 )
+        if( colony->ProductionOrder > 0 )
         {
             menu->Items->Add( CreateCustomMenuItem(
                 "Prod. Order: First",
@@ -1484,12 +1540,28 @@ void Form1::ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowInde
             "Prod. Order: Last",
             1000000,
             gcnew EventHandler1Arg<int>(this, &Form1::ColoniesMenuProdOrderAdjust) ) );
+
+        if( colony->CanProduce )
+        {
+            // Shipyard
+            if( colony->GetMaxProductionBudget() > Calculators::ShipyardCost( m_GameData->GetSpecies()->TechLevels[TECH_MA] ) )
+            {
+                menu->Items->Add( gcnew ToolStripSeparator );
+                ToolStripMenuItem ^item = gcnew ToolStripMenuItem(
+                    "Build Shipyard",
+                    nullptr,
+                    gcnew EventHandler(this, &Form1::ColoniesMenuProdShipyard));
+                if( colony->OrderBuildShipyard )
+                    item->Checked = true;
+                menu->Items->Add( item );
+            }
+        }
     }
 
     // Ship jumps to this colony
     ToolStripMenuItem ^jumpMenu = ShipsMenuAddJumpsHere(
-        m_ColoniesMenuRef->System,
-        m_ColoniesMenuRef->PlanetNum );
+        colony->System,
+        colony->PlanetNum );
     if( jumpMenu )
     {
         menu->Items->Add( gcnew ToolStripSeparator );
@@ -1531,6 +1603,12 @@ void Form1::ColoniesMenuProdOrderAdjust(int adjustment)
     m_GameData->GetSpecies()->SortColoniesByProdOrder();
     m_ColoniesFilter->Update();
 
+    SaveCommands();
+}
+
+void Form1::ColoniesMenuProdShipyard(Object^, EventArgs^)
+{
+    m_ColoniesMenuRef->OrderBuildShipyard = !m_ColoniesMenuRef->OrderBuildShipyard;
     SaveCommands();
 }
 

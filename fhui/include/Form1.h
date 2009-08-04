@@ -164,6 +164,7 @@ namespace FHUI {
         void        PlanetsMenuAddNameStart(Object^, EventArgs^);
         void        PlanetsMenuAddName(DataGridViewCellEventArgs ^cell);
         void        PlanetsMenuRemoveName(Object^, EventArgs^);
+        void        PlanetsMenuRemoveNameCancel(Object^, EventArgs^);
 
         IGridFilter        ^m_PlanetsFilter;
         Planet             ^m_PlanetsMenuRef;
@@ -177,6 +178,7 @@ namespace FHUI {
         void        ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
         void        ColoniesMenuSelectRef(Object^, EventArgs^);
         void        ColoniesMenuProdOrderAdjust(int adjustment);
+        void        ColoniesMenuProdShipyard(Object^, EventArgs^);
 
         IGridFilter        ^m_ColoniesFilter;
         Colony             ^m_ColoniesMenuRef;

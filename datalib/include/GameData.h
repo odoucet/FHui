@@ -141,6 +141,7 @@ public:
         Number = nr;
         Name = nullptr;
         NameIsNew = false;
+        NameIsDisband = false;
         Comment = nullptr;
         Diameter = dia;
         Grav = gv;
@@ -170,6 +171,7 @@ public:
 
     int         CalculateLSN(AtmosphericReq^);
 
+    String^     GetNameWithOrders();
     void        AddName(String ^name);
     void        DelName();
 
@@ -180,6 +182,7 @@ public:
     property int            Number;
     property String^        Name;
     property bool           NameIsNew;
+    property bool           NameIsDisband;
     property String^        Comment;
     property int            Diameter;
     property float          Grav;
@@ -312,9 +315,10 @@ public:
         MiDiff = 0;
         MaBase = -1;
         LSN = 99;
-        Shipyards = 0;
+        Shipyards = -1;
         LastSeen = -1;
         Inventory = gcnew array<int>(INV_MAX){0};
+        OrderBuildShipyard = false;
     }
 
     // -------- IComparable ----------------------------
@@ -357,6 +361,7 @@ public:
     int             LastSeen;
     int             ProductionOrder;
     bool            CanProduce;
+    bool            OrderBuildShipyard;
 
     property int EconomicBase { int get() { return Math::Max(-1, MiBase + MaBase); } }
     property int EUAvail { int get() { return EUProd - EUFleet; } }

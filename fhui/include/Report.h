@@ -38,6 +38,7 @@ public:
     initonly Regex^     ExpCmdSPAlly;
     initonly Regex^     ExpCmdSPEnemy;
     initonly Regex^     ExpCmdSPTeach;
+    initonly Regex^     ExpCmdBuiShipyard;
 };
 
 enum PhaseType

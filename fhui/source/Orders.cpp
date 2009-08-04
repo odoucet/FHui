@@ -59,7 +59,11 @@ void Form1::SaveCommands()
     // -- Colonies
     m_GameData->GetSpecies()->SortColoniesByProdOrder();
     for each( Colony ^colony in m_GameData->GetSpecies()->Colonies )
+    {
         m_OrderList->Add( "COLONY " + colony->Name );
+        if( colony->OrderBuildShipyard )
+            m_OrderList->Add("  build shipyard");
+    }
 
     // -- Ships
     for each( Ship ^ship in m_GameData->GetSpecies()->Ships )
@@ -96,6 +100,7 @@ void Form1::LoadCommands()
 
     String ^line;
     int colonyProdOrder = 1;
+    m_ColoniesMenuRef = nullptr;
     while( (line = sr->ReadLine()) != nullptr ) 
     {
         line = line->Trim();
@@ -107,9 +112,19 @@ void Form1::LoadCommands()
         {
             Colony ^colony = m_GameData->GetColony(m_RM->Results[0]);
             if( colony->Owner == m_GameData->GetSpecies() )
+            {
                 colony->ProductionOrder = colonyProdOrder++;
+                m_ColoniesMenuRef = colony;
+            }
             else
-                throw gcnew FHUIParsingException("Inconsistent commands template!");
+                throw gcnew FHUIParsingException("Inconsistent commands template (colony production order)!");
+        }
+        else if( m_RM->Match(line, m_RM->ExpCmdBuiShipyard) )
+        {
+            if( m_ColoniesMenuRef )
+                m_ColoniesMenuRef->OrderBuildShipyard = true;
+            else
+                throw gcnew FHUIParsingException("Inconsistent commands template (shipyard)!");
         }
         else if( m_RM->Match(line, m_RM->ExpCmdShipJump) )
         {
@@ -162,7 +177,7 @@ void Form1::LoadCommands()
             Alien ^alien = m_GameData->GetAlien(m_RM->Results[0]);
             if( alien->Relation != SP_ENEMY &&
                 alien->Relation != SP_ALLY )
-                throw gcnew FHUIParsingException("Inconsistent alien relation command!");
+                throw gcnew FHUIParsingException("Inconsistent alien relation command (neutral)!");
 
             alien->Relation = SP_NEUTRAL;
             m_GameData->AddCommand(gcnew CmdAlienRelation(alien, SP_NEUTRAL));
@@ -172,7 +187,7 @@ void Form1::LoadCommands()
             Alien ^alien = m_GameData->GetAlien(m_RM->Results[0]);
             if( alien->Relation != SP_ENEMY &&
                 alien->Relation != SP_NEUTRAL )
-                throw gcnew FHUIParsingException("Inconsistent alien relation command!");
+                throw gcnew FHUIParsingException("Inconsistent alien relation command (ally)!");
 
             alien->Relation = SP_ALLY;
             m_GameData->AddCommand(gcnew CmdAlienRelation(alien, SP_ALLY));
@@ -182,7 +197,7 @@ void Form1::LoadCommands()
             Alien ^alien = m_GameData->GetAlien(m_RM->Results[0]);
             if( alien->Relation != SP_NEUTRAL &&
                 alien->Relation != SP_ALLY )
-                throw gcnew FHUIParsingException("Inconsistent alien relation command!");
+                throw gcnew FHUIParsingException("Inconsistent alien relation command (enemy)!");
 
             alien->Relation = SP_ENEMY;
             m_GameData->AddCommand(gcnew CmdAlienRelation(alien, SP_ENEMY));
@@ -614,6 +629,14 @@ void Form1::GenerateProduction()
         // Launch plugin actions
         for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
             plugin->GenerateProduction(m_OrderList, colony, budget);
+
+        // Build SHIPYARD
+        if( colony->OrderBuildShipyard )
+        {
+            int cost = Calculators::ShipyardCost( m_GameData->GetSpecies()->TechLevels[TECH_MA] );
+            m_OrderList->Add( "    Shipyard  ; [A]  -" + cost.ToString() );
+            budget->Spend(cost);
+        }
 
         // Now try to UPGRADE ships here
         GenerateProductionUpgrade(colony, budget);

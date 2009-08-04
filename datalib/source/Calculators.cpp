@@ -53,6 +53,11 @@ int Calculators::ResearchCost(int startLevel, int endLevel, bool guided)
     return sum;
 }
 
+int Calculators::ShipyardCost(int maTechLevel)
+{
+    return maTechLevel * 10;
+}
+
 int Calculators::TransportCapacity(int size)
 {
     return (10 + size / 2) * size;

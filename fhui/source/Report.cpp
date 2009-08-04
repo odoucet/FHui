@@ -20,6 +20,7 @@ RegexMatcher::RegexMatcher()
     ExpCmdSPAlly    = gcnew Regex("^Ally SP ([^,;]+)$");
     ExpCmdSPEnemy   = gcnew Regex("^Enemy SP ([^,;]+)$");
     ExpCmdSPTeach   = gcnew Regex("^Teach ([A-Z]{2}) (\\d+) SP ([^,;]+)$");
+    ExpCmdBuiShipyard = gcnew Regex("^build shipyard$");
 }
 
 int RegexMatcher::GetResultInt(int arg)
