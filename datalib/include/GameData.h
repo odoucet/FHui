@@ -404,6 +404,7 @@ public:
         CanJump = !subLight && type != SHIP_BAS;
         Age = 0;
         Size = 0;
+        EUToComplete = 0;
         Location = SHIP_LOC_MAX;
         PlanetNum = -1;
         System = nullptr;
@@ -431,8 +432,8 @@ public:
     String^         PrintRefListEntry();
 
     int             GetMaintenanceCost();
-    int             GetUpgradeCost()        { return Calculators::ShipUpgradeCost(Age, OriginalCost); }
-    int             GetRecycleValue()       { return Calculators::ShipRecycleValue(Age, OriginalCost); }
+    int             GetUpgradeCost();
+    int             GetRecycleValue();
 
     void            CalculateCapacity();
 
@@ -450,6 +451,7 @@ public:
     property int            Tonnage;
     property int            WarTonnage;
     property int            OriginalCost;
+    property int            EUToComplete;
 
     property int            Size {
         int get() { return m_Size; }

@@ -326,7 +326,10 @@ void Form1::GenerateCombatInfo(StarSystem^ system)
     List<String^>^ AlienShipInfo = gcnew List<String^>;
 
     for each ( Ship^ ship in system->Ships )
-    {
+    {   // Skip incomplete ships
+        if( ship->EUToComplete > 0 )
+            continue;
+
         String^ shipLoc;
         if (ship->Location == SHIP_LOC_DEEP_SPACE )
         {
@@ -568,6 +571,10 @@ void Form1::GenerateJumps()
 
 void Form1::GenerateJumpInfo(Ship^ ship)
 {
+    // Skip incomplete ships
+    if( ship->EUToComplete > 0 )
+        return;
+
     m_OrderList->Add(
         String::Format("  ; {0} (age {1}) at {2} with [{3}]",
             ship->PrintClassWithName(),
@@ -643,7 +650,7 @@ void Form1::GenerateProduction()
             budget->Spend(cost);
         }
 
-        // Now try to UPGRADE ships here
+        // Now try to CONTINUE or UPGRADE ships here
         GenerateProductionUpgrade(colony, budget);
 
         // Automatic spendings summary
@@ -675,7 +682,13 @@ void Form1::GenerateProductionRecycle(Colony ^colony, BudgetTracker ^budget)
             ship->Command->Type == Ship::OrderType::Recycle &&
             ship->Command->PlanetNum == -1 )    // not yet done
         {
-            int value = Calculators::ShipRecycleValue(ship->Age, ship->OriginalCost);
+            // If ship is incomplete,
+            // add recycle command on planet where it is under construction.
+            if( ship->EUToComplete > 0 &&
+                ship->PlanetNum != colony->PlanetNum )
+                continue;
+
+            int value = ship->GetRecycleValue();
             m_OrderList->Add( String::Format("    Recycle {0}  ; [A] +{1} EU",
                 ship->PrintClassWithName(),
                 value) );
@@ -694,6 +707,21 @@ void Form1::GenerateProductionUpgrade(Colony ^colony, BudgetTracker ^budget)
 
     for each( Ship ^ship in colony->System->ShipsOwned )
     {
+        if( ship->EUToComplete > 0 &&
+            ship->PlanetNum == colony->PlanetNum )
+        {
+            // Continue ship if no recycle order issued
+            if( ship->Command == nullptr ||
+                ship->Command->Type != Ship::OrderType::Recycle )
+            {
+                m_OrderList->Add( String::Format("    Continue {0}  ; [A] -{1} EU",
+                    ship->PrintClassWithName(),
+                    ship->EUToComplete) );
+                budget->Spend(ship->EUToComplete);
+                continue;
+            }
+        }
+
         if( ship->Command != nullptr &&
             ship->Command->Type == Ship::OrderType::Upgrade &&
             ship->Command->PlanetNum == -1 )    // not yet done

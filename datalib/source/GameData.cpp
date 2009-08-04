@@ -548,6 +548,21 @@ void Ship::SetupTonnage()
         WarTonnage = Tonnage;
 }
 
+int Ship::GetUpgradeCost()
+{
+    if( EUToComplete > 0 )
+        return 0;
+    return Calculators::ShipUpgradeCost(Age, OriginalCost);
+}
+
+int Ship::GetRecycleValue()
+{
+    if( EUToComplete )
+        return (OriginalCost - EUToComplete) / 2;
+
+    return Calculators::ShipRecycleValue(Age, OriginalCost);
+}
+
 int Ship::GetMaintenanceCost()
 {
     if( Type == SHIP_BAS )

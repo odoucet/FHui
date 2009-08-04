@@ -10,6 +10,7 @@ FHUI build ??
 + Colonies hidden / under siege are marked as such in the notes
 + Added shipyards column on Colonies tab and shipyard build order
   in context menu on colonies that are able to build one.
++ Support for incomplete ships.
 
 FHUI build 117
 + Orders template is generated with more data than the default one in report.

@@ -1690,6 +1690,8 @@ void Form1::ShipsSetup()
         row[colOwner]       = ship->Owner == sp ? String::Format("* {0}", sp->Name) : ship->Owner->Name;
         row[colClass]       = ship->PrintClass();
         row[colName]        = ship->Name;
+        if( ship->EUToComplete > 0 )
+            row[colName]    = ship->Name + " (incomplete)";
         row[colLocation]    = ship->PrintLocation();
         if( !ship->IsPirate )
             row[colAge]     = ship->Age;
@@ -1704,6 +1706,8 @@ void Form1::ShipsSetup()
             row[colRecVal]  = ship->GetRecycleValue();
             if( ship->Command )
                 row[colOrder] = ship->Command->Print();
+            else if( ship->EUToComplete )
+                row[colOrder] = ship->EUToComplete.ToString() + " EU to complete";
         }
 
         for each( IGridPlugin ^plugin in m_GridPlugins )
@@ -1739,13 +1743,14 @@ void Form1::ShipsSetRef( int rowIndex )
 void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
 {
     int index = ShipsGrid->Columns[0]->Index;
-    m_ShipsMenuRef = safe_cast<Ship^>(ShipsGrid->Rows[ rowIndex ]->Cells[index]->Value);
+    Ship ^ship = safe_cast<Ship^>(ShipsGrid->Rows[ rowIndex ]->Cells[index]->Value);
+    m_ShipsMenuRef = ship;
 
     menu->Items->Add(
         String::Format("Select ref: {0} {1} (@ {2})",
-            m_ShipsMenuRef->PrintClass(),
-            m_ShipsMenuRef->Name,
-            m_ShipsMenuRef->System->PrintLocation() ),
+            ship->PrintClass(),
+            ship->Name,
+            ship->System->PrintLocation() ),
         nullptr,
         gcnew EventHandler(this, &Form1::ShipsMenuSelectRef) );
 
@@ -1755,14 +1760,14 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
         gcnew EventHandler(this, &Form1::ShipsFiltersReset_Click));
 
     // Ship orders
-    if( m_ShipsMenuRef->Owner == m_GameData->GetSpecies() )
+    if( ship->Owner == m_GameData->GetSpecies() )
     {
         menu->Items->Add( gcnew ToolStripSeparator );
 
         bool prodOrderPossible = false;
-        for each( Colony ^colony in m_ShipsMenuRef->Owner->Colonies )
+        for each( Colony ^colony in ship->Owner->Colonies )
         {
-            if( colony->System == m_ShipsMenuRef->System &&
+            if( colony->System == ship->System &&
                 colony->CanProduce )
             {
                 prodOrderPossible = true;
@@ -1774,47 +1779,51 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
         {
             EventHandler1Arg<ShipOrderData^> ^handler =
                 gcnew EventHandler1Arg<ShipOrderData^>(this, &Form1::ShipsMenuOrderSet);
+            ToolStripMenuItem ^menuItem;
 
-            ToolStripMenuItem ^menuItem = CreateCustomMenuItem(
-                "Upgrade",
-                gcnew ShipOrderData(
-                    m_ShipsMenuRef,
-                    gcnew Ship::Order(Ship::OrderType::Upgrade) ),
-                 handler );
-            if( m_ShipsMenuRef->Command &&
-                m_ShipsMenuRef->Command->Type == Ship::OrderType::Upgrade )
+            if( ship->EUToComplete == 0 )
             {
-                menuItem->Checked = true;
+                menuItem = CreateCustomMenuItem(
+                    "Upgrade",
+                    gcnew ShipOrderData(
+                        ship,
+                        gcnew Ship::Order(Ship::OrderType::Upgrade) ),
+                     handler );
+                if( ship->Command &&
+                    ship->Command->Type == Ship::OrderType::Upgrade )
+                {
+                    menuItem->Checked = true;
+                }
+                menu->Items->Add( menuItem );
             }
-            menu->Items->Add( menuItem );
 
             menuItem = CreateCustomMenuItem(
                 "Recycle",
                 gcnew ShipOrderData(
-                    m_ShipsMenuRef,
+                    ship,
                     gcnew Ship::Order(Ship::OrderType::Recycle) ),
                  handler );
-            if( m_ShipsMenuRef->Command &&
-                m_ShipsMenuRef->Command->Type == Ship::OrderType::Recycle )
+            if( ship->Command &&
+                ship->Command->Type == Ship::OrderType::Recycle )
                 menuItem->Checked = true;
             menu->Items->Add( menuItem );
         }
 
-        if( m_ShipsMenuRef->CanJump )
+        if( ship->CanJump )
         {
             ToolStripMenuItem ^jumpMenu = gcnew ToolStripMenuItem("Jump to:");
             bool anyJump = false;
 
-            if( m_ShipsMenuRef->Command &&
-                m_ShipsMenuRef->Command->Type == Ship::OrderType::Jump )
+            if( ship->Command &&
+                ship->Command->Type == Ship::OrderType::Jump )
                 jumpMenu->Checked = true;
 
             // Jump to ref system
-            if( m_ShipsFilter->RefSystem != m_ShipsMenuRef->System )
+            if( m_ShipsFilter->RefSystem != ship->System )
             {
                 jumpMenu->DropDownItems->Add(
                     ShipsMenuCreateJumpItem(
-                        m_ShipsMenuRef,
+                        ship,
                         m_ShipsFilter->RefSystem,
                         -1,
                         ShipsRef->Text ) );
@@ -1824,11 +1833,11 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
             // Colonies
             for each( Colony ^colony in m_GameData->GetSpecies()->Colonies )
             {
-                if( colony->System != m_ShipsMenuRef->System )
+                if( colony->System != ship->System )
                 {
                     jumpMenu->DropDownItems->Add(
                         ShipsMenuCreateJumpItem(
-                            m_ShipsMenuRef,
+                            ship,
                             colony->System,
                             colony->PlanetNum,
                             "PL " + colony->Name ) );
@@ -1840,14 +1849,14 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
             bool anyPlanet = false;
             for each( PlanetName ^planet in m_GameData->GetPlanetNames() )
             {
-                if( planet->System != m_ShipsMenuRef->System )
+                if( planet->System != ship->System )
                 {
                     if( !anyPlanet && anyJump )
                         jumpMenu->DropDownItems->Add( gcnew ToolStripSeparator );
 
                     jumpMenu->DropDownItems->Add(
                         ShipsMenuCreateJumpItem(
-                            m_ShipsMenuRef,
+                            ship,
                             planet->System,
                             planet->PlanetNum,
                             "PL " + planet->Name ) );
@@ -1861,11 +1870,11 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
         }
 
         // If ship already has command, add option to cancel it.
-        if( m_ShipsMenuRef->Command )
+        if( ship->Command )
         {
             menu->Items->Add( CreateCustomMenuItem<ShipOrderData^>(
                 "Cancel Command",
-                gcnew ShipOrderData(m_ShipsMenuRef, nullptr),
+                gcnew ShipOrderData(ship, nullptr),
                 gcnew EventHandler1Arg<ShipOrderData^>(this, &Form1::ShipsMenuOrderSet) ) );
         }
     }

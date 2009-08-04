@@ -794,9 +794,9 @@ void Report::MatchShipScan(String ^s, bool bColony)
     int size        = 0;
     bool subLight   = false;
 
-    if( m_RM->Match(s, "BAS\\s+") )
+    if( m_RM->Match(s, "^BAS\\s+") )
         type = SHIP_BAS;
-    else if( m_RM->Match(s, "TR(\\d+)([Ss]?)\\s+") ) 
+    else if( m_RM->Match(s, "^TR(\\d+)([Ss]?)\\s+") ) 
     {
         type = SHIP_TR;
         size = m_RM->GetResultInt(0);
@@ -806,7 +806,7 @@ void Report::MatchShipScan(String ^s, bool bColony)
     {
         try
         {
-            if( m_RM->Match(s, "([A-Za-z]{2})([Ss]?)\\s+") )
+            if( m_RM->Match(s, "^([A-Za-z]{2})([Ss]?)\\s+") )
             {
                 type = FHStrings::ShipFromString( m_RM->Results[0] );
                 subLight = 0 == String::Compare( m_RM->Results[1]->ToLower(), "s" );
@@ -822,6 +822,7 @@ void Report::MatchShipScan(String ^s, bool bColony)
 
     bool bMatch     = false;
     bool bInFD      = false;
+    bool bIncomplete= false;
     String ^name    = nullptr;
     int age         = 0;
     String ^loc     = nullptr;
@@ -829,19 +830,28 @@ void Report::MatchShipScan(String ^s, bool bColony)
     int planetNum   = -1;
     ShipLocType location = SHIP_LOC_DEEP_SPACE;
 
-    if( m_RM->Match(s, "\\?\\?\\? \\(([DOLdol])") )
+    if( m_RM->Match(s, "^\\?\\?\\? \\(([DOLdol])") )
     {
         bMatch  = true;
         bInFD   = true;
         name    = String::Format("??? ({0})", ++m_PirateShipsCnt);
         loc     = m_RM->Results[0]->ToLower();
     }
-    else if( m_RM->Match(s, "([^,;]+) \\(A(\\d+),([DOLdol])") )
+    else if( m_RM->Match(s, "^([^,;]+) \\(") )
     {
-        bMatch  = true;
         name    = m_RM->Results[0];
-        age     = m_RM->GetResultInt(1);
-        loc     = m_RM->Results[2]->ToLower();
+        if( m_RM->Match(s, "^C") )
+        {
+            bMatch  = true;
+            age     = 0;
+            bIncomplete = true;
+        }
+        else if( m_RM->Match(s, "^A(\\d+),([DOLdol])") )
+        {
+            bMatch  = true;
+            age     = m_RM->GetResultInt(0);
+            loc     = m_RM->Results[1]->ToLower();
+        }
     }
 
     if( bMatch )
@@ -863,32 +873,44 @@ void Report::MatchShipScan(String ^s, bool bColony)
         }
         system->LastVisited = m_Turn;
 
-        switch( loc[0] )
+        if( bIncomplete )
         {
-        case 'd':
-            location = SHIP_LOC_DEEP_SPACE;
-            break;
-        case 'o':
-            location = SHIP_LOC_ORBIT;
-            break;
-        case 'l':
             location = SHIP_LOC_LANDED;
-            break;
-        default:
-            throw gcnew FHUIParsingException("Invalid ship location: " + loc[0]);
-        }
-        if( location != SHIP_LOC_DEEP_SPACE )
-        {
-            if( m_RM->Match(s, "(\\d+)") )
-                planetNum = m_RM->GetResultInt(0);
+            if( bColony )
+                planetNum = m_ScanColony->PlanetNum;
             else
-                throw gcnew FHUIParsingException(
-                    String::Format("Unable to parse ship '{0}' location.", name));
+                throw gcnew FHUIParsingException("Ship under construction outside colony???");
+        }
+        else
+        {
+            switch( loc[0] )
+            {
+            case 'd':
+                location = SHIP_LOC_DEEP_SPACE;
+                break;
+            case 'o':
+                location = SHIP_LOC_ORBIT;
+                break;
+            case 'l':
+                location = SHIP_LOC_LANDED;
+                break;
+            default:
+                throw gcnew FHUIParsingException("Invalid ship location: " + loc[0]);
+            }
+
+            if( location != SHIP_LOC_DEEP_SPACE )
+            {
+                if( m_RM->Match(s, "^(\\d+)") )
+                    planetNum = m_RM->GetResultInt(0);
+                else
+                    throw gcnew FHUIParsingException(
+                        String::Format("Unable to parse ship '{0}' location.", name));
+            }
         }
 
         if( type == SHIP_BAS )
         {
-            if( m_RM->Match(s, ",(\\d+) tons") )
+            if( m_RM->Match(s, "^,(\\d+) tons") )
                 size = m_RM->GetResultInt(0);
             else
                 throw gcnew FHUIParsingException(
@@ -897,7 +919,7 @@ void Report::MatchShipScan(String ^s, bool bColony)
 
         if( bColony )
         {
-            if( m_RM->Match(s, "\\)\\s+(\\d+)\\s*") )
+            if( m_RM->Match(s, "^\\)\\s+(\\d+)\\s*") )
                 capacity = m_RM->GetResultInt(0);
             else
                 throw gcnew FHUIParsingException(
@@ -905,7 +927,7 @@ void Report::MatchShipScan(String ^s, bool bColony)
         }
         else
         {
-            if( !m_RM->Match(s, "\\)\\s*") )
+            if( !m_RM->Match(s, "^\\)\\s*") )
                 throw gcnew FHUIParsingException(
                     String::Format("Unable to parse ship '{0}'.", name));
         }
@@ -917,9 +939,22 @@ void Report::MatchShipScan(String ^s, bool bColony)
             if( m_ScanShip == nullptr )
                 return;
 
+            if( bIncomplete )
+            {
+                if( m_RM->Match(s, "^Left to pay = (\\d+)$") )
+                {
+                    int amount = m_RM->GetResultInt(0);
+                    m_ScanShip->EUToComplete = amount;
+                    m_ScanShip->CanJump = false;
+                }
+                else
+                    throw gcnew FHUIParsingException(
+                        String::Format("Unable to parse ship '{0}' completion cost.", name));
+            }
+
             while( !String::IsNullOrEmpty(s) )
             {
-                if( m_RM->Match(s, ",?\\s*(\\d+)\\s+(\\w+)\\s*") )
+                if( m_RM->Match(s, "^,?\\s*(\\d+)\\s+(\\w+)\\s*") )
                 {
                     int amount = m_RM->GetResultInt(0);
                     InventoryType inv = FHStrings::InvFromString( m_RM->Results[1] );
@@ -932,7 +967,7 @@ void Report::MatchShipScan(String ^s, bool bColony)
         }
         else
         {   // In aliens report phase read owning species
-            if( m_RM->Match(s, "SP ([^,;]+)\\s*$") )
+            if( m_RM->Match(s, "^SP ([^,;]+)\\s*$") )
             {
                 String ^spName = m_RM->Results[0];
                 Alien ^sp = m_GameData->AddAlien(m_Turn, spName);
