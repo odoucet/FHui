@@ -613,22 +613,27 @@ void Form1::GenerateProduction()
             prodSummary += "  max=" + budget->GetAvailBudget().ToString();
         m_OrderList->Add( prodSummary );
 
-        // TODO: include auto orders in Budget Tracker
-        List<String^>^ autoOrders = m_GameData->GetAutoOrdersProduction( colony );
-        if ( autoOrders )
-        {
-            for each (String^ line in autoOrders )
-            {
-                m_OrderList->Add( "    " + line + " ; AUTO" );
-            }
-        }
-
         // First RECYCLE all ships
         GenerateProductionRecycle(colony, budget);
 
         // Launch plugin actions
+        int prePluginNum = m_OrderList->Count;
         for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
             plugin->GenerateProduction(m_OrderList, colony, budget);
+        bool useAuto = m_OrderList->Count == prePluginNum;
+
+        // TODO: include auto orders in Budget Tracker
+        List<String^>^ autoOrders = m_GameData->GetAutoOrdersProduction( colony );
+        if ( autoOrders )
+        {
+            String ^prefix = "    ";
+            if( !useAuto )
+                prefix += "; ";
+            for each (String^ line in autoOrders )
+            {
+                m_OrderList->Add( prefix + line + " ; AUTO" );
+            }
+        }
 
         // Build SHIPYARD
         if( colony->OrderBuildShipyard )
