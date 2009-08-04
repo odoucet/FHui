@@ -5,7 +5,9 @@ Major new features and bug fixes will be listed here.
 
 FHUI build ??
 * Ally / Enemy commands are no longer put incorrectly into Combat section
+* Auto-generated develop orders are now copied correctly from order template
 * Fixed planet naming and name disbanding. Disband order may be canceled.
++ Colonies hidden / under siege are marked as such in the notes
 + Added shipyards column on Colonies tab and shipyard build order
   in context menu on colonies that are able to build one.
 

@@ -675,6 +675,14 @@ void Report::MatchColonyScan(String ^s)
     {
         m_ScanColony->EconomicEff = m_RM->GetResultInt(0);
     }
+    else if( m_RM->Match(s, "^IMPORTANT!  This planet is actively hiding from alien observation!") )
+    {
+        m_ScanColony->Hidden = true;
+    }
+    else if( m_RM->Match(s, "^WARNING!  This planet is currently under siege and will remain") )
+    {
+        m_ScanColony->UnderSiege = true;
+    }
     else if( m_RM->Match(s, "^Production penalty = (\\d+)% \\(LSN = (\\d+)\\)") )
     {
         m_ScanColony->ProdPenalty = m_RM->GetResultInt(0);
@@ -1063,6 +1071,11 @@ void Report::MatchAliensReport(String ^s)
     {
         if( m_ScanColony->LastSeen == m_Turn )
             m_ScanColony->Inventory[INV_PD] = m_RM->GetResultInt(0);
+    }
+    else if( m_ScanColony && m_RM->Match(s, "^\\(There are (\\d+) shipyards on the planet\\.\\)") )
+    {
+        if( m_ScanColony->LastSeen == m_Turn )
+            m_ScanColony->Shipyards = m_RM->GetResultInt(0);
     }
     else
         MatchShipScan(s, false);

@@ -319,6 +319,8 @@ public:
         LastSeen = -1;
         Inventory = gcnew array<int>(INV_MAX){0};
         OrderBuildShipyard = false;
+        Hidden = false;
+        UnderSiege = false;
     }
 
     // -------- IComparable ----------------------------
@@ -362,6 +364,8 @@ public:
     int             ProductionOrder;
     bool            CanProduce;
     bool            OrderBuildShipyard;
+    bool            Hidden;
+    bool            UnderSiege;
 
     property int EconomicBase { int get() { return Math::Max(-1, MiBase + MaBase); } }
     property int EUAvail { int get() { return EUProd - EUFleet; } }

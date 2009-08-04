@@ -1422,6 +1422,8 @@ void Form1::ColoniesSetup()
     for each( IGridPlugin ^plugin in m_GridPlugins )
         plugin->AddColumns(GridType::Colonies, dataTable);
 
+    DataColumn ^colNotes        = dataTable->Columns->Add("Notes",      String::typeid );
+
     int gv  = Decimal::ToInt32(TechGV->Value);
     int age = Decimal::ToInt32(ColoniesShipAge->Value);
     Alien ^sp = m_GameData->GetSpecies();
@@ -1467,8 +1469,21 @@ void Form1::ColoniesSetup()
             if( colony->LastSeen > 0 )
                 row[colSeen] = colony->LastSeen;
         }
+
         if( colony->Shipyards != -1 )
+        {
             row[colShipyards] = colony->Shipyards;
+        }
+
+        if( colony->Hidden )
+        {
+            row[colNotes] = "Hidden";
+        }
+
+        if( colony->UnderSiege )
+        {
+            row[colNotes] = "Under siege";
+        }
 
         for each( IGridPlugin ^plugin in m_GridPlugins )
             plugin->AddRowData(row, colony, m_SystemsFilter);
