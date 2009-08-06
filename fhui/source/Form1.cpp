@@ -1148,8 +1148,7 @@ void Form1::PlanetsSetup()
             row[colScan]     = system->PrintScanStatus();
             row[colColonies] = system->PrintColonies( planet->Number, m_GameData->GetSpecies() );
 
-            if( (planet->NumColonies == 0) &&
-                (planet->System->HomeSpecies != nullptr) )
+            if( (planet->System->HomeSpecies != nullptr) )
             {
                 // A home planet exists in the system. Make a note about that
                 String ^note = planet->PrintComment();
