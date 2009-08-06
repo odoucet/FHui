@@ -133,8 +133,7 @@ bool Report::Parse(String ^s)
             String::Concat(s, "\r\n") );
     }
 
-    s = s->Trim(' ');
-    s = s->Trim('\t');
+    s = s->Trim();
 
     if( m_Phase == PHASE_FILE_DETECT )
     {   // Turn scan mode only
@@ -334,8 +333,15 @@ bool Report::Parse(String ^s)
         break;
 
     case PHASE_ORDERS_STRIKE:
-        if( Regex("^Other events:").Match(s)->Success )
+        if( Regex("^Other events:").Match(s)->Success ||
+            Regex("^SPECIES STATUS$").Match(s)->Success )   // in case no other events happened
             m_Phase = PHASE_GLOBAL;
+        // It may happen that no other events were present, but there's incoming message
+        else if( m_RM->Match(s, "^You received the following message from SP ([^,;]+):") )
+        {
+            m_ScanAlien = m_GameData->AddAlien(m_Turn, m_RM->Results[0]);
+            m_Phase = PHASE_MESSAGE;
+        }
         break;
 
     case PHASE_TECH_LEVELS:
