@@ -699,6 +699,11 @@ void Form1::LoadPlugins()
     m_GridPlugins = gcnew List<IGridPlugin^>;
     m_OrdersPlugins = gcnew List<IOrdersPlugin^>;
 
+    if( ! EnablePlugins )
+    {
+        return;
+    }
+
     DirectoryInfo ^dir = gcnew DirectoryInfo(Application::StartupPath);
 
     for each( FileInfo ^f in dir->GetFiles("fhui.*.dll"))

@@ -559,11 +559,11 @@ public:
 
     void            SetAutoOrderPreDeparture(int turn, StarSystem^, String^);
     void            SetAutoOrderJumps(int turn, Ship^, String^);
-    void            SetAutoOrderProduction(int turn, Colony^, String^);
+    void            SetAutoOrderProduction(int turn, Colony^, String^, int);
 
     List<String^>^  GetAutoOrdersPreDeparture(StarSystem^);
     List<String^>^  GetAutoOrdersJumps(Ship^);
-    List<String^>^  GetAutoOrdersProduction(Colony^);
+    List<Pair<String^, int>^>^  GetAutoOrdersProduction(Colony^);
 
     // ------------------------------------------
 protected:
@@ -609,7 +609,7 @@ protected:
 
     SortedList<StarSystem^, List<String^>^> ^m_AutoOrdersPreDeparture;
     SortedList<Ship^, List<String^>^>       ^m_AutoOrdersJumps;
-    SortedList<Colony^, List<String^>^>     ^m_AutoOrdersProduction;
+    SortedList<Colony^, List<Pair<String^, int>^>^> ^m_AutoOrdersProduction;
 
     int                 m_TurnMax;
 };

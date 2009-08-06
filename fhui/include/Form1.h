@@ -37,6 +37,7 @@ namespace FHUI {
         // ==================================================
         // -- Config properties --
         property String^    DataDir;
+        property bool       EnablePlugins;
 
         // ==================================================
     private:

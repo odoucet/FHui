@@ -629,16 +629,23 @@ void Form1::GenerateProduction()
             plugin->GenerateProduction(m_OrderList, colony, budget);
         bool useAuto = m_OrderList->Count == prePluginNum;
 
-        // TODO: include auto orders in Budget Tracker
-        List<String^>^ autoOrders = m_GameData->GetAutoOrdersProduction( colony );
+        List<Pair<String^, int>^>^ autoOrders = m_GameData->GetAutoOrdersProduction( colony );
         if ( autoOrders )
         {
             String ^prefix = "    ";
             if( !useAuto )
                 prefix += "; ";
-            for each (String^ line in autoOrders )
+            for each (Pair<String^, int>^ order in autoOrders )
             {
-                m_OrderList->Add( prefix + line + " ; AUTO" );
+                m_OrderList->Add( prefix + order->A + String::Format(" ; AUTO (cost {0})", order->B) );
+                if (order->B > 0) 
+                {
+                    budget->Spend(order->B);
+                }
+                else
+                {
+                    budget->Recycle(-order->B);
+                }
             }
         }
 

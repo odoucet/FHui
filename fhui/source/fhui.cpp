@@ -13,14 +13,23 @@ int main(array<System::String ^> ^args)
     Application::SetCompatibleTextRenderingDefault(false); 
 
     System::String^ dataDir = nullptr;
+    bool plugins = true;
     for( int i = 0; i < args->Length; ++i )
     {
         if( args[i]->ToLower() == "-dir" && i < (args->Length - 1) )
+        {
             dataDir = args[i + 1];
+            continue;
+        }
+        if( args[i]->ToLower() == "-public" )
+        {
+            plugins = false;
+        }
     }
 
     Form1 ^fhui = gcnew Form1;
     fhui->DataDir = dataDir;
+    fhui->EnablePlugins = plugins;
     fhui->LoadGameData();
 
     // Create the main window and run it

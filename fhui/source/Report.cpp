@@ -1179,19 +1179,32 @@ void Report::MatchOrdersTemplate(String ^s)
     }
 
     // DEVELOP
-    if( m_RM->Match(s, "^Develop.*" ) ) // "^Develop\\s+\\d+(\\s+PL\\s+([^,]+)(,\\s+TR\\d+\\s+([^,]+))?)?$") )
+    if( m_RM->Match(s, "^Develop\\s+(\\d+)$" ) )
     {
-        m_GameData->SetAutoOrderProduction(m_Turn, m_ColonyProduction, line );
+        m_GameData->SetAutoOrderProduction(
+            m_Turn, m_ColonyProduction, line, m_RM->GetResultInt(0) );
+        return;
+    }
+    if( m_RM->Match(s, "^Develop\\s+(\\d+)\\s+PL\\s+([^,]+)$" ) )
+    {
+        m_GameData->SetAutoOrderProduction(
+            m_Turn, m_ColonyProduction, line, m_RM->GetResultInt(0) );
+        return;
+    }
+    if( m_RM->Match(s, "^Develop\\s+PL\\s+([^,]+),\\s+TR(\\d+)\\s+([^,]+)$") )
+    {
+        m_GameData->SetAutoOrderProduction(
+            m_Turn, m_ColonyProduction, line, Calculators::TransportCapacity(m_RM->GetResultInt(1)) );
         return;
     }
 
     // CONTINUE
-    if( m_RM->Match(s, "^Continue\\s+(\\S+)\\s+([^,]+).*$") )
+    if( m_RM->Match(s, "^Continue\\s+(\\S+)\\s+([^,]+),\\s+(\\d+).*$") )
     {
         Ship^ ship = m_GameData->GetShip(m_RM->Results[1]);
         if ( ship )
         {
-            m_GameData->SetAutoOrderProduction(m_Turn, m_ColonyProduction, line );
+            m_GameData->SetAutoOrderProduction(m_Turn, m_ColonyProduction, line, m_RM->GetResultInt(2) );
             return;
         }
         throw gcnew FHUIParsingException(
@@ -1199,12 +1212,18 @@ void Report::MatchOrdersTemplate(String ^s)
     }
 
     // RECYCLE
-    if( m_RM->Match(s, "^Recycle\\s+\\d+\\s+\\S+$") )
+    if( m_RM->Match(s, "^Recycle\\s+(\\d+)\\s+RM$") )
     {
-        m_GameData->SetAutoOrderProduction(m_Turn, m_ColonyProduction, line );
+        m_GameData->SetAutoOrderProduction( m_Turn, m_ColonyProduction, line, -m_RM->GetResultInt(0)/5 );
+        return;
+    } 
+    if( m_RM->Match(s, "^Recycle\\s+\\S+\\s+([^,]+)$") )
+    {
+        m_GameData->SetAutoOrderProduction(
+            m_Turn, m_ColonyProduction, line, -m_GameData->GetShip(m_RM->Results[0])->GetRecycleValue() );
         return;
     }
- 
+
     // SCAN (ignore) assume it is generated for all scouts
     // AUTO (ignore) assume it is enabled when at least one other order is found
 }

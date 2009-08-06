@@ -643,7 +643,7 @@ GameData::GameData(void)
     , m_Commands(gcnew List<ICommand^>)
     , m_AutoOrdersPreDeparture(gcnew SortedList<StarSystem^, List<String^>^>)
     , m_AutoOrdersJumps(gcnew SortedList<Ship^, List<String^>^>)
-    , m_AutoOrdersProduction(gcnew SortedList<Colony^, List<String^>^>)
+    , m_AutoOrdersProduction(gcnew SortedList<Colony^, List<Pair<String^, int>^>^>)
     , m_TurnMax(0)
 {
     AutoEnabled = false;
@@ -1547,19 +1547,19 @@ void GameData::SetAutoOrderJumps(int turn, Ship^ ship, String^ line)
     }
 }
 
-void GameData::SetAutoOrderProduction(int turn, Colony^ colony, String^ line)
+void GameData::SetAutoOrderProduction(int turn, Colony^ colony, String^ line, int cost)
 {
     if( TurnCheck(turn) )
     {
         AutoEnabled = true;
         if ( m_AutoOrdersProduction->ContainsKey( colony ) )
         {
-            m_AutoOrdersProduction[colony]->Add(line);
+            m_AutoOrdersProduction[colony]->Add(gcnew Pair<String^, int>(line, cost));
         }
         else
         {
-            List<String^>^ list = gcnew List<String^>;
-            list->Add(line);
+            List<Pair<String^, int>^>^ list = gcnew List<Pair<String^, int>^>;
+            list->Add(gcnew Pair<String^, int>(line, cost));
             m_AutoOrdersProduction->Add(colony, list);
         }
     }
@@ -1583,7 +1583,7 @@ List<String^>^ GameData::GetAutoOrdersJumps(Ship^ ship)
     return nullptr;
 }
 
-List<String^>^ GameData::GetAutoOrdersProduction(Colony^ colony)
+List<Pair<String^, int>^>^ GameData::GetAutoOrdersProduction(Colony^ colony)
 {
     if ( m_AutoOrdersProduction->ContainsKey( colony ) )
     {
