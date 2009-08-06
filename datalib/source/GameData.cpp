@@ -362,6 +362,9 @@ String^ Colony::PrintRefListEntry(Alien ^player)
 
 String^ Colony::PrintBalance()
 {
+    if( EconomicBase <= 0 )
+        return "Empty";
+
     if( NeedAU > 0 )
         return String::Format("+{0} AU", NeedAU);
     else if( NeedIU )
@@ -372,6 +375,14 @@ String^ Colony::PrintBalance()
 
 void Colony::CalculateBalance(bool MiMaBalanced)
 {
+    if( EconomicBase <= 0 ||
+        MiDiff == 0 )   // can happen on destroyed home planet
+    {
+        NeedIU = 0;
+        NeedAU = 0;
+        return;
+    }
+
     int miTech = Owner->TechLevelsAssumed[TECH_MI];
     int maTech = Owner->TechLevelsAssumed[TECH_MA];
     if( MiMaBalanced )
@@ -1301,7 +1312,8 @@ void GameData::UpdateSystems()
 
                     // Update planet info with colony info, if there is any difference
                     // Helps with MD changed via mining or when there is no system scan
-                    if ( colony->Owner == GetSpecies() )
+                    if ( colony->Owner == GetSpecies() &&
+                         colony->EconomicBase > 0 )
                     {
                         colony->CalculateBalance(false);
 
