@@ -752,8 +752,9 @@ void Form1::LoadPlugins()
 void Form1::ApplyDataAndFormat(
     DataGridView ^grid,
     DataTable ^data,
-    DataColumn ^objColumn,
-    int defaultSortColIdx )
+    int objColumnIndex,
+    int defaultSortColIdx,
+    IGridSorter ^sorter )
 {
     int sortBy = defaultSortColIdx;
     ListSortDirection sortDir = ListSortDirection::Ascending;
@@ -769,32 +770,39 @@ void Form1::ApplyDataAndFormat(
             sortDir = ListSortDirection::Descending;
             break;
         }
-
     }
 
     // Setup data source
-    grid->DataSource = data;
+    if( data )
+        grid->DataSource = data;
+    else
+        SetGridBgAndTooltip(grid);
 
     // Make object link column invisible
-    grid->Columns[objColumn->Ordinal]->Visible = false;
+    grid->Columns[objColumnIndex]->Visible = false;
 
     // Adjust row height
     grid->RowTemplate->Height = OPTIMAL_ROW_HEIGHT;
 
     // Formatting
-    for each( DataColumn ^col in data->Columns )
+    for each( DataGridViewColumn ^col in grid->Columns )
     {
-        if( col->DataType == double::typeid )
-            grid->Columns[col->Ordinal]->DefaultCellStyle->Format = "F2";
-        if( col->DataType == double::typeid || col->DataType == int::typeid )
-            grid->Columns[col->Ordinal]->DefaultCellStyle->Alignment =
+        if( col->CellType == double::typeid )
+            col->DefaultCellStyle->Format = "F2";
+        if( col->CellType == double::typeid || col->CellType == int::typeid )
+            col->DefaultCellStyle->Alignment =
                 DataGridViewContentAlignment::MiddleRight;
     }
 
     // Sort grid
     if( sortBy != -1 )
     {
-        grid->Sort( grid->Columns[sortBy], sortDir );
+        if( sorter )
+        {
+            sorter->SetSortColumn( sortBy );
+        }
+        else
+            grid->Sort( grid->Columns[sortBy], sortDir );
     }
 
     grid->ClearSelection();
@@ -991,7 +999,7 @@ void Form1::SystemsSetup()
         dataTable->Rows->Add(row);
     }
 
-    ApplyDataAndFormat(SystemsGrid, dataTable, colObject, colDist->Ordinal);
+    ApplyDataAndFormat(SystemsGrid, dataTable, colObject->Ordinal, colDist->Ordinal, nullptr);
     for each( IGridPlugin ^plugin in m_GridPlugins )
         plugin->GridFormat(GridType::Systems, SystemsGrid);
 
@@ -1171,7 +1179,7 @@ void Form1::PlanetsSetup()
         }
     }
 
-    ApplyDataAndFormat(PlanetsGrid, dataTable, colObject, colLSN->Ordinal);
+    ApplyDataAndFormat(PlanetsGrid, dataTable, colObject->Ordinal, colLSN->Ordinal, nullptr);
     for each( IGridPlugin ^plugin in m_GridPlugins )
         plugin->GridFormat(GridType::Planets, SystemsGrid);
 
@@ -1402,31 +1410,35 @@ void Form1::ColoniesUpdateControls()
 
 void Form1::ColoniesSetup()
 {
-    // Put system data in a DataTable so that column sorting works.
-    DataTable ^dataTable = gcnew DataTable();
+    ColoniesGrid->Columns->Clear();
 
-    DataColumn ^colObject       = dataTable->Columns->Add("colony",     Colony::typeid );
-    DataColumn ^colOwner        = dataTable->Columns->Add("Owner",      String::typeid );
-    DataColumn ^colName         = dataTable->Columns->Add("Name",       String::typeid );
-    DataColumn ^colType         = dataTable->Columns->Add("Type",       String::typeid );
-    DataColumn ^colLocation     = dataTable->Columns->Add("Loc.",       String::typeid );
-    DataColumn ^colSize         = dataTable->Columns->Add("Size",       double::typeid );
-    DataColumn ^colSeen         = dataTable->Columns->Add("Seen",       int::typeid );
-    DataColumn ^colProd         = dataTable->Columns->Add("Prod",       int::typeid );
-    DataColumn ^colShipyards    = dataTable->Columns->Add("S-yards",    int::typeid );
-    DataColumn ^colLSN          = dataTable->Columns->Add("LSN",        int::typeid );
-    DataColumn ^colProdPerc     = dataTable->Columns->Add("Pr[%]",      int::typeid );
-    DataColumn ^colBalance      = dataTable->Columns->Add("Balance",    String::typeid );
-    DataColumn ^colPop          = dataTable->Columns->Add("Pop",        int::typeid );
-    DataColumn ^colDist         = dataTable->Columns->Add("Dist",       double::typeid );
-    DataColumn ^colMishap       = dataTable->Columns->Add("Mishap %",   String::typeid );
-    DataColumn ^colInventory    = dataTable->Columns->Add("Inventory",  String::typeid );
-    DataColumn ^colProdOrder    = dataTable->Columns->Add("Order",      int::typeid );
+    ColoniesGridSorter ^sorter = gcnew ColoniesGridSorter(ColoniesGrid, m_GameData->GetSpecies());
+    sorter->SetGroupBySpecies( ColoniesGroupByOwner->Checked );
+    sorter->SetRefSystem( m_ColoniesFilter->RefSystem );
 
-    for each( IGridPlugin ^plugin in m_GridPlugins )
-        plugin->AddColumns(GridType::Colonies, dataTable);
+    m_ColoniesSorter = sorter;
 
-    DataColumn ^colNotes        = dataTable->Columns->Add("Notes",      String::typeid );
+    int colObject       = sorter->AddColumn("colony",     Colony::typeid,   SortOrder::None );
+    int colOwner        = sorter->AddColumn("Owner",      String::typeid,   SortOrder::Ascending,     ColoniesGridSorter::CustomSortMode::Owner );
+    int colName         = sorter->AddColumn("Name",       String::typeid,   SortOrder::Ascending );
+    int colType         = sorter->AddColumn("Type",       String::typeid,   SortOrder::Ascending,     ColoniesGridSorter::CustomSortMode::Type );
+    int colLocation     = sorter->AddColumn("Loc.",       String::typeid,   SortOrder::Ascending,     ColoniesGridSorter::CustomSortMode::Location );
+    int colSize         = sorter->AddColumn("Size",       double::typeid,   SortOrder::Descending );
+    int colSeen         = sorter->AddColumn("Seen",       int::typeid,      SortOrder::Descending );
+    int colProd         = sorter->AddColumn("Prod",       int::typeid,      SortOrder::Descending );
+    int colShipyards    = sorter->AddColumn("S-yards",    int::typeid,      SortOrder::Descending );
+    int colLSN          = sorter->AddColumn("LSN",        int::typeid,      SortOrder::Ascending );
+    int colProdPerc     = sorter->AddColumn("Pr[%]",      int::typeid,      SortOrder::Descending );
+    int colBalance      = sorter->AddColumn("Balance",    String::typeid,   SortOrder::Descending );
+    int colPop          = sorter->AddColumn("Pop",        int::typeid,      SortOrder::Descending );
+    int colDist         = sorter->AddColumn("Dist",       String::typeid,   SortOrder::Ascending,     ColoniesGridSorter::CustomSortMode::Distance );
+    int colInventory    = sorter->AddColumn("Inventory",  String::typeid,   SortOrder::Ascending );
+    int colProdOrder    = sorter->AddColumn("Order",      int::typeid,      SortOrder::Ascending );
+
+    //for each( IGridPlugin ^plugin in m_GridPlugins )
+    //    plugin->AddColumns(GridType::Colonies, dataTable);
+
+    int colNotes        = sorter->AddColumn("Notes",      String::typeid,   SortOrder::Ascending );
 
     int gv  = Decimal::ToInt32(TechGV->Value);
     int age = Decimal::ToInt32(ColoniesShipAge->Value);
@@ -1440,70 +1452,68 @@ void Form1::ColoniesSetup()
         double distance = colony->System->CalcDistance(m_ColoniesFilter->RefSystem);
         double mishap = colony->System->CalcMishap(m_ColoniesFilter->RefSystem, gv, age);
 
-        DataRow^ row = dataTable->NewRow();
-        row[colObject]      = colony;
-        row[colOwner]       = colony->Owner == sp ? String::Format("* {0}", sp->Name) : colony->Owner->Name;
-        row[colName]        = colony->Name;
-        row[colType]        = FHStrings::PlTypeToString(colony->PlanetType);
-        row[colLocation]    = colony->PrintLocation();
+        //DataRow^ row = dataTable->NewRow();
+        int row = ColoniesGrid->Rows->Add();
+        ColoniesGrid[colObject, row]->Value      = colony;
+        ColoniesGrid[colOwner, row]->Value       = colony->Owner == sp ? String::Format("* {0}", sp->Name) : colony->Owner->Name;
+        ColoniesGrid[colName, row]->Value        = colony->Name;
+        ColoniesGrid[colType, row]->Value        = FHStrings::PlTypeToString(colony->PlanetType);
+        ColoniesGrid[colLocation ,row]->Value    = colony->PrintLocation();
         if( colony->EconomicBase != -1 )
-            row[colSize]    = (double)colony->EconomicBase / 10;
-        row[colDist]        = distance;
-        row[colMishap]      = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
-        row[colInventory]   = colony->PrintInventoryShort();
+            ColoniesGrid[colSize ,row]->Value    = (double)colony->EconomicBase / 10;
+        ColoniesGrid[colDist, row]->Value        = String::Format("{0:F1}  ({1:F1}%)", distance, mishap);
+        ColoniesGrid[colInventory, row]->Value   = colony->PrintInventoryShort();
         if( colony->Planet )
-            row[colLSN]     = colony->Planet->LSN;
+            ColoniesGrid[colLSN, row]->Value     = colony->Planet->LSN;
 
         if( colony->Owner == sp )
         {
-            row[colProd]    = colony->EUProd - colony->EUFleet;
-            row[colProdOrder] = colony->ProductionOrder;
-            row[colProdPerc]= 100 - colony->ProdPenalty;
-            row[colPop]     = colony->AvailPop;
+            ColoniesGrid[colProd, row]->Value    = colony->EUAvail;
+            ColoniesGrid[colProdOrder, row]->Value = colony->ProductionOrder;
+            ColoniesGrid[colProdPerc, row]->Value= 100 - colony->ProdPenalty;
+            ColoniesGrid[colPop, row]->Value     = colony->AvailPop;
 
             if( colony->PlanetType == PLANET_HOME ||
                 colony->PlanetType == PLANET_COLONY )
             {
                 colony->CalculateBalance(m_ColoniesFilter->MiMaBalanced);
-                row[colBalance] = colony->PrintBalance();
+                ColoniesGrid[colBalance, row]->Value = colony->PrintBalance();
             }
         }
         else
         {
             if( colony->LastSeen > 0 )
-                row[colSeen] = colony->LastSeen;
+                ColoniesGrid[colSeen, row]->Value = colony->LastSeen;
         }
 
         if( colony->Shipyards != -1 )
         {
-            row[colShipyards] = colony->Shipyards;
+            ColoniesGrid[colShipyards, row]->Value = colony->Shipyards;
         }
 
         if( colony->Hidden )
         {
-            row[colNotes] = "Hidden";
+            ColoniesGrid[colNotes, row]->Value = "Hidden";
         }
 
         if( colony->UnderSiege )
         {
-            row[colNotes] = "Under siege";
+            ColoniesGrid[colNotes, row]->Value = "Under siege";
         }
 
-        for each( IGridPlugin ^plugin in m_GridPlugins )
-            plugin->AddRowData(row, colony, m_SystemsFilter);
+        //for each( IGridPlugin ^plugin in m_GridPlugins )
+        //    plugin->AddRowData(row, colony, m_SystemsFilter);
 
-        dataTable->Rows->Add(row);
+        //dataTable->Rows->Add(row);
     }
 
-    ApplyDataAndFormat(ColoniesGrid, dataTable, colObject, colOwner->Ordinal);
-    for each( IGridPlugin ^plugin in m_GridPlugins )
-        plugin->GridFormat(GridType::Colonies, SystemsGrid);
+    ApplyDataAndFormat(ColoniesGrid, nullptr, colObject, colProd, sorter);
+    //for each( IGridPlugin ^plugin in m_GridPlugins )
+    //    plugin->GridFormat(GridType::Colonies, SystemsGrid);
 
     // Formatting
-    ColoniesGrid->Columns[colSize->Ordinal]->DefaultCellStyle->Format = "F1";
-
-    // Some columns are not sortable... yet
-    ColoniesGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
+    ColoniesGrid->Columns[colSize]->DefaultCellStyle->Format = "F1";
+    ColoniesGrid->Columns[colDist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
 
     // Enable filters
     m_ColoniesFilter->EnableUpdates = true;
@@ -1513,7 +1523,7 @@ void Form1::ColoniesSetRef( int rowIndex )
 {
     if( rowIndex != -1 )
     {
-        int index = PlanetsGrid->Columns[0]->Index;
+        int index = ColoniesGrid->Columns[0]->Index;
         Colony ^colony = safe_cast<Colony^>(ColoniesGrid->Rows[ rowIndex ]->Cells[index]->Value);
         ColoniesRefColony->Text = colony->PrintRefListEntry( m_GameData->GetSpecies() );
     }
@@ -1720,7 +1730,7 @@ void Form1::ShipsSetup()
         dataTable->Rows->Add(row);
     }
 
-    ApplyDataAndFormat(ShipsGrid, dataTable, colObject, colOwner->Ordinal);
+    ApplyDataAndFormat(ShipsGrid, dataTable, colObject->Ordinal, colOwner->Ordinal, nullptr);
     for each( IGridPlugin ^plugin in m_GridPlugins )
         plugin->GridFormat(GridType::Ships, SystemsGrid);
 
@@ -2024,7 +2034,7 @@ void Form1::AliensSetup()
         dataTable->Rows->Add(row);
     }
 
-    ApplyDataAndFormat(AliensGrid, dataTable, colObject, colRelation->Ordinal);
+    ApplyDataAndFormat(AliensGrid, dataTable, colObject->Ordinal, colRelation->Ordinal, nullptr);
     for each( IGridPlugin ^plugin in m_GridPlugins )
         plugin->GridFormat(GridType::Aliens, SystemsGrid);
 

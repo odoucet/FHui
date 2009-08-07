@@ -250,6 +250,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\source\GridSorter.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\source\Map.cpp"
 					>
 				</File>
@@ -317,6 +321,10 @@
 				</File>
 				<File
 					RelativePath=".\include\GridFilter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\GridSorter.h"
 					>
 				</File>
 				<File

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "enums.h"
+#include "GridSorter.h"
 
 namespace FHUI {
 
@@ -81,8 +82,9 @@ namespace FHUI {
         void        ApplyDataAndFormat(
                         DataGridView ^grid,
                         DataTable ^dataTable,
-                        DataColumn ^objColumn,
-                        int defaultSortColIdx );
+                        int objColumnIndex,
+                        int defaultSortColIdx,
+                        IGridSorter ^sorter );
         Color       GetAlienColor(Alien ^sp);
         void        SetGridBgAndTooltip(DataGridView ^grid);
         void        SetGridRefSystemOnMouseClick(DataGridView ^grid, int rowIndex);
@@ -128,6 +130,7 @@ namespace FHUI {
 
         bool                m_HadException;
         bool               ^m_bGridUpdateEnabled;
+private: System::Windows::Forms::CheckBox^  ColoniesGroupByOwner;
 
         System::Windows::Forms::ToolTip^    m_GridToolTip;
 
@@ -182,6 +185,7 @@ namespace FHUI {
         void        ColoniesMenuProdShipyard(Object^, EventArgs^);
 
         IGridFilter        ^m_ColoniesFilter;
+        IGridSorter        ^m_ColoniesSorter;
         Colony             ^m_ColoniesMenuRef;
 
         // ==================================================
@@ -582,6 +586,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->splitContainer4 = (gcnew System::Windows::Forms::SplitContainer());
             this->ColoniesFiltOwnN = (gcnew System::Windows::Forms::CheckBox());
             this->ColoniesFiltOwnO = (gcnew System::Windows::Forms::CheckBox());
+            this->ColoniesGroupByOwner = (gcnew System::Windows::Forms::CheckBox());
             this->ColoniesMiMaBalanced = (gcnew System::Windows::Forms::CheckBox());
             this->ColoniesRefHome = (gcnew System::Windows::Forms::ComboBox());
             this->ColoniesFiltersReset = (gcnew System::Windows::Forms::Button());
@@ -1960,6 +1965,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesFiltOwnN);
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesFiltOwnO);
+            this->splitContainer4->Panel1->Controls->Add(this->ColoniesGroupByOwner);
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesMiMaBalanced);
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesRefHome);
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesFiltersReset);
@@ -1987,7 +1993,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // ColoniesFiltOwnN
             // 
             this->ColoniesFiltOwnN->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ColoniesFiltOwnN->Location = System::Drawing::Point(296, 51);
+            this->ColoniesFiltOwnN->Location = System::Drawing::Point(286, 51);
             this->ColoniesFiltOwnN->Margin = System::Windows::Forms::Padding(1);
             this->ColoniesFiltOwnN->Name = L"ColoniesFiltOwnN";
             this->ColoniesFiltOwnN->Size = System::Drawing::Size(23, 23);
@@ -2001,7 +2007,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // ColoniesFiltOwnO
             // 
             this->ColoniesFiltOwnO->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ColoniesFiltOwnO->Location = System::Drawing::Point(271, 51);
+            this->ColoniesFiltOwnO->Location = System::Drawing::Point(261, 51);
             this->ColoniesFiltOwnO->Margin = System::Windows::Forms::Padding(1);
             this->ColoniesFiltOwnO->Name = L"ColoniesFiltOwnO";
             this->ColoniesFiltOwnO->Size = System::Drawing::Size(23, 23);
@@ -2012,10 +2018,23 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ColoniesFiltOwnO->UseVisualStyleBackColor = true;
             this->ColoniesFiltOwnO->CheckedChanged += gcnew System::EventHandler(this, &Form1::Colonies_Update);
             // 
+            // ColoniesGroupByOwner
+            // 
+            this->ColoniesGroupByOwner->AutoSize = true;
+            this->ColoniesGroupByOwner->Checked = true;
+            this->ColoniesGroupByOwner->CheckState = System::Windows::Forms::CheckState::Checked;
+            this->ColoniesGroupByOwner->Location = System::Drawing::Point(439, 55);
+            this->ColoniesGroupByOwner->Name = L"ColoniesGroupByOwner";
+            this->ColoniesGroupByOwner->Size = System::Drawing::Size(103, 17);
+            this->ColoniesGroupByOwner->TabIndex = 50;
+            this->ColoniesGroupByOwner->Text = L"Group by Owner";
+            this->ColoniesGroupByOwner->UseVisualStyleBackColor = true;
+            this->ColoniesGroupByOwner->CheckedChanged += gcnew System::EventHandler(this, &Form1::Colonies_Update);
+            // 
             // ColoniesMiMaBalanced
             // 
             this->ColoniesMiMaBalanced->AutoSize = true;
-            this->ColoniesMiMaBalanced->Location = System::Drawing::Point(348, 55);
+            this->ColoniesMiMaBalanced->Location = System::Drawing::Point(326, 55);
             this->ColoniesMiMaBalanced->Name = L"ColoniesMiMaBalanced";
             this->ColoniesMiMaBalanced->Size = System::Drawing::Size(107, 17);
             this->ColoniesMiMaBalanced->TabIndex = 50;
@@ -2205,9 +2224,9 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ColoniesGrid->TabIndex = 0;
             this->ColoniesGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
             this->ColoniesGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
+            this->ColoniesGrid->ColumnHeaderMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::ColoniesGrid_ColumnHeaderMouseClick);
             this->ColoniesGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseEnter);
             this->ColoniesGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::ColoniesGrid_CellMouseDoubleClick);
-            this->ColoniesGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
             // 
             // TabShips
             // 
@@ -3035,6 +3054,9 @@ private: System::Void MenuTabs_SelectedIndexChanged(System::Object^  sender, Sys
          }
 private: System::Void PlanetsGrid_CellEndEdit(System::Object^  sender, System::Windows::Forms::DataGridViewCellEventArgs^  e) {
              PlanetsMenuAddName(e);
+         }
+private: System::Void ColoniesGrid_ColumnHeaderMouseClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
+             m_ColoniesSorter->SetSortColumn( e->ColumnIndex );
          }
 };
 

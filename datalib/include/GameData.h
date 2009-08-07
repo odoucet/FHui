@@ -241,6 +241,8 @@ public:
     double      CalcDistance(int x, int y, int z)                   { return Calculators::Distance(X, Y, Z, x, y, z); }
     double      CalcMishap(int x, int y, int z, int gv, int age)    { return Calculators::Mishap(X, Y, Z, x, y, z, gv, age); }
 
+    int         CompareLocation(StarSystem ^sys);
+
     Planet^     GetPlanet(int plNum);
 
     bool        IsExplored() { return TurnScanned != -1; }

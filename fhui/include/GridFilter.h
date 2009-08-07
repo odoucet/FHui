@@ -6,9 +6,6 @@ using namespace System::Windows::Forms;
 namespace FHUI
 {
 
-ref class Ship;
-ref class StarSystem;
-
 delegate void GridSetupHandler();
 delegate void GridExceptionHandler(Exception ^e);
 

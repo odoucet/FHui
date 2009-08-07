@@ -159,6 +159,13 @@ Int32 StarSystem::CompareTo( Object^ obj )
     return Z - system->Z;
 }
 
+int StarSystem::CompareLocation(StarSystem ^sys)
+{
+    if( X != sys->X ) return X - sys->X;
+    if( Y != sys->Y ) return Y - sys->Y;
+                      return Z - sys->Z;
+}
+
 Planet^ StarSystem::GetPlanet(int plNum)
 {
     if( plNum < 1 )
