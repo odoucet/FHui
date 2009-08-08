@@ -250,6 +250,8 @@ void Form1::UpdateControls()
     ColoniesUpdateControls();
     ShipsUpdateControls();
     AliensUpdateControls();
+
+    UtilTRInfoUpdate();
 }
 
 void Form1::UpdateTabs()
@@ -1689,7 +1691,7 @@ void Form1::ShipsSetup()
     Alien ^sp = m_GameData->GetSpecies();
     int gv = sp->TechLevelsAssumed[TECH_GV];
     int ml = sp->TechLevelsAssumed[TECH_ML];
-    double discount = (100.0 - (ml / 2)) / 100.0;
+    double discount = Calculators::ShipMaintenanceDiscount(ml);
 
     for each( Ship ^ship in m_GameData->GetShips() )
     {

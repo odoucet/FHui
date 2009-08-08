@@ -285,6 +285,10 @@
 						/>
 					</FileConfiguration>
 				</File>
+				<File
+					RelativePath=".\source\Utils.cpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="Resources"

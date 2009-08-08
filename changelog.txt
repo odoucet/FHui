@@ -3,13 +3,20 @@ Major new features and bug fixes will be listed here.
 + New features
 * Bug fixes
 
+FHUI build ??
+* Production orders copied from 'auto' sections are included.
+  in budget calculations.
++ Data sorting on Colonies tab improved.
++ Context menu allows quick copying orders template to clipboard.
++ TR size calculator on Utils tab.
+
 FHUI build 126
-* Ally / Enemy commands are no longer put incorrectly into Combat section
-* Auto-generated develop orders are now copied correctly from order template
+* Ally / Enemy commands are no longer put incorrectly into Combat section.
+* Auto-generated develop orders are now copied correctly from order template.
 * Fixed planet naming and name disbanding. Disband order may be canceled.
 * Fixed bug in report parser when "Other events" section was missing.
 * Fixed "divide by zero" bug in colony balance calculation.
-+ Colonies hidden / under siege are marked as such in the notes
++ Colonies hidden / under siege are marked as such in the notes.
 + Added shipyards column on Colonies tab and shipyard build order
   in context menu on colonies that are able to build one.
 + Support for incomplete ships.
@@ -26,7 +33,7 @@ FHUI build 117
 + Orders for planets: add/remove planet name.
 
 FHUI build 70
-* Fixed misreporting alien colony size by 0.1
+* Fixed misreporting alien colony size by 0.1.
 * Internal calculations precission improved to be consistent with FH engine.
 + Balance now reports IU / AU needed.
 + Empty planets in alien home systems are marked in notes.

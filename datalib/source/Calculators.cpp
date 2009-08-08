@@ -36,6 +36,11 @@ int Calculators::ShipRecycleValue(int age, int originalCost)
     return (int)Math::Floor(((3 * originalCost) / 4.0) * ((60 - age) / 50.0)); 
 }
 
+double Calculators::ShipMaintenanceDiscount(int mlLevel)
+{
+    return (100.0 - (mlLevel / 2)) / 100.0;
+}
+
 int Calculators::ResearchCost(int startLevel, int endLevel, bool guided)
 {
     int sum = 0;

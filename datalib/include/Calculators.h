@@ -13,6 +13,7 @@ public:
 
     static int      ShipUpgradeCost(int age, int originalCost);
     static int      ShipRecycleValue(int age, int originalCost);
+    static double   ShipMaintenanceDiscount(int mlLevel);
 
     static int      ResearchCost(int startLevel, int endLevel, bool guided);
     static int      ShipyardCost(int maTechLevel);

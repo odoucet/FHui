@@ -822,4 +822,9 @@ void Form1::GenerateStrikes()
     m_OrderList->Add("");
 }
 
+void Form1::CopyOrdersTemplateToClipboard()
+{
+    Clipboard::SetText(OrderTemplate->Text, TextDataFormat::Text);
+}
+
 } // end namespace FHUI
