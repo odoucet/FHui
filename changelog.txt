@@ -9,6 +9,7 @@ FHUI build ??
 + Data sorting on Colonies tab improved.
 + Context menu allows quick copying orders template to clipboard.
 + TR size calculator on Utils tab.
++ Research cost calculator on Utils tab.
 
 FHUI build 126
 * Ally / Enemy commands are no longer put incorrectly into Combat section.

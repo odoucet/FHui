@@ -252,7 +252,9 @@ namespace FHUI {
 
         // ==================================================
         // --- UTILS ---
-        void        UtilTRInfoUpdate();
+        void        UtilUpdateAll();
+        void        UtilUpdateTRInfo();
+        void        UtilUpdateResearch();
 
         // ==================================================
         // --- MAP ---
@@ -289,6 +291,11 @@ namespace FHUI {
         // Auto-generated code below this point
         // --------------------------------------------------
 
+    private: System::Windows::Forms::Label^  UtilResInfoAverage;
+    private: System::Windows::Forms::Label^  UtilResInfoGuaranteed;
+    private: System::Windows::Forms::Label^  UtilResInfoGuided;
+    private: System::Windows::Forms::NumericUpDown^  UtilResTo;
+    private: System::Windows::Forms::NumericUpDown^  UtilResFrom;
     private: System::Windows::Forms::NumericUpDown^  UtilTRSize;
     private: System::Windows::Forms::Label^  UtilTrInfoMaint;
     private: System::Windows::Forms::Label^  UtilTrInfoMA;
@@ -522,15 +529,21 @@ private: System::Windows::Forms::Label^  SystemsRef;
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle21 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle22 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::ToolStripMenuItem^  copyToClipboardToolStripMenuItem;
+            System::Windows::Forms::GroupBox^  groupBox5;
+            System::Windows::Forms::Label^  label33;
+            System::Windows::Forms::Label^  label35;
+            System::Windows::Forms::Label^  label37;
+            System::Windows::Forms::Label^  label39;
+            System::Windows::Forms::Label^  label38;
             System::Windows::Forms::GroupBox^  groupBox4;
+            System::Windows::Forms::Label^  label32;
+            System::Windows::Forms::Label^  label30;
+            System::Windows::Forms::Label^  label29;
             System::Windows::Forms::Label^  label28;
             System::Windows::Forms::Label^  label5;
             System::Windows::Forms::Label^  label6;
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle23 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle24 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::Label^  label29;
-            System::Windows::Forms::Label^  label30;
-            System::Windows::Forms::Label^  label32;
             this->TurnReloadBtn = (gcnew System::Windows::Forms::Button());
             this->TurnSelect = (gcnew System::Windows::Forms::ComboBox());
             this->Summary = (gcnew System::Windows::Forms::TextBox());
@@ -647,6 +660,13 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->OrderTemplate = (gcnew System::Windows::Forms::RichTextBox());
             this->OrdersCtxMenu = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
             this->TabUtils = (gcnew System::Windows::Forms::TabPage());
+            this->UtilResInfoAverage = (gcnew System::Windows::Forms::Label());
+            this->UtilResInfoGuaranteed = (gcnew System::Windows::Forms::Label());
+            this->UtilResInfoGuided = (gcnew System::Windows::Forms::Label());
+            this->UtilResTo = (gcnew System::Windows::Forms::NumericUpDown());
+            this->UtilResFrom = (gcnew System::Windows::Forms::NumericUpDown());
+            this->UtilTrInfoMA = (gcnew System::Windows::Forms::Label());
+            this->UtilTrInfoMaint = (gcnew System::Windows::Forms::Label());
             this->UtilTRInfoCap = (gcnew System::Windows::Forms::Label());
             this->UtilTRSize = (gcnew System::Windows::Forms::NumericUpDown());
             this->TabAbout = (gcnew System::Windows::Forms::TabPage());
@@ -657,8 +677,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->comboBox2 = (gcnew System::Windows::Forms::ComboBox());
             this->dataGridView1 = (gcnew System::Windows::Forms::DataGridView());
             this->BtnTooltip = (gcnew System::Windows::Forms::ToolTip(this->components));
-            this->UtilTrInfoMaint = (gcnew System::Windows::Forms::Label());
-            this->UtilTrInfoMA = (gcnew System::Windows::Forms::Label());
             TopSplitCont = (gcnew System::Windows::Forms::SplitContainer());
             splitContainer7 = (gcnew System::Windows::Forms::SplitContainer());
             label25 = (gcnew System::Windows::Forms::Label());
@@ -692,13 +710,19 @@ private: System::Windows::Forms::Label^  SystemsRef;
             label10 = (gcnew System::Windows::Forms::Label());
             label27 = (gcnew System::Windows::Forms::Label());
             copyToClipboardToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+            groupBox5 = (gcnew System::Windows::Forms::GroupBox());
+            label33 = (gcnew System::Windows::Forms::Label());
+            label35 = (gcnew System::Windows::Forms::Label());
+            label37 = (gcnew System::Windows::Forms::Label());
+            label39 = (gcnew System::Windows::Forms::Label());
+            label38 = (gcnew System::Windows::Forms::Label());
             groupBox4 = (gcnew System::Windows::Forms::GroupBox());
+            label32 = (gcnew System::Windows::Forms::Label());
+            label30 = (gcnew System::Windows::Forms::Label());
+            label29 = (gcnew System::Windows::Forms::Label());
             label28 = (gcnew System::Windows::Forms::Label());
             label5 = (gcnew System::Windows::Forms::Label());
             label6 = (gcnew System::Windows::Forms::Label());
-            label29 = (gcnew System::Windows::Forms::Label());
-            label30 = (gcnew System::Windows::Forms::Label());
-            label32 = (gcnew System::Windows::Forms::Label());
             TopSplitCont->Panel1->SuspendLayout();
             TopSplitCont->Panel2->SuspendLayout();
             TopSplitCont->SuspendLayout();
@@ -762,6 +786,9 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabOrders->SuspendLayout();
             this->OrdersCtxMenu->SuspendLayout();
             this->TabUtils->SuspendLayout();
+            groupBox5->SuspendLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->UtilResTo))->BeginInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->UtilResFrom))->BeginInit();
             groupBox4->SuspendLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->UtilTRSize))->BeginInit();
             this->TabAbout->SuspendLayout();
@@ -2763,12 +2790,130 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // TabUtils
             // 
             this->TabUtils->BackColor = System::Drawing::SystemColors::Control;
+            this->TabUtils->Controls->Add(groupBox5);
             this->TabUtils->Controls->Add(groupBox4);
             this->TabUtils->Location = System::Drawing::Point(4, 22);
             this->TabUtils->Name = L"TabUtils";
             this->TabUtils->Size = System::Drawing::Size(683, 535);
             this->TabUtils->TabIndex = 10;
             this->TabUtils->Text = L"Utils";
+            // 
+            // groupBox5
+            // 
+            groupBox5->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left) 
+                | System::Windows::Forms::AnchorStyles::Right));
+            groupBox5->Controls->Add(this->UtilResInfoAverage);
+            groupBox5->Controls->Add(label33);
+            groupBox5->Controls->Add(this->UtilResInfoGuaranteed);
+            groupBox5->Controls->Add(label35);
+            groupBox5->Controls->Add(this->UtilResInfoGuided);
+            groupBox5->Controls->Add(label37);
+            groupBox5->Controls->Add(label39);
+            groupBox5->Controls->Add(label38);
+            groupBox5->Controls->Add(this->UtilResTo);
+            groupBox5->Controls->Add(this->UtilResFrom);
+            groupBox5->Location = System::Drawing::Point(0, 52);
+            groupBox5->Name = L"groupBox5";
+            groupBox5->Size = System::Drawing::Size(677, 46);
+            groupBox5->TabIndex = 0;
+            groupBox5->TabStop = false;
+            groupBox5->Text = L"Research";
+            // 
+            // UtilResInfoAverage
+            // 
+            this->UtilResInfoAverage->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
+            this->UtilResInfoAverage->Location = System::Drawing::Point(489, 19);
+            this->UtilResInfoAverage->Name = L"UtilResInfoAverage";
+            this->UtilResInfoAverage->Size = System::Drawing::Size(49, 20);
+            this->UtilResInfoAverage->TabIndex = 2;
+            this->UtilResInfoAverage->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            // 
+            // label33
+            // 
+            label33->AutoSize = true;
+            label33->Location = System::Drawing::Point(436, 23);
+            label33->Name = L"label33";
+            label33->Size = System::Drawing::Size(50, 13);
+            label33->TabIndex = 1;
+            label33->Text = L"Average:";
+            // 
+            // UtilResInfoGuaranteed
+            // 
+            this->UtilResInfoGuaranteed->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
+            this->UtilResInfoGuaranteed->Location = System::Drawing::Point(372, 19);
+            this->UtilResInfoGuaranteed->Name = L"UtilResInfoGuaranteed";
+            this->UtilResInfoGuaranteed->Size = System::Drawing::Size(49, 20);
+            this->UtilResInfoGuaranteed->TabIndex = 2;
+            this->UtilResInfoGuaranteed->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            // 
+            // label35
+            // 
+            label35->AutoSize = true;
+            label35->Location = System::Drawing::Point(303, 23);
+            label35->Name = L"label35";
+            label35->Size = System::Drawing::Size(66, 13);
+            label35->TabIndex = 1;
+            label35->Text = L"Guaranteed:";
+            // 
+            // UtilResInfoGuided
+            // 
+            this->UtilResInfoGuided->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
+            this->UtilResInfoGuided->Location = System::Drawing::Point(242, 19);
+            this->UtilResInfoGuided->Name = L"UtilResInfoGuided";
+            this->UtilResInfoGuided->Size = System::Drawing::Size(49, 20);
+            this->UtilResInfoGuided->TabIndex = 2;
+            this->UtilResInfoGuided->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            // 
+            // label37
+            // 
+            label37->AutoSize = true;
+            label37->Location = System::Drawing::Point(195, 23);
+            label37->Name = L"label37";
+            label37->Size = System::Drawing::Size(44, 13);
+            label37->TabIndex = 1;
+            label37->Text = L"Guided:";
+            // 
+            // label39
+            // 
+            label39->AutoSize = true;
+            label39->Location = System::Drawing::Point(101, 23);
+            label39->Name = L"label39";
+            label39->Size = System::Drawing::Size(20, 13);
+            label39->TabIndex = 1;
+            label39->Text = L"To";
+            // 
+            // label38
+            // 
+            label38->AutoSize = true;
+            label38->Location = System::Drawing::Point(4, 23);
+            label38->Name = L"label38";
+            label38->Size = System::Drawing::Size(30, 13);
+            label38->TabIndex = 1;
+            label38->Text = L"From";
+            // 
+            // UtilResTo
+            // 
+            this->UtilResTo->Location = System::Drawing::Point(124, 19);
+            this->UtilResTo->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {200, 0, 0, 0});
+            this->UtilResTo->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {2, 0, 0, 0});
+            this->UtilResTo->Name = L"UtilResTo";
+            this->UtilResTo->Size = System::Drawing::Size(53, 20);
+            this->UtilResTo->TabIndex = 0;
+            this->UtilResTo->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
+            this->UtilResTo->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {2, 0, 0, 0});
+            this->UtilResTo->ValueChanged += gcnew System::EventHandler(this, &Form1::UtilTRSize_ValueChanged);
+            // 
+            // UtilResFrom
+            // 
+            this->UtilResFrom->Location = System::Drawing::Point(37, 19);
+            this->UtilResFrom->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {199, 0, 0, 0});
+            this->UtilResFrom->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+            this->UtilResFrom->Name = L"UtilResFrom";
+            this->UtilResFrom->Size = System::Drawing::Size(53, 20);
+            this->UtilResFrom->TabIndex = 0;
+            this->UtilResFrom->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
+            this->UtilResFrom->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
+            this->UtilResFrom->ValueChanged += gcnew System::EventHandler(this, &Form1::UtilTRSize_ValueChanged);
             // 
             // groupBox4
             // 
@@ -2789,6 +2934,42 @@ private: System::Windows::Forms::Label^  SystemsRef;
             groupBox4->TabStop = false;
             groupBox4->Text = L"Transports";
             // 
+            // UtilTrInfoMA
+            // 
+            this->UtilTrInfoMA->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
+            this->UtilTrInfoMA->Location = System::Drawing::Point(445, 19);
+            this->UtilTrInfoMA->Name = L"UtilTrInfoMA";
+            this->UtilTrInfoMA->Size = System::Drawing::Size(49, 20);
+            this->UtilTrInfoMA->TabIndex = 2;
+            this->UtilTrInfoMA->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            // 
+            // label32
+            // 
+            label32->AutoSize = true;
+            label32->Location = System::Drawing::Point(375, 23);
+            label32->Name = L"label32";
+            label32->Size = System::Drawing::Size(67, 13);
+            label32->TabIndex = 1;
+            label32->Text = L"MA Needed:";
+            // 
+            // UtilTrInfoMaint
+            // 
+            this->UtilTrInfoMaint->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
+            this->UtilTrInfoMaint->Location = System::Drawing::Point(314, 19);
+            this->UtilTrInfoMaint->Name = L"UtilTrInfoMaint";
+            this->UtilTrInfoMaint->Size = System::Drawing::Size(49, 20);
+            this->UtilTrInfoMaint->TabIndex = 2;
+            this->UtilTrInfoMaint->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            // 
+            // label30
+            // 
+            label30->AutoSize = true;
+            label30->Location = System::Drawing::Point(239, 23);
+            label30->Name = L"label30";
+            label30->Size = System::Drawing::Size(72, 13);
+            label30->TabIndex = 1;
+            label30->Text = L"Maintenance:";
+            // 
             // UtilTRInfoCap
             // 
             this->UtilTRInfoCap->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
@@ -2797,6 +2978,15 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->UtilTRInfoCap->Size = System::Drawing::Size(49, 20);
             this->UtilTRInfoCap->TabIndex = 2;
             this->UtilTRInfoCap->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            // 
+            // label29
+            // 
+            label29->AutoSize = true;
+            label29->Location = System::Drawing::Point(124, 23);
+            label29->Name = L"label29";
+            label29->Size = System::Drawing::Size(51, 13);
+            label29->TabIndex = 1;
+            label29->Text = L"Capacity:";
             // 
             // label28
             // 
@@ -2930,51 +3120,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->dataGridView1->Size = System::Drawing::Size(569, 504);
             this->dataGridView1->TabIndex = 0;
             // 
-            // label29
-            // 
-            label29->AutoSize = true;
-            label29->Location = System::Drawing::Point(124, 23);
-            label29->Name = L"label29";
-            label29->Size = System::Drawing::Size(51, 13);
-            label29->TabIndex = 1;
-            label29->Text = L"Capacity:";
-            // 
-            // label30
-            // 
-            label30->AutoSize = true;
-            label30->Location = System::Drawing::Point(239, 23);
-            label30->Name = L"label30";
-            label30->Size = System::Drawing::Size(72, 13);
-            label30->TabIndex = 1;
-            label30->Text = L"Maintenance:";
-            // 
-            // UtilTrInfoMaint
-            // 
-            this->UtilTrInfoMaint->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-            this->UtilTrInfoMaint->Location = System::Drawing::Point(314, 19);
-            this->UtilTrInfoMaint->Name = L"UtilTrInfoMaint";
-            this->UtilTrInfoMaint->Size = System::Drawing::Size(49, 20);
-            this->UtilTrInfoMaint->TabIndex = 2;
-            this->UtilTrInfoMaint->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            // 
-            // label32
-            // 
-            label32->AutoSize = true;
-            label32->Location = System::Drawing::Point(375, 23);
-            label32->Name = L"label32";
-            label32->Size = System::Drawing::Size(67, 13);
-            label32->TabIndex = 1;
-            label32->Text = L"MA Needed:";
-            // 
-            // UtilTrInfoMA
-            // 
-            this->UtilTrInfoMA->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-            this->UtilTrInfoMA->Location = System::Drawing::Point(445, 19);
-            this->UtilTrInfoMA->Name = L"UtilTrInfoMA";
-            this->UtilTrInfoMA->Size = System::Drawing::Size(49, 20);
-            this->UtilTrInfoMA->TabIndex = 2;
-            this->UtilTrInfoMA->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            // 
             // Form1
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -3058,6 +3203,10 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabOrders->ResumeLayout(false);
             this->OrdersCtxMenu->ResumeLayout(false);
             this->TabUtils->ResumeLayout(false);
+            groupBox5->ResumeLayout(false);
+            groupBox5->PerformLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->UtilResTo))->EndInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->UtilResFrom))->EndInit();
             groupBox4->ResumeLayout(false);
             groupBox4->PerformLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->UtilTRSize))->EndInit();
@@ -3206,7 +3355,7 @@ private: System::Void copyToClipboardToolStripMenuItem_Click(System::Object^  se
              CopyOrdersTemplateToClipboard();
          }
 private: System::Void UtilTRSize_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
-             UtilTRInfoUpdate();
+             UtilUpdateAll();
          }
 };
 

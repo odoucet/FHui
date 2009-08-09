@@ -251,7 +251,7 @@ void Form1::UpdateControls()
     ShipsUpdateControls();
     AliensUpdateControls();
 
-    UtilTRInfoUpdate();
+    UtilUpdateAll();
 }
 
 void Form1::UpdateTabs()
