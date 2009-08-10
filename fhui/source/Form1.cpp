@@ -242,7 +242,21 @@ void Form1::UpdateTabs()
 {
     if( MenuTabs->SelectedIndex == TabIndex::Map )
     {
-        MapDraw();
+        System::Windows::Forms::DialogResult result = MessageBox::Show(
+            this,
+            "MAP is under construction and is not functional yet...",
+            "Map tab alert",
+            MessageBoxButtons::OKCancel,
+            MessageBoxIcon::Question,
+            MessageBoxDefaultButton::Button2);
+        if( result == System::Windows::Forms::DialogResult::OK )
+        {
+            MapDraw();
+        }
+        else
+        {
+            MenuTabs->SelectedTab = MenuTabs->TabPages[0];
+        }
     }
 
     if( MenuTabs->SelectedIndex == TabIndex::Orders )
@@ -344,7 +358,6 @@ void Form1::ShowException(Exception ^e)
 
     // Disable some critical controls
     TurnSelect->Enabled = false;
-    //MenuTabs->Enabled = false;
 }
 
 void Form1::FillAboutBox()
