@@ -4,6 +4,7 @@ using namespace System;
 
 namespace FHUI
 {
+    ref class Colony;
 
 public ref class Calculators
 {
@@ -19,6 +20,7 @@ public:
     static int      ShipyardCost(int maTechLevel);
 
     static int      TransportCapacity(int size);
+    static int      ColonyProduction(Colony^, int mi, int ma, int ls, int fleetPercentCost);
 };
 
 } // end namespace FHUI

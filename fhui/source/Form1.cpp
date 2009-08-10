@@ -1470,7 +1470,14 @@ void Form1::ColoniesSetup()
 
         if( colony->Owner == sp )
         {
-            ColoniesGrid[colProd, row]->Value    = colony->EUAvail;
+            int prodCalculated = Calculators::ColonyProduction(
+                colony,
+                sp->TechLevelsAssumed[TECH_MI],
+                sp->TechLevelsAssumed[TECH_MA],
+                sp->TechLevelsAssumed[TECH_LS],
+                m_GameData->GetFleetPercentCost() );
+
+            ColoniesGrid[colProd, row]->Value    = prodCalculated; // was: colony->EUAvail
             ColoniesGrid[colProdOrder, row]->Value = colony->ProductionOrder;
             ColoniesGrid[colProdPerc, row]->Value= 100 - colony->ProdPenalty;
             ColoniesGrid[colPop, row]->Value     = colony->AvailPop;

@@ -367,10 +367,6 @@
 			RelativePath="..\changelog.txt"
 			>
 		</File>
-		<File
-			RelativePath="..\todo.txt"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

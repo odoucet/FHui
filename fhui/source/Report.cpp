@@ -208,8 +208,8 @@ bool Report::Parse(String ^s)
         else if( m_RM->Match(s, "^Economic units = (\\d+)") )
             m_GameData->SetTurnStartEU( m_Turn, m_RM->GetResultInt(0) );
         // Fleet maintenance
-        else if( m_RM->Match(s, "^Fleet maintenance cost = (\\d+) \\((\\d+\\.?\\d+)% of total production\\)") )
-            m_GameData->SetFleetCost(m_Turn, m_RM->GetResultInt(0), m_RM->GetResultFloat(1));
+        else if( m_RM->Match(s, "^Fleet maintenance cost = (\\d+) \\((\\d+)\\.(\\d+)% of total production\\)") )
+            m_GameData->SetFleetCost(m_Turn, m_RM->GetResultInt(0), m_RM->GetResultInt(1)*100 + m_RM->GetResultInt(2) );
         // Species...
         else if( Regex("^Species met:").Match(s)->Success )
             StartLineAggregate(PHASE_SPECIES_MET, s, AGGREGATE_LINES_MAX);

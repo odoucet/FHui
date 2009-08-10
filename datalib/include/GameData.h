@@ -521,7 +521,8 @@ public:
 
     Alien^          GetSpecies()                { return m_Species; }
     String^         GetSpeciesName()            { return m_Species->Name; }
-    void            GetFleetCost(int%, float%);
+    int             GetFleetCost();
+    int             GetFleetPercentCost();
     Alien^          GetAlien(String ^sp);
     StarSystem^     GetStarSystem(int x, int y, int z);
     StarSystem^     GetStarSystem(String ^name);
@@ -546,7 +547,7 @@ public:
     void            SetAtmosphereNeutral(GasType gas);
     void            SetAtmospherePoisonous(GasType gas);
     void            SetTechLevel(int turn, Alien ^sp, TechType, int, int);
-    void            SetFleetCost(int turn, int, float);
+    void            SetFleetCost(int turn, int, int);
     Alien^          AddAlien(int turn, String ^sp);
     void            SetAlienRelation(int turn, String ^sp, SPRelType);
     void            AddStarSystem(int x, int y, int z, String ^type, String ^comment);
@@ -599,7 +600,7 @@ protected:
     int                 m_TurnEUStart;
     int                 m_TurnEUProduced;
     int                 m_FleetCost;
-    float               m_FleetCostPercent;
+    int                 m_FleetCostPercent; // * 100
     array<StarSystem^>                 ^m_Systems;
     SortedList<String^, Alien^>        ^m_Aliens;
     SortedList<String^, Colony^>       ^m_Colonies;

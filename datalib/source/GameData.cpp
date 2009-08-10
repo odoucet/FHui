@@ -641,7 +641,7 @@ GameData::GameData(void)
     , m_TurnEUStart(0)
     , m_TurnEUProduced(0)
     , m_FleetCost(0)
-    , m_FleetCostPercent(0.0)
+    , m_FleetCostPercent(0)
     , m_Aliens(gcnew SortedList<String^, Alien^>)
     , m_Systems(gcnew array<StarSystem^>(0))
     , m_Colonies(gcnew SortedList<String^, Colony^>)
@@ -729,11 +729,11 @@ String^ GameData::GetEconomicSummary()
     return String::Format(
         "EUs  carried: {0,7}\r\n"
         "    produced: {1,7}\r\n"
-        "Fleet maint.: {2} ({3:F2}%)\r\n"
-        "     Budget : {4,7}\r\n",
+        "Fleet maint.: {2} ({3}.{4}%)\r\n"
+        "     Budget : {5,7}\r\n",
         m_TurnEUStart,
         m_TurnEUProduced,
-        m_FleetCost, m_FleetCostPercent,
+        m_FleetCost, m_FleetCostPercent/100, m_FleetCostPercent%100,
         m_TurnEUProduced + m_TurnEUStart - m_FleetCost);
 }
 
@@ -842,10 +842,14 @@ String^ GameData::GetShipsSummary()
     return ret;
 }
 
-void GameData::GetFleetCost(int %cost, float %percent)
+int GameData::GetFleetCost()
 {
-    cost = m_FleetCost;
-    percent = m_FleetCostPercent;
+    return m_FleetCost;
+}
+
+int GameData::GetFleetPercentCost()
+{
+    return m_FleetCostPercent;
 }
 
 Alien^ GameData::GetAlien(String ^sp)
@@ -934,7 +938,7 @@ bool GameData::TurnCheck(int turn)
         m_TurnEUStart       = 0;
         m_TurnEUProduced    = 0;
         m_FleetCost         = 0;
-        m_FleetCostPercent  = 0.0;
+        m_FleetCostPercent  = 0;
 
         // Remove all player's colonies in case one of them no longer exists
         bool removed = false;
@@ -1026,7 +1030,7 @@ void GameData::SetTechLevel(int turn, Alien ^sp, TechType tech, int lev, int lev
     }
 }
 
-void GameData::SetFleetCost(int turn, int cost, float percent)
+void GameData::SetFleetCost(int turn, int cost, int percent)
 {
     if( TurnCheck(turn) )
     {

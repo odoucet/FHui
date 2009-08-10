@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "Calculators.h"
+#include "GameData.h"
 
 namespace FHUI
 {
@@ -32,8 +33,7 @@ int Calculators::ShipUpgradeCost(int age, int originalCost)
 
 int Calculators::ShipRecycleValue(int age, int originalCost)
 {
-    //int only: return (((300 * originalCost) / 4) * ((6000 - (100 * age)) / 50)) / 10000;
-    return (int)Math::Floor(((3 * originalCost) / 4.0) * ((60 - age) / 50.0)); 
+    return (3 * originalCost * (60 - age)) / 200;
 }
 
 double Calculators::ShipMaintenanceDiscount(int mlLevel)
@@ -56,6 +56,42 @@ int Calculators::ResearchCost(int startLevel, int endLevel, bool guided)
     }
 
     return sum;
+}
+
+int Calculators::ColonyProduction(Colony^ colony, int mi, int ma, int ls, int fleetPercentCost)
+{
+    int rawMaterialUnits, productionCapacity, availableToSpend;
+
+    if (colony->MiDiff == 0)
+    {
+        return 0; // TODO: Fix at MiDiff parsing
+    }
+
+    rawMaterialUnits = (10 * mi * colony->MiBase) / colony->MiDiff;
+    productionCapacity = (ma * colony->MaBase) / 10;
+
+    rawMaterialUnits -= (colony->ProdPenalty * rawMaterialUnits) / 100;
+    rawMaterialUnits = ((colony->EconomicEff * rawMaterialUnits) + 50) / 100;
+
+    productionCapacity -= (colony->ProdPenalty * productionCapacity) / 100;
+    productionCapacity = ((colony->EconomicEff * productionCapacity) + 50) / 100;
+
+    if ( colony->PlanetType == PLANET_COLONY_MINING )
+    {
+        /* Mining colony */
+        availableToSpend = (2 * rawMaterialUnits) / 3; 
+    }
+    if ( colony->PlanetType == PLANET_COLONY_RESORT )
+    {
+        /* Resort colony */
+        availableToSpend = (2 * productionCapacity) / 3; 
+    }
+    if ( colony->PlanetType == PLANET_COLONY )
+    {
+        rawMaterialUnits += colony->Inventory[INV_RM];
+        availableToSpend = Math::Min(rawMaterialUnits, productionCapacity);
+    }
+    return ( availableToSpend - ((fleetPercentCost * availableToSpend + 5000) / 10000) );
 }
 
 int Calculators::ShipyardCost(int maTechLevel)
