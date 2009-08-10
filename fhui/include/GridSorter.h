@@ -9,17 +9,6 @@ namespace FHUI
 
 ////////////////////////////////////////////////////////////////
 
-interface class IGridSorter : public System::Collections::IComparer
-{
-    void    SetSortColumn(int index);
-    void    SetGroupBySpecies(bool doGroup);
-    void    SetRefSystem(StarSystem ^refSystem);
-
-    int     AddColumn(String ^title, Type ^type, SortOrder defaultSortOrder);
-};
-
-////////////////////////////////////////////////////////////////
-
 ref class GridSorterBase abstract : public IGridSorter
 {
 public:
@@ -27,19 +16,19 @@ public:
     virtual void    SetGroupBySpecies(bool doGroup);
     virtual void    SetRefSystem(StarSystem ^refSystem);
 
-    virtual int     AddColumn(String ^title, Type ^type, SortOrder defaultSortOrder);
+    virtual int     AddColumn(String ^title, String ^description, Type ^type, SortOrder defaultSortOrder);
 
     virtual int     Compare( Object^ o1, Object^ o2 );
 
 protected:
-    GridSorterBase(DataGridView ^grid, Alien ^player);
+    GridSorterBase(DataGridView ^grid);
 
     virtual void    StoreDefaultSortOrder(int index, SortOrder defaultSortOrder);
 
     virtual int     GetSortDirectionModifier();
     virtual int     GetForcedDirectionModifier(SortOrder forcedOrder);
 
-    virtual int     AddColumnDefault(String ^title, Type ^type, SortOrder defaultSortOrder) abstract;
+    virtual int     AddColumnDefault(String ^title, String ^description, Type ^type, SortOrder defaultSortOrder) abstract;
 
     // Initial compare function called when sorting the grid
     // Must handle groupping and custom sorting methods. Then it may fall to
@@ -54,7 +43,6 @@ protected:
 
 protected:
     DataGridView^   m_Grid;
-    Alien^          m_Player;
     StarSystem^     m_RefSystem;
 
     int             m_SortColumn;
@@ -70,7 +58,7 @@ protected:
 ref class ColoniesGridSorter : public GridSorterBase
 {
 public:
-    ColoniesGridSorter(DataGridView ^grid, Alien ^player);
+    ColoniesGridSorter(DataGridView ^grid);
 
     enum class CustomSortMode
     {
@@ -81,8 +69,8 @@ public:
         Distance,
     };
 
-    virtual int AddColumnDefault(String ^title, Type ^type, SortOrder defaultSortOrder) override;
-    virtual int AddColumn(String ^title, Type ^type, SortOrder defaultSortOrder, CustomSortMode sm);
+    virtual int AddColumnDefault(String ^title, String ^description, Type ^type, SortOrder defaultSortOrder) override;
+    virtual int AddColumn(String ^title, String ^description, Type ^type, SortOrder defaultSortOrder, CustomSortMode sm);
 
 protected:
     virtual int CustomCompare(DataGridViewRow ^r1, DataGridViewRow ^r2) override;

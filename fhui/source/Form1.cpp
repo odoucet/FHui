@@ -4,6 +4,7 @@
 
 #include "Report.h"
 #include "GridFilter.h"
+#include "GridSorter.h"
 
 using namespace System::IO;
 using namespace System::Text::RegularExpressions;
@@ -48,8 +49,8 @@ void Form1::LoadGameData()
 
         FillAboutBox();
         InitData();
-        InitControls();
         LoadPlugins();
+        InitControls();
         ScanReports();
         LoadOrders();
     }
@@ -111,24 +112,7 @@ void Form1::InitControls()
     m_PlanetsFilter = filter;
 
     // -- colonies
-    filter = gcnew GridFilter(ColoniesGrid, m_bGridUpdateEnabled);
-    filter->GridSetup += gcnew GridSetupHandler(this, &Form1::ColoniesSetup);
-    filter->GridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
-
-    filter->CtrlRef         = ColoniesRef;
-    filter->CtrlRefHome     = ColoniesRefHome;
-    filter->CtrlRefXYZ      = ColoniesRefXYZ;
-    filter->CtrlRefColony   = ColoniesRefColony;
-    filter->CtrlRefShip     = ColoniesRefShip;
-    filter->CtrlGV          = TechGV;
-    filter->CtrlShipAge     = ColoniesShipAge;
-    filter->CtrlMaxMishap   = ColoniesMaxMishap;
-    filter->CtrlMaxLSN      = ColoniesMaxLSN;
-    filter->CtrlFiltOwnO    = ColoniesFiltOwnO;
-    filter->CtrlFiltOwnN    = ColoniesFiltOwnN;
-    filter->CtrlMiMaBalance = ColoniesMiMaBalanced;
-
-    m_ColoniesFilter = filter;
+    ColoniesInitControls();
 
     // -- ships
     filter = gcnew GridFilter(ShipsGrid, m_bGridUpdateEnabled);
@@ -194,7 +178,7 @@ void Form1::InitRefLists()
     m_RefListColonies   = gcnew List<String^>;
     m_RefListShips      = gcnew List<String^>;
 
-    Alien ^sp = m_GameData->GetSpecies();
+    Alien ^sp = GameData::Player;
 
     // -- ref systems xyz:
     m_RefListSystemsXYZ->Add( GridFilter::s_CaptionXYZ );
@@ -212,11 +196,11 @@ void Form1::InitRefLists()
     // owned first
     m_RefListColonies->Add( GridFilter::s_CaptionColony );
     for each( Colony ^colony in sp->Colonies )
-        m_RefListColonies->Add( colony->PrintRefListEntry(sp) );
+        m_RefListColonies->Add( colony->PrintRefListEntry() );
     // then alien
     for each( Colony ^colony in m_GameData->GetColonies() )
         if( colony->Owner != sp )
-            m_RefListColonies->Add( colony->PrintRefListEntry(sp) );
+            m_RefListColonies->Add( colony->PrintRefListEntry() );
 
     // -- ref ship age:
     m_RefListShips->Add( GridFilter::s_CaptionShip );
@@ -269,7 +253,7 @@ void Form1::UpdateTabs()
 
 void Form1::TechLevelsResetToCurrent()
 {
-    Alien ^sp = m_GameData->GetSpecies();
+    Alien ^sp = GameData::Player;
 
     // Inhibit grid update
     *m_bGridUpdateEnabled = false;
@@ -293,7 +277,7 @@ void Form1::TechLevelsResetToCurrent()
 
 void Form1::TechLevelsResetToTaught()
 {
-    Alien ^sp = m_GameData->GetSpecies();
+    Alien ^sp = GameData::Player;
 
     // Inhibit grid update
     *m_bGridUpdateEnabled = false;
@@ -310,7 +294,7 @@ void Form1::TechLevelsResetToTaught()
 
 void Form1::TechLevelsChanged()
 {
-    Alien ^sp = m_GameData->GetSpecies();
+    Alien ^sp = GameData::Player;
 
     sp->TechLevelsAssumed[TECH_MI] = Decimal::ToInt32(TechMI->Value);
     sp->TechLevelsAssumed[TECH_MA] = Decimal::ToInt32(TechMA->Value);
@@ -512,7 +496,7 @@ void Form1::DisplayTurn()
         Summary->Text = m_GameData->GetSummary();
 
         this->Text = String::Format("[SP {0}, Turn {1}] Far Horizons User Interface, build {2}",
-            m_GameData->GetSpeciesName(),
+            GameData::Player->Name,
             m_GameData->GetLastTurn(),
             BuildInfo::Version );
 
@@ -777,8 +761,6 @@ void Form1::ApplyDataAndFormat(
     // Setup data source
     if( data )
         grid->DataSource = data;
-    else
-        SetGridBgAndTooltip(grid);
 
     // Make object link column invisible
     grid->Columns[objColumnIndex]->Visible = false;
@@ -789,9 +771,13 @@ void Form1::ApplyDataAndFormat(
     // Formatting
     for each( DataGridViewColumn ^col in grid->Columns )
     {
-        if( col->CellType == double::typeid )
+        Type ^type = col->ValueType;
+        if( type == nullptr )
+            type = col->CellTemplate->ValueType;
+
+        if( type == double::typeid )
             col->DefaultCellStyle->Format = "F2";
-        if( col->CellType == double::typeid || col->CellType == int::typeid )
+        if( type == double::typeid || type == int::typeid )
             col->DefaultCellStyle->Alignment =
                 DataGridViewContentAlignment::MiddleRight;
     }
@@ -810,12 +796,44 @@ void Form1::ApplyDataAndFormat(
     grid->ClearSelection();
 }
 
+void Form1::ColumnsFilterMenu(DataGridView ^grid, DataGridViewCellMouseEventArgs ^e)
+{
+    // Create menu
+    Windows::Forms::ContextMenuStrip ^menu = gcnew Windows::Forms::ContextMenuStrip;
+
+    EventHandler1Arg<ColumnsFilterData^> ^handler =
+        gcnew EventHandler1Arg<ColumnsFilterData^>(this, &Form1::ColoniesFilterOnOff);
+
+    for( int i = 0; i < grid->Columns->Count; ++i )
+    {
+        String ^text = (String^)grid->Columns[i]->HeaderCell->Value;
+        if( String::IsNullOrEmpty(text) )
+        {
+            ToolStripMenuItem ^menuItem = CreateCustomMenuItem(
+                text,
+                gcnew ColumnsFilterData(grid, i),
+                handler );
+            menuItem->Checked = grid->Columns[i]->Visible;
+            menu->Items->Add( menuItem );
+        }
+    }
+
+    // Show menu
+    Rectangle r = grid->GetCellDisplayRectangle(e->ColumnIndex, e->RowIndex, false);
+    menu->Show(grid, r.Left + e->Location.X, r.Top + e->Location.Y);
+}
+
+void Form1::ColoniesFilterOnOff(ColumnsFilterData ^data)
+{
+    data->A->Columns[data->B]->Visible = !data->A->Columns[data->B]->Visible;
+}
+
 Color Form1::GetAlienColor(Alien ^sp)
 {
     if( sp == nullptr )
         return Color::White;
 
-    if( sp == m_GameData->GetSpecies() )
+    if( sp == GameData::Player )
         return Color::FromArgb(225, 255, 255);
 
     switch( sp->Relation )
@@ -934,7 +952,7 @@ void Form1::SystemsUpdateControls()
 
     // Trigger grid update
     m_SystemsFilter->EnableUpdates  = true;
-    SystemsRefHome->Text            = m_GameData->GetSpeciesName();
+    SystemsRefHome->Text            = GameData::Player->Name;
     m_SystemsFilter->Reset();
 }
 
@@ -990,13 +1008,13 @@ void Form1::SystemsSetup()
         row[colScan]        = system->PrintScanStatus();
         if( system->LastVisited != -1 )
             row[colVisited] = system->LastVisited;
-        row[colColonies]    = system->PrintColonies( -1, m_GameData->GetSpecies() );
+        row[colColonies]    = system->PrintColonies( -1, GameData::Player );
         row[colNotes]       = system->Comment;
 
         //SystemsGrid->Columns[colColonies->Ordinal]->DefaultCellStyle->WrapMode = DataGridViewTriState::True;
 
         for each( IGridPlugin ^plugin in m_GridPlugins )
-            plugin->AddRowData(row, system, m_SystemsFilter);
+            plugin->AddRowData(row, m_SystemsFilter, system);
 
         dataTable->Rows->Add(row);
     }
@@ -1093,7 +1111,7 @@ void Form1::PlanetsUpdateControls()
     m_PlanetsFilter->EnableUpdates  = false;
 
     m_PlanetsFilter->GameData       = m_GameData;
-    m_PlanetsFilter->DefaultLSN     = Math::Min(99, m_GameData->GetSpecies()->TechLevelsAssumed[TECH_LS]);
+    m_PlanetsFilter->DefaultLSN     = Math::Min(99, GameData::Player->TechLevelsAssumed[TECH_LS]);
 
     PlanetsRefXYZ->DataSource       = m_RefListSystemsXYZ;
     PlanetsRefHome->DataSource      = m_RefListHomes;
@@ -1103,7 +1121,7 @@ void Form1::PlanetsUpdateControls()
     PlanetsRefHome->Text = GridFilter::s_CaptionHome;
     // Trigger grid update
     m_PlanetsFilter->EnableUpdates  = true;
-    PlanetsRefHome->Text = m_GameData->GetSpeciesName();
+    PlanetsRefHome->Text = GameData::Player->Name;
     m_PlanetsFilter->Reset();
 }
 
@@ -1156,7 +1174,7 @@ void Form1::PlanetsSetup()
             if( system->LastVisited != -1 )
                 row[colVisited] = system->LastVisited;
             row[colScan]     = system->PrintScanStatus();
-            row[colColonies] = system->PrintColonies( planet->Number, m_GameData->GetSpecies() );
+            row[colColonies] = system->PrintColonies( planet->Number, GameData::Player );
 
             if( (planet->System->HomeSpecies != nullptr) )
             {
@@ -1175,7 +1193,7 @@ void Form1::PlanetsSetup()
             }
 
             for each( IGridPlugin ^plugin in m_GridPlugins )
-                plugin->AddRowData(row, planet, m_SystemsFilter);
+                plugin->AddRowData(row, m_PlanetsFilter, planet);
 
             dataTable->Rows->Add(row);
         }
@@ -1183,7 +1201,7 @@ void Form1::PlanetsSetup()
 
     ApplyDataAndFormat(PlanetsGrid, dataTable, colObject->Ordinal, colLSN->Ordinal, nullptr);
     for each( IGridPlugin ^plugin in m_GridPlugins )
-        plugin->GridFormat(GridType::Planets, SystemsGrid);
+        plugin->GridFormat(GridType::Planets, PlanetsGrid);
 
     // Some columns are not sortable... yet
     PlanetsGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
@@ -1391,6 +1409,73 @@ void Form1::PlanetsMenuRemoveNameCancel(Object^, EventArgs^)
 ////////////////////////////////////////////////////////////////
 // Colonies
 
+void Form1::ColoniesInitControls()
+{
+    ColoniesGridSorter ^sorter = gcnew ColoniesGridSorter(ColoniesGrid);
+
+    // Add columns
+    ColoniesColumns %c = m_ColoniesColumns;
+
+#define ADD_COLUMN(title, desc, type, sortOrder, customSortMode)    \
+    sorter->AddColumn(title, desc, type::typeid, SortOrder::sortOrder, ColoniesGridSorter::CustomSortMode::customSortMode)
+
+    c.Object    = ADD_COLUMN(nullptr,       nullptr,                        Colony, None,       Default);
+    c.Owner     = ADD_COLUMN("Owner",       "Colony owner",                 String, Ascending,  Owner);
+    c.Name      = ADD_COLUMN("Name",        "Colony name",                  String, Ascending,  Default);
+    c.Type      = ADD_COLUMN("Type",        "Colony type",                  String, Ascending,  Type);
+    c.Location  = ADD_COLUMN("Loc",         "X Y Z #Planet location",         String, Ascending,  Location);
+    c.Size      = ADD_COLUMN("Size",        "Colony economic base",         double, Descending, Default);
+    c.Prod      = ADD_COLUMN("PR",          "Production",                   int,    Descending, Default);
+    c.Shipyards = ADD_COLUMN("SY",          "Shipyards",                    int,    Descending, Default);
+    c.LSN       = ADD_COLUMN("LSN",         "LSN",                          int,    Ascending,  Default);
+    c.Balance   = ADD_COLUMN("Balance",     "IU/AU balance",                String, Descending, Default);
+    c.Pop       = ADD_COLUMN("Pop",         "Available population",         int,    Descending, Default);
+    c.Dist      = ADD_COLUMN("Dist",        "Distance to ref system and mishap chance [%]", String, Ascending, Distance);
+    c.Inventory = ADD_COLUMN("Inventory",   "Planetary inventory",          String, Ascending, Default);
+    c.ProdOrder = ADD_COLUMN("#",           "Production order for orders template", int, Ascending, Default);
+    c.ProdPerc  = ADD_COLUMN("Eff",         "Production effectiveness",     int,    Descending, Default);
+    c.Seen      = ADD_COLUMN("Seen",        "Last seen turn",               int,    Descending, Default);
+
+    for each( IGridPlugin ^plugin in m_GridPlugins )
+        plugin->AddColumns(GridType::Colonies, sorter);
+
+    c.Notes        = ADD_COLUMN("Notes", "Notes", String, Ascending, Default);
+#undef ADD_COLUMN
+
+    // Formatting
+    ApplyDataAndFormat(ColoniesGrid, nullptr, c.Object, c.Prod, sorter);
+    for each( IGridPlugin ^plugin in m_GridPlugins )
+        plugin->GridFormat(GridType::Colonies, ColoniesGrid);
+
+    ColoniesGrid->Columns[c.Size]->DefaultCellStyle->Format = "F1";
+    ColoniesGrid->Columns[c.Dist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
+
+    ColoniesGrid->Columns[c.Inventory]->DefaultCellStyle->Font =
+        gcnew System::Drawing::Font(L"Tahoma", 6.75F);
+
+    // Filter setup
+    GridFilter ^filter = gcnew GridFilter(ColoniesGrid, m_bGridUpdateEnabled);
+    filter->GridSetup += gcnew GridSetupHandler(this, &Form1::ColoniesSetup);
+    filter->GridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
+
+    filter->CtrlRef         = ColoniesRef;
+    filter->CtrlRefHome     = ColoniesRefHome;
+    filter->CtrlRefXYZ      = ColoniesRefXYZ;
+    filter->CtrlRefColony   = ColoniesRefColony;
+    filter->CtrlRefShip     = ColoniesRefShip;
+    filter->CtrlGV          = TechGV;
+    filter->CtrlShipAge     = ColoniesShipAge;
+    filter->CtrlMaxMishap   = ColoniesMaxMishap;
+    filter->CtrlMaxLSN      = ColoniesMaxLSN;
+    filter->CtrlFiltOwnO    = ColoniesFiltOwnO;
+    filter->CtrlFiltOwnN    = ColoniesFiltOwnN;
+    filter->CtrlMiMaBalance = ColoniesMiMaBalanced;
+
+    // Store objects
+    m_ColoniesFilter = filter;
+    m_ColoniesSorter = sorter;
+}
+
 void Form1::ColoniesUpdateControls()
 {
     // Inhibit grid update
@@ -1406,45 +1491,22 @@ void Form1::ColoniesUpdateControls()
     ColoniesRefHome->Text = GridFilter::s_CaptionHome;
     // Trigger grid update
     m_ColoniesFilter->EnableUpdates = true;
-    ColoniesRefHome->Text = m_GameData->GetSpeciesName();
+    ColoniesRefHome->Text = GameData::Player->Name;
     m_ColoniesFilter->Reset();
+
+    m_ColoniesSorter->SetGroupBySpecies( ColoniesGroupByOwner->Checked );
+    m_ColoniesSorter->SetRefSystem( m_ColoniesFilter->RefSystem );
 }
 
 void Form1::ColoniesSetup()
 {
-    ColoniesGrid->Columns->Clear();
+    ColoniesGrid->Rows->Clear();
 
-    ColoniesGridSorter ^sorter = gcnew ColoniesGridSorter(ColoniesGrid, m_GameData->GetSpecies());
-    sorter->SetGroupBySpecies( ColoniesGroupByOwner->Checked );
-    sorter->SetRefSystem( m_ColoniesFilter->RefSystem );
-
-    m_ColoniesSorter = sorter;
-
-    int colObject       = sorter->AddColumn("colony",     Colony::typeid,   SortOrder::None );
-    int colOwner        = sorter->AddColumn("Owner",      String::typeid,   SortOrder::Ascending,     ColoniesGridSorter::CustomSortMode::Owner );
-    int colName         = sorter->AddColumn("Name",       String::typeid,   SortOrder::Ascending );
-    int colType         = sorter->AddColumn("Type",       String::typeid,   SortOrder::Ascending,     ColoniesGridSorter::CustomSortMode::Type );
-    int colLocation     = sorter->AddColumn("Loc.",       String::typeid,   SortOrder::Ascending,     ColoniesGridSorter::CustomSortMode::Location );
-    int colSize         = sorter->AddColumn("Size",       double::typeid,   SortOrder::Descending );
-    int colSeen         = sorter->AddColumn("Seen",       int::typeid,      SortOrder::Descending );
-    int colProd         = sorter->AddColumn("Prod",       int::typeid,      SortOrder::Descending );
-    int colShipyards    = sorter->AddColumn("S-yards",    int::typeid,      SortOrder::Descending );
-    int colLSN          = sorter->AddColumn("LSN",        int::typeid,      SortOrder::Ascending );
-    int colProdPerc     = sorter->AddColumn("Pr[%]",      int::typeid,      SortOrder::Descending );
-    int colBalance      = sorter->AddColumn("Balance",    String::typeid,   SortOrder::Descending );
-    int colPop          = sorter->AddColumn("Pop",        int::typeid,      SortOrder::Descending );
-    int colDist         = sorter->AddColumn("Dist",       String::typeid,   SortOrder::Ascending,     ColoniesGridSorter::CustomSortMode::Distance );
-    int colInventory    = sorter->AddColumn("Inventory",  String::typeid,   SortOrder::Ascending );
-    int colProdOrder    = sorter->AddColumn("Order",      int::typeid,      SortOrder::Ascending );
-
-    //for each( IGridPlugin ^plugin in m_GridPlugins )
-    //    plugin->AddColumns(GridType::Colonies, dataTable);
-
-    int colNotes        = sorter->AddColumn("Notes",      String::typeid,   SortOrder::Ascending );
+    ColoniesColumns %c = m_ColoniesColumns;
 
     int gv  = Decimal::ToInt32(TechGV->Value);
     int age = Decimal::ToInt32(ColoniesShipAge->Value);
-    Alien ^sp = m_GameData->GetSpecies();
+    Alien ^sp = GameData::Player;
 
     for each( Colony ^colony in m_GameData->GetColonies() )
     {
@@ -1454,19 +1516,19 @@ void Form1::ColoniesSetup()
         double distance = colony->System->CalcDistance(m_ColoniesFilter->RefSystem);
         double mishap = colony->System->CalcMishap(m_ColoniesFilter->RefSystem, gv, age);
 
-        //DataRow^ row = dataTable->NewRow();
-        int row = ColoniesGrid->Rows->Add();
-        ColoniesGrid[colObject, row]->Value      = colony;
-        ColoniesGrid[colOwner, row]->Value       = colony->Owner == sp ? String::Format("* {0}", sp->Name) : colony->Owner->Name;
-        ColoniesGrid[colName, row]->Value        = colony->Name;
-        ColoniesGrid[colType, row]->Value        = FHStrings::PlTypeToString(colony->PlanetType);
-        ColoniesGrid[colLocation ,row]->Value    = colony->PrintLocation();
+        DataGridViewRow ^row = ColoniesGrid->Rows[ ColoniesGrid->Rows->Add() ];
+        DataGridViewCellCollection ^cells = row->Cells;
+        cells[c.Object]->Value      = colony;
+        cells[c.Owner]->Value       = colony->Owner == sp ? String::Format("* {0}", sp->Name) : colony->Owner->Name;
+        cells[c.Name]->Value        = colony->Name;
+        cells[c.Type]->Value        = FHStrings::PlTypeToString(colony->PlanetType);
+        cells[c.Location]->Value    = colony->PrintLocation();
         if( colony->EconomicBase != -1 )
-            ColoniesGrid[colSize ,row]->Value    = (double)colony->EconomicBase / 10;
-        ColoniesGrid[colDist, row]->Value        = String::Format("{0:F1}  ({1:F1}%)", distance, mishap);
-        ColoniesGrid[colInventory, row]->Value   = colony->PrintInventoryShort();
+            cells[c.Size]->Value    = (double)colony->EconomicBase / 10;
+        cells[c.Dist]->Value        = String::Format("{0:F1}  ({1:F1}%)", distance, mishap);
+        cells[c.Inventory]->Value   = colony->PrintInventoryShort();
         if( colony->Planet )
-            ColoniesGrid[colLSN, row]->Value     = colony->Planet->LSN;
+            cells[c.LSN]->Value     = colony->Planet->LSN;
 
         if( colony->Owner == sp )
         {
@@ -1477,52 +1539,50 @@ void Form1::ColoniesSetup()
                 sp->TechLevelsAssumed[TECH_LS],
                 m_GameData->GetFleetPercentCost() );
 
-            ColoniesGrid[colProd, row]->Value    = prodCalculated; // was: colony->EUAvail
-            ColoniesGrid[colProdOrder, row]->Value = colony->ProductionOrder;
-            ColoniesGrid[colProdPerc, row]->Value= 100 - colony->ProdPenalty;
-            ColoniesGrid[colPop, row]->Value     = colony->AvailPop;
+            cells[c.Prod]->Value    = prodCalculated;
+            cells[c.ProdOrder]->Value = colony->ProductionOrder;
+            cells[c.ProdPerc]->Value= 100 - colony->ProdPenalty;
+            cells[c.Pop]->Value     = colony->AvailPop;
 
             if( colony->PlanetType == PLANET_HOME ||
                 colony->PlanetType == PLANET_COLONY )
             {
                 colony->CalculateBalance(m_ColoniesFilter->MiMaBalanced);
-                ColoniesGrid[colBalance, row]->Value = colony->PrintBalance();
+                cells[c.Balance]->Value = colony->PrintBalance();
             }
         }
         else
         {
             if( colony->LastSeen > 0 )
-                ColoniesGrid[colSeen, row]->Value = colony->LastSeen;
+                cells[c.Seen]->Value = colony->LastSeen;
         }
 
         if( colony->Shipyards != -1 )
         {
-            ColoniesGrid[colShipyards, row]->Value = colony->Shipyards;
+            cells[c.Shipyards]->Value = colony->Shipyards;
         }
 
         if( colony->Hidden )
         {
-            ColoniesGrid[colNotes, row]->Value = "Hidden";
+            cells[c.Notes]->Value = "Hidden";
         }
 
         if( colony->UnderSiege )
         {
-            ColoniesGrid[colNotes, row]->Value = "Under siege";
+            cells[c.Notes]->Value = "Under siege";
+            cells[c.Notes]->Style->ForeColor = Color::Red;
+            cells[c.Prod]->Style->ForeColor = Color::Red;
         }
 
-        //for each( IGridPlugin ^plugin in m_GridPlugins )
-        //    plugin->AddRowData(row, colony, m_SystemsFilter);
-
-        //dataTable->Rows->Add(row);
+        for each( IGridPlugin ^plugin in m_GridPlugins )
+            plugin->AddRowData(row, m_ColoniesFilter, colony);
     }
 
-    ApplyDataAndFormat(ColoniesGrid, nullptr, colObject, colProd, sorter);
-    //for each( IGridPlugin ^plugin in m_GridPlugins )
-    //    plugin->GridFormat(GridType::Colonies, SystemsGrid);
+    // Setup tooltips
+    SetGridBgAndTooltip(ColoniesGrid);
 
-    // Formatting
-    ColoniesGrid->Columns[colSize]->DefaultCellStyle->Format = "F1";
-    ColoniesGrid->Columns[colDist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
+    // Sort data
+    ColoniesGrid->Sort( m_ColoniesSorter );
 
     // Enable filters
     m_ColoniesFilter->EnableUpdates = true;
@@ -1534,7 +1594,7 @@ void Form1::ColoniesSetRef( int rowIndex )
     {
         int index = ColoniesGrid->Columns[0]->Index;
         Colony ^colony = safe_cast<Colony^>(ColoniesGrid->Rows[ rowIndex ]->Cells[index]->Value);
-        ColoniesRefColony->Text = colony->PrintRefListEntry( m_GameData->GetSpecies() );
+        ColoniesRefColony->Text = colony->PrintRefListEntry();
     }
 }
 
@@ -1545,7 +1605,7 @@ void Form1::ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowInde
     m_ColoniesMenuRef = colony;
 
     menu->Items->Add(
-        "Select ref: PL " + colony->PrintRefListEntry(m_GameData->GetSpecies()),
+        "Select ref: PL " + colony->PrintRefListEntry(),
         nullptr,
         gcnew EventHandler(this, &Form1::ColoniesMenuSelectRef) );
 
@@ -1554,7 +1614,7 @@ void Form1::ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowInde
         nullptr,
         gcnew EventHandler(this, &Form1::ColoniesFiltersReset_Click));
 
-    if( colony->Owner == m_GameData->GetSpecies() )
+    if( colony->Owner == GameData::Player )
     {
         menu->Items->Add( gcnew ToolStripSeparator );
 
@@ -1582,7 +1642,7 @@ void Form1::ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowInde
         if( colony->CanProduce )
         {
             // Shipyard
-            if( colony->GetMaxProductionBudget() > Calculators::ShipyardCost( m_GameData->GetSpecies()->TechLevels[TECH_MA] ) )
+            if( colony->GetMaxProductionBudget() > Calculators::ShipyardCost( GameData::Player->TechLevels[TECH_MA] ) )
             {
                 menu->Items->Add( gcnew ToolStripSeparator );
                 ToolStripMenuItem ^item = gcnew ToolStripMenuItem(
@@ -1609,7 +1669,7 @@ void Form1::ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowInde
 
 void Form1::ColoniesMenuSelectRef(Object^, EventArgs ^e)
 {
-    ColoniesRefColony->Text = m_ColoniesMenuRef->PrintRefListEntry(m_GameData->GetSpecies());
+    ColoniesRefColony->Text = m_ColoniesMenuRef->PrintRefListEntry();
 }
 
 void Form1::ColoniesMenuProdOrderAdjust(int adjustment)
@@ -1617,7 +1677,7 @@ void Form1::ColoniesMenuProdOrderAdjust(int adjustment)
     int oldOrder = m_ColoniesMenuRef->ProductionOrder;
     int newOrder = Math::Max(1, oldOrder + adjustment);
     int lastOrder = 0;
-    for each( Colony ^colony in m_GameData->GetSpecies()->Colonies )
+    for each( Colony ^colony in GameData::Player->Colonies )
     {
         if( colony != m_ColoniesMenuRef )
         {
@@ -1638,7 +1698,7 @@ void Form1::ColoniesMenuProdOrderAdjust(int adjustment)
 
     newOrder = Math::Min(newOrder, lastOrder + 1);
     m_ColoniesMenuRef->ProductionOrder = newOrder;
-    m_GameData->GetSpecies()->SortColoniesByProdOrder();
+    GameData::Player->SortColoniesByProdOrder();
     m_ColoniesFilter->Update();
 
     SaveCommands();
@@ -1668,7 +1728,7 @@ void Form1::ShipsUpdateControls()
     ShipsRefHome->Text = GridFilter::s_CaptionHome;
     // Trigger grid update
     m_ShipsFilter->EnableUpdates = true;
-    ShipsRefHome->Text = m_GameData->GetSpeciesName();
+    ShipsRefHome->Text = GameData::Player->Name;
     m_ShipsFilter->Reset();
 }
 
@@ -1695,7 +1755,7 @@ void Form1::ShipsSetup()
     for each( IGridPlugin ^plugin in m_GridPlugins )
         plugin->AddColumns(GridType::Ships, dataTable);
 
-    Alien ^sp = m_GameData->GetSpecies();
+    Alien ^sp = GameData::Player;
     int gv = sp->TechLevelsAssumed[TECH_GV];
     int ml = sp->TechLevelsAssumed[TECH_ML];
     double discount = Calculators::ShipMaintenanceDiscount(ml);
@@ -1734,14 +1794,14 @@ void Form1::ShipsSetup()
         }
 
         for each( IGridPlugin ^plugin in m_GridPlugins )
-            plugin->AddRowData(row, ship, m_SystemsFilter);
+            plugin->AddRowData(row, m_ShipsFilter, ship);
 
         dataTable->Rows->Add(row);
     }
 
     ApplyDataAndFormat(ShipsGrid, dataTable, colObject->Ordinal, colOwner->Ordinal, nullptr);
     for each( IGridPlugin ^plugin in m_GridPlugins )
-        plugin->GridFormat(GridType::Ships, SystemsGrid);
+        plugin->GridFormat(GridType::Ships, ShipsGrid);
 
     // Some columns are not sortable... yet
     ShipsGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
@@ -1756,7 +1816,7 @@ void Form1::ShipsSetRef( int rowIndex )
     {
         int index = ShipsGrid->Columns[0]->Index;
         Ship ^ship = safe_cast<Ship^>(ShipsGrid->Rows[ rowIndex ]->Cells[index]->Value);
-        if( ship->Owner == m_GameData->GetSpecies() )
+        if( ship->Owner == GameData::Player )
             ShipsRefShip->Text = ship->PrintRefListEntry();
         else
             m_ShipsFilter->SetRefSystem(ship->System);
@@ -1783,7 +1843,7 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
         gcnew EventHandler(this, &Form1::ShipsFiltersReset_Click));
 
     // Ship orders
-    if( ship->Owner == m_GameData->GetSpecies() )
+    if( ship->Owner == GameData::Player )
     {
         menu->Items->Add( gcnew ToolStripSeparator );
 
@@ -1854,7 +1914,7 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
             }
 
             // Colonies
-            for each( Colony ^colony in m_GameData->GetSpecies()->Colonies )
+            for each( Colony ^colony in GameData::Player->Colonies )
             {
                 if( colony->System != ship->System )
                 {
@@ -1940,7 +2000,7 @@ ToolStripMenuItem^ Form1::ShipsMenuAddJumpsHere(
     ToolStripMenuItem ^jumpMenu = gcnew ToolStripMenuItem("Jump Here:");
     bool anyJump = false;
 
-    for each( Ship ^ship in m_GameData->GetSpecies()->Ships )
+    for each( Ship ^ship in GameData::Player->Ships )
     {
         if( ship->CanJump == false )
             continue;
@@ -1965,7 +2025,7 @@ ToolStripMenuItem^ Form1::ShipsMenuAddJumpsHere(
 
 void Form1::ShipsMenuSelectRef(Object^, EventArgs ^e)
 {
-    if( m_ShipsMenuRef->Owner == m_GameData->GetSpecies() )
+    if( m_ShipsMenuRef->Owner == GameData::Player )
         ShipsRefShip->Text = m_ShipsMenuRef->PrintRefListEntry();
     else
         m_ShipsFilter->SetRefSystem(m_ShipsMenuRef->System);
@@ -2038,14 +2098,14 @@ void Form1::AliensSetup()
         }
 
         for each( IGridPlugin ^plugin in m_GridPlugins )
-            plugin->AddRowData(row, alien, m_SystemsFilter);
+            plugin->AddRowData(row, m_AliensFilter, alien);
 
         dataTable->Rows->Add(row);
     }
 
     ApplyDataAndFormat(AliensGrid, dataTable, colObject->Ordinal, colRelation->Ordinal, nullptr);
     for each( IGridPlugin ^plugin in m_GridPlugins )
-        plugin->GridFormat(GridType::Aliens, SystemsGrid);
+        plugin->GridFormat(GridType::Aliens, AliensGrid);
 
     // Enable filters
     m_AliensFilter->EnableUpdates = true;
@@ -2132,7 +2192,7 @@ ToolStripMenuItem^ Form1::AliensMenuCreateTeach(String ^text, TechType tech)
 {
     ToolStripMenuItem ^menuItem = CreateCustomMenuItem(
         text,
-        gcnew TeachData(m_AliensMenuRef, tech, m_GameData->GetSpecies()->TechLevels[tech]),
+        gcnew TeachData(m_AliensMenuRef, tech, GameData::Player->TechLevels[tech]),
         gcnew EventHandler1Arg<TeachData^>(this, &Form1::AliensMenuTeach) );
 
     return menuItem;
@@ -2167,27 +2227,27 @@ void Form1::AliensMenuTeachAll(Object^, EventArgs^)
 {
     m_AliensFilter->EnableUpdates = false;
 
-    TeachData ^data = gcnew TeachData(m_AliensMenuRef, TECH_MI, m_GameData->GetSpecies()->TechLevels[TECH_MI]);
+    TeachData ^data = gcnew TeachData(m_AliensMenuRef, TECH_MI, GameData::Player->TechLevels[TECH_MI]);
     AliensMenuTeach(data);
 
     data->B = TECH_MA;
-    data->C = m_GameData->GetSpecies()->TechLevels[TECH_MA];
+    data->C = GameData::Player->TechLevels[TECH_MA];
     AliensMenuTeach(data);
 
     data->B = TECH_ML;
-    data->C = m_GameData->GetSpecies()->TechLevels[TECH_ML];
+    data->C = GameData::Player->TechLevels[TECH_ML];
     AliensMenuTeach(data);
 
     data->B = TECH_GV;
-    data->C = m_GameData->GetSpecies()->TechLevels[TECH_GV];
+    data->C = GameData::Player->TechLevels[TECH_GV];
     AliensMenuTeach(data);
 
     data->B = TECH_LS;
-    data->C = m_GameData->GetSpecies()->TechLevels[TECH_LS];
+    data->C = GameData::Player->TechLevels[TECH_LS];
     AliensMenuTeach(data);
 
     data->B = TECH_BI;
-    data->C = m_GameData->GetSpecies()->TechLevels[TECH_BI];
+    data->C = GameData::Player->TechLevels[TECH_BI];
     AliensMenuTeach(data);
 
     m_AliensFilter->EnableUpdates = true;

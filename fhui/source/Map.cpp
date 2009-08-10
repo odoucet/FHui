@@ -32,7 +32,7 @@ private value struct MapConstants
 
 void Form1::MapSetup()
 {
-    MapSPSelf->Text = m_GameData->GetSpeciesName();
+    MapSPSelf->Text = GameData::Player->Name;
 }
 
 void Form1::MapDraw()
@@ -61,7 +61,7 @@ void Form1::MapDraw()
 
 int Form1::MapSpNumFromPtr(Alien ^sp)
 {
-    if( sp == m_GameData->GetSpecies() )
+    if( sp == GameData::Player )
         return 3;
 
     //TODO: 3 species
@@ -75,7 +75,7 @@ Alien^ Form1::MapGetAlien(int sp)
     case 0:     return MapGetAlienFromUI(MapSP3);
     case 1:     return MapGetAlienFromUI(MapSP2);
     case 2:     return MapGetAlienFromUI(MapSP1);
-    case 3:     return m_GameData->GetSpecies();
+    case 3:     return GameData::Player;
     default:
         // TODO: exception
         return nullptr;
@@ -154,7 +154,7 @@ Brush^ Form1::MapGetBrushLSN(int lsn)
     }
     else
     {
-        int minLsn = m_GameData->GetSpecies()->TechLevelsAssumed[TECH_LS];
+        int minLsn = GameData::Player->TechLevelsAssumed[TECH_LS];
         alpha = (25.0F + (((minLsn - Math::Min(minLsn, lsn)) * 75.0F) / minLsn)) / 100.0F;
     }
 

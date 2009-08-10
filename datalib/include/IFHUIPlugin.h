@@ -15,6 +15,7 @@ ref class Alien;
 ref class Ship;
 ref class GameData;
 interface class IGridFilter;
+interface class IGridSorter;
 
 ref class BudgetTracker;
 
@@ -45,13 +46,14 @@ public interface class IGridPlugin : public IPluginBase
 {
 public:
     void        AddColumns(GridType, DataTable^);
+    void        AddColumns(GridType, IGridSorter^);
     void        GridFormat(GridType, DataGridView^);
     void        AddMenuItems(GridType, DataGridView^);
-    void        AddRowData(DataRow^, StarSystem^, IGridFilter^);
-    void        AddRowData(DataRow^, Planet^, IGridFilter^);
-    void        AddRowData(DataRow^, Colony^, IGridFilter^);
-    void        AddRowData(DataRow^, Ship^, IGridFilter^);
-    void        AddRowData(DataRow^, Alien^, IGridFilter^);
+    void        AddRowData(DataRow^, IGridFilter^, StarSystem^);
+    void        AddRowData(DataRow^, IGridFilter^, Planet^);
+    void        AddRowData(DataGridViewRow^, IGridFilter^, Colony^);
+    void        AddRowData(DataRow^, IGridFilter^, Ship^);
+    void        AddRowData(DataRow^, IGridFilter^, Alien^);
 };
 
 // ---------------------------------------------------------

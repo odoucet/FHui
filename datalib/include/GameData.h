@@ -338,7 +338,7 @@ public:
 
     String^         PrintLocation() { return String::Format("{0} {1}", System->PrintLocation(), PlanetNum); }
     String^         PrintInventoryShort();
-    String^         PrintRefListEntry(Alien ^player);
+    String^         PrintRefListEntry();
     String^         PrintBalance();
 
     void            CalculateBalance(bool MiMaBalanced);
@@ -519,8 +519,6 @@ public:
     int             GetLastTurn()               { return m_TurnMax; }
     int             GetCarriedEU()              { return m_TurnEUStart; }
 
-    Alien^          GetSpecies()                { return m_Species; }
-    String^         GetSpeciesName()            { return m_Species->Name; }
     int             GetFleetCost();
     int             GetFleetPercentCost();
     Alien^          GetAlien(String ^sp);
@@ -569,6 +567,9 @@ public:
     List<Pair<String^, int>^>^  GetAutoOrdersProduction(Colony^);
 
     // ------------------------------------------
+
+    static property Alien^  Player;
+
 protected:
     bool            TurnCheck(int turn);
     int             TurnAlign(int turn);
@@ -596,7 +597,6 @@ protected:
     List<Colony^>^      GetColonies(StarSystem^, Alien^);
 
     // ------------------------------------------
-    Alien              ^m_Species;
     int                 m_TurnEUStart;
     int                 m_TurnEUProduced;
     int                 m_FleetCost;

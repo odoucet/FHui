@@ -57,8 +57,8 @@ void Form1::SaveCommands()
     m_OrderList->Clear();
 
     // -- Colonies
-    m_GameData->GetSpecies()->SortColoniesByProdOrder();
-    for each( Colony ^colony in m_GameData->GetSpecies()->Colonies )
+    GameData::Player->SortColoniesByProdOrder();
+    for each( Colony ^colony in GameData::Player->Colonies )
     {
         m_OrderList->Add( "COLONY " + colony->Name );
         if( colony->OrderBuildShipyard )
@@ -66,7 +66,7 @@ void Form1::SaveCommands()
     }
 
     // -- Ships
-    for each( Ship ^ship in m_GameData->GetSpecies()->Ships )
+    for each( Ship ^ship in GameData::Player->Ships )
         if( ship->Command )
             m_OrderList->Add( String::Format("SHIP {0} {1}",
                 ship->PrintClassWithName(),
@@ -111,7 +111,7 @@ void Form1::LoadCommands()
         if( m_RM->Match(line, m_RM->ExpCmdColony) )
         {
             Colony ^colony = m_GameData->GetColony(m_RM->Results[0]);
-            if( colony->Owner == m_GameData->GetSpecies() )
+            if( colony->Owner == GameData::Player )
             {
                 colony->ProductionOrder = colonyProdOrder++;
                 m_ColoniesMenuRef = colony;
@@ -210,7 +210,7 @@ void Form1::LoadCommands()
             if( alien->Relation != SP_NEUTRAL &&
                 alien->Relation != SP_ALLY )
                 throw gcnew FHUIParsingException("Inconsistent alien relation for Teach command!");
-            if( level != m_GameData->GetSpecies()->TechLevels[tech] )
+            if( level != GameData::Player->TechLevels[tech] )
                 throw gcnew FHUIParsingException("Inconsistent tech level for Teach command!");
 
             m_GameData->AddCommand( gcnew CmdTeach(alien, tech, level) );
@@ -311,7 +311,7 @@ void Form1::GenerateCombat()
 
 void Form1::GenerateCombatInfo(StarSystem^ system)
 {
-    Alien^ player = m_GameData->GetSpecies();
+    Alien^ player = GameData::Player;
 
     String^ sysInfo = system->PrintColonies(-1, player );
     if ( String::IsNullOrEmpty(sysInfo) )
@@ -514,7 +514,7 @@ void Form1::GenerateJumps()
 {
     m_OrderList->Add("START JUMPS");
     
-    List<Ship^>^ jumpList = m_GameData->GetSpecies()->Ships;
+    List<Ship^>^ jumpList = GameData::Player->Ships;
     jumpList->Sort( gcnew ShipJumpComparer );
 
     for each( Ship ^ship in jumpList )
@@ -591,7 +591,7 @@ void Form1::GenerateProduction()
     m_OrderList->Add("  ; +" + budget->GetTotalBudget().ToString() + " EUs carried" );
 
     // Mark ships for upgrade
-    for each( Ship ^ship in m_GameData->GetSpecies()->Ships )
+    for each( Ship ^ship in GameData::Player->Ships )
     {
         if( ship->Command != nullptr &&
             (   ship->Command->Type == Ship::OrderType::Upgrade ||
@@ -602,10 +602,10 @@ void Form1::GenerateProduction()
     }
 
     // Sort colonies for production
-    m_GameData->GetSpecies()->SortColoniesByProdOrder();
+    GameData::Player->SortColoniesByProdOrder();
 
     // Generate production template for each colony
-    for each( Colony ^colony in m_GameData->GetSpecies()->Colonies )
+    for each( Colony ^colony in GameData::Player->Colonies )
     {
         m_OrderList->Add("");
         m_OrderList->Add("  PRODUCTION PL " + colony->Name);
@@ -652,7 +652,7 @@ void Form1::GenerateProduction()
         // Build SHIPYARD
         if( colony->OrderBuildShipyard )
         {
-            int cost = Calculators::ShipyardCost( m_GameData->GetSpecies()->TechLevels[TECH_MA] );
+            int cost = Calculators::ShipyardCost( GameData::Player->TechLevels[TECH_MA] );
             m_OrderList->Add( "    Shipyard  ; [A]  -" + cost.ToString() );
             budget->Spend(cost);
         }
@@ -786,7 +786,7 @@ void Form1::GeneratePostArrival()
 
     for each( IOrdersPlugin ^plugin in m_OrdersPlugins )
     {
-        for each( Ship ^ship in m_GameData->GetSpecies()->Ships )
+        for each( Ship ^ship in GameData::Player->Ships )
             plugin->GeneratePostArrival(m_OrderList, ship);
     }
 
@@ -796,7 +796,7 @@ void Form1::GeneratePostArrival()
 
 void Form1::GenerateScanOrders()
 {
-    for each( Ship ^ship in m_GameData->GetSpecies()->Ships )
+    for each( Ship ^ship in GameData::Player->Ships )
     {
         if( ship->CanJump &&
             ship->Type == SHIP_TR &&

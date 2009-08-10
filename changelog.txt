@@ -6,10 +6,14 @@ Major new features and bug fixes will be listed here.
 FHUI build ??
 * Production orders copied from 'auto' sections are included.
   in budget calculations.
-+ Data sorting on Colonies tab improved.
++ Colonies tab:
+  + formatting modified to fit more data on screen;
+  + data sorting improved;
+  + columns may be hidden (right click on column header);
 + Context menu allows quick copying orders template to clipboard.
 + TR size calculator on Utils tab.
 + Research cost calculator on Utils tab.
++ Production on Colonies tab is calculated based on tech levels selected on toolbar.
 
 FHUI build 126
 * Ally / Enemy commands are no longer put incorrectly into Combat section.

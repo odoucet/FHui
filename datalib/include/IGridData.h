@@ -9,6 +9,8 @@ ref class Alien;
 ref class StarSystem;
 ref class GameData;
 
+////////////////////////////////////////////////////////////////
+
 public interface class IGridDataSrc
 {
     Alien^      GetAlienForBgColor();
@@ -21,6 +23,19 @@ public interface class IGridDataSrc
     SPRelType   GetFilterRelType();
     ShipType    GetFilterShipType();
 };
+
+////////////////////////////////////////////////////////////////
+
+public interface class IGridSorter : public System::Collections::IComparer
+{
+    void    SetSortColumn(int index);
+    void    SetGroupBySpecies(bool doGroup);
+    void    SetRefSystem(StarSystem ^refSystem);
+
+    int     AddColumn(String ^title, String ^description, Type ^type, Windows::Forms::SortOrder defaultSortOrder);
+};
+
+////////////////////////////////////////////////////////////////
 
 public interface class IGridFilter
 {
@@ -41,5 +56,7 @@ public interface class IGridFilter
 
     property bool           MiMaBalanced { bool get(); }
 };
+
+////////////////////////////////////////////////////////////////
 
 } // end namespace FHUI

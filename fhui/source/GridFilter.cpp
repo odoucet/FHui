@@ -103,7 +103,7 @@ bool GridFilter::Filter(IGridDataSrc ^item)
     if( CtrlFiltOwnO )
     {
         Alien ^owner = item->GetFilterOwner();
-        Alien ^sp    = GameData->GetSpecies();
+        Alien ^sp    = GameData->Player;
         if( (!CtrlFiltOwnO->Checked && owner == sp) ||
             (!CtrlFiltOwnN->Checked && owner != sp) )
         {
@@ -312,7 +312,7 @@ void GridFilter::SetRefColony()
     if( String::IsNullOrEmpty(ref) || ref[0] == '[' )
         return;
 
-    Alien ^sp = GameData->GetSpecies();
+    Alien ^sp = GameData->Player;
 
     Colony ^colony = nullptr;
     bool bFound = false;

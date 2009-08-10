@@ -8,9 +8,8 @@ namespace FHUI
 
 ////////////////////////////////////////////////////////////////
 
-GridSorterBase::GridSorterBase(DataGridView ^grid, Alien ^player)
+GridSorterBase::GridSorterBase(DataGridView ^grid)
     : m_Grid(grid)
-    , m_Player(player)
     , m_RefSystem(nullptr)
     , m_SortColumn(-1)
     , m_SortOrder(SortOrder::None)
@@ -19,9 +18,9 @@ GridSorterBase::GridSorterBase(DataGridView ^grid, Alien ^player)
     m_DefaultSortOrder = gcnew array<SortOrder>(0);
 }
 
-int GridSorterBase::AddColumn(String ^title, Type ^type, SortOrder defaultSortOrder)
+int GridSorterBase::AddColumn(String ^title, String ^description, Type ^type, SortOrder defaultSortOrder)
 {
-    return AddColumnDefault(title, type, defaultSortOrder);
+    return AddColumnDefault(title, description, type, defaultSortOrder);
 }
 
 void GridSorterBase::SetRefSystem(StarSystem ^refSystem)
@@ -148,18 +147,18 @@ int GridSorterBase::DefaultCompare(DataGridViewRow ^r1, DataGridViewRow ^r2)
 
 ////////////////////////////////////////////////////////////////
 
-ColoniesGridSorter::ColoniesGridSorter(DataGridView ^grid, Alien ^player)
-    : GridSorterBase(grid, player)
+ColoniesGridSorter::ColoniesGridSorter(DataGridView ^grid)
+    : GridSorterBase(grid)
 {
     m_SortModes = gcnew SortedList<int, CustomSortMode>;
 }
 
-int ColoniesGridSorter::AddColumnDefault(String ^title, Type ^type, SortOrder defaultSortOrder)
+int ColoniesGridSorter::AddColumnDefault(String ^title, String ^description, Type ^type, SortOrder defaultSortOrder)
 {
-    return AddColumn(title, type, defaultSortOrder, CustomSortMode::Default);
+    return AddColumn(title, description, type, defaultSortOrder, CustomSortMode::Default);
 }
 
-int ColoniesGridSorter::AddColumn(String ^title, Type ^type, SortOrder defaultSortOrder, CustomSortMode sm)
+int ColoniesGridSorter::AddColumn(String ^title, String ^description, Type ^type, SortOrder defaultSortOrder, CustomSortMode sm)
 {
     DataGridViewCell ^cell = gcnew DataGridViewTextBoxCell;
     cell->ValueType = type;
@@ -170,6 +169,7 @@ int ColoniesGridSorter::AddColumn(String ^title, Type ^type, SortOrder defaultSo
     col->SortMode = DataGridViewColumnSortMode::Programmatic;
 
     int index = m_Grid->Columns->Add(col);
+    m_Grid->Columns[index]->HeaderCell->ToolTipText = description;
 
     m_SortModes[index] = sm;
     StoreDefaultSortOrder(index, defaultSortOrder);
@@ -190,9 +190,9 @@ int ColoniesGridSorter::CustomCompare(DataGridViewRow ^r1, DataGridViewRow ^r2)
             // Regardless of sort direction, species grouping always
             // puts player on top, and other species alphabetically
             // (this is why always GetSortDirectionModifier() is used)
-            if( c1->Owner == m_Player )
+            if( c1->Owner == GameData::Player )
                 return -1 * GetSortDirectionModifier();
-            else if( c2->Owner == m_Player )
+            else if( c2->Owner == GameData::Player )
                 return 1 * GetSortDirectionModifier();
             return c1->Owner->Name->CompareTo(c2->Owner->Name) * GetSortDirectionModifier();
         }

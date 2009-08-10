@@ -114,9 +114,9 @@ Report::Report(GameData ^gd, RegexMatcher ^rm)
 bool Report::IsValid()
 {
     return
-        m_GameData->GetSpecies() != nullptr &&
-        m_GameData->GetSpeciesName() != nullptr &&
-        m_GameData->GetSpecies()->AtmReq->IsValid() &&
+        GameData::Player != nullptr &&
+        GameData::Player->Name != nullptr &&
+        GameData::Player->AtmReq->IsValid() &&
         m_Phase == PHASE_ORDERS_TEMPLATE;
 }
 
@@ -220,9 +220,9 @@ bool Report::Parse(String ^s)
         else if( Regex("^Enemies:").Match(s)->Success )
             StartLineAggregate(PHASE_SPECIES_ENEMIES, s, AGGREGATE_LINES_MAX);
         else if( m_RM->Match(s, "^Government name:\\s+(.+)$") )
-            m_GameData->GetSpecies()->GovName = m_RM->Results[0];
+            GameData::Player->GovName = m_RM->Results[0];
         else if( m_RM->Match(s, "^Government type:\\s+(.+)$") )
-            m_GameData->GetSpecies()->GovType = m_RM->Results[0];
+            GameData::Player->GovType = m_RM->Results[0];
         else if( m_RM->Match(s, "^Aliens at\\s+x\\s+=\\s+(\\d+), y\\s+=\\s+(\\d+), z\\s+=\\s+(\\d+)") )
         {
             m_ScanX = m_RM->GetResultInt(0);
@@ -564,7 +564,7 @@ bool Report::MatchTech(String ^s, String ^techName, TechType tech)
     {
         m_GameData->SetTechLevel(
             m_Turn,
-            m_GameData->GetSpecies(),
+            GameData::Player,
             tech,
             m_RM->GetResultInt(0),
             m_RM->GetResultInt(1));
@@ -574,7 +574,7 @@ bool Report::MatchTech(String ^s, String ^techName, TechType tech)
     {
         m_GameData->SetTechLevel(
             m_Turn,
-            m_GameData->GetSpecies(),
+            GameData::Player,
             tech,
             m_RM->GetResultInt(0),
             m_RM->GetResultInt(0));
@@ -622,7 +622,7 @@ void Report::MatchColonyScan(String ^s)
  
             m_ScanColony = m_GameData->AddColony(
                 m_Turn,
-                m_GameData->GetSpecies(),
+                GameData::Player,
                 plName,
                 system,
                 plNum );
@@ -941,7 +941,7 @@ void Report::MatchShipScan(String ^s, bool bColony)
         if( m_Phase != PHASE_ALIENS_REPORT )
         {
             m_ScanShip = m_GameData->AddShip(
-                m_Turn, m_GameData->GetSpecies(), type, name, subLight, system);
+                m_Turn, GameData::Player, type, name, subLight, system);
             if( m_ScanShip == nullptr )
                 return;
 
@@ -1025,7 +1025,7 @@ void Report::MatchOtherPlanetsShipsScan(String ^s)
             // Treat as colony of size 0
             Colony^ colony = m_GameData->AddColony(
                 m_Turn,
-                m_GameData->GetSpecies(),
+                GameData::Player,
                 plName,
                 system,
                 plNum );

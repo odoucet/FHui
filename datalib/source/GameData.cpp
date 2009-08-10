@@ -362,9 +362,9 @@ String^ Colony::PrintInventoryShort()
     return PrintInventory(Inventory);
 }
 
-String^ Colony::PrintRefListEntry(Alien ^player)
+String^ Colony::PrintRefListEntry()
 {
-    return Name + (player != Owner ? (" (" + Owner->Name + ")") : "");
+    return Name + (GameData::Player != Owner ? (" (" + Owner->Name + ")") : "");
 }
 
 String^ Colony::PrintBalance()
@@ -637,8 +637,7 @@ String^ Ship::Order::PrintJumpDestination()
 // ---------------------------------------------------------
 
 GameData::GameData(void)
-    : m_Species(nullptr)
-    , m_TurnEUStart(0)
+    : m_TurnEUStart(0)
     , m_TurnEUProduced(0)
     , m_FleetCost(0)
     , m_FleetCostPercent(0)
@@ -683,7 +682,7 @@ String^ GameData::GetSummary()
 
 String^ GameData::GetSpeciesSummary()
 {
-    AtmosphericReq ^atm = m_Species->AtmReq;
+    AtmosphericReq ^atm = Player->AtmReq;
 
     String ^toxicGases = "";
     for( int gas = 0; gas < GAS_MAX; ++gas )
@@ -697,11 +696,11 @@ String^ GameData::GetSpeciesSummary()
         "Home: [{1} {2} {3} {4}]\r\n"
         "Temp:{5} Press:{6}  Atm:{7} {8}-{9}%\r\n"
         "Poisons:{10}\r\n",
-        GetSpeciesName(),
-        m_Species->HomeSystem->X,
-        m_Species->HomeSystem->Y,
-        m_Species->HomeSystem->Z,
-        m_Species->HomePlanet,
+        Player->Name,
+        Player->HomeSystem->X,
+        Player->HomeSystem->Y,
+        Player->HomeSystem->Z,
+        Player->HomePlanet,
         atm->TempClass == -1 ? "??" : atm->TempClass.ToString(),
         atm->PressClass == -1 ? "??" : atm->PressClass.ToString(),
         FHStrings::GasToString( atm->GasRequired ),
@@ -739,8 +738,8 @@ String^ GameData::GetEconomicSummary()
 
 String^ GameData::GetTechSummary(TechType tech)
 {
-    int lev = m_Species->TechLevels[tech];
-    int levTeach = m_Species->TechLevelsTeach[tech];
+    int lev = Player->TechLevels[tech];
+    int levTeach = Player->TechLevelsTeach[tech];
 
     if( lev != levTeach )
     {
@@ -768,7 +767,7 @@ String^ GameData::GetAliensSummary()
     List<Alien^> ^aliens = gcnew List<Alien^>;
     for each( Alien ^alien in GetAliens() )
     {
-        if( alien != m_Species &&
+        if( alien != Player &&
             alien->Relation != SP_PIRATE )
         {
             aliens->Add(alien);
@@ -826,7 +825,7 @@ public:
 
 String^ GameData::GetShipsSummary()
 {
-    List<Ship^> ^ships = GetShips(m_Species);
+    List<Ship^> ^ships = GetShips(Player);
     if( ships->Count == 0 )
         return "You have no ships\r\n";
 
@@ -931,7 +930,7 @@ bool GameData::TurnCheck(int turn)
         // New turn cleanup
         for each( Alien ^alien in GetAliens() )
         {
-            if( alien != m_Species && alien->Relation != SP_PIRATE )
+            if( alien != Player && alien->Relation != SP_PIRATE )
                 alien->Relation = SP_NEUTRAL; // FIXME: default relation may be different...
         }
 
@@ -946,7 +945,7 @@ bool GameData::TurnCheck(int turn)
             removed = false;
             for each( KeyValuePair<String^, Colony^> ^iter in m_Colonies )
             {
-                if( iter->Value->Owner == m_Species )
+                if( iter->Value->Owner == Player )
                 {
                     m_Colonies->Remove(iter->Key);
                     removed = true;
@@ -979,16 +978,16 @@ int GameData::TurnAlign(int turn)
 
 void GameData::SetSpecies(String ^sp)
 {
-    if( m_Species == nullptr )
+    if( Player == nullptr )
     {
-        m_Species = AddAlien(0, sp);
-        m_Species->Relation = SP_PLAYER;
+        Player = AddAlien(0, sp);
+        Player->Relation = SP_PLAYER;
     }
 
-    if( String::Compare(m_Species->Name, sp) != 0 )
+    if( String::Compare(Player->Name, sp) != 0 )
         throw gcnew FHUIDataIntegrityException(
             String::Format("Reports for different species: {0} and {1}",
-                m_Species->Name, sp) );
+                Player->Name, sp) );
 }
 
 Alien^ GameData::AddAlien(int turn, String ^sp)
@@ -1041,7 +1040,7 @@ void GameData::SetFleetCost(int turn, int cost, int percent)
 
 void GameData::SetAtmosphereReq(GasType gas, int reqMin, int reqMax)
 {
-    AtmosphericReq ^atm = GetSpecies()->AtmReq;
+    AtmosphericReq ^atm = Player->AtmReq;
 
     if( (atm->GasRequired != GAS_MAX && atm->GasRequired != gas) ||
         atm->Neutral[gas] ||
@@ -1057,7 +1056,7 @@ void GameData::SetAtmosphereReq(GasType gas, int reqMin, int reqMax)
 
 void GameData::SetAtmosphereNeutral(GasType gas)
 {
-    AtmosphericReq ^atm = GetSpecies()->AtmReq;
+    AtmosphericReq ^atm = Player->AtmReq;
 
     if( atm->GasRequired == gas ||
         atm->Poisonous[gas] )
@@ -1070,7 +1069,7 @@ void GameData::SetAtmosphereNeutral(GasType gas)
 
 void GameData::SetAtmospherePoisonous(GasType gas)
 {
-    AtmosphericReq ^atm = GetSpecies()->AtmReq;
+    AtmosphericReq ^atm = Player->AtmReq;
 
     if( atm->GasRequired == gas ||
         atm->Neutral[gas] )
@@ -1199,7 +1198,7 @@ Colony^ GameData::AddColony(int turn, Alien ^sp, String ^name, StarSystem ^syste
         // If this is species' own colony, remove alien colonies from this system.
         // They'll be restored by 'Aliens at...' parsing. If not - it means that alien
         // colony was destroyed or assimilated.
-        if( sp == m_Species )
+        if( sp == Player )
         {
             bool bRemoved = false;
             do
@@ -1208,7 +1207,7 @@ Colony^ GameData::AddColony(int turn, Alien ^sp, String ^name, StarSystem ^syste
                 for each( KeyValuePair<String^, Colony^> ^iter in m_Colonies )
                 {
                     Colony ^c = iter->Value;
-                    if( c->Owner != m_Species &&
+                    if( c->Owner != Player &&
                         c->System == system )
                     {
                         m_Colonies->Remove(iter->Key);
@@ -1282,7 +1281,7 @@ void GameData::UpdateSystems()
             if( colony->System == system )
             {
                 system->Colonies->Add(colony);
-                if( colony->Owner == GetSpecies() )
+                if( colony->Owner == Player )
                     system->ColoniesOwned->Add(colony);
                 else
                     system->ColoniesAlien->Add(colony);
@@ -1293,7 +1292,7 @@ void GameData::UpdateSystems()
             if( ship->System == system )
             {
                 system->Ships->Add(ship);
-                if( ship->Owner == GetSpecies() )
+                if( ship->Owner == Player )
                     system->ShipsOwned->Add(ship);
                 else
                     system->ShipsAlien->Add(ship);
@@ -1305,7 +1304,7 @@ void GameData::UpdateSystems()
         int minLSNAvail = 99999;
         for each( Planet ^planet in system->GetPlanets() )
         {
-            planet->LSN = planet->CalculateLSN(m_Species->AtmReq);
+            planet->LSN = planet->CalculateLSN(Player->AtmReq);
             planet->NumColonies = 0;
             planet->NumColoniesOwned = 0;
 
@@ -1317,13 +1316,13 @@ void GameData::UpdateSystems()
                 if( colony->PlanetNum == planet->Number )
                 {
                     ++planet->NumColonies;
-                    if( colony->Owner == GetSpecies() )
+                    if( colony->Owner == Player )
                         ++planet->NumColoniesOwned;
                     available = false;
 
                     // Update planet info with colony info, if there is any difference
                     // Helps with MD changed via mining or when there is no system scan
-                    if ( colony->Owner == GetSpecies() &&
+                    if ( colony->Owner == Player &&
                          colony->EconomicBase > 0 )
                     {
                         colony->CalculateBalance(false);
@@ -1380,7 +1379,7 @@ void GameData::LinkPlanetNames()
         StarSystem ^system = colony->System;
         colony->Planet = system->GetPlanet( colony->PlanetNum );
 
-        if( colony->Owner == m_Species )
+        if( colony->Owner == Player )
         {
             if( colony->Planet == nullptr )
                 throw gcnew FHUIDataIntegrityException(
@@ -1431,7 +1430,7 @@ void GameData::UpdateColonies()
     int order = 0;
 
     // Mining and resort colonies first
-    for each( Colony ^colony in GetSpecies()->Colonies )
+    for each( Colony ^colony in Player->Colonies )
         if( colony->PlanetType == PLANET_COLONY_MINING ||
             colony->PlanetType == PLANET_COLONY_RESORT )
         {
@@ -1440,7 +1439,7 @@ void GameData::UpdateColonies()
         }
 
     // Colony planets
-    for each( Colony ^colony in GetSpecies()->Colonies )
+    for each( Colony ^colony in Player->Colonies )
         if( colony->PlanetType == PLANET_COLONY )
         {
             colony->ProductionOrder = ++order;
@@ -1448,14 +1447,14 @@ void GameData::UpdateColonies()
         }
 
     // Home planet
-    for each( Colony ^colony in GetSpecies()->Colonies )
+    for each( Colony ^colony in Player->Colonies )
         if( colony->PlanetType == PLANET_HOME )
         {
             colony->ProductionOrder = ++order;
             colony->CanProduce = true;
         }
 
-    GetSpecies()->SortColoniesByProdOrder();
+    Player->SortColoniesByProdOrder();
 }
 
 Ship^ GameData::AddShip(int turn, Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system)
@@ -1466,7 +1465,7 @@ Ship^ GameData::AddShip(int turn, Alien ^sp, ShipType type, String ^name, bool s
         ship->System = system;
         m_Ships[name->ToLower()] = ship;
 
-        if( sp == m_Species )
+        if( sp == Player )
         {
             // Remove alien colonies from this system.
             // They'll be restored by 'Aliens at...' parsing. If not - it means that alien
@@ -1478,7 +1477,7 @@ Ship^ GameData::AddShip(int turn, Alien ^sp, ShipType type, String ^name, bool s
                 for each( KeyValuePair<String^, Colony^> ^iter in m_Colonies )
                 {
                     Colony ^c = iter->Value;
-                    if( c->Owner != m_Species &&
+                    if( c->Owner != Player &&
                         c->System == system )
                     {
                         if( c->Planet == nullptr )
