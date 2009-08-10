@@ -39,8 +39,8 @@ void Form1::UtilUpdateResearch()
     }
 
     UtilResInfoGuided->Text     = Calculators::ResearchCost(from, to, true).ToString();
-    UtilResInfoGuaranteed->Text = Calculators::ResearchCost(from, to + 1, false).ToString();
     UtilResInfoAverage->Text    = Calculators::ResearchCost(from, to, false).ToString();
+    UtilResInfoGuaranteed->Text = Calculators::ResearchCost(from, to * 2, false).ToString();
 
 }
 

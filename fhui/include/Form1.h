@@ -2822,7 +2822,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // UtilResInfoAverage
             // 
             this->UtilResInfoAverage->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-            this->UtilResInfoAverage->Location = System::Drawing::Point(489, 19);
+            this->UtilResInfoAverage->Location = System::Drawing::Point(366, 19);
             this->UtilResInfoAverage->Name = L"UtilResInfoAverage";
             this->UtilResInfoAverage->Size = System::Drawing::Size(49, 20);
             this->UtilResInfoAverage->TabIndex = 2;
@@ -2831,7 +2831,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // label33
             // 
             label33->AutoSize = true;
-            label33->Location = System::Drawing::Point(436, 23);
+            label33->Location = System::Drawing::Point(310, 23);
             label33->Name = L"label33";
             label33->Size = System::Drawing::Size(50, 13);
             label33->TabIndex = 1;
@@ -2840,7 +2840,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // UtilResInfoGuaranteed
             // 
             this->UtilResInfoGuaranteed->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-            this->UtilResInfoGuaranteed->Location = System::Drawing::Point(372, 19);
+            this->UtilResInfoGuaranteed->Location = System::Drawing::Point(497, 19);
             this->UtilResInfoGuaranteed->Name = L"UtilResInfoGuaranteed";
             this->UtilResInfoGuaranteed->Size = System::Drawing::Size(49, 20);
             this->UtilResInfoGuaranteed->TabIndex = 2;
@@ -2849,7 +2849,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // label35
             // 
             label35->AutoSize = true;
-            label35->Location = System::Drawing::Point(303, 23);
+            label35->Location = System::Drawing::Point(428, 23);
             label35->Name = L"label35";
             label35->Size = System::Drawing::Size(66, 13);
             label35->TabIndex = 1;
