@@ -49,7 +49,7 @@ public:
     void        AddColumns(GridType, IGridSorter^);
     void        GridFormat(GridType, DataGridView^);
     void        AddMenuItems(GridType, DataGridView^);
-    void        AddRowData(DataRow^, IGridFilter^, StarSystem^);
+    void        AddRowData(DataGridViewRow^, IGridFilter^, StarSystem^);
     void        AddRowData(DataRow^, IGridFilter^, Planet^);
     void        AddRowData(DataGridViewRow^, IGridFilter^, Colony^);
     void        AddRowData(DataRow^, IGridFilter^, Ship^);

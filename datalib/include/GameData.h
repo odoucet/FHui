@@ -25,6 +25,7 @@ public:
     virtual String^     GetTooltipText()            { return "<TODO...>"; }
 
     virtual StarSystem^ GetFilterSystem()           { return nullptr; }
+    virtual StarSystem^ GetFilterLocation(int %pl)  { return nullptr; }
     virtual Alien^      GetFilterOwner()            { throw gcnew FHUIDataImplException("Not implemented!"); }
     virtual int         GetFilterLSN()              { throw gcnew FHUIDataImplException("Not implemented!"); }
     virtual int         GetFilterNumColonies()      { throw gcnew FHUIDataImplException("Not implemented!"); }
@@ -164,6 +165,7 @@ public:
     virtual Alien^      GetAlienForBgColor() override   { return Master; }
 
     virtual StarSystem^ GetFilterSystem() override      { return System; }
+    virtual StarSystem^ GetFilterLocation(int %pl) override { pl = Number; return System; }
     virtual Alien^      GetFilterOwner() override       { return Master; }
     virtual int         GetFilterLSN() override         { return LSN; }
     virtual int         GetFilterNumColonies() override { return NumColonies; }
@@ -231,6 +233,7 @@ public:
     virtual String^     GetTooltipText() override       { return GenerateScan(); }
 
     virtual StarSystem^ GetFilterSystem() override      { return this; }
+    virtual StarSystem^ GetFilterLocation(int %pl) override { pl = -1; return this; }
     virtual Alien^      GetFilterOwner() override       { return Master; }
     virtual int         GetFilterLSN() override         { return MinLSN; }
     virtual int         GetFilterNumColonies() override { return Colonies->Count; }
@@ -332,6 +335,7 @@ public:
     virtual Alien^      GetAlienForBgColor() override   { return Owner; }
 
     virtual StarSystem^ GetFilterSystem() override      { return System; }
+    virtual StarSystem^ GetFilterLocation(int %pl) override { pl = PlanetNum; return System; }
     virtual Alien^      GetFilterOwner() override       { return Owner; }
     virtual int         GetFilterLSN() override         { return Planet ? Planet->LSN : 99999; }
     // --------------------------------------------------
@@ -422,6 +426,7 @@ public:
     virtual Alien^      GetAlienForBgColor() override   { return Owner; }
 
     virtual StarSystem^ GetFilterSystem() override      { return System; }
+    virtual StarSystem^ GetFilterLocation(int %pl) override { pl = PlanetNum; return System; }
     virtual Alien^      GetFilterOwner() override       { return Owner; }
     virtual SPRelType   GetFilterRelType() override     { return Owner->GetFilterRelType(); }
     virtual ShipType    GetFilterShipType() override    { return Type; }

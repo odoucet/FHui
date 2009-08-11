@@ -70,25 +70,7 @@ void Form1::InitControls()
     GridFilter ^filter;
 
     // -- systems
-    filter = gcnew GridFilter(SystemsGrid, m_bGridUpdateEnabled);
-    filter->GridSetup += gcnew GridSetupHandler(this, &Form1::SystemsSetup);
-    filter->GridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
-
-    filter->CtrlRef         = SystemsRef;
-    filter->CtrlRefHome     = SystemsRefHome;
-    filter->CtrlRefXYZ      = SystemsRefXYZ;
-    filter->CtrlRefColony   = SystemsRefColony;
-    filter->CtrlRefShip     = SystemsRefShip;
-    filter->CtrlGV          = TechGV;
-    filter->CtrlShipAge     = SystemsShipAge;
-    filter->CtrlMaxMishap   = SystemsMaxMishap;
-    filter->CtrlMaxLSN      = SystemsMaxLSN;
-    filter->CtrlFiltVisV    = SystemsFiltVisV;
-    filter->CtrlFiltVisN    = SystemsFiltVisN;
-    filter->CtrlFiltColC    = SystemsFiltColC;
-    filter->CtrlFiltColN    = SystemsFiltColN;
-
-    m_SystemsFilter = filter;
+    SystemsInitControls();
 
     // -- planets
     filter = gcnew GridFilter(PlanetsGrid, m_bGridUpdateEnabled);
@@ -951,6 +933,70 @@ ToolStripMenuItem^ Form1::CreateCustomMenuItem(
 ////////////////////////////////////////////////////////////////
 // Systems
 
+void Form1::SystemsInitControls()
+{
+    SystemsGridSorter ^sorter = gcnew SystemsGridSorter(SystemsGrid);
+
+    // Add columns
+    SystemsColumns %c = m_SystemsColumns;
+
+#define ADD_COLUMN(title, desc, type, sortOrder, customSortMode)    \
+    sorter->AddColumn(title, desc, type::typeid, SortOrder::sortOrder, SystemsGridSorter::CustomSortMode::customSortMode)
+
+    c.Object   = ADD_COLUMN(nullptr,        nullptr,                StarSystem, None,       Default);
+    c.X        = ADD_COLUMN("X",            "System X coordinate",  int,        Ascending,  Default);
+    c.Y        = ADD_COLUMN("Y",            "System Y coordinate",  int,        Ascending,  Default);
+    c.Z        = ADD_COLUMN("Z",            "System Z coordinate",  int,        Ascending,  Default);
+    c.Type     = ADD_COLUMN("Type",         "Star type",            String,     Ascending,  Default);
+    c.Planets  = ADD_COLUMN("PL",           "Number of planets",    int,        Descending, Default);
+    c.LSN      = ADD_COLUMN("Min LSN",      "Minimum LSN",          int,        Ascending,  Default);
+    c.LSNAvail = ADD_COLUMN("Free LSN",     "Minimum free LSN",     int,        Ascending,  Default);
+    c.Dist     = ADD_COLUMN("Distance",     "Distance to ref system and mishap chance [%]", String, Ascending, Distance);
+    c.Visited  = ADD_COLUMN("Vis",          "Last turn you visited this system", int, Descending, Default);
+    c.Scan     = ADD_COLUMN("Scan",         "System scan source",   String,     Ascending,  Default);
+    c.Colonies = ADD_COLUMN("Colonies",     "Summary of colonies and named planets", String, Ascending,  Default);
+
+    for each( IGridPlugin ^plugin in m_GridPlugins )
+        plugin->AddColumns(GridType::Systems, sorter);
+
+    c.Notes    = ADD_COLUMN("Notes", "Notes", String, Ascending,  Default);
+#undef ADD_COLUMN
+
+    // Formatting
+    ApplyDataAndFormat(SystemsGrid, nullptr, c.Object, c.LSNAvail, sorter);
+    for each( IGridPlugin ^plugin in m_GridPlugins )
+        plugin->GridFormat(GridType::Systems, SystemsGrid);
+
+    SystemsGrid->Columns[c.Dist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
+    SystemsGrid->Columns[c.Colonies]->DefaultCellStyle->Font =
+        gcnew System::Drawing::Font(L"Tahoma", 6.75F);
+
+    // Filter setup
+    GridFilter ^filter = gcnew GridFilter(SystemsGrid, m_bGridUpdateEnabled);
+    filter->GridSetup += gcnew GridSetupHandler(this, &Form1::SystemsSetup);
+    filter->GridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
+    filter->Sorter = sorter;
+
+    filter->CtrlRef         = SystemsRef;
+    filter->CtrlRefHome     = SystemsRefHome;
+    filter->CtrlRefXYZ      = SystemsRefXYZ;
+    filter->CtrlRefColony   = SystemsRefColony;
+    filter->CtrlRefShip     = SystemsRefShip;
+    filter->CtrlGV          = TechGV;
+    filter->CtrlShipAge     = SystemsShipAge;
+    filter->CtrlMaxMishap   = SystemsMaxMishap;
+    filter->CtrlMaxLSN      = SystemsMaxLSN;
+    filter->CtrlFiltVisV    = SystemsFiltVisV;
+    filter->CtrlFiltVisN    = SystemsFiltVisN;
+    filter->CtrlFiltColC    = SystemsFiltColC;
+    filter->CtrlFiltColN    = SystemsFiltColN;
+
+
+    // Store objects
+    m_SystemsFilter = filter;
+    m_SystemsSorter = sorter;
+}
+
 void Form1::SystemsUpdateControls()
 {
     // Inhibit grid update
@@ -971,27 +1017,9 @@ void Form1::SystemsUpdateControls()
 
 void Form1::SystemsSetup()
 {
-    // Put system data in a DataTable so that column sorting works.
-    DataTable ^dataTable = gcnew DataTable();
+    SystemsGrid->Rows->Clear();
 
-    DataColumn ^colObject   = dataTable->Columns->Add("system",     StarSystem::typeid );
-    DataColumn ^colX        = dataTable->Columns->Add("X",          int::typeid );
-    DataColumn ^colY        = dataTable->Columns->Add("Y",          int::typeid );
-    DataColumn ^colZ        = dataTable->Columns->Add("Z",          int::typeid );
-    DataColumn ^colType     = dataTable->Columns->Add("Type",       String::typeid );
-    DataColumn ^colPlanets  = dataTable->Columns->Add("Planets",    int::typeid );
-    DataColumn ^colLSN      = dataTable->Columns->Add("Min LSN",    int::typeid );
-    DataColumn ^colLSNAvail = dataTable->Columns->Add("Free LSN",   int::typeid );
-    DataColumn ^colDist     = dataTable->Columns->Add("Dist.",      double::typeid );
-    DataColumn ^colMishap   = dataTable->Columns->Add("Mishap %",   String::typeid );
-    DataColumn ^colVisited  = dataTable->Columns->Add("Visited",    int::typeid );
-    DataColumn ^colScan     = dataTable->Columns->Add("Scan",       String::typeid );
-    DataColumn ^colColonies = dataTable->Columns->Add("Colonies",   String::typeid );
-
-    for each( IGridPlugin ^plugin in m_GridPlugins )
-        plugin->AddColumns(GridType::Systems, dataTable);
-
-    DataColumn ^colNotes    = dataTable->Columns->Add("Notes",      String::typeid );
+    SystemsColumns %c = m_SystemsColumns;
 
     int gv  = Decimal::ToInt32(TechGV->Value);
     int age = Decimal::ToInt32(SystemsShipAge->Value);
@@ -1001,46 +1029,41 @@ void Form1::SystemsSetup()
         if( m_SystemsFilter->Filter(system) )
             continue;
 
+        double distance = system->CalcDistance(m_SystemsFilter->RefSystem);
         double mishap = system->CalcMishap(m_SystemsFilter->RefSystem, gv, age);
 
-        DataRow^ row = dataTable->NewRow();
-        row[colObject]      = system;
-        row[colX]           = system->X;
-        row[colY]           = system->Y;
-        row[colZ]           = system->Z;
-        row[colType]        = system->Type;
+        DataGridViewRow ^row = SystemsGrid->Rows[ SystemsGrid->Rows->Add() ];
+        DataGridViewCellCollection ^cells = row->Cells;
+        cells[c.Object]->Value      = system;
+        cells[c.X]->Value           = system->X;
+        cells[c.Y]->Value           = system->Y;
+        cells[c.Z]->Value           = system->Z;
+        cells[c.Type]->Value        = system->Type;
         if( system->IsExplored() )
         {
-            row[colPlanets] = system->PlanetsCount;
-            row[colLSN]     = system->MinLSN;
+            cells[c.Planets]->Value = system->PlanetsCount;
+            cells[c.LSN]->Value     = system->MinLSN;
             if( system->MinLSNAvail != 99999 )
-                row[colLSNAvail]= system->MinLSNAvail;
+                cells[c.LSNAvail]->Value= system->MinLSNAvail;
         }
-        row[colDist]        = system->CalcDistance(m_SystemsFilter->RefSystem);
-        row[colMishap]      = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
-        row[colScan]        = system->PrintScanStatus();
+        cells[c.Dist]->Value        = String::Format("{0:F1}  ({1:F1}%)", distance, mishap);;
+        cells[c.Scan]->Value        = system->PrintScanStatus();
         if( system->LastVisited != -1 )
-            row[colVisited] = system->LastVisited;
-        row[colColonies]    = system->PrintColonies( -1, GameData::Player );
-        row[colNotes]       = system->Comment;
+            cells[c.Visited]->Value = system->LastVisited;
+        cells[c.Colonies]->Value    = system->PrintColonies( -1, GameData::Player );
+        cells[c.Notes]->Value       = system->Comment;
 
         //SystemsGrid->Columns[colColonies->Ordinal]->DefaultCellStyle->WrapMode = DataGridViewTriState::True;
 
         for each( IGridPlugin ^plugin in m_GridPlugins )
             plugin->AddRowData(row, m_SystemsFilter, system);
-
-        dataTable->Rows->Add(row);
     }
 
-    ApplyDataAndFormat(SystemsGrid, dataTable, colObject->Ordinal, colDist->Ordinal, nullptr);
-    for each( IGridPlugin ^plugin in m_GridPlugins )
-        plugin->GridFormat(GridType::Systems, SystemsGrid);
+    // Setup tooltips
+    SetGridBgAndTooltip(SystemsGrid);
 
-    SystemsGrid->Columns[colColonies->Ordinal]->DefaultCellStyle->Font =
-        gcnew System::Drawing::Font(L"Tahoma", 6.75F);
-
-    // Some columns are not sortable... yet
-    SystemsGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
+    // Sort data
+    SystemsGrid->Sort( m_SystemsSorter );
 
     // Enable filters
     m_SystemsFilter->EnableUpdates = true;
@@ -1442,14 +1465,14 @@ void Form1::ColoniesInitControls()
     c.Owner     = ADD_COLUMN("Owner",       "Colony owner",                 String, Ascending,  Owner);
     c.Name      = ADD_COLUMN("Name",        "Colony name",                  String, Ascending,  Default);
     c.Type      = ADD_COLUMN("Type",        "Colony type",                  String, Ascending,  Type);
-    c.Location  = ADD_COLUMN("Loc",         "X Y Z #Planet location",         String, Ascending,  Location);
+    c.Location  = ADD_COLUMN("Loc",         "X Y Z #Planet location",       String, Ascending,  Location);
     c.Size      = ADD_COLUMN("Size",        "Colony economic base",         double, Descending, Default);
     c.Prod      = ADD_COLUMN("PR",          "Production",                   int,    Descending, Default);
     c.Shipyards = ADD_COLUMN("SY",          "Shipyards",                    int,    Descending, Default);
     c.LSN       = ADD_COLUMN("LSN",         "LSN",                          int,    Ascending,  Default);
     c.Balance   = ADD_COLUMN("Balance",     "IU/AU balance",                String, Descending, Default);
     c.Pop       = ADD_COLUMN("Pop",         "Available population",         int,    Descending, Default);
-    c.Dist      = ADD_COLUMN("Dist",        "Distance to ref system and mishap chance [%]", String, Ascending, Distance);
+    c.Dist      = ADD_COLUMN("Distance",    "Distance to ref system and mishap chance [%]", String, Ascending, Distance);
     c.Inventory = ADD_COLUMN("Inventory",   "Planetary inventory",          String, Ascending, Default);
     c.ProdOrder = ADD_COLUMN("#",           "Production order for orders template", int, Ascending, Default);
     c.ProdPerc  = ADD_COLUMN("Eff",         "Production effectiveness",     int,    Descending, Default);
@@ -1468,7 +1491,6 @@ void Form1::ColoniesInitControls()
 
     ColoniesGrid->Columns[c.Size]->DefaultCellStyle->Format = "F1";
     ColoniesGrid->Columns[c.Dist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
-
     ColoniesGrid->Columns[c.Inventory]->DefaultCellStyle->Font =
         gcnew System::Drawing::Font(L"Tahoma", 6.75F);
 
@@ -1476,6 +1498,7 @@ void Form1::ColoniesInitControls()
     GridFilter ^filter = gcnew GridFilter(ColoniesGrid, m_bGridUpdateEnabled);
     filter->GridSetup += gcnew GridSetupHandler(this, &Form1::ColoniesSetup);
     filter->GridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
+    filter->Sorter = sorter;
 
     filter->CtrlRef         = ColoniesRef;
     filter->CtrlRefHome     = ColoniesRefHome;
@@ -1514,7 +1537,6 @@ void Form1::ColoniesUpdateControls()
     m_ColoniesFilter->Reset();
 
     m_ColoniesSorter->SetGroupBySpecies( ColoniesGroupByOwner->Checked );
-    m_ColoniesSorter->SetRefSystem( m_ColoniesFilter->RefSystem );
 }
 
 void Form1::ColoniesSetup()

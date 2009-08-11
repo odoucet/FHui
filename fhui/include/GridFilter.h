@@ -27,7 +27,17 @@ public:
     }
 
     virtual property GameData^      GameData;
-    virtual property StarSystem^    RefSystem;
+    virtual property StarSystem^    RefSystem
+    {
+        void set(StarSystem^ sys)
+        {
+            m_RefSystem = sys;
+            if( Sorter )
+                Sorter->SetRefSystem(sys);
+        }
+        StarSystem^ get()           { return m_RefSystem; }
+    }
+    virtual property IGridSorter^   Sorter;
     virtual property bool           EnableUpdates
     {
         void set(bool en) { *m_bGridUpdateEnabled = en; }
@@ -89,6 +99,7 @@ protected:
     Ship^           GetShipFromRefList(ComboBox ^combo);
 
     DataGridView    ^m_Grid;
+    StarSystem      ^m_RefSystem;
     bool            ^m_bGridUpdateEnabled;
     Object          ^m_RefreshDummy;
 

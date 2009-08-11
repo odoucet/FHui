@@ -16,11 +16,31 @@ GridSorterBase::GridSorterBase(DataGridView ^grid)
     , m_GroupBySpecies(false)
 {
     m_DefaultSortOrder = gcnew array<SortOrder>(0);
+    m_SortModes = gcnew SortedList<int, CustomSortMode>;
 }
 
 int GridSorterBase::AddColumn(String ^title, String ^description, Type ^type, SortOrder defaultSortOrder)
 {
-    return AddColumnDefault(title, description, type, defaultSortOrder);
+    return AddColumn(title, description, type, defaultSortOrder, CustomSortMode::Default);
+}
+
+int GridSorterBase::AddColumn(String ^title, String ^description, Type ^type, SortOrder defaultSortOrder, CustomSortMode sm)
+{
+    DataGridViewCell ^cell = gcnew DataGridViewTextBoxCell;
+    cell->ValueType = type;
+
+    DataGridViewColumn ^col = gcnew DataGridViewColumn;
+    col->HeaderText = title;
+    col->CellTemplate = cell;
+    col->SortMode = DataGridViewColumnSortMode::Programmatic;
+
+    int index = m_Grid->Columns->Add(col);
+    m_Grid->Columns[index]->HeaderCell->ToolTipText = description;
+
+    m_SortModes[index] = sm;
+    StoreDefaultSortOrder(index, defaultSortOrder);
+
+    return index;
 }
 
 void GridSorterBase::SetRefSystem(StarSystem ^refSystem)
@@ -76,12 +96,6 @@ void GridSorterBase::SetGroupBySpecies(bool doGroup)
     }
 }
 
-int GridSorterBase::Compare( Object^ o1, Object^ o2 )
-{
-    return GetSortDirectionModifier() *
-        CustomCompare( (DataGridViewRow^)o1, (DataGridViewRow^)o2 );
-}
-
 int GridSorterBase::GetSortDirectionModifier()
 {
     return m_SortOrder == SortOrder::Ascending ? 1 : -1;
@@ -94,7 +108,69 @@ int GridSorterBase::GetForcedDirectionModifier(SortOrder forcedOrder)
     return -1;
 }
 
-int GridSorterBase::DefaultCompare(DataGridViewRow ^r1, DataGridViewRow ^r2)
+int GridSorterBase::Compare( Object^ obj1, Object^ obj2 )
+{
+    DataGridViewRow ^r1 = safe_cast<DataGridViewRow^>( obj1 );
+    DataGridViewRow ^r2 = safe_cast<DataGridViewRow^>( obj2 );
+
+    IGridDataSrc ^o1 = safe_cast<IGridDataSrc^>( r1->Cells[0]->Value );
+    IGridDataSrc ^o2 = safe_cast<IGridDataSrc^>( r2->Cells[0]->Value );
+
+    // Group by species
+    if( m_GroupBySpecies )
+    {
+        Alien ^owner1 = o1->GetFilterOwner();
+        Alien ^owner2 = o2->GetFilterOwner();
+
+        if(owner1 != owner2 )
+        {
+            // Regardless of sort direction, species grouping always
+            // puts player on top, and other species alphabetically
+            // (this is why always GetSortDirectionModifier() is used)
+            if( owner1 == GameData::Player )
+                return -1;
+            else if( owner2 == GameData::Player )
+                return 1;
+            return owner1->Name->CompareTo(owner2->Name);
+        }
+    }
+
+    int result = 0;
+
+    // Is it a custom sort column?
+    switch( m_SortModes[m_SortColumn] )
+    {
+    case CustomSortMode::Default:
+        result = CompareDefault(r1, r2);
+        break;
+
+    case CustomSortMode::Owner:
+        result = CompareOwner(o1, o2);
+        break;
+
+    case CustomSortMode::Type:
+        result = CompareType(o1, o2);
+        break;
+
+    case CustomSortMode::Location:
+        result = CompareLocation(o1, o2);
+        break;
+
+    case CustomSortMode::Distance:
+        result = CompareDistance(o1, o2);
+        break;
+
+    default:
+        throw gcnew FHUIDataImplException("Unsupported custom sort mode: " + m_SortModes[m_SortColumn].ToString() );
+    }
+
+    if( result == 0 )
+        result = BackupCompare(r1, r2);
+
+    return result * GetSortDirectionModifier();
+}
+
+int GridSorterBase::CompareDefault(DataGridViewRow ^r1, DataGridViewRow ^r2)
 {
     int result = 0;
     Object ^v1 = r1->Cells[m_SortColumn]->Value;
@@ -140,7 +216,63 @@ int GridSorterBase::DefaultCompare(DataGridViewRow ^r1, DataGridViewRow ^r2)
         throw gcnew FHUIDataIntegrityException("Default column compare type invalid: " + type->ToString());
 
     if( result == 0 )
-        return BackupCompare(r1, r2);
+        result = BackupCompare(r1, r2);
+
+    return result;
+}
+
+int GridSorterBase::CompareOwner(IGridDataSrc ^o1, IGridDataSrc ^o2)
+{
+    return o1->GetFilterOwner()->Name->CompareTo(o2->GetFilterOwner()->Name);
+}
+
+int GridSorterBase::CompareType(IGridDataSrc ^o1, IGridDataSrc ^o2)
+{
+    throw gcnew FHUIDataIntegrityException("Sorter: Type custom compare must be overriden!");
+}
+
+int GridSorterBase::CompareLocation(IGridDataSrc ^o1, IGridDataSrc ^o2)
+{
+    int p1, p2;
+    int result = o1->GetFilterLocation(p1)->CompareLocation(o2->GetFilterLocation(p2));
+    if( result == 0 )
+        result = p1 - p2;
+    return result;
+}
+
+int GridSorterBase::CompareDistance(IGridDataSrc ^o1, IGridDataSrc ^o2)
+{
+    if( m_RefSystem == nullptr )
+        return 0;
+
+    double distDiff =
+        o1->GetFilterSystem()->CalcDistance(m_RefSystem) - o2->GetFilterSystem()->CalcDistance(m_RefSystem);
+
+    if( distDiff == 0 )
+        return 0;
+    return distDiff < 0 ? -1 : 1;
+}
+
+////////////////////////////////////////////////////////////////
+
+SystemsGridSorter::SystemsGridSorter(DataGridView ^grid)
+    : GridSorterBase(grid)
+{
+}
+
+int SystemsGridSorter::BackupCompare(DataGridViewRow ^r1, DataGridViewRow ^r2)
+{
+    StarSystem ^s1 = safe_cast<StarSystem^>( r1->Cells[0]->Value );
+    StarSystem ^s2 = safe_cast<StarSystem^>( r2->Cells[0]->Value );
+
+    int result = 0;
+
+    // Step 1: by distance to ref system
+    result = CompareDistance(s1, s2) * GetForcedDirectionModifier(SortOrder::Ascending);
+
+    // Step 2: by available LSN
+    if( result == 0 )
+        result = (s1->MinLSNAvail - s2->MinLSNAvail) * GetForcedDirectionModifier(SortOrder::Ascending);
 
     return result;
 }
@@ -150,96 +282,16 @@ int GridSorterBase::DefaultCompare(DataGridViewRow ^r1, DataGridViewRow ^r2)
 ColoniesGridSorter::ColoniesGridSorter(DataGridView ^grid)
     : GridSorterBase(grid)
 {
-    m_SortModes = gcnew SortedList<int, CustomSortMode>;
 }
-
-int ColoniesGridSorter::AddColumnDefault(String ^title, String ^description, Type ^type, SortOrder defaultSortOrder)
-{
-    return AddColumn(title, description, type, defaultSortOrder, CustomSortMode::Default);
-}
-
-int ColoniesGridSorter::AddColumn(String ^title, String ^description, Type ^type, SortOrder defaultSortOrder, CustomSortMode sm)
-{
-    DataGridViewCell ^cell = gcnew DataGridViewTextBoxCell;
-    cell->ValueType = type;
-
-    DataGridViewColumn ^col = gcnew DataGridViewColumn;
-    col->HeaderText = title;
-    col->CellTemplate = cell;
-    col->SortMode = DataGridViewColumnSortMode::Programmatic;
-
-    int index = m_Grid->Columns->Add(col);
-    m_Grid->Columns[index]->HeaderCell->ToolTipText = description;
-
-    m_SortModes[index] = sm;
-    StoreDefaultSortOrder(index, defaultSortOrder);
-
-    return index;
-}
-
-int ColoniesGridSorter::CustomCompare(DataGridViewRow ^r1, DataGridViewRow ^r2)
-{
-    Colony ^c1 = safe_cast<Colony^>( ((DataGridViewRow^)r1)->Cells[0]->Value );
-    Colony ^c2 = safe_cast<Colony^>( ((DataGridViewRow^)r2)->Cells[0]->Value );
-
-    // Group by species
-    if( m_GroupBySpecies )
-    {
-        if( c1->Owner != c2->Owner )
-        {
-            // Regardless of sort direction, species grouping always
-            // puts player on top, and other species alphabetically
-            // (this is why always GetSortDirectionModifier() is used)
-            if( c1->Owner == GameData::Player )
-                return -1 * GetSortDirectionModifier();
-            else if( c2->Owner == GameData::Player )
-                return 1 * GetSortDirectionModifier();
-            return c1->Owner->Name->CompareTo(c2->Owner->Name) * GetSortDirectionModifier();
-        }
-    }
-
-    int result = 0;
-
-    // Is it a custom sort column?
-    switch( m_SortModes[m_SortColumn] )
-    {
-    case CustomSortMode::Default:
-        return DefaultCompare(r1, r2);
-
-    case CustomSortMode::Owner:
-        result = c1->Owner->Name->CompareTo(c2->Owner->Name);
-        break;
-
-    case CustomSortMode::Type:
-        result = c1->PlanetType - c2->PlanetType;   // Make HOME first when descending order (this order is default)
-        break;
-
-    case CustomSortMode::Location:
-        result = c1->System->CompareLocation(c2->System);
-        if( result == 0 )
-            result = c1->PlanetNum - c2->PlanetNum;
-        break;
-
-    case CustomSortMode::Distance:
-        result = DistanceCompare(c1, c2);
-        break;
-    }
-
-    if( result == 0 )
-        return BackupCompare(r1, r2);
-
-    return result;
-}
-
 int ColoniesGridSorter::BackupCompare(DataGridViewRow ^r1, DataGridViewRow ^r2)
 {
-    Colony ^c1 = safe_cast<Colony^>( ((DataGridViewRow^)r1)->Cells[0]->Value );
-    Colony ^c2 = safe_cast<Colony^>( ((DataGridViewRow^)r2)->Cells[0]->Value );
+    Colony ^c1 = safe_cast<Colony^>( r1->Cells[0]->Value );
+    Colony ^c2 = safe_cast<Colony^>( r2->Cells[0]->Value );
 
     int result = 0;
 
     // Step 1: by distance to ref system
-    result = DistanceCompare(c1, c2) * GetForcedDirectionModifier(SortOrder::Ascending);
+    result = CompareDistance(c1, c2) * GetForcedDirectionModifier(SortOrder::Ascending);
 
     // Step 2: by production capacity
     if( result == 0 )
@@ -256,17 +308,10 @@ int ColoniesGridSorter::BackupCompare(DataGridViewRow ^r1, DataGridViewRow ^r2)
     return result;
 }
 
-int ColoniesGridSorter::DistanceCompare(Colony ^c1, Colony ^c2)
+int ColoniesGridSorter::CompareType(IGridDataSrc ^o1, IGridDataSrc ^o2)
 {
-    if( m_RefSystem == nullptr )
-        return 0;
-
-    double distDiff =
-        c1->System->CalcDistance(m_RefSystem) - c2->System->CalcDistance(m_RefSystem);
-
-    if( distDiff == 0 )
-        return 0;
-    return distDiff < 0 ? -1 : 1;
+    // Make HOME first when descending order (this order is default)
+    return ((Colony^)o1)->PlanetType - ((Colony^)o2)->PlanetType;
 }
 
 ////////////////////////////////////////////////////////////////

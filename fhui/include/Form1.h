@@ -147,6 +147,7 @@ namespace FHUI {
 
         // ==================================================
         // --- SYSTEMS ---
+        void        SystemsInitControls();
         void        SystemsUpdateControls();
         void        SystemsSetup();
         void        SystemsSelectPlanets( int rowIndex );
@@ -155,9 +156,28 @@ namespace FHUI {
         void        SystemsMenuShowColonies(Object^, EventArgs^);
         void        SystemsMenuSelectRef(Object^, EventArgs^);
 
+        value struct SystemsColumns
+        {
+            int Object;
+            int X;
+            int Y;
+            int Z;
+            int Type;
+            int Planets;
+            int LSN;
+            int LSNAvail;
+            int Dist;
+            int Visited;
+            int Scan;
+            int Colonies;
+            int Notes;
+        };
+
         IGridFilter        ^m_SystemsFilter;
+        IGridSorter        ^m_SystemsSorter;
         StarSystem         ^m_SystemsMenuRef;
         int                 m_SystemsMenuRefRow;
+        SystemsColumns      m_SystemsColumns;
 
         // ==================================================
         // --- PLANETS ---
@@ -187,9 +207,8 @@ namespace FHUI {
         void        ColoniesMenuProdOrderAdjust(int adjustment);
         void        ColoniesMenuProdShipyard(Object^, EventArgs^);
 
-        value class ColoniesColumns
+        value struct ColoniesColumns
         {
-        public:
             int Object;
             int Owner;
             int Name;
@@ -1467,6 +1486,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->SystemsGrid->TabIndex = 0;
             this->SystemsGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
             this->SystemsGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
+            this->SystemsGrid->ColumnHeaderMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::SystemsGrid_ColumnHeaderMouseClick);
             this->SystemsGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseEnter);
             this->SystemsGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::SystemsGrid_CellMouseDoubleClick);
             this->SystemsGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
@@ -3427,6 +3447,12 @@ private: System::Void MenuTabs_SelectedIndexChanged(System::Object^  sender, Sys
          }
 private: System::Void PlanetsGrid_CellEndEdit(System::Object^  sender, System::Windows::Forms::DataGridViewCellEventArgs^  e) {
              PlanetsMenuAddName(e);
+         }
+private: System::Void SystemsGrid_ColumnHeaderMouseClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
+             if( e->Button == Windows::Forms::MouseButtons::Left )
+                 m_SystemsSorter->SetSortColumn( e->ColumnIndex );
+             else
+                 ColumnsFilterMenu( SystemsGrid, e );
          }
 private: System::Void ColoniesGrid_ColumnHeaderMouseClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
              if( e->Button == Windows::Forms::MouseButtons::Left )

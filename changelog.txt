@@ -3,7 +3,11 @@ Major new features and bug fixes will be listed here.
 + New features
 * Bug fixes
 
-FHUI build ??
+FHUI build 140
+* Sorting by distance to ref system on Colonies tab fixed.
++ Colonies tab goodies from build 139 now also on Systems tab.
+
+FHUI build 139
 * Production orders copied from 'auto' sections are included.
   in budget calculations.
 + Colonies tab:

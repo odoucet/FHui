@@ -17,6 +17,7 @@ public interface class IGridDataSrc
     String^     GetTooltipText();
 
     StarSystem^ GetFilterSystem();
+    StarSystem^ GetFilterLocation(int %plNum);
     Alien^      GetFilterOwner();
     int         GetFilterLSN();
     int         GetFilterNumColonies();
@@ -49,6 +50,7 @@ public interface class IGridFilter
     property GameData^      GameData;
     property bool           EnableUpdates;
     property StarSystem^    RefSystem;
+    property IGridSorter^   Sorter;
 
     property int            DefaultLSN;
     property int            DefaultMishap;
