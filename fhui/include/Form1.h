@@ -522,40 +522,37 @@ private: System::Windows::Forms::Label^  SystemsRef;
             System::Windows::Forms::Label^  label9;
             System::Windows::Forms::Label^  label4;
             System::Windows::Forms::Label^  label14;
-            System::Windows::Forms::GroupBox^  groupBox3;
-            System::Windows::Forms::Label^  label13;
-            System::Windows::Forms::GroupBox^  groupBox2;
-            System::Windows::Forms::Label^  label12;
-            System::Windows::Forms::GroupBox^  groupBox1;
-            System::Windows::Forms::Label^  label11;
-            System::Windows::Forms::Label^  label7;
             System::Windows::Forms::SplitContainer^  splitContainer2;
             System::Windows::Forms::Label^  label16;
             System::Windows::Forms::Label^  label15;
             System::Windows::Forms::Label^  label2;
             System::Windows::Forms::Label^  label17;
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle14 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle15 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle1 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle2 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle3 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::SplitContainer^  splitContainer3;
             System::Windows::Forms::Label^  label1;
             System::Windows::Forms::Label^  label3;
             System::Windows::Forms::Label^  label18;
             System::Windows::Forms::Label^  label20;
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle16 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle17 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle4 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle5 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle6 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::Label^  label8;
             System::Windows::Forms::Label^  label19;
             System::Windows::Forms::Label^  label22;
             System::Windows::Forms::Label^  label24;
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle18 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle19 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle20 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle7 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle8 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle9 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::Label^  label10;
             System::Windows::Forms::Label^  label27;
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle21 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle22 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle23 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle24 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle10 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle11 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle12 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle13 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle14 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle15 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::ToolStripMenuItem^  copyToClipboardToolStripMenuItem;
             System::Windows::Forms::GroupBox^  groupBox5;
             System::Windows::Forms::Label^  label33;
@@ -568,10 +565,17 @@ private: System::Windows::Forms::Label^  SystemsRef;
             System::Windows::Forms::Label^  label30;
             System::Windows::Forms::Label^  label29;
             System::Windows::Forms::Label^  label28;
+            System::Windows::Forms::GroupBox^  groupBox3;
+            System::Windows::Forms::Label^  label13;
+            System::Windows::Forms::GroupBox^  groupBox2;
+            System::Windows::Forms::Label^  label12;
+            System::Windows::Forms::GroupBox^  groupBox1;
+            System::Windows::Forms::Label^  label11;
+            System::Windows::Forms::Label^  label7;
             System::Windows::Forms::Label^  label5;
             System::Windows::Forms::Label^  label6;
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle25 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle26 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle16 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle17 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             this->TurnReloadBtn = (gcnew System::Windows::Forms::Button());
             this->TurnSelect = (gcnew System::Windows::Forms::ComboBox());
             this->Summary = (gcnew System::Windows::Forms::TextBox());
@@ -589,24 +593,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->RepModeCommands = (gcnew System::Windows::Forms::RadioButton());
             this->RepTurnNr = (gcnew System::Windows::Forms::ComboBox());
             this->RepModeReports = (gcnew System::Windows::Forms::RadioButton());
-            this->TabMap = (gcnew System::Windows::Forms::TabPage());
-            this->panel1 = (gcnew System::Windows::Forms::Panel());
-            this->MapLSNVal = (gcnew System::Windows::Forms::NumericUpDown());
-            this->MapEnJumps = (gcnew System::Windows::Forms::CheckBox());
-            this->MapEnLSN = (gcnew System::Windows::Forms::CheckBox());
-            this->MapEnDist = (gcnew System::Windows::Forms::CheckBox());
-            this->MapSP3GV = (gcnew System::Windows::Forms::NumericUpDown());
-            this->MapSP3 = (gcnew System::Windows::Forms::ComboBox());
-            this->MapSP3System = (gcnew System::Windows::Forms::ComboBox());
-            this->MapSP2GV = (gcnew System::Windows::Forms::NumericUpDown());
-            this->MapSP2 = (gcnew System::Windows::Forms::ComboBox());
-            this->MapSP2System = (gcnew System::Windows::Forms::ComboBox());
-            this->MapSP1GV = (gcnew System::Windows::Forms::NumericUpDown());
-            this->MapSP1 = (gcnew System::Windows::Forms::ComboBox());
-            this->MapSP1System = (gcnew System::Windows::Forms::ComboBox());
-            this->MapSPSelf = (gcnew System::Windows::Forms::GroupBox());
-            this->MapSPSelfGV = (gcnew System::Windows::Forms::NumericUpDown());
-            this->MapSPSelfSystem = (gcnew System::Windows::Forms::ComboBox());
             this->TabSystems = (gcnew System::Windows::Forms::TabPage());
             this->SystemsFiltVisN = (gcnew System::Windows::Forms::CheckBox());
             this->SystemsFiltColN = (gcnew System::Windows::Forms::CheckBox());
@@ -697,6 +683,24 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->UtilTrInfoMaint = (gcnew System::Windows::Forms::Label());
             this->UtilTRInfoCap = (gcnew System::Windows::Forms::Label());
             this->UtilTRSize = (gcnew System::Windows::Forms::NumericUpDown());
+            this->TabMap = (gcnew System::Windows::Forms::TabPage());
+            this->panel1 = (gcnew System::Windows::Forms::Panel());
+            this->MapLSNVal = (gcnew System::Windows::Forms::NumericUpDown());
+            this->MapEnJumps = (gcnew System::Windows::Forms::CheckBox());
+            this->MapEnLSN = (gcnew System::Windows::Forms::CheckBox());
+            this->MapEnDist = (gcnew System::Windows::Forms::CheckBox());
+            this->MapSP3GV = (gcnew System::Windows::Forms::NumericUpDown());
+            this->MapSP3 = (gcnew System::Windows::Forms::ComboBox());
+            this->MapSP3System = (gcnew System::Windows::Forms::ComboBox());
+            this->MapSP2GV = (gcnew System::Windows::Forms::NumericUpDown());
+            this->MapSP2 = (gcnew System::Windows::Forms::ComboBox());
+            this->MapSP2System = (gcnew System::Windows::Forms::ComboBox());
+            this->MapSP1GV = (gcnew System::Windows::Forms::NumericUpDown());
+            this->MapSP1 = (gcnew System::Windows::Forms::ComboBox());
+            this->MapSP1System = (gcnew System::Windows::Forms::ComboBox());
+            this->MapSPSelf = (gcnew System::Windows::Forms::GroupBox());
+            this->MapSPSelfGV = (gcnew System::Windows::Forms::NumericUpDown());
+            this->MapSPSelfSystem = (gcnew System::Windows::Forms::ComboBox());
             this->TabAbout = (gcnew System::Windows::Forms::TabPage());
             this->TextAbout = (gcnew System::Windows::Forms::TextBox());
             this->comboBox1 = (gcnew System::Windows::Forms::ComboBox());
@@ -714,13 +718,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             label9 = (gcnew System::Windows::Forms::Label());
             label4 = (gcnew System::Windows::Forms::Label());
             label14 = (gcnew System::Windows::Forms::Label());
-            groupBox3 = (gcnew System::Windows::Forms::GroupBox());
-            label13 = (gcnew System::Windows::Forms::Label());
-            groupBox2 = (gcnew System::Windows::Forms::GroupBox());
-            label12 = (gcnew System::Windows::Forms::Label());
-            groupBox1 = (gcnew System::Windows::Forms::GroupBox());
-            label11 = (gcnew System::Windows::Forms::Label());
-            label7 = (gcnew System::Windows::Forms::Label());
             splitContainer2 = (gcnew System::Windows::Forms::SplitContainer());
             label16 = (gcnew System::Windows::Forms::Label());
             label15 = (gcnew System::Windows::Forms::Label());
@@ -749,6 +746,13 @@ private: System::Windows::Forms::Label^  SystemsRef;
             label30 = (gcnew System::Windows::Forms::Label());
             label29 = (gcnew System::Windows::Forms::Label());
             label28 = (gcnew System::Windows::Forms::Label());
+            groupBox3 = (gcnew System::Windows::Forms::GroupBox());
+            label13 = (gcnew System::Windows::Forms::Label());
+            groupBox2 = (gcnew System::Windows::Forms::GroupBox());
+            label12 = (gcnew System::Windows::Forms::Label());
+            groupBox1 = (gcnew System::Windows::Forms::GroupBox());
+            label11 = (gcnew System::Windows::Forms::Label());
+            label7 = (gcnew System::Windows::Forms::Label());
             label5 = (gcnew System::Windows::Forms::Label());
             label6 = (gcnew System::Windows::Forms::Label());
             TopSplitCont->Panel1->SuspendLayout();
@@ -765,17 +769,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechLS))->BeginInit();
             this->MenuTabs->SuspendLayout();
             this->TabReports->SuspendLayout();
-            this->TabMap->SuspendLayout();
-            this->panel1->SuspendLayout();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapLSNVal))->BeginInit();
-            groupBox3->SuspendLayout();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSP3GV))->BeginInit();
-            groupBox2->SuspendLayout();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSP2GV))->BeginInit();
-            groupBox1->SuspendLayout();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSP1GV))->BeginInit();
-            this->MapSPSelf->SuspendLayout();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSPSelfGV))->BeginInit();
             this->TabSystems->SuspendLayout();
             splitContainer2->Panel1->SuspendLayout();
             splitContainer2->Panel2->SuspendLayout();
@@ -819,6 +812,17 @@ private: System::Windows::Forms::Label^  SystemsRef;
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->UtilResFrom))->BeginInit();
             groupBox4->SuspendLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->UtilTRSize))->BeginInit();
+            this->TabMap->SuspendLayout();
+            this->panel1->SuspendLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapLSNVal))->BeginInit();
+            groupBox3->SuspendLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSP3GV))->BeginInit();
+            groupBox2->SuspendLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSP2GV))->BeginInit();
+            groupBox1->SuspendLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSP1GV))->BeginInit();
+            this->MapSPSelf->SuspendLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSPSelfGV))->BeginInit();
             this->TabAbout->SuspendLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->dataGridView1))->BeginInit();
             this->SuspendLayout();
@@ -1168,284 +1172,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->RepModeReports->UseVisualStyleBackColor = true;
             this->RepModeReports->CheckedChanged += gcnew System::EventHandler(this, &Form1::RepMode_CheckedChanged);
             // 
-            // TabMap
-            // 
-            this->TabMap->BackColor = System::Drawing::Color::Black;
-            this->TabMap->Controls->Add(this->panel1);
-            this->TabMap->Location = System::Drawing::Point(4, 22);
-            this->TabMap->Margin = System::Windows::Forms::Padding(0);
-            this->TabMap->Name = L"TabMap";
-            this->TabMap->Size = System::Drawing::Size(683, 535);
-            this->TabMap->TabIndex = 1;
-            this->TabMap->Text = L"Map";
-            this->TabMap->UseVisualStyleBackColor = true;
-            this->TabMap->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &Form1::MapCanvas_Paint);
-            // 
-            // panel1
-            // 
-            this->panel1->BackColor = System::Drawing::SystemColors::Control;
-            this->panel1->Controls->Add(this->MapLSNVal);
-            this->panel1->Controls->Add(this->MapEnJumps);
-            this->panel1->Controls->Add(this->MapEnLSN);
-            this->panel1->Controls->Add(this->MapEnDist);
-            this->panel1->Controls->Add(groupBox3);
-            this->panel1->Controls->Add(groupBox2);
-            this->panel1->Controls->Add(groupBox1);
-            this->panel1->Controls->Add(this->MapSPSelf);
-            this->panel1->Dock = System::Windows::Forms::DockStyle::Right;
-            this->panel1->Location = System::Drawing::Point(483, 0);
-            this->panel1->Name = L"panel1";
-            this->panel1->Size = System::Drawing::Size(200, 535);
-            this->panel1->TabIndex = 0;
-            // 
-            // MapLSNVal
-            // 
-            this->MapLSNVal->Location = System::Drawing::Point(108, 324);
-            this->MapLSNVal->Name = L"MapLSNVal";
-            this->MapLSNVal->Size = System::Drawing::Size(52, 20);
-            this->MapLSNVal->TabIndex = 2;
-            this->MapLSNVal->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
-            this->MapLSNVal->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {21, 0, 0, 0});
-            this->MapLSNVal->ValueChanged += gcnew System::EventHandler(this, &Form1::MapUpdate);
-            // 
-            // MapEnJumps
-            // 
-            this->MapEnJumps->AutoSize = true;
-            this->MapEnJumps->Enabled = false;
-            this->MapEnJumps->Location = System::Drawing::Point(9, 413);
-            this->MapEnJumps->Name = L"MapEnJumps";
-            this->MapEnJumps->Size = System::Drawing::Size(110, 17);
-            this->MapEnJumps->TabIndex = 1;
-            this->MapEnJumps->Text = L"Show jump orders";
-            this->MapEnJumps->UseVisualStyleBackColor = true;
-            this->MapEnJumps->CheckedChanged += gcnew System::EventHandler(this, &Form1::MapUpdate);
-            // 
-            // MapEnLSN
-            // 
-            this->MapEnLSN->AutoSize = true;
-            this->MapEnLSN->Checked = true;
-            this->MapEnLSN->CheckState = System::Windows::Forms::CheckState::Checked;
-            this->MapEnLSN->Location = System::Drawing::Point(9, 324);
-            this->MapEnLSN->Name = L"MapEnLSN";
-            this->MapEnLSN->Size = System::Drawing::Size(95, 17);
-            this->MapEnLSN->TabIndex = 1;
-            this->MapEnLSN->Text = L"Max LSN filter:";
-            this->MapEnLSN->UseVisualStyleBackColor = true;
-            this->MapEnLSN->CheckedChanged += gcnew System::EventHandler(this, &Form1::MapEnLSN_CheckedChanged);
-            // 
-            // MapEnDist
-            // 
-            this->MapEnDist->AutoSize = true;
-            this->MapEnDist->Checked = true;
-            this->MapEnDist->CheckState = System::Windows::Forms::CheckState::Checked;
-            this->MapEnDist->Location = System::Drawing::Point(9, 345);
-            this->MapEnDist->Name = L"MapEnDist";
-            this->MapEnDist->Size = System::Drawing::Size(73, 17);
-            this->MapEnDist->TabIndex = 1;
-            this->MapEnDist->Text = L"Distances";
-            this->MapEnDist->UseVisualStyleBackColor = true;
-            this->MapEnDist->CheckedChanged += gcnew System::EventHandler(this, &Form1::MapUpdate);
-            // 
-            // groupBox3
-            // 
-            groupBox3->Controls->Add(this->MapSP3GV);
-            groupBox3->Controls->Add(label13);
-            groupBox3->Controls->Add(this->MapSP3);
-            groupBox3->Controls->Add(this->MapSP3System);
-            groupBox3->ForeColor = System::Drawing::Color::DarkBlue;
-            groupBox3->Location = System::Drawing::Point(3, 250);
-            groupBox3->Name = L"groupBox3";
-            groupBox3->Size = System::Drawing::Size(194, 68);
-            groupBox3->TabIndex = 0;
-            groupBox3->TabStop = false;
-            groupBox3->Text = L"Alien #1";
-            // 
-            // MapSP3GV
-            // 
-            this->MapSP3GV->Enabled = false;
-            this->MapSP3GV->ForeColor = System::Drawing::Color::DarkBlue;
-            this->MapSP3GV->Location = System::Drawing::Point(35, 42);
-            this->MapSP3GV->Name = L"MapSP3GV";
-            this->MapSP3GV->Size = System::Drawing::Size(46, 20);
-            this->MapSP3GV->TabIndex = 3;
-            this->MapSP3GV->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
-            this->MapSP3GV->ValueChanged += gcnew System::EventHandler(this, &Form1::MapUpdate);
-            // 
-            // label13
-            // 
-            label13->AutoSize = true;
-            label13->ForeColor = System::Drawing::Color::DarkBlue;
-            label13->Location = System::Drawing::Point(6, 46);
-            label13->Name = L"label13";
-            label13->Size = System::Drawing::Size(25, 13);
-            label13->TabIndex = 2;
-            label13->Text = L"GV:";
-            // 
-            // MapSP3
-            // 
-            this->MapSP3->ForeColor = System::Drawing::Color::DarkBlue;
-            this->MapSP3->FormattingEnabled = true;
-            this->MapSP3->Location = System::Drawing::Point(6, 19);
-            this->MapSP3->Name = L"MapSP3";
-            this->MapSP3->Size = System::Drawing::Size(97, 21);
-            this->MapSP3->TabIndex = 1;
-            // 
-            // MapSP3System
-            // 
-            this->MapSP3System->Enabled = false;
-            this->MapSP3System->ForeColor = System::Drawing::Color::DarkBlue;
-            this->MapSP3System->FormattingEnabled = true;
-            this->MapSP3System->Location = System::Drawing::Point(109, 18);
-            this->MapSP3System->Name = L"MapSP3System";
-            this->MapSP3System->Size = System::Drawing::Size(79, 21);
-            this->MapSP3System->TabIndex = 1;
-            // 
-            // groupBox2
-            // 
-            groupBox2->Controls->Add(this->MapSP2GV);
-            groupBox2->Controls->Add(label12);
-            groupBox2->Controls->Add(this->MapSP2);
-            groupBox2->Controls->Add(this->MapSP2System);
-            groupBox2->ForeColor = System::Drawing::Color::DarkGreen;
-            groupBox2->Location = System::Drawing::Point(3, 176);
-            groupBox2->Name = L"groupBox2";
-            groupBox2->Size = System::Drawing::Size(194, 68);
-            groupBox2->TabIndex = 0;
-            groupBox2->TabStop = false;
-            groupBox2->Text = L"Alien #1";
-            // 
-            // MapSP2GV
-            // 
-            this->MapSP2GV->Enabled = false;
-            this->MapSP2GV->ForeColor = System::Drawing::Color::DarkGreen;
-            this->MapSP2GV->Location = System::Drawing::Point(35, 42);
-            this->MapSP2GV->Name = L"MapSP2GV";
-            this->MapSP2GV->Size = System::Drawing::Size(46, 20);
-            this->MapSP2GV->TabIndex = 3;
-            this->MapSP2GV->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
-            this->MapSP2GV->ValueChanged += gcnew System::EventHandler(this, &Form1::MapUpdate);
-            // 
-            // label12
-            // 
-            label12->AutoSize = true;
-            label12->ForeColor = System::Drawing::Color::DarkGreen;
-            label12->Location = System::Drawing::Point(6, 46);
-            label12->Name = L"label12";
-            label12->Size = System::Drawing::Size(25, 13);
-            label12->TabIndex = 2;
-            label12->Text = L"GV:";
-            // 
-            // MapSP2
-            // 
-            this->MapSP2->ForeColor = System::Drawing::Color::DarkGreen;
-            this->MapSP2->FormattingEnabled = true;
-            this->MapSP2->Location = System::Drawing::Point(6, 19);
-            this->MapSP2->Name = L"MapSP2";
-            this->MapSP2->Size = System::Drawing::Size(97, 21);
-            this->MapSP2->TabIndex = 1;
-            // 
-            // MapSP2System
-            // 
-            this->MapSP2System->Enabled = false;
-            this->MapSP2System->ForeColor = System::Drawing::Color::DarkGreen;
-            this->MapSP2System->FormattingEnabled = true;
-            this->MapSP2System->Location = System::Drawing::Point(109, 18);
-            this->MapSP2System->Name = L"MapSP2System";
-            this->MapSP2System->Size = System::Drawing::Size(79, 21);
-            this->MapSP2System->TabIndex = 1;
-            // 
-            // groupBox1
-            // 
-            groupBox1->Controls->Add(this->MapSP1GV);
-            groupBox1->Controls->Add(label11);
-            groupBox1->Controls->Add(this->MapSP1);
-            groupBox1->Controls->Add(this->MapSP1System);
-            groupBox1->ForeColor = System::Drawing::Color::Maroon;
-            groupBox1->Location = System::Drawing::Point(3, 102);
-            groupBox1->Name = L"groupBox1";
-            groupBox1->Size = System::Drawing::Size(194, 68);
-            groupBox1->TabIndex = 0;
-            groupBox1->TabStop = false;
-            groupBox1->Text = L"Alien #1";
-            // 
-            // MapSP1GV
-            // 
-            this->MapSP1GV->Enabled = false;
-            this->MapSP1GV->ForeColor = System::Drawing::Color::Maroon;
-            this->MapSP1GV->Location = System::Drawing::Point(35, 42);
-            this->MapSP1GV->Name = L"MapSP1GV";
-            this->MapSP1GV->Size = System::Drawing::Size(46, 20);
-            this->MapSP1GV->TabIndex = 3;
-            this->MapSP1GV->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
-            this->MapSP1GV->ValueChanged += gcnew System::EventHandler(this, &Form1::MapUpdate);
-            // 
-            // label11
-            // 
-            label11->AutoSize = true;
-            label11->ForeColor = System::Drawing::Color::Maroon;
-            label11->Location = System::Drawing::Point(6, 46);
-            label11->Name = L"label11";
-            label11->Size = System::Drawing::Size(25, 13);
-            label11->TabIndex = 2;
-            label11->Text = L"GV:";
-            // 
-            // MapSP1
-            // 
-            this->MapSP1->ForeColor = System::Drawing::Color::Maroon;
-            this->MapSP1->FormattingEnabled = true;
-            this->MapSP1->Location = System::Drawing::Point(6, 18);
-            this->MapSP1->Name = L"MapSP1";
-            this->MapSP1->Size = System::Drawing::Size(97, 21);
-            this->MapSP1->TabIndex = 1;
-            // 
-            // MapSP1System
-            // 
-            this->MapSP1System->Enabled = false;
-            this->MapSP1System->ForeColor = System::Drawing::Color::Maroon;
-            this->MapSP1System->FormattingEnabled = true;
-            this->MapSP1System->Location = System::Drawing::Point(109, 18);
-            this->MapSP1System->Name = L"MapSP1System";
-            this->MapSP1System->Size = System::Drawing::Size(79, 21);
-            this->MapSP1System->TabIndex = 1;
-            // 
-            // MapSPSelf
-            // 
-            this->MapSPSelf->Controls->Add(this->MapSPSelfGV);
-            this->MapSPSelf->Controls->Add(label7);
-            this->MapSPSelf->Controls->Add(this->MapSPSelfSystem);
-            this->MapSPSelf->Location = System::Drawing::Point(3, 28);
-            this->MapSPSelf->Name = L"MapSPSelf";
-            this->MapSPSelf->Size = System::Drawing::Size(194, 68);
-            this->MapSPSelf->TabIndex = 0;
-            this->MapSPSelf->TabStop = false;
-            this->MapSPSelf->Text = L"groupBox1";
-            // 
-            // MapSPSelfGV
-            // 
-            this->MapSPSelfGV->Location = System::Drawing::Point(36, 42);
-            this->MapSPSelfGV->Name = L"MapSPSelfGV";
-            this->MapSPSelfGV->Size = System::Drawing::Size(46, 20);
-            this->MapSPSelfGV->TabIndex = 3;
-            this->MapSPSelfGV->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
-            this->MapSPSelfGV->ValueChanged += gcnew System::EventHandler(this, &Form1::MapUpdate);
-            // 
-            // label7
-            // 
-            label7->AutoSize = true;
-            label7->Location = System::Drawing::Point(6, 46);
-            label7->Name = L"label7";
-            label7->Size = System::Drawing::Size(25, 13);
-            label7->TabIndex = 2;
-            label7->Text = L"GV:";
-            // 
-            // MapSPSelfSystem
-            // 
-            this->MapSPSelfSystem->FormattingEnabled = true;
-            this->MapSPSelfSystem->Location = System::Drawing::Point(6, 18);
-            this->MapSPSelfSystem->Name = L"MapSPSelfSystem";
-            this->MapSPSelfSystem->Size = System::Drawing::Size(182, 21);
-            this->MapSPSelfSystem->TabIndex = 1;
-            // 
             // TabSystems
             // 
             this->TabSystems->BackColor = System::Drawing::Color::Transparent;
@@ -1703,29 +1429,37 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->SystemsGrid->AllowUserToDeleteRows = false;
             this->SystemsGrid->AllowUserToOrderColumns = true;
             this->SystemsGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
+            dataGridViewCellStyle1->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle1->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle1->Font = (gcnew System::Drawing::Font(L"Tahoma", 6.75F));
+            dataGridViewCellStyle1->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle1->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle1->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle1->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->SystemsGrid->ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this->SystemsGrid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-            dataGridViewCellStyle14->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle14->BackColor = System::Drawing::SystemColors::Window;
-            dataGridViewCellStyle14->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle2->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle2->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle2->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle14->ForeColor = System::Drawing::SystemColors::ControlText;
-            dataGridViewCellStyle14->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle14->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle14->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
-            this->SystemsGrid->DefaultCellStyle = dataGridViewCellStyle14;
+            dataGridViewCellStyle2->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle2->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle2->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle2->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->SystemsGrid->DefaultCellStyle = dataGridViewCellStyle2;
             this->SystemsGrid->Dock = System::Windows::Forms::DockStyle::Fill;
             this->SystemsGrid->Location = System::Drawing::Point(0, 0);
             this->SystemsGrid->Name = L"SystemsGrid";
             this->SystemsGrid->ReadOnly = true;
-            dataGridViewCellStyle15->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle15->BackColor = System::Drawing::SystemColors::Control;
-            dataGridViewCellStyle15->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle3->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle3->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle3->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle15->ForeColor = System::Drawing::SystemColors::WindowText;
-            dataGridViewCellStyle15->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle15->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle15->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
-            this->SystemsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle15;
+            dataGridViewCellStyle3->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle3->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle3->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle3->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->SystemsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this->SystemsGrid->RowHeadersWidth = 4;
             this->SystemsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
             this->SystemsGrid->ShowCellToolTips = false;
@@ -1992,29 +1726,37 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->PlanetsGrid->AllowUserToDeleteRows = false;
             this->PlanetsGrid->AllowUserToOrderColumns = true;
             this->PlanetsGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
+            dataGridViewCellStyle4->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle4->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle4->Font = (gcnew System::Drawing::Font(L"Tahoma", 6.75F));
+            dataGridViewCellStyle4->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle4->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle4->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle4->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->PlanetsGrid->ColumnHeadersDefaultCellStyle = dataGridViewCellStyle4;
             this->PlanetsGrid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-            dataGridViewCellStyle16->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle16->BackColor = System::Drawing::SystemColors::Window;
-            dataGridViewCellStyle16->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle5->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle5->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle5->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle16->ForeColor = System::Drawing::SystemColors::ControlText;
-            dataGridViewCellStyle16->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle16->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle16->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
-            this->PlanetsGrid->DefaultCellStyle = dataGridViewCellStyle16;
+            dataGridViewCellStyle5->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle5->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle5->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle5->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->PlanetsGrid->DefaultCellStyle = dataGridViewCellStyle5;
             this->PlanetsGrid->Dock = System::Windows::Forms::DockStyle::Fill;
             this->PlanetsGrid->Location = System::Drawing::Point(0, 0);
             this->PlanetsGrid->Name = L"PlanetsGrid";
             this->PlanetsGrid->ReadOnly = true;
-            dataGridViewCellStyle17->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle17->BackColor = System::Drawing::SystemColors::Control;
-            dataGridViewCellStyle17->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle6->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle6->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle6->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle17->ForeColor = System::Drawing::SystemColors::WindowText;
-            dataGridViewCellStyle17->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle17->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle17->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
-            this->PlanetsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle17;
+            dataGridViewCellStyle6->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle6->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle6->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle6->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->PlanetsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle6;
             this->PlanetsGrid->RowHeadersWidth = 4;
             this->PlanetsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
             this->PlanetsGrid->ShowCellToolTips = false;
@@ -2281,38 +2023,38 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ColoniesGrid->AllowUserToDeleteRows = false;
             this->ColoniesGrid->AllowUserToOrderColumns = true;
             this->ColoniesGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
-            dataGridViewCellStyle18->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle18->BackColor = System::Drawing::SystemColors::Control;
-            dataGridViewCellStyle18->Font = (gcnew System::Drawing::Font(L"Tahoma", 6.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle7->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle7->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle7->Font = (gcnew System::Drawing::Font(L"Tahoma", 6.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle18->ForeColor = System::Drawing::SystemColors::WindowText;
-            dataGridViewCellStyle18->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle18->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle18->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
-            this->ColoniesGrid->ColumnHeadersDefaultCellStyle = dataGridViewCellStyle18;
+            dataGridViewCellStyle7->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle7->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle7->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle7->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->ColoniesGrid->ColumnHeadersDefaultCellStyle = dataGridViewCellStyle7;
             this->ColoniesGrid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-            dataGridViewCellStyle19->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle19->BackColor = System::Drawing::SystemColors::Window;
-            dataGridViewCellStyle19->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle8->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle8->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle8->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle19->ForeColor = System::Drawing::SystemColors::ControlText;
-            dataGridViewCellStyle19->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle19->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle19->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
-            this->ColoniesGrid->DefaultCellStyle = dataGridViewCellStyle19;
+            dataGridViewCellStyle8->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle8->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle8->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle8->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->ColoniesGrid->DefaultCellStyle = dataGridViewCellStyle8;
             this->ColoniesGrid->Dock = System::Windows::Forms::DockStyle::Fill;
             this->ColoniesGrid->Location = System::Drawing::Point(0, 0);
             this->ColoniesGrid->Name = L"ColoniesGrid";
             this->ColoniesGrid->ReadOnly = true;
-            dataGridViewCellStyle20->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle20->BackColor = System::Drawing::SystemColors::Control;
-            dataGridViewCellStyle20->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle9->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle9->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle9->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle20->ForeColor = System::Drawing::SystemColors::WindowText;
-            dataGridViewCellStyle20->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle20->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle20->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
-            this->ColoniesGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle20;
+            dataGridViewCellStyle9->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle9->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle9->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle9->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->ColoniesGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle9;
             this->ColoniesGrid->RowHeadersWidth = 4;
             this->ColoniesGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
             this->ColoniesGrid->ShowCellToolTips = false;
@@ -2611,29 +2353,37 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ShipsGrid->AllowUserToDeleteRows = false;
             this->ShipsGrid->AllowUserToOrderColumns = true;
             this->ShipsGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
+            dataGridViewCellStyle10->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle10->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle10->Font = (gcnew System::Drawing::Font(L"Tahoma", 6.75F));
+            dataGridViewCellStyle10->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle10->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle10->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle10->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->ShipsGrid->ColumnHeadersDefaultCellStyle = dataGridViewCellStyle10;
             this->ShipsGrid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-            dataGridViewCellStyle21->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle21->BackColor = System::Drawing::SystemColors::Window;
-            dataGridViewCellStyle21->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle11->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle11->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle11->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle21->ForeColor = System::Drawing::SystemColors::ControlText;
-            dataGridViewCellStyle21->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle21->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle21->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
-            this->ShipsGrid->DefaultCellStyle = dataGridViewCellStyle21;
+            dataGridViewCellStyle11->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle11->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle11->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle11->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->ShipsGrid->DefaultCellStyle = dataGridViewCellStyle11;
             this->ShipsGrid->Dock = System::Windows::Forms::DockStyle::Fill;
             this->ShipsGrid->Location = System::Drawing::Point(0, 0);
             this->ShipsGrid->Name = L"ShipsGrid";
             this->ShipsGrid->ReadOnly = true;
-            dataGridViewCellStyle22->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle22->BackColor = System::Drawing::SystemColors::Control;
-            dataGridViewCellStyle22->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle12->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle12->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle12->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle22->ForeColor = System::Drawing::SystemColors::WindowText;
-            dataGridViewCellStyle22->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle22->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle22->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
-            this->ShipsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle22;
+            dataGridViewCellStyle12->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle12->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle12->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle12->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->ShipsGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle12;
             this->ShipsGrid->RowHeadersWidth = 4;
             this->ShipsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
             this->ShipsGrid->ShowCellToolTips = false;
@@ -2755,29 +2505,37 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->AliensGrid->AllowUserToDeleteRows = false;
             this->AliensGrid->AllowUserToOrderColumns = true;
             this->AliensGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
+            dataGridViewCellStyle13->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle13->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle13->Font = (gcnew System::Drawing::Font(L"Tahoma", 6.75F));
+            dataGridViewCellStyle13->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle13->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle13->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle13->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->AliensGrid->ColumnHeadersDefaultCellStyle = dataGridViewCellStyle13;
             this->AliensGrid->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-            dataGridViewCellStyle23->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle23->BackColor = System::Drawing::SystemColors::Window;
-            dataGridViewCellStyle23->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle14->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle14->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle14->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle23->ForeColor = System::Drawing::SystemColors::ControlText;
-            dataGridViewCellStyle23->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle23->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle23->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
-            this->AliensGrid->DefaultCellStyle = dataGridViewCellStyle23;
+            dataGridViewCellStyle14->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle14->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle14->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle14->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->AliensGrid->DefaultCellStyle = dataGridViewCellStyle14;
             this->AliensGrid->Dock = System::Windows::Forms::DockStyle::Fill;
             this->AliensGrid->Location = System::Drawing::Point(0, 0);
             this->AliensGrid->Name = L"AliensGrid";
             this->AliensGrid->ReadOnly = true;
-            dataGridViewCellStyle24->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle24->BackColor = System::Drawing::SystemColors::Control;
-            dataGridViewCellStyle24->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle15->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle15->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle15->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle24->ForeColor = System::Drawing::SystemColors::WindowText;
-            dataGridViewCellStyle24->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle24->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle24->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
-            this->AliensGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle24;
+            dataGridViewCellStyle15->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle15->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle15->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle15->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->AliensGrid->RowHeadersDefaultCellStyle = dataGridViewCellStyle15;
             this->AliensGrid->RowHeadersWidth = 4;
             this->AliensGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
             this->AliensGrid->ShowCellToolTips = false;
@@ -3047,6 +2805,284 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->UtilTRSize->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
             this->UtilTRSize->ValueChanged += gcnew System::EventHandler(this, &Form1::UtilTRSize_ValueChanged);
             // 
+            // TabMap
+            // 
+            this->TabMap->BackColor = System::Drawing::Color::Black;
+            this->TabMap->Controls->Add(this->panel1);
+            this->TabMap->Location = System::Drawing::Point(4, 22);
+            this->TabMap->Margin = System::Windows::Forms::Padding(0);
+            this->TabMap->Name = L"TabMap";
+            this->TabMap->Size = System::Drawing::Size(683, 535);
+            this->TabMap->TabIndex = 1;
+            this->TabMap->Text = L"Map";
+            this->TabMap->UseVisualStyleBackColor = true;
+            this->TabMap->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &Form1::MapCanvas_Paint);
+            // 
+            // panel1
+            // 
+            this->panel1->BackColor = System::Drawing::SystemColors::Control;
+            this->panel1->Controls->Add(this->MapLSNVal);
+            this->panel1->Controls->Add(this->MapEnJumps);
+            this->panel1->Controls->Add(this->MapEnLSN);
+            this->panel1->Controls->Add(this->MapEnDist);
+            this->panel1->Controls->Add(groupBox3);
+            this->panel1->Controls->Add(groupBox2);
+            this->panel1->Controls->Add(groupBox1);
+            this->panel1->Controls->Add(this->MapSPSelf);
+            this->panel1->Dock = System::Windows::Forms::DockStyle::Right;
+            this->panel1->Location = System::Drawing::Point(483, 0);
+            this->panel1->Name = L"panel1";
+            this->panel1->Size = System::Drawing::Size(200, 535);
+            this->panel1->TabIndex = 0;
+            // 
+            // MapLSNVal
+            // 
+            this->MapLSNVal->Location = System::Drawing::Point(108, 324);
+            this->MapLSNVal->Name = L"MapLSNVal";
+            this->MapLSNVal->Size = System::Drawing::Size(52, 20);
+            this->MapLSNVal->TabIndex = 2;
+            this->MapLSNVal->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
+            this->MapLSNVal->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {21, 0, 0, 0});
+            this->MapLSNVal->ValueChanged += gcnew System::EventHandler(this, &Form1::MapUpdate);
+            // 
+            // MapEnJumps
+            // 
+            this->MapEnJumps->AutoSize = true;
+            this->MapEnJumps->Enabled = false;
+            this->MapEnJumps->Location = System::Drawing::Point(9, 413);
+            this->MapEnJumps->Name = L"MapEnJumps";
+            this->MapEnJumps->Size = System::Drawing::Size(110, 17);
+            this->MapEnJumps->TabIndex = 1;
+            this->MapEnJumps->Text = L"Show jump orders";
+            this->MapEnJumps->UseVisualStyleBackColor = true;
+            this->MapEnJumps->CheckedChanged += gcnew System::EventHandler(this, &Form1::MapUpdate);
+            // 
+            // MapEnLSN
+            // 
+            this->MapEnLSN->AutoSize = true;
+            this->MapEnLSN->Checked = true;
+            this->MapEnLSN->CheckState = System::Windows::Forms::CheckState::Checked;
+            this->MapEnLSN->Location = System::Drawing::Point(9, 324);
+            this->MapEnLSN->Name = L"MapEnLSN";
+            this->MapEnLSN->Size = System::Drawing::Size(95, 17);
+            this->MapEnLSN->TabIndex = 1;
+            this->MapEnLSN->Text = L"Max LSN filter:";
+            this->MapEnLSN->UseVisualStyleBackColor = true;
+            this->MapEnLSN->CheckedChanged += gcnew System::EventHandler(this, &Form1::MapEnLSN_CheckedChanged);
+            // 
+            // MapEnDist
+            // 
+            this->MapEnDist->AutoSize = true;
+            this->MapEnDist->Checked = true;
+            this->MapEnDist->CheckState = System::Windows::Forms::CheckState::Checked;
+            this->MapEnDist->Location = System::Drawing::Point(9, 345);
+            this->MapEnDist->Name = L"MapEnDist";
+            this->MapEnDist->Size = System::Drawing::Size(73, 17);
+            this->MapEnDist->TabIndex = 1;
+            this->MapEnDist->Text = L"Distances";
+            this->MapEnDist->UseVisualStyleBackColor = true;
+            this->MapEnDist->CheckedChanged += gcnew System::EventHandler(this, &Form1::MapUpdate);
+            // 
+            // groupBox3
+            // 
+            groupBox3->Controls->Add(this->MapSP3GV);
+            groupBox3->Controls->Add(label13);
+            groupBox3->Controls->Add(this->MapSP3);
+            groupBox3->Controls->Add(this->MapSP3System);
+            groupBox3->ForeColor = System::Drawing::Color::DarkBlue;
+            groupBox3->Location = System::Drawing::Point(3, 250);
+            groupBox3->Name = L"groupBox3";
+            groupBox3->Size = System::Drawing::Size(194, 68);
+            groupBox3->TabIndex = 0;
+            groupBox3->TabStop = false;
+            groupBox3->Text = L"Alien #1";
+            // 
+            // MapSP3GV
+            // 
+            this->MapSP3GV->Enabled = false;
+            this->MapSP3GV->ForeColor = System::Drawing::Color::DarkBlue;
+            this->MapSP3GV->Location = System::Drawing::Point(35, 42);
+            this->MapSP3GV->Name = L"MapSP3GV";
+            this->MapSP3GV->Size = System::Drawing::Size(46, 20);
+            this->MapSP3GV->TabIndex = 3;
+            this->MapSP3GV->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
+            this->MapSP3GV->ValueChanged += gcnew System::EventHandler(this, &Form1::MapUpdate);
+            // 
+            // label13
+            // 
+            label13->AutoSize = true;
+            label13->ForeColor = System::Drawing::Color::DarkBlue;
+            label13->Location = System::Drawing::Point(6, 46);
+            label13->Name = L"label13";
+            label13->Size = System::Drawing::Size(25, 13);
+            label13->TabIndex = 2;
+            label13->Text = L"GV:";
+            // 
+            // MapSP3
+            // 
+            this->MapSP3->ForeColor = System::Drawing::Color::DarkBlue;
+            this->MapSP3->FormattingEnabled = true;
+            this->MapSP3->Location = System::Drawing::Point(6, 19);
+            this->MapSP3->Name = L"MapSP3";
+            this->MapSP3->Size = System::Drawing::Size(97, 21);
+            this->MapSP3->TabIndex = 1;
+            // 
+            // MapSP3System
+            // 
+            this->MapSP3System->Enabled = false;
+            this->MapSP3System->ForeColor = System::Drawing::Color::DarkBlue;
+            this->MapSP3System->FormattingEnabled = true;
+            this->MapSP3System->Location = System::Drawing::Point(109, 18);
+            this->MapSP3System->Name = L"MapSP3System";
+            this->MapSP3System->Size = System::Drawing::Size(79, 21);
+            this->MapSP3System->TabIndex = 1;
+            // 
+            // groupBox2
+            // 
+            groupBox2->Controls->Add(this->MapSP2GV);
+            groupBox2->Controls->Add(label12);
+            groupBox2->Controls->Add(this->MapSP2);
+            groupBox2->Controls->Add(this->MapSP2System);
+            groupBox2->ForeColor = System::Drawing::Color::DarkGreen;
+            groupBox2->Location = System::Drawing::Point(3, 176);
+            groupBox2->Name = L"groupBox2";
+            groupBox2->Size = System::Drawing::Size(194, 68);
+            groupBox2->TabIndex = 0;
+            groupBox2->TabStop = false;
+            groupBox2->Text = L"Alien #1";
+            // 
+            // MapSP2GV
+            // 
+            this->MapSP2GV->Enabled = false;
+            this->MapSP2GV->ForeColor = System::Drawing::Color::DarkGreen;
+            this->MapSP2GV->Location = System::Drawing::Point(35, 42);
+            this->MapSP2GV->Name = L"MapSP2GV";
+            this->MapSP2GV->Size = System::Drawing::Size(46, 20);
+            this->MapSP2GV->TabIndex = 3;
+            this->MapSP2GV->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
+            this->MapSP2GV->ValueChanged += gcnew System::EventHandler(this, &Form1::MapUpdate);
+            // 
+            // label12
+            // 
+            label12->AutoSize = true;
+            label12->ForeColor = System::Drawing::Color::DarkGreen;
+            label12->Location = System::Drawing::Point(6, 46);
+            label12->Name = L"label12";
+            label12->Size = System::Drawing::Size(25, 13);
+            label12->TabIndex = 2;
+            label12->Text = L"GV:";
+            // 
+            // MapSP2
+            // 
+            this->MapSP2->ForeColor = System::Drawing::Color::DarkGreen;
+            this->MapSP2->FormattingEnabled = true;
+            this->MapSP2->Location = System::Drawing::Point(6, 19);
+            this->MapSP2->Name = L"MapSP2";
+            this->MapSP2->Size = System::Drawing::Size(97, 21);
+            this->MapSP2->TabIndex = 1;
+            // 
+            // MapSP2System
+            // 
+            this->MapSP2System->Enabled = false;
+            this->MapSP2System->ForeColor = System::Drawing::Color::DarkGreen;
+            this->MapSP2System->FormattingEnabled = true;
+            this->MapSP2System->Location = System::Drawing::Point(109, 18);
+            this->MapSP2System->Name = L"MapSP2System";
+            this->MapSP2System->Size = System::Drawing::Size(79, 21);
+            this->MapSP2System->TabIndex = 1;
+            // 
+            // groupBox1
+            // 
+            groupBox1->Controls->Add(this->MapSP1GV);
+            groupBox1->Controls->Add(label11);
+            groupBox1->Controls->Add(this->MapSP1);
+            groupBox1->Controls->Add(this->MapSP1System);
+            groupBox1->ForeColor = System::Drawing::Color::Maroon;
+            groupBox1->Location = System::Drawing::Point(3, 102);
+            groupBox1->Name = L"groupBox1";
+            groupBox1->Size = System::Drawing::Size(194, 68);
+            groupBox1->TabIndex = 0;
+            groupBox1->TabStop = false;
+            groupBox1->Text = L"Alien #1";
+            // 
+            // MapSP1GV
+            // 
+            this->MapSP1GV->Enabled = false;
+            this->MapSP1GV->ForeColor = System::Drawing::Color::Maroon;
+            this->MapSP1GV->Location = System::Drawing::Point(35, 42);
+            this->MapSP1GV->Name = L"MapSP1GV";
+            this->MapSP1GV->Size = System::Drawing::Size(46, 20);
+            this->MapSP1GV->TabIndex = 3;
+            this->MapSP1GV->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
+            this->MapSP1GV->ValueChanged += gcnew System::EventHandler(this, &Form1::MapUpdate);
+            // 
+            // label11
+            // 
+            label11->AutoSize = true;
+            label11->ForeColor = System::Drawing::Color::Maroon;
+            label11->Location = System::Drawing::Point(6, 46);
+            label11->Name = L"label11";
+            label11->Size = System::Drawing::Size(25, 13);
+            label11->TabIndex = 2;
+            label11->Text = L"GV:";
+            // 
+            // MapSP1
+            // 
+            this->MapSP1->ForeColor = System::Drawing::Color::Maroon;
+            this->MapSP1->FormattingEnabled = true;
+            this->MapSP1->Location = System::Drawing::Point(6, 18);
+            this->MapSP1->Name = L"MapSP1";
+            this->MapSP1->Size = System::Drawing::Size(97, 21);
+            this->MapSP1->TabIndex = 1;
+            // 
+            // MapSP1System
+            // 
+            this->MapSP1System->Enabled = false;
+            this->MapSP1System->ForeColor = System::Drawing::Color::Maroon;
+            this->MapSP1System->FormattingEnabled = true;
+            this->MapSP1System->Location = System::Drawing::Point(109, 18);
+            this->MapSP1System->Name = L"MapSP1System";
+            this->MapSP1System->Size = System::Drawing::Size(79, 21);
+            this->MapSP1System->TabIndex = 1;
+            // 
+            // MapSPSelf
+            // 
+            this->MapSPSelf->Controls->Add(this->MapSPSelfGV);
+            this->MapSPSelf->Controls->Add(label7);
+            this->MapSPSelf->Controls->Add(this->MapSPSelfSystem);
+            this->MapSPSelf->Location = System::Drawing::Point(3, 28);
+            this->MapSPSelf->Name = L"MapSPSelf";
+            this->MapSPSelf->Size = System::Drawing::Size(194, 68);
+            this->MapSPSelf->TabIndex = 0;
+            this->MapSPSelf->TabStop = false;
+            this->MapSPSelf->Text = L"groupBox1";
+            // 
+            // MapSPSelfGV
+            // 
+            this->MapSPSelfGV->Location = System::Drawing::Point(36, 42);
+            this->MapSPSelfGV->Name = L"MapSPSelfGV";
+            this->MapSPSelfGV->Size = System::Drawing::Size(46, 20);
+            this->MapSPSelfGV->TabIndex = 3;
+            this->MapSPSelfGV->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
+            this->MapSPSelfGV->ValueChanged += gcnew System::EventHandler(this, &Form1::MapUpdate);
+            // 
+            // label7
+            // 
+            label7->AutoSize = true;
+            label7->Location = System::Drawing::Point(6, 46);
+            label7->Name = L"label7";
+            label7->Size = System::Drawing::Size(25, 13);
+            label7->TabIndex = 2;
+            label7->Text = L"GV:";
+            // 
+            // MapSPSelfSystem
+            // 
+            this->MapSPSelfSystem->FormattingEnabled = true;
+            this->MapSPSelfSystem->Location = System::Drawing::Point(6, 18);
+            this->MapSPSelfSystem->Name = L"MapSPSelfSystem";
+            this->MapSPSelfSystem->Size = System::Drawing::Size(182, 21);
+            this->MapSPSelfSystem->TabIndex = 1;
+            // 
             // TabAbout
             // 
             this->TabAbout->BackColor = System::Drawing::Color::Transparent;
@@ -3132,28 +3168,28 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->dataGridView1->AllowUserToOrderColumns = true;
             this->dataGridView1->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
             this->dataGridView1->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-            dataGridViewCellStyle25->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle25->BackColor = System::Drawing::SystemColors::Window;
-            dataGridViewCellStyle25->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle16->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle16->BackColor = System::Drawing::SystemColors::Window;
+            dataGridViewCellStyle16->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle25->ForeColor = System::Drawing::SystemColors::ControlText;
-            dataGridViewCellStyle25->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle25->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle25->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
-            this->dataGridView1->DefaultCellStyle = dataGridViewCellStyle25;
+            dataGridViewCellStyle16->ForeColor = System::Drawing::SystemColors::ControlText;
+            dataGridViewCellStyle16->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle16->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle16->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
+            this->dataGridView1->DefaultCellStyle = dataGridViewCellStyle16;
             this->dataGridView1->Dock = System::Windows::Forms::DockStyle::Fill;
             this->dataGridView1->Location = System::Drawing::Point(0, 0);
             this->dataGridView1->Name = L"dataGridView1";
             this->dataGridView1->ReadOnly = true;
-            dataGridViewCellStyle26->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle26->BackColor = System::Drawing::SystemColors::Control;
-            dataGridViewCellStyle26->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
+            dataGridViewCellStyle17->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
+            dataGridViewCellStyle17->BackColor = System::Drawing::SystemColors::Control;
+            dataGridViewCellStyle17->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
-            dataGridViewCellStyle26->ForeColor = System::Drawing::SystemColors::WindowText;
-            dataGridViewCellStyle26->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle26->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle26->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
-            this->dataGridView1->RowHeadersDefaultCellStyle = dataGridViewCellStyle26;
+            dataGridViewCellStyle17->ForeColor = System::Drawing::SystemColors::WindowText;
+            dataGridViewCellStyle17->SelectionBackColor = System::Drawing::SystemColors::Highlight;
+            dataGridViewCellStyle17->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
+            dataGridViewCellStyle17->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
+            this->dataGridView1->RowHeadersDefaultCellStyle = dataGridViewCellStyle17;
             this->dataGridView1->RowHeadersWidth = 4;
             this->dataGridView1->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
             this->dataGridView1->Size = System::Drawing::Size(569, 504);
@@ -3184,22 +3220,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechLS))->EndInit();
             this->MenuTabs->ResumeLayout(false);
             this->TabReports->ResumeLayout(false);
-            this->TabMap->ResumeLayout(false);
-            this->panel1->ResumeLayout(false);
-            this->panel1->PerformLayout();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapLSNVal))->EndInit();
-            groupBox3->ResumeLayout(false);
-            groupBox3->PerformLayout();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSP3GV))->EndInit();
-            groupBox2->ResumeLayout(false);
-            groupBox2->PerformLayout();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSP2GV))->EndInit();
-            groupBox1->ResumeLayout(false);
-            groupBox1->PerformLayout();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSP1GV))->EndInit();
-            this->MapSPSelf->ResumeLayout(false);
-            this->MapSPSelf->PerformLayout();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSPSelfGV))->EndInit();
             this->TabSystems->ResumeLayout(false);
             splitContainer2->Panel1->ResumeLayout(false);
             splitContainer2->Panel1->PerformLayout();
@@ -3249,6 +3269,22 @@ private: System::Windows::Forms::Label^  SystemsRef;
             groupBox4->ResumeLayout(false);
             groupBox4->PerformLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->UtilTRSize))->EndInit();
+            this->TabMap->ResumeLayout(false);
+            this->panel1->ResumeLayout(false);
+            this->panel1->PerformLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapLSNVal))->EndInit();
+            groupBox3->ResumeLayout(false);
+            groupBox3->PerformLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSP3GV))->EndInit();
+            groupBox2->ResumeLayout(false);
+            groupBox2->PerformLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSP2GV))->EndInit();
+            groupBox1->ResumeLayout(false);
+            groupBox1->PerformLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSP1GV))->EndInit();
+            this->MapSPSelf->ResumeLayout(false);
+            this->MapSPSelf->PerformLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSPSelfGV))->EndInit();
             this->TabAbout->ResumeLayout(false);
             this->TabAbout->PerformLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->dataGridView1))->EndInit();

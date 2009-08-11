@@ -1036,6 +1036,9 @@ void Form1::SystemsSetup()
     for each( IGridPlugin ^plugin in m_GridPlugins )
         plugin->GridFormat(GridType::Systems, SystemsGrid);
 
+    SystemsGrid->Columns[colColonies->Ordinal]->DefaultCellStyle->Font =
+        gcnew System::Drawing::Font(L"Tahoma", 6.75F);
+
     // Some columns are not sortable... yet
     SystemsGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
 
@@ -1215,6 +1218,9 @@ void Form1::PlanetsSetup()
     ApplyDataAndFormat(PlanetsGrid, dataTable, colObject->Ordinal, colLSN->Ordinal, nullptr);
     for each( IGridPlugin ^plugin in m_GridPlugins )
         plugin->GridFormat(GridType::Planets, PlanetsGrid);
+
+    PlanetsGrid->Columns[colColonies->Ordinal]->DefaultCellStyle->Font =
+        gcnew System::Drawing::Font(L"Tahoma", 6.75F);
 
     // Some columns are not sortable... yet
     PlanetsGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
