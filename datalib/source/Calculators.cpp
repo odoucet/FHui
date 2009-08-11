@@ -81,12 +81,12 @@ int Calculators::ColonyProduction(Colony^ colony, int mi, int ma, int ls, int fl
         /* Mining colony */
         availableToSpend = (2 * rawMaterialUnits) / 3; 
     }
-    if ( colony->PlanetType == PLANET_COLONY_RESORT )
+    else if ( colony->PlanetType == PLANET_COLONY_RESORT )
     {
         /* Resort colony */
         availableToSpend = (2 * productionCapacity) / 3; 
     }
-    if ( colony->PlanetType == PLANET_COLONY )
+    else
     {
         rawMaterialUnits += colony->Inventory[INV_RM];
         availableToSpend = Math::Min(rawMaterialUnits, productionCapacity);
