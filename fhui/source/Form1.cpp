@@ -820,7 +820,7 @@ void Form1::ColumnsFilterMenu(DataGridView ^grid, DataGridViewCellMouseEventArgs
     for( int i = 0; i < grid->Columns->Count; ++i )
     {
         String ^text = (String^)grid->Columns[i]->HeaderCell->Value;
-        if( String::IsNullOrEmpty(text) )
+        if( !String::IsNullOrEmpty(text) )
         {
             ToolStripMenuItem ^menuItem = CreateCustomMenuItem(
                 text,
