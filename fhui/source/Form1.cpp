@@ -67,52 +67,11 @@ void Form1::InitControls()
 
     m_GridToolTip = gcnew ToolTip;
 
-    GridFilter ^filter;
-
-    // -- systems
     SystemsInitControls();
-
-    // -- planets
     PlanetsInitControls();
-
-    // -- colonies
     ColoniesInitControls();
-
-    // -- ships
-    filter = gcnew GridFilter(ShipsGrid, m_bGridUpdateEnabled);
-    filter->GridSetup += gcnew GridSetupHandler(this, &Form1::ShipsSetup);
-    filter->GridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
-
-    filter->CtrlRef         = ShipsRef;
-    filter->CtrlRefHome     = ShipsRefHome;
-    filter->CtrlRefXYZ      = ShipsRefXYZ;
-    filter->CtrlRefColony   = ShipsRefColony;
-    filter->CtrlRefShip     = ShipsRefShip;
-    filter->CtrlGV          = TechGV;
-    filter->CtrlMaxMishap   = ShipsMaxMishap;
-    filter->CtrlFiltOwnO    = ShipsFiltOwnO;
-    filter->CtrlFiltOwnN    = ShipsFiltOwnN;
-    filter->CtrlFiltRelA    = ShipsFiltRelA;
-    filter->CtrlFiltRelE    = ShipsFiltRelE;
-    filter->CtrlFiltRelN    = ShipsFiltRelN;
-    filter->CtrlFiltRelP    = ShipsFiltRelP;
-    filter->CtrlFiltTypeBas = ShipsFiltTypeBA;
-    filter->CtrlFiltTypeMl  = ShipsFiltTypeML;
-    filter->CtrlFiltTypeTr  = ShipsFiltTypeTR;
-
-    m_ShipsFilter = filter;
-
-    // -- aliens
-    filter = gcnew GridFilter(AliensGrid, m_bGridUpdateEnabled);
-    filter->GridSetup += gcnew GridSetupHandler(this, &Form1::AliensSetup);
-    filter->GridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
-
-    filter->CtrlFiltRelA    = AliensFiltRelA;
-    filter->CtrlFiltRelE    = AliensFiltRelE;
-    filter->CtrlFiltRelN    = AliensFiltRelN;
-    filter->CtrlFiltRelP    = AliensFiltRelP;
-
-    m_AliensFilter = filter;
+    ShipsInitControls();
+    AliensInitControls();
 }
 
 void Form1::InitData()
@@ -1774,6 +1733,70 @@ void Form1::ColoniesMenuProdShipyard(Object^, EventArgs^)
 ////////////////////////////////////////////////////////////////
 // Ships
 
+void Form1::ShipsInitControls()
+{
+    ShipsGridSorter ^sorter = gcnew ShipsGridSorter(ShipsGrid);
+
+    // Add columns
+    ShipsColumns %c = m_ShipsColumns;
+
+#define ADD_COLUMN(title, desc, type, sortOrder, customSortMode)    \
+    sorter->AddColumn(title, desc, type::typeid, SortOrder::sortOrder, GridSorterBase::CustomSortMode::customSortMode)
+
+    c.Object    = ADD_COLUMN(nullptr,       nullptr,                    Ship,   None,       Default);
+    c.Owner     = ADD_COLUMN("Owner",       "Ship owner",               String, Ascending,  Owner);
+    c.Class     = ADD_COLUMN("Class",       "Ship class",               String, Ascending,  Type);
+    c.Name      = ADD_COLUMN("Name",        "Ship name",                String, Ascending,  Default);
+    c.Location  = ADD_COLUMN("Location",    "Current location",         String, Ascending,  Location);
+    c.Age       = ADD_COLUMN("Age",         "Age",                      int,    Ascending,  Default);
+    c.Cap       = ADD_COLUMN("Cap",         "Capacity",                 int,    Ascending,  Default);
+    c.Dist      = ADD_COLUMN("Distance",    "Distance to ref system and mishap chance [%]", String, Ascending, Distance);
+    c.Cargo     = ADD_COLUMN("Cargo",       "Cargo on board",           String, Ascending,  Default);
+    c.Maint     = ADD_COLUMN("Maint",       "Maintenance cost",         double, Ascending,  Default);
+    c.UpgCost   = ADD_COLUMN("Upg",         "Upgrade cost to age 0",    int,    Ascending,  Default);
+    c.RecVal    = ADD_COLUMN("Rec",         "Recycle value",            int,    Descending, Default);
+    c.Order     = ADD_COLUMN("Order",       "Order",                    String, Ascending,  Default);
+
+    for each( IGridPlugin ^plugin in m_GridPlugins )
+        plugin->AddColumns(GridType::Ships, sorter);
+#undef ADD_COLUMN
+
+    // Formatting
+    ApplyDataAndFormat(ShipsGrid, nullptr, c.Object, c.Class, sorter);
+    for each( IGridPlugin ^plugin in m_GridPlugins )
+        plugin->GridFormat(GridType::Ships, ShipsGrid);
+
+    ShipsGrid->Columns[c.Dist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
+    ShipsGrid->Columns[c.Cargo]->DefaultCellStyle->Font =
+        gcnew System::Drawing::Font(L"Tahoma", 6.75F);
+
+    GridFilter ^filter = gcnew GridFilter(ShipsGrid, m_bGridUpdateEnabled);
+    filter->GridSetup += gcnew GridSetupHandler(this, &Form1::ShipsSetup);
+    filter->GridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
+    filter->Sorter = sorter;
+
+    filter->CtrlRef         = ShipsRef;
+    filter->CtrlRefHome     = ShipsRefHome;
+    filter->CtrlRefXYZ      = ShipsRefXYZ;
+    filter->CtrlRefColony   = ShipsRefColony;
+    filter->CtrlRefShip     = ShipsRefShip;
+    filter->CtrlGV          = TechGV;
+    filter->CtrlMaxMishap   = ShipsMaxMishap;
+    filter->CtrlFiltOwnO    = ShipsFiltOwnO;
+    filter->CtrlFiltOwnN    = ShipsFiltOwnN;
+    filter->CtrlFiltRelA    = ShipsFiltRelA;
+    filter->CtrlFiltRelE    = ShipsFiltRelE;
+    filter->CtrlFiltRelN    = ShipsFiltRelN;
+    filter->CtrlFiltRelP    = ShipsFiltRelP;
+    filter->CtrlFiltTypeBas = ShipsFiltTypeBA;
+    filter->CtrlFiltTypeMl  = ShipsFiltTypeML;
+    filter->CtrlFiltTypeTr  = ShipsFiltTypeTR;
+
+    // Store objects
+    m_ShipsFilter = filter;
+    m_ShipsSorter = sorter;
+}
+
 void Form1::ShipsUpdateControls()
 {
     // Inhibit grid update
@@ -1791,30 +1814,15 @@ void Form1::ShipsUpdateControls()
     m_ShipsFilter->EnableUpdates = true;
     ShipsRefHome->Text = GameData::Player->Name;
     m_ShipsFilter->Reset();
+
+    m_ShipsSorter->SetGroupBySpecies( ColoniesGroupByOwner->Checked );
 }
 
 void Form1::ShipsSetup()
 {
-    // Put system data in a DataTable so that column sorting works.
-    DataTable ^dataTable = gcnew DataTable();
+    ShipsGrid->Rows->Clear();
 
-    DataColumn ^colObject   = dataTable->Columns->Add("ship",       Ship::typeid );
-    DataColumn ^colOwner    = dataTable->Columns->Add("Owner",      String::typeid );
-    DataColumn ^colClass    = dataTable->Columns->Add("Class",      String::typeid );
-    DataColumn ^colName     = dataTable->Columns->Add("Name",       String::typeid );
-    DataColumn ^colLocation = dataTable->Columns->Add("Location",   String::typeid );
-    DataColumn ^colAge      = dataTable->Columns->Add("Age",        int::typeid );
-    DataColumn ^colCap      = dataTable->Columns->Add("Cap.",       int::typeid );
-    DataColumn ^colCargo    = dataTable->Columns->Add("Cargo",      String::typeid );
-    DataColumn ^colDist     = dataTable->Columns->Add("Dist.",      double::typeid );
-    DataColumn ^colMishap   = dataTable->Columns->Add("Mishap %",   String::typeid );
-    DataColumn ^colMaint    = dataTable->Columns->Add("Maint",      double::typeid );
-    DataColumn ^colUpgCost  = dataTable->Columns->Add("Upg.Cost",   int::typeid );
-    DataColumn ^colRecVal   = dataTable->Columns->Add("Rec.Val",    int::typeid );
-    DataColumn ^colOrder    = dataTable->Columns->Add("Order",      String::typeid );
-
-    for each( IGridPlugin ^plugin in m_GridPlugins )
-        plugin->AddColumns(GridType::Ships, dataTable);
+    ShipsColumns %c = m_ShipsColumns;
 
     Alien ^sp = GameData::Player;
     int gv = sp->TechLevelsAssumed[TECH_GV];
@@ -1829,43 +1837,40 @@ void Form1::ShipsSetup()
         double distance = ship->System->CalcDistance(m_ShipsFilter->RefSystem);
         double mishap   = ship->System->CalcMishap(m_ShipsFilter->RefSystem, gv, ship->Age);
 
-        DataRow^ row = dataTable->NewRow();
-        row[colObject]      = ship;
-        row[colOwner]       = ship->Owner == sp ? String::Format("* {0}", sp->Name) : ship->Owner->Name;
-        row[colClass]       = ship->PrintClass();
-        row[colName]        = ship->Name;
+        DataGridViewRow ^row = ShipsGrid->Rows[ ShipsGrid->Rows->Add() ];
+        DataGridViewCellCollection ^cells = row->Cells;
+        cells[c.Object]->Value      = ship;
+        cells[c.Owner]->Value       = ship->Owner == sp ? String::Format("* {0}", sp->Name) : ship->Owner->Name;
+        cells[c.Class]->Value       = ship->PrintClass();
+        cells[c.Name]->Value        = ship->Name;
         if( ship->EUToComplete > 0 )
-            row[colName]    = ship->Name + " (incomplete)";
-        row[colLocation]    = ship->PrintLocation();
+            cells[c.Name]->Value    = ship->Name + " (incomplete)";
+        cells[c.Location]->Value    = ship->PrintLocation();
         if( !ship->IsPirate )
-            row[colAge]     = ship->Age;
-        row[colCap]         = ship->Capacity;
-        row[colDist]        = distance;
-        row[colMishap]      = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
+            cells[c.Age]->Value     = ship->Age;
+        cells[c.Cap]->Value         = ship->Capacity;
+        cells[c.Dist]->Value        = String::Format("{0:F1}  ({1:F1}%)", distance, mishap);
         if( sp == ship->Owner )
         {
-            row[colCargo]   = ship->PrintCargo();
-            row[colMaint]   = ship->GetMaintenanceCost() * discount;
-            row[colUpgCost] = ship->GetUpgradeCost();
-            row[colRecVal]  = ship->GetRecycleValue();
+            cells[c.Cargo]->Value   = ship->PrintCargo();
+            cells[c.Maint]->Value   = ship->GetMaintenanceCost() * discount;
+            cells[c.UpgCost]->Value = ship->GetUpgradeCost();
+            cells[c.RecVal]->Value  = ship->GetRecycleValue();
             if( ship->Command )
-                row[colOrder] = ship->Command->Print();
+                cells[c.Order]->Value = ship->Command->Print();
             else if( ship->EUToComplete )
-                row[colOrder] = ship->EUToComplete.ToString() + " EU to complete";
+                cells[c.Order]->Value = ship->EUToComplete.ToString() + " EU to complete";
         }
 
         for each( IGridPlugin ^plugin in m_GridPlugins )
             plugin->AddRowData(row, m_ShipsFilter, ship);
-
-        dataTable->Rows->Add(row);
     }
 
-    ApplyDataAndFormat(ShipsGrid, dataTable, colObject->Ordinal, colOwner->Ordinal, nullptr);
-    for each( IGridPlugin ^plugin in m_GridPlugins )
-        plugin->GridFormat(GridType::Ships, ShipsGrid);
+    // Setup tooltips
+    SetGridBgAndTooltip(ShipsGrid);
 
-    // Some columns are not sortable... yet
-    ShipsGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
+    // Sort data
+    ShipsGrid->Sort( m_ShipsSorter );
 
     // Enable filters
     m_ShipsFilter->EnableUpdates = true;
@@ -2102,6 +2107,21 @@ void Form1::ShipsMenuOrderSet(ShipOrderData ^data)
 ////////////////////////////////////////////////////////////////
 // Aliens
 
+void Form1::AliensInitControls()
+{
+    // -- aliens
+    GridFilter ^filter = gcnew GridFilter(AliensGrid, m_bGridUpdateEnabled);
+    filter->GridSetup += gcnew GridSetupHandler(this, &Form1::AliensSetup);
+    filter->GridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
+
+    filter->CtrlFiltRelA    = AliensFiltRelA;
+    filter->CtrlFiltRelE    = AliensFiltRelE;
+    filter->CtrlFiltRelN    = AliensFiltRelN;
+    filter->CtrlFiltRelP    = AliensFiltRelP;
+
+    m_AliensFilter = filter;
+}
+
 void Form1::AliensUpdateControls()
 {
     m_AliensFilter->EnableUpdates = true;
@@ -2123,8 +2143,8 @@ void Form1::AliensSetup()
     DataColumn ^colTeach    = dataTable->Columns->Add("Teach",          String::typeid );
     DataColumn ^colEMail    = dataTable->Columns->Add("EMail",          String::typeid );
 
-    for each( IGridPlugin ^plugin in m_GridPlugins )
-        plugin->AddColumns(GridType::Aliens, dataTable);
+    //for each( IGridPlugin ^plugin in m_GridPlugins )
+    //    plugin->AddColumns(GridType::Aliens, dataTable);
 
     for each( Alien ^alien in m_GameData->GetAliens() )
     {
@@ -2158,8 +2178,8 @@ void Form1::AliensSetup()
                 row[colTeach] = teach->Substring(2);
         }
 
-        for each( IGridPlugin ^plugin in m_GridPlugins )
-            plugin->AddRowData(row, m_AliensFilter, alien);
+        //for each( IGridPlugin ^plugin in m_GridPlugins )
+        //    plugin->AddRowData(row, m_AliensFilter, alien);
 
         dataTable->Rows->Add(row);
     }

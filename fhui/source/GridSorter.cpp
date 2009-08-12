@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "GridSorter.h"
+#include "enums.h"
 
 ////////////////////////////////////////////////////////////////
 
@@ -336,6 +337,83 @@ int ColoniesGridSorter::CompareType(IGridDataSrc ^o1, IGridDataSrc ^o2)
 {
     // Make HOME first when descending order (this order is default)
     return ((Colony^)o1)->PlanetType - ((Colony^)o2)->PlanetType;
+}
+
+////////////////////////////////////////////////////////////////
+
+ShipsGridSorter::ShipsGridSorter(DataGridView ^grid)
+    : GridSorterBase(grid)
+{
+}
+
+int ShipsGridSorter::BackupCompare(DataGridViewRow ^r1, DataGridViewRow ^r2)
+{
+    Ship ^s1 = safe_cast<Ship^>( r1->Cells[0]->Value );
+    Ship ^s2 = safe_cast<Ship^>( r2->Cells[0]->Value );
+
+    int result = 0;
+
+    // Step 1: by type
+    if( result == 0 )
+        result = CompareType(s1, s2) * GetForcedDirectionModifier(SortOrder::Ascending);
+
+    // Step 2: by age
+    if( result == 0 )
+        result = (s1->Age - s2->Age) * GetForcedDirectionModifier(SortOrder::Ascending);
+
+    // Step 3: by distance to ref system
+    result = CompareDistance(s1, s2) * GetForcedDirectionModifier(SortOrder::Ascending);
+
+    // Step 4: by name
+    if( result == 0 )
+        result = s1->Name->CompareTo(s2->Name) * GetForcedDirectionModifier(SortOrder::Ascending);
+
+    return result;
+}
+
+int ShipsGridSorter::CompareType(IGridDataSrc ^o1, IGridDataSrc ^o2)
+{
+    Ship ^s1 = safe_cast<Ship^>( o1 );
+    Ship ^s2 = safe_cast<Ship^>( o2 );
+
+    return GetShipClassValue(s1) - GetShipClassValue(s2);
+}
+
+int ShipsGridSorter::GetShipClassValue(Ship ^s)
+{
+    // Bases first
+    if( s->Type == SHIP_BAS )
+        return 1;
+    // TR last, by tonnage and equal tonnage separated from sublight
+    if( s->Type == SHIP_TR )
+        return 10000 + (10000 - 10 * s->Size) + (s->SubLight ? 1 : 0);
+
+    // Big military ships first and equal tonnage separated from sublight
+    return 100 + SHIP_MAX - s->Type + (s->SubLight ? 1 : 0);
+}
+
+////////////////////////////////////////////////////////////////
+
+AliensGridSorter::AliensGridSorter(DataGridView ^grid)
+    : GridSorterBase(grid)
+{
+}
+
+int AliensGridSorter::BackupCompare(DataGridViewRow ^r1, DataGridViewRow ^r2)
+{
+    Alien ^a1 = safe_cast<Alien^>( r1->Cells[0]->Value );
+    Alien ^a2 = safe_cast<Alien^>( r2->Cells[0]->Value );
+
+    int result = 0;
+
+    // Step 1: by relation
+    result = (a1->Relation - a2->Relation) * GetForcedDirectionModifier(SortOrder::Ascending);
+
+    // Step 2: by name
+    if( result == 0 )
+        result = a1->Name->CompareTo(a2->Name) * GetForcedDirectionModifier(SortOrder::Ascending);
+
+    return result;
 }
 
 ////////////////////////////////////////////////////////////////

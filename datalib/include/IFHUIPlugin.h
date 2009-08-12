@@ -45,15 +45,14 @@ public enum class GridType
 public interface class IGridPlugin : public IPluginBase
 {
 public:
-    void        AddColumns(GridType, DataTable^);
     void        AddColumns(GridType, IGridSorter^);
     void        GridFormat(GridType, DataGridView^);
     void        AddMenuItems(GridType, DataGridView^);
     void        AddRowData(DataGridViewRow^, IGridFilter^, StarSystem^);
     void        AddRowData(DataGridViewRow^, IGridFilter^, Planet^);
     void        AddRowData(DataGridViewRow^, IGridFilter^, Colony^);
-    void        AddRowData(DataRow^, IGridFilter^, Ship^);
-    void        AddRowData(DataRow^, IGridFilter^, Alien^);
+    void        AddRowData(DataGridViewRow^, IGridFilter^, Ship^);
+    void        AddRowData(DataGridViewRow^, IGridFilter^, Alien^);
 };
 
 // ---------------------------------------------------------

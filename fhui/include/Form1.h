@@ -254,6 +254,7 @@ namespace FHUI {
 
         // ==================================================
         // --- SHIPS ---
+        void        ShipsInitControls();
         void        ShipsUpdateControls();
         void        ShipsSetup();
         void        ShipsSetRef( int rowIndex );
@@ -268,13 +269,34 @@ namespace FHUI {
         ToolStripMenuItem^ ShipsMenuCreateJumpItem(
                         Ship ^ship, StarSystem ^system, int planetNum, String ^text );
 
+
+        value struct ShipsColumns
+        {
+            int Object;
+            int Owner;
+            int Class;
+            int Name;
+            int Location;
+            int Age;
+            int Cap;
+            int Dist;
+            int Cargo;
+            int Maint;
+            int UpgCost;
+            int RecVal;
+            int Order;
+        };
+
         IGridFilter        ^m_ShipsFilter;
+        IGridSorter        ^m_ShipsSorter;
         Ship               ^m_ShipsMenuRef;
+        ShipsColumns        m_ShipsColumns;
 
         // ==================================================
         // --- ALIENS ---
-        void        AliensSetup();
+        void        AliensInitControls();
         void        AliensUpdateControls();
+        void        AliensSetup();
         void        AliensFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
 
         typedef Pair<Alien^, int> AlienRelationData;
@@ -286,8 +308,15 @@ namespace FHUI {
 
         ToolStripMenuItem^ AliensMenuCreateTeach(String ^text, TechType tech);
 
+        value struct AliensColumns
+        {
+            int Object;
+        };
+
         IGridFilter        ^m_AliensFilter;
+        IGridSorter        ^m_AliensSorter;
         Alien              ^m_AliensMenuRef;
+        AliensColumns       m_AliensColumns;
 
         // ==================================================
         // --- ORDER TEMPLATE ---
@@ -356,6 +385,7 @@ namespace FHUI {
         // Auto-generated code below this point
         // --------------------------------------------------
 
+    private: System::Windows::Forms::CheckBox^  ShipsGroupByOwner;
     private: System::Windows::Forms::Label^  UtilResInfoAverage;
     private: System::Windows::Forms::Label^  UtilResInfoGuaranteed;
     private: System::Windows::Forms::Label^  UtilResInfoGuided;
@@ -682,6 +712,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ColoniesGrid = (gcnew System::Windows::Forms::DataGridView());
             this->TabShips = (gcnew System::Windows::Forms::TabPage());
             this->splitContainer5 = (gcnew System::Windows::Forms::SplitContainer());
+            this->ShipsGroupByOwner = (gcnew System::Windows::Forms::CheckBox());
             this->ShipsRefXYZ = (gcnew System::Windows::Forms::ComboBox());
             this->ShipsFiltTypeML = (gcnew System::Windows::Forms::CheckBox());
             this->ShipsFiltTypeTR = (gcnew System::Windows::Forms::CheckBox());
@@ -2129,6 +2160,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // splitContainer5.Panel1
             // 
+            this->splitContainer5->Panel1->Controls->Add(this->ShipsGroupByOwner);
             this->splitContainer5->Panel1->Controls->Add(this->ShipsRefXYZ);
             this->splitContainer5->Panel1->Controls->Add(this->ShipsFiltTypeML);
             this->splitContainer5->Panel1->Controls->Add(this->ShipsFiltTypeTR);
@@ -2157,6 +2189,19 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->splitContainer5->SplitterWidth = 1;
             this->splitContainer5->TabIndex = 2;
             // 
+            // ShipsGroupByOwner
+            // 
+            this->ShipsGroupByOwner->AutoSize = true;
+            this->ShipsGroupByOwner->Checked = true;
+            this->ShipsGroupByOwner->CheckState = System::Windows::Forms::CheckState::Checked;
+            this->ShipsGroupByOwner->Location = System::Drawing::Point(435, 55);
+            this->ShipsGroupByOwner->Name = L"ShipsGroupByOwner";
+            this->ShipsGroupByOwner->Size = System::Drawing::Size(103, 17);
+            this->ShipsGroupByOwner->TabIndex = 72;
+            this->ShipsGroupByOwner->Text = L"Group by Owner";
+            this->ShipsGroupByOwner->UseVisualStyleBackColor = true;
+            this->ShipsGroupByOwner->CheckedChanged += gcnew System::EventHandler(this, &Form1::ShipsGroupByOwner_CheckedChanged);
+            // 
             // ShipsRefXYZ
             // 
             this->ShipsRefXYZ->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
@@ -2171,7 +2216,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // ShipsFiltTypeML
             // 
             this->ShipsFiltTypeML->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ShipsFiltTypeML->Location = System::Drawing::Point(409, 52);
+            this->ShipsFiltTypeML->Location = System::Drawing::Point(353, 52);
             this->ShipsFiltTypeML->Margin = System::Windows::Forms::Padding(1);
             this->ShipsFiltTypeML->Name = L"ShipsFiltTypeML";
             this->ShipsFiltTypeML->Size = System::Drawing::Size(31, 23);
@@ -2185,7 +2230,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // ShipsFiltTypeTR
             // 
             this->ShipsFiltTypeTR->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ShipsFiltTypeTR->Location = System::Drawing::Point(442, 52);
+            this->ShipsFiltTypeTR->Location = System::Drawing::Point(386, 52);
             this->ShipsFiltTypeTR->Margin = System::Windows::Forms::Padding(1);
             this->ShipsFiltTypeTR->Name = L"ShipsFiltTypeTR";
             this->ShipsFiltTypeTR->Size = System::Drawing::Size(31, 23);
@@ -2199,7 +2244,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // ShipsFiltRelP
             // 
             this->ShipsFiltRelP->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ShipsFiltRelP->Location = System::Drawing::Point(331, 52);
+            this->ShipsFiltRelP->Location = System::Drawing::Point(286, 52);
             this->ShipsFiltRelP->Margin = System::Windows::Forms::Padding(1);
             this->ShipsFiltRelP->Name = L"ShipsFiltRelP";
             this->ShipsFiltRelP->Size = System::Drawing::Size(23, 23);
@@ -2213,7 +2258,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // ShipsFiltTypeBA
             // 
             this->ShipsFiltTypeBA->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ShipsFiltTypeBA->Location = System::Drawing::Point(376, 52);
+            this->ShipsFiltTypeBA->Location = System::Drawing::Point(320, 52);
             this->ShipsFiltTypeBA->Margin = System::Windows::Forms::Padding(1);
             this->ShipsFiltTypeBA->Name = L"ShipsFiltTypeBA";
             this->ShipsFiltTypeBA->Size = System::Drawing::Size(31, 23);
@@ -2227,7 +2272,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // ShipsFiltRelN
             // 
             this->ShipsFiltRelN->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ShipsFiltRelN->Location = System::Drawing::Point(306, 52);
+            this->ShipsFiltRelN->Location = System::Drawing::Point(261, 52);
             this->ShipsFiltRelN->Margin = System::Windows::Forms::Padding(1);
             this->ShipsFiltRelN->Name = L"ShipsFiltRelN";
             this->ShipsFiltRelN->Size = System::Drawing::Size(23, 23);
@@ -2241,7 +2286,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // ShipsFiltOwnN
             // 
             this->ShipsFiltOwnN->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ShipsFiltOwnN->Location = System::Drawing::Point(196, 52);
+            this->ShipsFiltOwnN->Location = System::Drawing::Point(174, 52);
             this->ShipsFiltOwnN->Margin = System::Windows::Forms::Padding(1);
             this->ShipsFiltOwnN->Name = L"ShipsFiltOwnN";
             this->ShipsFiltOwnN->Size = System::Drawing::Size(23, 23);
@@ -2255,7 +2300,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // ShipsFiltOwnO
             // 
             this->ShipsFiltOwnO->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ShipsFiltOwnO->Location = System::Drawing::Point(171, 52);
+            this->ShipsFiltOwnO->Location = System::Drawing::Point(149, 52);
             this->ShipsFiltOwnO->Margin = System::Windows::Forms::Padding(1);
             this->ShipsFiltOwnO->Name = L"ShipsFiltOwnO";
             this->ShipsFiltOwnO->Size = System::Drawing::Size(23, 23);
@@ -2269,7 +2314,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // ShipsFiltRelE
             // 
             this->ShipsFiltRelE->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ShipsFiltRelE->Location = System::Drawing::Point(281, 52);
+            this->ShipsFiltRelE->Location = System::Drawing::Point(236, 52);
             this->ShipsFiltRelE->Margin = System::Windows::Forms::Padding(1);
             this->ShipsFiltRelE->Name = L"ShipsFiltRelE";
             this->ShipsFiltRelE->Size = System::Drawing::Size(23, 23);
@@ -2283,7 +2328,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // ShipsFiltRelA
             // 
             this->ShipsFiltRelA->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ShipsFiltRelA->Location = System::Drawing::Point(256, 52);
+            this->ShipsFiltRelA->Location = System::Drawing::Point(211, 52);
             this->ShipsFiltRelA->Margin = System::Windows::Forms::Padding(1);
             this->ShipsFiltRelA->Name = L"ShipsFiltRelA";
             this->ShipsFiltRelA->Size = System::Drawing::Size(23, 23);
@@ -2431,6 +2476,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ShipsGrid->TabIndex = 0;
             this->ShipsGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
             this->ShipsGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
+            this->ShipsGrid->ColumnHeaderMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::ShipsGrid_ColumnHeaderMouseClick);
             this->ShipsGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseEnter);
             this->ShipsGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::ShipsGrid_CellMouseDoubleClick);
             this->ShipsGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
@@ -2583,6 +2629,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->AliensGrid->TabIndex = 0;
             this->AliensGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
             this->AliensGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
+            this->AliensGrid->ColumnHeaderMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::AliensGrid_ColumnHeaderMouseClick);
             this->AliensGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseEnter);
             this->AliensGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseDoubleClick);
             this->AliensGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
@@ -3486,6 +3533,18 @@ private: System::Void ColoniesGrid_ColumnHeaderMouseClick(System::Object^  sende
              else
                  ColumnsFilterMenu( ColoniesGrid, e );
          }
+private: System::Void ShipsGrid_ColumnHeaderMouseClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
+             if( e->Button == Windows::Forms::MouseButtons::Left )
+                 m_ShipsSorter->SetSortColumn( e->ColumnIndex );
+             else
+                 ColumnsFilterMenu( ShipsGrid, e );
+         }
+private: System::Void AliensGrid_ColumnHeaderMouseClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
+             if( e->Button == Windows::Forms::MouseButtons::Left )
+                 m_AliensSorter->SetSortColumn( e->ColumnIndex );
+             else
+                 ColumnsFilterMenu( AliensGrid, e );
+         }
 private: System::Void copyToClipboardToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
              CopyOrdersTemplateToClipboard();
          }
@@ -3494,6 +3553,9 @@ private: System::Void UtilTRSize_ValueChanged(System::Object^  sender, System::E
          }
 private: System::Void ColoniesGroupByOwner_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
              m_ColoniesSorter->SetGroupBySpecies( safe_cast<CheckBox^>(sender)->Checked );
+         }
+private: System::Void ShipsGroupByOwner_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
+             m_ShipsSorter->SetGroupBySpecies( safe_cast<CheckBox^>(sender)->Checked );
          }
 };
 

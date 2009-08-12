@@ -100,4 +100,29 @@ protected:
 
 ////////////////////////////////////////////////////////////////
 
+ref class ShipsGridSorter : public GridSorterBase
+{
+public:
+    ShipsGridSorter(DataGridView ^grid);
+
+protected:
+    virtual int     BackupCompare(DataGridViewRow ^r1, DataGridViewRow ^r2) override;
+    virtual int     CompareType(IGridDataSrc ^o1, IGridDataSrc ^o2) override;
+
+    virtual int     GetShipClassValue(Ship ^s);
+};
+
+////////////////////////////////////////////////////////////////
+
+ref class AliensGridSorter : public GridSorterBase
+{
+public:
+    AliensGridSorter(DataGridView ^grid);
+
+protected:
+    virtual int     BackupCompare(DataGridViewRow ^r1, DataGridViewRow ^r2) override;
+};
+
+////////////////////////////////////////////////////////////////
+
 } // end namespace FHUI
