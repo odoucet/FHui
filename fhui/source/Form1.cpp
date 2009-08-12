@@ -73,25 +73,7 @@ void Form1::InitControls()
     SystemsInitControls();
 
     // -- planets
-    filter = gcnew GridFilter(PlanetsGrid, m_bGridUpdateEnabled);
-    filter->GridSetup += gcnew GridSetupHandler(this, &Form1::PlanetsSetup);
-    filter->GridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
-
-    filter->CtrlRef         = PlanetsRef;
-    filter->CtrlRefHome     = PlanetsRefHome;
-    filter->CtrlRefXYZ      = PlanetsRefXYZ;
-    filter->CtrlRefColony   = PlanetsRefColony;
-    filter->CtrlRefShip     = PlanetsRefShip;
-    filter->CtrlGV          = TechGV;
-    filter->CtrlShipAge     = PlanetsShipAge;
-    filter->CtrlMaxMishap   = PlanetsMaxMishap;
-    filter->CtrlMaxLSN      = PlanetsMaxLSN;
-    filter->CtrlFiltVisV    = PlanetsFiltVisV;
-    filter->CtrlFiltVisN    = PlanetsFiltVisN;
-    filter->CtrlFiltColC    = PlanetsFiltColC;
-    filter->CtrlFiltColN    = PlanetsFiltColN;
-
-    m_PlanetsFilter = filter;
+    PlanetsInitControls();
 
     // -- colonies
     ColoniesInitControls();
@@ -941,7 +923,7 @@ void Form1::SystemsInitControls()
     SystemsColumns %c = m_SystemsColumns;
 
 #define ADD_COLUMN(title, desc, type, sortOrder, customSortMode)    \
-    sorter->AddColumn(title, desc, type::typeid, SortOrder::sortOrder, SystemsGridSorter::CustomSortMode::customSortMode)
+    sorter->AddColumn(title, desc, type::typeid, SortOrder::sortOrder, GridSorterBase::CustomSortMode::customSortMode)
 
     c.Object   = ADD_COLUMN(nullptr,        nullptr,                StarSystem, None,       Default);
     c.X        = ADD_COLUMN("X",            "System X coordinate",  int,        Ascending,  Default);
@@ -990,7 +972,6 @@ void Form1::SystemsInitControls()
     filter->CtrlFiltVisN    = SystemsFiltVisN;
     filter->CtrlFiltColC    = SystemsFiltColC;
     filter->CtrlFiltColN    = SystemsFiltColN;
-
 
     // Store objects
     m_SystemsFilter = filter;
@@ -1144,6 +1125,68 @@ void Form1::SystemsMenuSelectRef(Object^, EventArgs^)
 ////////////////////////////////////////////////////////////////
 // Planets
 
+void Form1::PlanetsInitControls()
+{
+    PlanetsGridSorter ^sorter = gcnew PlanetsGridSorter(PlanetsGrid);
+
+    // Add columns
+    PlanetsColumns %c = m_PlanetsColumns;
+
+#define ADD_COLUMN(title, desc, type, sortOrder, customSortMode)    \
+    sorter->AddColumn(title, desc, type::typeid, SortOrder::sortOrder, GridSorterBase::CustomSortMode::customSortMode)
+
+    c.Object    = ADD_COLUMN(nullptr,       nullptr,                Planet,     None,       Default);
+    c.Name      = ADD_COLUMN("Name",        "Planet name",          String,     Ascending,  Default);
+    c.Location  = ADD_COLUMN("Location",    "X Y Z #Planet Number", String,     Ascending,  Location);
+    c.TC        = ADD_COLUMN("TC",          "Temperature class",    int,        Ascending,  Default);
+    c.PC        = ADD_COLUMN("PC",          "Pressure class",       int,        Ascending,  Default);
+    c.MD        = ADD_COLUMN("MD",          "Mining difficulty",    double,     Ascending,  Default);
+    c.LSN       = ADD_COLUMN("LSN",         "LSN",                  int,        Ascending,  Default);
+    c.Dist      = ADD_COLUMN("Distance",    "Distance to ref system and mishap chance [%]", String, Ascending, Distance);
+    c.Visited   = ADD_COLUMN("Vis",         "Last turn you visited planet's system", int, Descending, Default);
+    c.Scan      = ADD_COLUMN("Scan",        "Planet scan source",   String,     Ascending,  Default);
+    c.Colonies  = ADD_COLUMN("Colonies",    "Summary of colonies and named planets", String, Ascending,  Default);
+
+    for each( IGridPlugin ^plugin in m_GridPlugins )
+        plugin->AddColumns(GridType::Planets, sorter);
+
+    c.Notes    = ADD_COLUMN("Notes", "Notes", String, Ascending,  Default);
+#undef ADD_COLUMN
+
+    // Formatting
+    ApplyDataAndFormat(PlanetsGrid, nullptr, c.Object, c.LSN, sorter);
+    for each( IGridPlugin ^plugin in m_GridPlugins )
+        plugin->GridFormat(GridType::Planets, PlanetsGrid);
+
+    PlanetsGrid->Columns[c.Dist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
+    PlanetsGrid->Columns[c.Colonies]->DefaultCellStyle->Font =
+        gcnew System::Drawing::Font(L"Tahoma", 6.75F);
+
+    // Filter setup
+    GridFilter ^filter = gcnew GridFilter(PlanetsGrid, m_bGridUpdateEnabled);
+    filter->GridSetup += gcnew GridSetupHandler(this, &Form1::PlanetsSetup);
+    filter->GridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
+    filter->Sorter = sorter;
+
+    filter->CtrlRef         = PlanetsRef;
+    filter->CtrlRefHome     = PlanetsRefHome;
+    filter->CtrlRefXYZ      = PlanetsRefXYZ;
+    filter->CtrlRefColony   = PlanetsRefColony;
+    filter->CtrlRefShip     = PlanetsRefShip;
+    filter->CtrlGV          = TechGV;
+    filter->CtrlShipAge     = PlanetsShipAge;
+    filter->CtrlMaxMishap   = PlanetsMaxMishap;
+    filter->CtrlMaxLSN      = PlanetsMaxLSN;
+    filter->CtrlFiltVisV    = PlanetsFiltVisV;
+    filter->CtrlFiltVisN    = PlanetsFiltVisN;
+    filter->CtrlFiltColC    = PlanetsFiltColC;
+    filter->CtrlFiltColN    = PlanetsFiltColN;
+
+    // Store objects
+    m_PlanetsFilter = filter;
+    m_PlanetsSorter = sorter;
+}
+
 void Form1::PlanetsUpdateControls()
 {
     // Inhibit grid update
@@ -1166,26 +1209,9 @@ void Form1::PlanetsUpdateControls()
 
 void Form1::PlanetsSetup()
 {
-    // Put system data in a DataTable so that column sorting works.
-    DataTable ^dataTable = gcnew DataTable();
+    PlanetsGrid->Rows->Clear();
 
-    DataColumn ^colObject   = dataTable->Columns->Add("planet",     Planet::typeid );
-    DataColumn ^colName     = dataTable->Columns->Add("Name",       String::typeid );
-    DataColumn ^colCoords   = dataTable->Columns->Add("Coords",     String::typeid );
-    DataColumn ^colTemp     = dataTable->Columns->Add("Temp",       int::typeid );
-    DataColumn ^colPress    = dataTable->Columns->Add("Press",      int::typeid );
-    DataColumn ^colMD       = dataTable->Columns->Add("MD",         double::typeid );
-    DataColumn ^colLSN      = dataTable->Columns->Add("LSN",        int::typeid );
-    DataColumn ^colDist     = dataTable->Columns->Add("Dist.",      double::typeid );
-    DataColumn ^colMishap   = dataTable->Columns->Add("Mishap %",   String::typeid );
-    DataColumn ^colVisited  = dataTable->Columns->Add("Visited",    int::typeid );
-    DataColumn ^colScan     = dataTable->Columns->Add("Scan",       String::typeid );
-    DataColumn ^colColonies = dataTable->Columns->Add("Colonies",   String::typeid );
-
-    for each( IGridPlugin ^plugin in m_GridPlugins )
-        plugin->AddColumns(GridType::Planets, dataTable);
-
-    DataColumn ^colNotes    = dataTable->Columns->Add("Notes",      String::typeid );
+    PlanetsColumns %c = m_PlanetsColumns;
 
     int gv  = Decimal::ToInt32(TechGV->Value);
     int age = Decimal::ToInt32(PlanetsShipAge->Value);
@@ -1200,20 +1226,20 @@ void Form1::PlanetsSetup()
             if( m_PlanetsFilter->Filter(planet) )
                 continue;
 
-            DataRow^ row = dataTable->NewRow();
-            row[colObject]   = planet;
-            row[colName]     = planet->GetNameWithOrders();
-            row[colCoords]   = planet->PrintLocation();
-            row[colTemp]     = planet->TempClass;
-            row[colPress]    = planet->PressClass;
-            row[colMD]       = (double)planet->MiDiff / 100;
-            row[colLSN]      = planet->LSN;
-            row[colDist]     = distance;
-            row[colMishap]   = String::Format("{0:F2} / {1:F2}", mishap, mishap * mishap / 100.0);
+            DataGridViewRow ^row = PlanetsGrid->Rows[ PlanetsGrid->Rows->Add() ];
+            DataGridViewCellCollection ^cells = row->Cells;
+            cells[c.Object]->Value  = planet;
+            cells[c.Name]->Value    = planet->GetNameWithOrders();
+            cells[c.Location]->Value= planet->PrintLocation();
+            cells[c.TC]->Value      = planet->TempClass;
+            cells[c.PC]->Value      = planet->PressClass;
+            cells[c.MD]->Value      = (double)planet->MiDiff / 100;
+            cells[c.LSN]->Value     = planet->LSN;
+            cells[c.Dist]->Value    = String::Format("{0:F1}  ({1:F1}%)", distance, mishap);
             if( system->LastVisited != -1 )
-                row[colVisited] = system->LastVisited;
-            row[colScan]     = system->PrintScanStatus();
-            row[colColonies] = system->PrintColonies( planet->Number, GameData::Player );
+                cells[c.Visited]->Value = system->LastVisited;
+            cells[c.Scan]->Value    = system->PrintScanStatus();
+            cells[c.Colonies]->Value= system->PrintColonies( planet->Number, GameData::Player );
 
             if( (planet->System->HomeSpecies != nullptr) )
             {
@@ -1224,29 +1250,23 @@ void Form1::PlanetsSetup()
                     note += "; ";
                 }
                 note += String::Format("SP {0} home system", planet->System->HomeSpecies->Name );
-                row[colNotes] = note;
+                cells[c.Notes]->Value = note;
             }
             else
             {
-                row[colNotes]    = planet->Comment;
+                cells[c.Notes]->Value    = planet->Comment;
             }
 
             for each( IGridPlugin ^plugin in m_GridPlugins )
                 plugin->AddRowData(row, m_PlanetsFilter, planet);
-
-            dataTable->Rows->Add(row);
         }
     }
 
-    ApplyDataAndFormat(PlanetsGrid, dataTable, colObject->Ordinal, colLSN->Ordinal, nullptr);
-    for each( IGridPlugin ^plugin in m_GridPlugins )
-        plugin->GridFormat(GridType::Planets, PlanetsGrid);
+    // Setup tooltips
+    SetGridBgAndTooltip(PlanetsGrid);
 
-    PlanetsGrid->Columns[colColonies->Ordinal]->DefaultCellStyle->Font =
-        gcnew System::Drawing::Font(L"Tahoma", 6.75F);
-
-    // Some columns are not sortable... yet
-    PlanetsGrid->Columns[colMishap->Ordinal]->SortMode = DataGridViewColumnSortMode::NotSortable;
+    // Sort data
+    PlanetsGrid->Sort( m_PlanetsSorter );
 
     // Enable filters
     m_PlanetsFilter->EnableUpdates = true;
@@ -1459,7 +1479,7 @@ void Form1::ColoniesInitControls()
     ColoniesColumns %c = m_ColoniesColumns;
 
 #define ADD_COLUMN(title, desc, type, sortOrder, customSortMode)    \
-    sorter->AddColumn(title, desc, type::typeid, SortOrder::sortOrder, ColoniesGridSorter::CustomSortMode::customSortMode)
+    sorter->AddColumn(title, desc, type::typeid, SortOrder::sortOrder, GridSorterBase::CustomSortMode::customSortMode)
 
     c.Object    = ADD_COLUMN(nullptr,       nullptr,                        Colony, None,       Default);
     c.Owner     = ADD_COLUMN("Owner",       "Colony owner",                 String, Ascending,  Owner);

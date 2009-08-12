@@ -73,8 +73,17 @@ public:
 
 protected:
     virtual int     BackupCompare(DataGridViewRow ^r1, DataGridViewRow ^r2) override;
+};
+
+////////////////////////////////////////////////////////////////
+
+ref class PlanetsGridSorter : public GridSorterBase
+{
+public:
+    PlanetsGridSorter(DataGridView ^grid);
 
 protected:
+    virtual int     BackupCompare(DataGridViewRow ^r1, DataGridViewRow ^r2) override;
 };
 
 ////////////////////////////////////////////////////////////////

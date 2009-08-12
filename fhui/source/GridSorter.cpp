@@ -279,6 +279,30 @@ int SystemsGridSorter::BackupCompare(DataGridViewRow ^r1, DataGridViewRow ^r2)
 
 ////////////////////////////////////////////////////////////////
 
+PlanetsGridSorter::PlanetsGridSorter(DataGridView ^grid)
+    : GridSorterBase(grid)
+{
+}
+
+int PlanetsGridSorter::BackupCompare(DataGridViewRow ^r1, DataGridViewRow ^r2)
+{
+    Planet ^p1 = safe_cast<Planet^>( r1->Cells[0]->Value );
+    Planet ^p2 = safe_cast<Planet^>( r2->Cells[0]->Value );
+
+    int result = 0;
+
+    // Step 1: by distance to ref system
+    result = CompareDistance(p1, p2) * GetForcedDirectionModifier(SortOrder::Ascending);
+
+    // Step 2: by available LSN
+    if( result == 0 )
+        result = (p1->LSN - p2->LSN) * GetForcedDirectionModifier(SortOrder::Ascending);
+
+    return result;
+}
+
+////////////////////////////////////////////////////////////////
+
 ColoniesGridSorter::ColoniesGridSorter(DataGridView ^grid)
     : GridSorterBase(grid)
 {
