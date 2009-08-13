@@ -161,6 +161,10 @@ int GridSorterBase::Compare( Object^ obj1, Object^ obj2 )
         result = CompareDistance(o1, o2);
         break;
 
+    case CustomSortMode::Relation:
+        result = CompareRelation(o1, o2);
+        break;
+
     default:
         throw gcnew FHUIDataImplException("Unsupported custom sort mode: " + m_SortModes[m_SortColumn].ToString() );
     }
@@ -252,6 +256,11 @@ int GridSorterBase::CompareDistance(IGridDataSrc ^o1, IGridDataSrc ^o2)
     if( distDiff == 0 )
         return 0;
     return distDiff < 0 ? -1 : 1;
+}
+
+int GridSorterBase::CompareRelation(IGridDataSrc ^o1, IGridDataSrc ^o2)
+{
+    throw gcnew FHUIDataIntegrityException("Sorter: Relation custom compare must be overriden!");
 }
 
 ////////////////////////////////////////////////////////////////
@@ -407,13 +416,33 @@ int AliensGridSorter::BackupCompare(DataGridViewRow ^r1, DataGridViewRow ^r2)
     int result = 0;
 
     // Step 1: by relation
-    result = (a1->Relation - a2->Relation) * GetForcedDirectionModifier(SortOrder::Ascending);
+    result = CompareRelation(a1, a2) * GetForcedDirectionModifier(SortOrder::Ascending);
 
-    // Step 2: by name
+    // Step 2: by home system distance
+    if( result == 0 )
+    {
+        double dist1 = 999999.9;
+        double dist2 = 999999.9;
+        if( a1->HomeSystem )
+            dist1 = GameData::Player->HomeSystem->CalcDistance( a1->HomeSystem );
+        if( a2->HomeSystem )
+            dist2 = GameData::Player->HomeSystem->CalcDistance( a2->HomeSystem );
+        result = dist1 < dist2 ? -1 : 1;
+    }
+
+    // Step 3: by name
     if( result == 0 )
         result = a1->Name->CompareTo(a2->Name) * GetForcedDirectionModifier(SortOrder::Ascending);
 
     return result;
+}
+
+int AliensGridSorter::CompareRelation(IGridDataSrc ^o1, IGridDataSrc ^o2)
+{
+    Alien ^a1 = safe_cast<Alien^>( o1 );
+    Alien ^a2 = safe_cast<Alien^>( o2 );
+
+    return a1->Relation - a2->Relation;
 }
 
 ////////////////////////////////////////////////////////////////

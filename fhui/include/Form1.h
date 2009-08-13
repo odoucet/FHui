@@ -311,6 +311,15 @@ namespace FHUI {
         value struct AliensColumns
         {
             int Object;
+            int Name;
+            int Relation;
+            int Home;
+            int Dist;
+            int TechLev;
+            int TC;
+            int PC;
+            int Teach;
+            int EMail;
         };
 
         IGridFilter        ^m_AliensFilter;

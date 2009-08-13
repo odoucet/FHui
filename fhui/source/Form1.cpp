@@ -2109,17 +2109,49 @@ void Form1::ShipsMenuOrderSet(ShipOrderData ^data)
 
 void Form1::AliensInitControls()
 {
-    // -- aliens
+    AliensGridSorter ^sorter = gcnew AliensGridSorter(AliensGrid);
+
+    // Add columns
+    AliensColumns %c = m_AliensColumns;
+
+#define ADD_COLUMN(title, desc, type, sortOrder, customSortMode)    \
+    sorter->AddColumn(title, desc, type::typeid, SortOrder::sortOrder, GridSorterBase::CustomSortMode::customSortMode)
+
+    c.Object    = ADD_COLUMN(nullptr,       nullptr,                    Alien,  None,       Default);
+    c.Name      = ADD_COLUMN("Name",        "Species name",             String, Ascending,  Default);
+    c.Relation  = ADD_COLUMN("Relation",    "Current relation",         String, Ascending,  Relation);
+    c.Home      = ADD_COLUMN("Home",        "Home planet location",     String, Ascending,  Location);
+    c.Dist      = ADD_COLUMN("Dist",        "Home distance from your home system", double, Ascending, Default);
+    c.TechLev   = ADD_COLUMN("Tech Levels", "Estimated technology levels", String, Ascending, Default);
+    c.TC        = ADD_COLUMN("TC",          "Temperature class of their home planet", int,  Ascending,  Default);
+    c.PC        = ADD_COLUMN("PC",          "Pressure class of their home planet",    int,    Ascending,  Default);
+    c.Teach     = ADD_COLUMN("Teach",       "Teach orders",             String, Ascending,  Default);
+    c.EMail     = ADD_COLUMN("EMail",       "Species email",            String, Ascending,  Default);
+
+    for each( IGridPlugin ^plugin in m_GridPlugins )
+        plugin->AddColumns(GridType::Aliens, sorter);
+#undef ADD_COLUMN
+
+    // Formatting
+    ApplyDataAndFormat(AliensGrid, nullptr, c.Object, c.Relation, sorter);
+    for each( IGridPlugin ^plugin in m_GridPlugins )
+        plugin->GridFormat(GridType::Aliens, AliensGrid);
+
+    AliensGrid->Columns[c.Dist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
+
     GridFilter ^filter = gcnew GridFilter(AliensGrid, m_bGridUpdateEnabled);
     filter->GridSetup += gcnew GridSetupHandler(this, &Form1::AliensSetup);
     filter->GridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
+    filter->Sorter = sorter;
 
     filter->CtrlFiltRelA    = AliensFiltRelA;
     filter->CtrlFiltRelE    = AliensFiltRelE;
     filter->CtrlFiltRelN    = AliensFiltRelN;
     filter->CtrlFiltRelP    = AliensFiltRelP;
 
+    // Store objects
     m_AliensFilter = filter;
+    m_AliensSorter = sorter;
 }
 
 void Form1::AliensUpdateControls()
@@ -2130,40 +2162,33 @@ void Form1::AliensUpdateControls()
 
 void Form1::AliensSetup()
 {
-    // Put system data in a DataTable so that column sorting works.
-    DataTable ^dataTable = gcnew DataTable();
+    AliensGrid->Rows->Clear();
 
-    DataColumn ^colObject   = dataTable->Columns->Add("alien",          Alien::typeid );
-    DataColumn ^colName     = dataTable->Columns->Add("Name",           String::typeid );
-    DataColumn ^colRelation = dataTable->Columns->Add("Relation",       String::typeid );
-    DataColumn ^colHome     = dataTable->Columns->Add("Home",           String::typeid );
-    DataColumn ^colTechLev  = dataTable->Columns->Add("Tech Levels",    String::typeid );
-    DataColumn ^colTemp     = dataTable->Columns->Add("Temp",           int::typeid );
-    DataColumn ^colPress    = dataTable->Columns->Add("Press",          int::typeid );
-    DataColumn ^colTeach    = dataTable->Columns->Add("Teach",          String::typeid );
-    DataColumn ^colEMail    = dataTable->Columns->Add("EMail",          String::typeid );
-
-    //for each( IGridPlugin ^plugin in m_GridPlugins )
-    //    plugin->AddColumns(GridType::Aliens, dataTable);
+    AliensColumns %c = m_AliensColumns;
 
     for each( Alien ^alien in m_GameData->GetAliens() )
     {
         if( m_AliensFilter->Filter(alien) )
             continue;
 
-        DataRow^ row = dataTable->NewRow();
-        row[colObject]      = alien;
-        row[colName]        = alien->Name;
-        row[colRelation]    = alien->PrintRelation();
-        row[colHome]        = alien->PrintHome();
-        row[colTechLev]     = alien->PrintTechLevels();
+        DataGridViewRow ^row = AliensGrid->Rows[ AliensGrid->Rows->Add() ];
+        DataGridViewCellCollection ^cells = row->Cells;
+        cells[c.Object]->Value      = alien;
+        cells[c.Name]->Value        = alien->Name;
+        cells[c.Relation]->Value    = alien->PrintRelation();
+        cells[c.Home]->Value        = alien->PrintHome();
+        cells[c.TechLev]->Value     = alien->PrintTechLevels();
+        if( alien->HomeSystem )
+        {
+            cells[c.Dist]->Value    = GameData::Player->HomeSystem->CalcDistance( alien->HomeSystem );
+        }
         if( alien->AtmReq->TempClass != -1 &&
             alien->AtmReq->PressClass != -1 )
         {
-            row[colTemp]    = alien->AtmReq->TempClass;
-            row[colPress]   = alien->AtmReq->PressClass;
+            cells[c.TC]->Value      = alien->AtmReq->TempClass;
+            cells[c.PC]->Value      = alien->AtmReq->PressClass;
         }
-        row[colEMail]       = alien->Email;
+        cells[c.EMail]->Value       = alien->Email;
 
         if( alien->TeachOrders )
         {
@@ -2175,18 +2200,18 @@ void Form1::AliensSetup()
             if( alien->TeachOrders & (1 << TECH_LS) ) teach += ", LS";
             if( alien->TeachOrders & (1 << TECH_BI) ) teach += ", BI";
             if( !String::IsNullOrEmpty(teach) )
-                row[colTeach] = teach->Substring(2);
+                cells[c.Teach]->Value = teach->Substring(2);
         }
 
-        //for each( IGridPlugin ^plugin in m_GridPlugins )
-        //    plugin->AddRowData(row, m_AliensFilter, alien);
-
-        dataTable->Rows->Add(row);
+        for each( IGridPlugin ^plugin in m_GridPlugins )
+            plugin->AddRowData(row, m_AliensFilter, alien);
     }
 
-    ApplyDataAndFormat(AliensGrid, dataTable, colObject->Ordinal, colRelation->Ordinal, nullptr);
-    for each( IGridPlugin ^plugin in m_GridPlugins )
-        plugin->GridFormat(GridType::Aliens, AliensGrid);
+    // Setup tooltips
+    SetGridBgAndTooltip(AliensGrid);
+
+    // Sort data
+    AliensGrid->Sort( m_AliensSorter );
 
     // Enable filters
     m_AliensFilter->EnableUpdates = true;

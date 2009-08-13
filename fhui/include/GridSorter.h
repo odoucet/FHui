@@ -25,6 +25,7 @@ public:
         Type,
         Location,
         Distance,
+        Relation,
     };
 
     virtual int     AddColumn(String ^title, String ^description, Type ^type, SortOrder defaultSortOrder);
@@ -50,6 +51,7 @@ protected:
     virtual int     CompareType(IGridDataSrc ^o1, IGridDataSrc ^o2);    // must be overriden for proper usage
     virtual int     CompareLocation(IGridDataSrc ^o1, IGridDataSrc ^o2);
     virtual int     CompareDistance(IGridDataSrc ^o1, IGridDataSrc ^o2);
+    virtual int     CompareRelation(IGridDataSrc ^o1, IGridDataSrc ^o2);
 
 protected:
     DataGridView^   m_Grid;
@@ -121,6 +123,7 @@ public:
 
 protected:
     virtual int     BackupCompare(DataGridViewRow ^r1, DataGridViewRow ^r2) override;
+    virtual int     CompareRelation(IGridDataSrc ^o1, IGridDataSrc ^o2) override;
 };
 
 ////////////////////////////////////////////////////////////////
