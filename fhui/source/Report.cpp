@@ -661,6 +661,7 @@ void Report::MatchColonyScan(String ^s)
     case PLANET_COLONY_MINING:
         if( m_RM->Match(s, "^This mining colony will generate (\\d+) - (\\d+) = \\d+ economic units this turn\\.") )
         {
+            m_ScanColony->MaBase = 0;
             m_ScanColony->EUProd  = m_RM->GetResultInt(0);
             m_ScanColony->EUFleet = m_RM->GetResultInt(1);
             m_GameData->AddTurnProducedEU( m_Turn, m_ScanColony->EUProd );
@@ -670,6 +671,7 @@ void Report::MatchColonyScan(String ^s)
     case PLANET_COLONY_RESORT:
         if( m_RM->Match(s, "^This resort colony will generate (\\d+) - (\\d+) = \\d+ economic units this turn\\.") )
         {
+            m_ScanColony->MiBase = 0;
             m_ScanColony->EUProd  = m_RM->GetResultInt(0);
             m_ScanColony->EUFleet = m_RM->GetResultInt(1);
             m_GameData->AddTurnProducedEU( m_Turn, m_ScanColony->EUProd );
@@ -1006,7 +1008,7 @@ void Report::MatchShipScan(String ^s, bool bColony)
 
 void Report::MatchOtherPlanetsShipsScan(String ^s)
 {
-    if( m_RM->Match(s, "^(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+#(\\d+)\\s+PL\\s+([^,]+),?(.*)$") )
+    if( m_RM->Match(s, "^(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+#(\\d+)\\s+PL\\s+([^,]+)(,?)") )
     {
         m_ScanX = m_RM->GetResultInt(0);
         m_ScanY = m_RM->GetResultInt(1);
@@ -1016,11 +1018,10 @@ void Report::MatchOtherPlanetsShipsScan(String ^s)
 
         int plNum = m_RM->GetResultInt(3);
         String^ plName = m_RM->Results[4];
-        String^ inventory = m_RM->Results[5];
 
         m_GameData->AddPlanetName( m_Turn, system, plNum, plName);
 
-        if( inventory->Length )
+        if( m_RM->Results[5]->Length > 0 )
         {
             // Treat as colony of size 0
             Colony^ colony = m_GameData->AddColony(
@@ -1038,10 +1039,21 @@ void Report::MatchOtherPlanetsShipsScan(String ^s)
             colony->EconomicEff = 0;
 
             // Species have colony here, so system is visited
-            // TODO: Not sure if no CUs are present
+            // TODO: Not sure if system is under surveillance when no CUs are present on the planet
             system->LastVisited = m_Turn;
 
-            // TODO: Parse inventory
+            while( !String::IsNullOrEmpty(s) )
+            {
+                if( m_RM->Match(s, "^,?\\s+(\\d+)\\s+(\\w+)\\s*") )
+                {
+                    int amount = m_RM->GetResultInt(0);
+                    InventoryType inv = FHStrings::InvFromString( m_RM->Results[1] );
+                    colony->Inventory[inv] = amount;
+                }
+                else
+                    throw gcnew FHUIParsingException(
+                        String::Format("Unable to parse colony '{0}' inventory.", plName));
+            }
         }
     }
 
@@ -1224,8 +1236,13 @@ void Report::MatchOrdersTemplate(String ^s)
         return;
     }
 
+    // AUTO
+    if( m_RM->Match(s, "^Auto$") )
+    {
+        m_GameData->SetAutoEnabled( m_Turn );
+        return;
+    } 
     // SCAN (ignore) assume it is generated for all scouts
-    // AUTO (ignore) assume it is enabled when at least one other order is found
 }
 
 void Report::StartLineAggregate(PhaseType phase, String ^s, int maxLines)

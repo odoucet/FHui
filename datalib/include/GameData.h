@@ -563,6 +563,7 @@ public:
 
     property bool   AutoEnabled;
 
+    void            SetAutoEnabled(int turn);
     void            SetAutoOrderPreDeparture(int turn, StarSystem^, String^);
     void            SetAutoOrderJumps(int turn, Ship^, String^);
     void            SetAutoOrderProduction(int turn, Colony^, String^, int);

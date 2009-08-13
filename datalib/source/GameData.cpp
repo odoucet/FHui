@@ -1521,11 +1521,18 @@ void GameData::SortCommands()
     m_Commands->Sort( gcnew CommandComparer );
 }
 
-void GameData::SetAutoOrderPreDeparture(int turn, StarSystem^ system, String^ line)
+void GameData::SetAutoEnabled(int turn)
 {   
     if( TurnCheck(turn) )
     {
         AutoEnabled = true;
+    }
+}
+
+void GameData::SetAutoOrderPreDeparture(int turn, StarSystem^ system, String^ line)
+{   
+    if( TurnCheck(turn) )
+    {
         if ( m_AutoOrdersPreDeparture->ContainsKey( system ) )
         {
             m_AutoOrdersPreDeparture[system]->Add(line);
@@ -1543,7 +1550,6 @@ void GameData::SetAutoOrderJumps(int turn, Ship^ ship, String^ line)
 {
     if( TurnCheck(turn) )
     {
-        AutoEnabled = true;
         if ( m_AutoOrdersJumps->ContainsKey( ship ) )
         {
             m_AutoOrdersJumps[ship]->Add(line);
@@ -1561,7 +1567,6 @@ void GameData::SetAutoOrderProduction(int turn, Colony^ colony, String^ line, in
 {
     if( TurnCheck(turn) )
     {
-        AutoEnabled = true;
         if ( m_AutoOrdersProduction->ContainsKey( colony ) )
         {
             m_AutoOrdersProduction[colony]->Add(gcnew Pair<String^, int>(line, cost));
