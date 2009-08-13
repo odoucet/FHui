@@ -2393,30 +2393,41 @@ void Form1::AliensMenuSetRelation(AlienRelationData ^data)
     Alien ^alien = data->A;
     SPRelType rel = (SPRelType)data->B;
 
-    if( alien->Relation == alien->RelationOriginal )
-    {   // Add relation command
-        AddCommand( gcnew CmdAlienRelation(alien, rel) );
-    }
-    else
-    {   // Modify existing relation command
-        for each( ICommand ^iCmd in m_GameData->GetCommands() )
+    bool addNew = true;
+
+    // Modify existing relation command
+    for each( ICommand ^iCmd in m_GameData->GetCommands() )
+    {
+        if( iCmd->GetType() == CommandType::AlienRelation )
         {
-            if( iCmd->GetType() == CommandType::AlienRelation )
+            CmdAlienRelation ^cmd = safe_cast<CmdAlienRelation^>(iCmd);
+            if( cmd->m_Alien == alien )
             {
-                CmdAlienRelation ^cmd = safe_cast<CmdAlienRelation^>(iCmd);
-                if( cmd->m_Alien == alien )
+                if( rel == alien->RelationOriginal )
+                    DelCommand(iCmd);
+                else
                 {
                     cmd->m_Relation = rel;
-                    break;
+                    SaveCommands();
                 }
+                addNew = false;
+                break;
             }
         }
     }
 
+    if( addNew )
+    {   // Add relation command
+        AddCommand( gcnew CmdAlienRelation(alien, rel) );
+    }
+
+    // Set relation
+    alien->Relation = rel;
+
+    // Cancel any teach commands for enemy species
     if( rel == SP_ENEMY && alien->TeachOrders )
         AliensMenuTeachCancel(nullptr, nullptr);
 
-    alien->Relation = rel;
     m_AliensFilter->Update();
     // Update other grids to reflect new colors
     m_SystemsFilter->Update();
