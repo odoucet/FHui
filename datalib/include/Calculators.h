@@ -21,6 +21,7 @@ public:
 
     static int      TransportCapacity(int size);
     static int      ColonyProduction(Colony^, int mi, int ma, int ls, int fleetPercentCost);
+    static int      ProductionPenalty(int lsn, int ls);
 };
 
 } // end namespace FHUI

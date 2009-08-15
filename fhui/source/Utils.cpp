@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "Form1.h"
+#include "enums.h"
 
 using namespace System::IO;
 
@@ -8,10 +9,16 @@ using namespace System::IO;
 namespace FHUI
 {
 
+void Form1::UtilTabSelected()
+{
+    UtilProdPenaltyLS->Value = GameData::Player->TechLevelsAssumed[TECH_LS];
+}
+
 void Form1::UtilUpdateAll()
 {
     UtilUpdateTRInfo();
     UtilUpdateResearch();
+    UtilUpdateProdPenalty();
 }
 
 void Form1::UtilUpdateTRInfo()
@@ -41,6 +48,17 @@ void Form1::UtilUpdateResearch()
     UtilResInfoGuided->Text     = Calculators::ResearchCost(from, to, true).ToString();
     UtilResInfoAverage->Text    = Calculators::ResearchCost(from, to, false).ToString();
     UtilResInfoGuaranteed->Text = Calculators::ResearchCost(from, from + (to - from) * 2, false).ToString();
+}
+
+void Form1::UtilUpdateProdPenalty()
+{
+    int lsn = Decimal::ToInt32( UtilProdPenaltyLSN->Value );
+    int ls = Decimal::ToInt32( UtilProdPenaltyLS->Value );
+    int penalty = Calculators::ProductionPenalty(lsn, ls);
+    if( penalty == -1 )
+        UtilProdPenalty->Text = "N/A";
+    else
+        UtilProdPenalty->Text = penalty.ToString() + "%";
 }
 
 } // end namespace FHUI

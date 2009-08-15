@@ -12,6 +12,7 @@ FHUI build ??
 * Fixed alien relation orders generation when changed multiple times per turn.
 + All tabs now have functionality introduced in build 139.
 + Support for manually entered ref coordinates added.
++ Production penalty calculator on Utils tab.
 + Display performance improved.
 
 FHUI build 140

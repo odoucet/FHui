@@ -94,6 +94,15 @@ int Calculators::ColonyProduction(Colony^ colony, int mi, int ma, int ls, int fl
     return ( availableToSpend - ((fleetPercentCost * availableToSpend + 5000) / 10000) );
 }
 
+int Calculators::ProductionPenalty(int lsn, int ls)
+{
+    if( ls < lsn )
+        return -1;
+    if( ls == 0 )
+        return 0;
+    return (int)Math::Floor( (100.0 * lsn) / ls );
+}
+
 int Calculators::ShipyardCost(int maTechLevel)
 {
     return maTechLevel * 10;

@@ -161,28 +161,35 @@ void Form1::UpdateControls()
 
 void Form1::UpdateTabs()
 {
-    if( MenuTabs->SelectedIndex == TabIndex::Map )
+    switch( MenuTabs->SelectedIndex )
     {
-        System::Windows::Forms::DialogResult result = MessageBox::Show(
-            this,
-            "MAP is under construction and is not functional yet...",
-            "Map tab alert",
-            MessageBoxButtons::OKCancel,
-            MessageBoxIcon::Question,
-            MessageBoxDefaultButton::Button2);
-        if( result == System::Windows::Forms::DialogResult::OK )
+    case TabIndex::Map:
         {
-            MapDraw();
+            System::Windows::Forms::DialogResult result = MessageBox::Show(
+                this,
+                "MAP is under construction and is not functional yet...",
+                "Map tab alert",
+                MessageBoxButtons::OKCancel,
+                MessageBoxIcon::Question,
+                MessageBoxDefaultButton::Button2);
+            if( result == System::Windows::Forms::DialogResult::OK )
+            {
+                MapDraw();
+            }
+            else
+            {
+                MenuTabs->SelectedTab = MenuTabs->TabPages[0];
+            }
         }
-        else
-        {
-            MenuTabs->SelectedTab = MenuTabs->TabPages[0];
-        }
-    }
+        break;
 
-    if( MenuTabs->SelectedIndex == TabIndex::Orders )
-    {
+    case TabIndex::Orders:
         GenerateTemplate();
+        break;
+
+    case TabIndex::Utils:
+        UtilTabSelected();
+        break;
     }
 }
 
