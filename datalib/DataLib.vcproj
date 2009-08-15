@@ -291,6 +291,11 @@
 					>
 				</File>
 				<File
+					RelativePath=".\include\DblBufDGV.h"
+					FileType="1"
+					>
+				</File>
+				<File
 					RelativePath=".\include\exceptions.h"
 					>
 				</File>

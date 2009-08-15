@@ -240,10 +240,10 @@ void Form1::TechLevelsChanged()
 
     if( *m_bGridUpdateEnabled )
     {
-        m_SystemsFilter->Update();
-        m_PlanetsFilter->Update();
-        m_ColoniesFilter->Update();
-        m_ShipsFilter->Update();
+        SystemsGrid->Filter->Update();
+        PlanetsGrid->Filter->Update();
+        ColoniesGrid->Filter->Update();
+        ShipsGrid->Filter->Update();
 
         if( MenuTabs->SelectedIndex == TabIndex::Map )
             MapDraw();
@@ -806,7 +806,7 @@ void Form1::SetGridBgAndTooltip(DataGridView ^grid)
     }
 }
 
-void Form1::SetGridRefSystemOnMouseClick(DataGridView ^grid, int rowIndex)
+void Form1::SetGridRefSystemOnMouseClick(DblBufDGV ^grid, int rowIndex)
 {
     if( rowIndex >= 0 )
     {
@@ -816,17 +816,7 @@ void Form1::SetGridRefSystemOnMouseClick(DataGridView ^grid, int rowIndex)
         StarSystem ^system = iDataSrc->GetFilterSystem();
         if( system )
         {
-            IGridFilter ^filter = nullptr;
-            if( grid == SystemsGrid )
-                filter = m_SystemsFilter;
-            else if( grid == PlanetsGrid )
-                filter = m_PlanetsFilter;
-            else if( grid == ColoniesGrid )
-                filter = m_ColoniesFilter;
-            else if( grid == ShipsGrid )
-                filter = m_ShipsFilter;
-            else if( grid == AliensGrid )
-                filter = m_AliensFilter;
+            IGridFilter ^filter = grid->Filter;
             if( filter )
                 filter->SetRefSystem(system);
         }
@@ -932,16 +922,16 @@ void Form1::SystemsInitControls()
     filter->CtrlFiltColN    = SystemsFiltColN;
 
     // Store objects
-    m_SystemsFilter = filter;
-    m_SystemsSorter = sorter;
+    SystemsGrid->Filter = filter;
+    SystemsGrid->Sorter = sorter;
 }
 
 void Form1::SystemsUpdateControls()
 {
     // Inhibit grid update
-    m_SystemsFilter->EnableUpdates  = false;
+    SystemsGrid->Filter->EnableUpdates  = false;
 
-    m_SystemsFilter->GameData       = m_GameData;
+    SystemsGrid->Filter->GameData       = m_GameData;
 
     SystemsRefXYZ->DataSource       = m_RefListSystemsXYZ;
     SystemsRefHome->DataSource      = m_RefListHomes;
@@ -949,14 +939,14 @@ void Form1::SystemsUpdateControls()
     SystemsRefShip->DataSource      = m_RefListShips;
 
     // Trigger grid update
-    m_SystemsFilter->EnableUpdates  = true;
+    SystemsGrid->Filter->EnableUpdates  = true;
     SystemsRefHome->Text            = GameData::Player->Name;
-    m_SystemsFilter->Reset();
+    SystemsGrid->Filter->Reset();
 }
 
 void Form1::SystemsSetup()
 {
-    SystemsGrid->Rows->Clear();
+    SystemsGrid->FullUpdateBegin();
 
     SystemsColumns %c = m_SystemsColumns;
 
@@ -965,11 +955,11 @@ void Form1::SystemsSetup()
 
     for each( StarSystem ^system in m_GameData->GetStarSystems() )
     {
-        if( m_SystemsFilter->Filter(system) )
+        if( SystemsGrid->Filter->Filter(system) )
             continue;
 
-        double distance = system->CalcDistance(m_SystemsFilter->RefSystem);
-        double mishap = system->CalcMishap(m_SystemsFilter->RefSystem, gv, age);
+        double distance = system->CalcDistance(SystemsGrid->Filter->RefSystem);
+        double mishap = system->CalcMishap(SystemsGrid->Filter->RefSystem, gv, age);
 
         DataGridViewRow ^row = SystemsGrid->Rows[ SystemsGrid->Rows->Add() ];
         DataGridViewCellCollection ^cells = row->Cells;
@@ -995,17 +985,13 @@ void Form1::SystemsSetup()
         //SystemsGrid->Columns[colColonies->Ordinal]->DefaultCellStyle->WrapMode = DataGridViewTriState::True;
 
         for each( IGridPlugin ^plugin in m_GridPlugins )
-            plugin->AddRowData(row, m_SystemsFilter, system);
+            plugin->AddRowData(row, SystemsGrid->Filter, system);
     }
 
     // Setup tooltips
     SetGridBgAndTooltip(SystemsGrid);
 
-    // Sort data
-    SystemsGrid->Sort( m_SystemsSorter );
-
-    // Enable filters
-    m_SystemsFilter->EnableUpdates = true;
+    SystemsGrid->FullUpdateEnd();
 }
 
 void Form1::SystemsSelectPlanets( int rowIndex )
@@ -1077,7 +1063,7 @@ void Form1::SystemsMenuShowColonies(Object^, EventArgs^)
 
 void Form1::SystemsMenuSelectRef(Object^, EventArgs^)
 {
-    m_SystemsFilter->SetRefSystem(m_SystemsMenuRef);
+    SystemsGrid->Filter->SetRefSystem(m_SystemsMenuRef);
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1142,17 +1128,17 @@ void Form1::PlanetsInitControls()
     filter->CtrlFiltColN    = PlanetsFiltColN;
 
     // Store objects
-    m_PlanetsFilter = filter;
-    m_PlanetsSorter = sorter;
+    PlanetsGrid->Filter = filter;
+    PlanetsGrid->Sorter = sorter;
 }
 
 void Form1::PlanetsUpdateControls()
 {
     // Inhibit grid update
-    m_PlanetsFilter->EnableUpdates  = false;
+    PlanetsGrid->Filter->EnableUpdates  = false;
 
-    m_PlanetsFilter->GameData       = m_GameData;
-    m_PlanetsFilter->DefaultLSN     = Math::Min(99, GameData::Player->TechLevelsAssumed[TECH_LS]);
+    PlanetsGrid->Filter->GameData       = m_GameData;
+    PlanetsGrid->Filter->DefaultLSN     = Math::Min(99, GameData::Player->TechLevelsAssumed[TECH_LS]);
 
     PlanetsRefXYZ->DataSource       = m_RefListSystemsXYZ;
     PlanetsRefHome->DataSource      = m_RefListHomes;
@@ -1161,14 +1147,14 @@ void Form1::PlanetsUpdateControls()
 
     PlanetsRefHome->Text = GridFilter::s_CaptionHome;
     // Trigger grid update
-    m_PlanetsFilter->EnableUpdates  = true;
+    PlanetsGrid->Filter->EnableUpdates  = true;
     PlanetsRefHome->Text = GameData::Player->Name;
-    m_PlanetsFilter->Reset();
+    PlanetsGrid->Filter->Reset();
 }
 
 void Form1::PlanetsSetup()
 {
-    PlanetsGrid->Rows->Clear();
+    PlanetsGrid->FullUpdateBegin();
 
     PlanetsColumns %c = m_PlanetsColumns;
 
@@ -1177,12 +1163,12 @@ void Form1::PlanetsSetup()
 
     for each( StarSystem ^system in m_GameData->GetStarSystems() )
     {
-        double distance = system->CalcDistance(m_PlanetsFilter->RefSystem);
-        double mishap = system->CalcMishap(m_PlanetsFilter->RefSystem, gv, age);
+        double distance = system->CalcDistance(PlanetsGrid->Filter->RefSystem);
+        double mishap = system->CalcMishap(PlanetsGrid->Filter->RefSystem, gv, age);
 
         for each( Planet ^planet in system->GetPlanets() )
         {
-            if( m_PlanetsFilter->Filter(planet) )
+            if( PlanetsGrid->Filter->Filter(planet) )
                 continue;
 
             DataGridViewRow ^row = PlanetsGrid->Rows[ PlanetsGrid->Rows->Add() ];
@@ -1217,18 +1203,14 @@ void Form1::PlanetsSetup()
             }
 
             for each( IGridPlugin ^plugin in m_GridPlugins )
-                plugin->AddRowData(row, m_PlanetsFilter, planet);
+                plugin->AddRowData(row, PlanetsGrid->Filter, planet);
         }
     }
 
     // Setup tooltips
     SetGridBgAndTooltip(PlanetsGrid);
 
-    // Sort data
-    PlanetsGrid->Sort( m_PlanetsSorter );
-
-    // Enable filters
-    m_PlanetsFilter->EnableUpdates = true;
+    PlanetsGrid->FullUpdateEnd();
 }
 
 void Form1::PlanetsSelectColonies( int rowIndex )
@@ -1324,7 +1306,7 @@ void Form1::PlanetsMenuShowColonies(Object^, EventArgs^)
 
 void Form1::PlanetsMenuSelectRef(Object^, EventArgs^)
 {
-    m_PlanetsFilter->SetRefSystem(m_PlanetsMenuRef->System);
+    PlanetsGrid->Filter->SetRefSystem(m_PlanetsMenuRef->System);
 }
 
 void Form1::PlanetsMenuAddNameStart(Object^, EventArgs^)
@@ -1377,7 +1359,7 @@ void Form1::PlanetsMenuAddName(DataGridViewCellEventArgs ^cell)
         m_PlanetsMenuRef->AddName(name);
     }
 
-    m_PlanetsFilter->Update();
+    PlanetsGrid->Filter->Update();
 }
 
 void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
@@ -1405,7 +1387,7 @@ void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
 
     m_PlanetsMenuRef->DelName();
 
-    m_PlanetsFilter->Update();
+    PlanetsGrid->Filter->Update();
 }
 
 void Form1::PlanetsMenuRemoveNameCancel(Object^, EventArgs^)
@@ -1420,7 +1402,7 @@ void Form1::PlanetsMenuRemoveNameCancel(Object^, EventArgs^)
             {
                 DelCommand(iCmd);
                 m_PlanetsMenuRef->NameIsDisband = false;
-                m_PlanetsFilter->Update();
+                PlanetsGrid->Filter->Update();
                 return;
             }
         }
@@ -1494,16 +1476,16 @@ void Form1::ColoniesInitControls()
     filter->CtrlMiMaBalance = ColoniesMiMaBalanced;
 
     // Store objects
-    m_ColoniesFilter = filter;
-    m_ColoniesSorter = sorter;
+    ColoniesGrid->Filter = filter;
+    ColoniesGrid->Sorter = sorter;
 }
 
 void Form1::ColoniesUpdateControls()
 {
     // Inhibit grid update
-    m_ColoniesFilter->EnableUpdates = false;
+    ColoniesGrid->Filter->EnableUpdates = false;
 
-    m_ColoniesFilter->GameData      = m_GameData;
+    ColoniesGrid->Filter->GameData      = m_GameData;
 
     ColoniesRefXYZ->DataSource      = m_RefListSystemsXYZ;
     ColoniesRefHome->DataSource     = m_RefListHomes;
@@ -1512,16 +1494,16 @@ void Form1::ColoniesUpdateControls()
 
     ColoniesRefHome->Text = GridFilter::s_CaptionHome;
     // Trigger grid update
-    m_ColoniesFilter->EnableUpdates = true;
+    ColoniesGrid->Filter->EnableUpdates = true;
     ColoniesRefHome->Text = GameData::Player->Name;
-    m_ColoniesFilter->Reset();
+    ColoniesGrid->Filter->Reset();
 
-    m_ColoniesSorter->SetGroupBySpecies( ColoniesGroupByOwner->Checked );
+    ColoniesGrid->Sorter->SetGroupBySpecies( ColoniesGroupByOwner->Checked );
 }
 
 void Form1::ColoniesSetup()
 {
-    ColoniesGrid->Rows->Clear();
+    ColoniesGrid->FullUpdateBegin();
 
     ColoniesColumns %c = m_ColoniesColumns;
 
@@ -1531,11 +1513,11 @@ void Form1::ColoniesSetup()
 
     for each( Colony ^colony in m_GameData->GetColonies() )
     {
-        if( m_ColoniesFilter->Filter(colony) )
+        if( ColoniesGrid->Filter->Filter(colony) )
             continue;
 
-        double distance = colony->System->CalcDistance(m_ColoniesFilter->RefSystem);
-        double mishap = colony->System->CalcMishap(m_ColoniesFilter->RefSystem, gv, age);
+        double distance = colony->System->CalcDistance(ColoniesGrid->Filter->RefSystem);
+        double mishap = colony->System->CalcMishap(ColoniesGrid->Filter->RefSystem, gv, age);
 
         DataGridViewRow ^row = ColoniesGrid->Rows[ ColoniesGrid->Rows->Add() ];
         DataGridViewCellCollection ^cells = row->Cells;
@@ -1568,7 +1550,7 @@ void Form1::ColoniesSetup()
             if( colony->PlanetType == PLANET_HOME ||
                 colony->PlanetType == PLANET_COLONY )
             {
-                colony->CalculateBalance(m_ColoniesFilter->MiMaBalanced);
+                colony->CalculateBalance(ColoniesGrid->Filter->MiMaBalanced);
                 cells[c.Balance]->Value = colony->PrintBalance();
             }
         }
@@ -1609,17 +1591,13 @@ void Form1::ColoniesSetup()
         cells[c.Notes]->Value = notes;
 
         for each( IGridPlugin ^plugin in m_GridPlugins )
-            plugin->AddRowData(row, m_ColoniesFilter, colony);
+            plugin->AddRowData(row, ColoniesGrid->Filter, colony);
     }
 
     // Setup tooltips
     SetGridBgAndTooltip(ColoniesGrid);
 
-    // Sort data
-    ColoniesGrid->Sort( m_ColoniesSorter );
-
-    // Enable filters
-    m_ColoniesFilter->EnableUpdates = true;
+    ColoniesGrid->FullUpdateEnd();
 }
 
 void Form1::ColoniesSetRef( int rowIndex )
@@ -1733,7 +1711,7 @@ void Form1::ColoniesMenuProdOrderAdjust(int adjustment)
     newOrder = Math::Min(newOrder, lastOrder + 1);
     m_ColoniesMenuRef->ProductionOrder = newOrder;
     GameData::Player->SortColoniesByProdOrder();
-    m_ColoniesFilter->Update();
+    ColoniesGrid->Filter->Update();
 
     SaveCommands();
 }
@@ -1808,16 +1786,16 @@ void Form1::ShipsInitControls()
     filter->CtrlFiltTypeTr  = ShipsFiltTypeTR;
 
     // Store objects
-    m_ShipsFilter = filter;
-    m_ShipsSorter = sorter;
+    ShipsGrid->Filter = filter;
+    ShipsGrid->Sorter = sorter;
 }
 
 void Form1::ShipsUpdateControls()
 {
     // Inhibit grid update
-    m_ShipsFilter->EnableUpdates = false;
+    ShipsGrid->Filter->EnableUpdates = false;
 
-    m_ShipsFilter->GameData      = m_GameData;
+    ShipsGrid->Filter->GameData      = m_GameData;
 
     ShipsRefXYZ->DataSource      = m_RefListSystemsXYZ;
     ShipsRefHome->DataSource     = m_RefListHomes;
@@ -1826,16 +1804,16 @@ void Form1::ShipsUpdateControls()
 
     ShipsRefHome->Text = GridFilter::s_CaptionHome;
     // Trigger grid update
-    m_ShipsFilter->EnableUpdates = true;
+    ShipsGrid->Filter->EnableUpdates = true;
     ShipsRefHome->Text = GameData::Player->Name;
-    m_ShipsFilter->Reset();
+    ShipsGrid->Filter->Reset();
 
-    m_ShipsSorter->SetGroupBySpecies( ColoniesGroupByOwner->Checked );
+    ShipsGrid->Sorter->SetGroupBySpecies( ColoniesGroupByOwner->Checked );
 }
 
 void Form1::ShipsSetup()
 {
-    ShipsGrid->Rows->Clear();
+    ShipsGrid->FullUpdateBegin();
 
     ShipsColumns %c = m_ShipsColumns;
 
@@ -1846,11 +1824,11 @@ void Form1::ShipsSetup()
 
     for each( Ship ^ship in m_GameData->GetShips() )
     {
-        if( m_ShipsFilter->Filter(ship) )
+        if( ShipsGrid->Filter->Filter(ship) )
             continue;
 
-        double distance = ship->System->CalcDistance(m_ShipsFilter->RefSystem);
-        double mishap   = ship->System->CalcMishap(m_ShipsFilter->RefSystem, gv, ship->Age);
+        double distance = ship->System->CalcDistance(ShipsGrid->Filter->RefSystem);
+        double mishap   = ship->System->CalcMishap(ShipsGrid->Filter->RefSystem, gv, ship->Age);
 
         DataGridViewRow ^row = ShipsGrid->Rows[ ShipsGrid->Rows->Add() ];
         DataGridViewCellCollection ^cells = row->Cells;
@@ -1878,17 +1856,13 @@ void Form1::ShipsSetup()
         }
 
         for each( IGridPlugin ^plugin in m_GridPlugins )
-            plugin->AddRowData(row, m_ShipsFilter, ship);
+            plugin->AddRowData(row, ShipsGrid->Filter, ship);
     }
 
     // Setup tooltips
     SetGridBgAndTooltip(ShipsGrid);
 
-    // Sort data
-    ShipsGrid->Sort( m_ShipsSorter );
-
-    // Enable filters
-    m_ShipsFilter->EnableUpdates = true;
+    ShipsGrid->FullUpdateEnd();
 }
 
 void Form1::ShipsSetRef( int rowIndex )
@@ -1900,7 +1874,7 @@ void Form1::ShipsSetRef( int rowIndex )
         if( ship->Owner == GameData::Player )
             ShipsRefShip->Text = ship->PrintRefListEntry();
         else
-            m_ShipsFilter->SetRefSystem(ship->System);
+            ShipsGrid->Filter->SetRefSystem(ship->System);
     }
 }
 
@@ -1983,12 +1957,12 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
                 jumpMenu->Checked = true;
 
             // Jump to ref system
-            if( m_ShipsFilter->RefSystem != ship->System )
+            if( ShipsGrid->Filter->RefSystem != ship->System )
             {
                 jumpMenu->DropDownItems->Add(
                     ShipsMenuCreateJumpItem(
                         ship,
-                        m_ShipsFilter->RefSystem,
+                        ShipsGrid->Filter->RefSystem,
                         -1,
                         ShipsRef->Text ) );
                 anyJump = true;
@@ -2109,13 +2083,13 @@ void Form1::ShipsMenuSelectRef(Object^, EventArgs ^e)
     if( m_ShipsMenuRef->Owner == GameData::Player )
         ShipsRefShip->Text = m_ShipsMenuRef->PrintRefListEntry();
     else
-        m_ShipsFilter->SetRefSystem(m_ShipsMenuRef->System);
+        ShipsGrid->Filter->SetRefSystem(m_ShipsMenuRef->System);
 }
 
 void Form1::ShipsMenuOrderSet(ShipOrderData ^data)
 {
     data->A->Command = data->B;
-    m_ShipsFilter->Update();
+    ShipsGrid->Filter->Update();
     SaveCommands();
 }
 
@@ -2165,25 +2139,25 @@ void Form1::AliensInitControls()
     filter->CtrlFiltRelP    = AliensFiltRelP;
 
     // Store objects
-    m_AliensFilter = filter;
-    m_AliensSorter = sorter;
+    AliensGrid->Filter = filter;
+    AliensGrid->Sorter = sorter;
 }
 
 void Form1::AliensUpdateControls()
 {
-    m_AliensFilter->EnableUpdates = true;
-    m_AliensFilter->Reset();
+    AliensGrid->Filter->EnableUpdates = true;
+    AliensGrid->Filter->Reset();
 }
 
 void Form1::AliensSetup()
 {
-    AliensGrid->Rows->Clear();
+    AliensGrid->FullUpdateBegin();
 
     AliensColumns %c = m_AliensColumns;
 
     for each( Alien ^alien in m_GameData->GetAliens() )
     {
-        if( m_AliensFilter->Filter(alien) )
+        if( AliensGrid->Filter->Filter(alien) )
             continue;
 
         DataGridViewRow ^row = AliensGrid->Rows[ AliensGrid->Rows->Add() ];
@@ -2219,17 +2193,13 @@ void Form1::AliensSetup()
         }
 
         for each( IGridPlugin ^plugin in m_GridPlugins )
-            plugin->AddRowData(row, m_AliensFilter, alien);
+            plugin->AddRowData(row, AliensGrid->Filter, alien);
     }
 
     // Setup tooltips
     SetGridBgAndTooltip(AliensGrid);
 
-    // Sort data
-    AliensGrid->Sort( m_AliensSorter );
-
-    // Enable filters
-    m_AliensFilter->EnableUpdates = true;
+    AliensGrid->FullUpdateEnd();
 }
 
 void Form1::AliensFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
@@ -2341,12 +2311,12 @@ void Form1::AliensMenuTeach(TeachData ^data)
     AddCommand( gcnew CmdTeach(alien, tech, level) );
 
     alien->TeachOrders |= 1 << tech;
-    m_AliensFilter->Update();
+    AliensGrid->Filter->Update();
 }
 
 void Form1::AliensMenuTeachAll(Object^, EventArgs^)
 {
-    m_AliensFilter->EnableUpdates = false;
+    AliensGrid->Filter->EnableUpdates = false;
 
     TeachData ^data = gcnew TeachData(m_AliensMenuRef, TECH_MI, GameData::Player->TechLevels[TECH_MI]);
     AliensMenuTeach(data);
@@ -2371,8 +2341,8 @@ void Form1::AliensMenuTeachAll(Object^, EventArgs^)
     data->C = GameData::Player->TechLevels[TECH_BI];
     AliensMenuTeach(data);
 
-    m_AliensFilter->EnableUpdates = true;
-    m_AliensFilter->Update();
+    AliensGrid->Filter->EnableUpdates = true;
+    AliensGrid->Filter->Update();
 }
 
 void Form1::AliensMenuTeachCancel(Object^, EventArgs^)
@@ -2400,7 +2370,7 @@ void Form1::AliensMenuTeachCancel(Object^, EventArgs^)
         SaveCommands();
 
     m_AliensMenuRef->TeachOrders = 0;
-    m_AliensFilter->Update();
+    AliensGrid->Filter->Update();
 }
 
 void Form1::AliensMenuSetRelation(AlienRelationData ^data)
@@ -2443,12 +2413,12 @@ void Form1::AliensMenuSetRelation(AlienRelationData ^data)
     if( rel == SP_ENEMY && alien->TeachOrders )
         AliensMenuTeachCancel(nullptr, nullptr);
 
-    m_AliensFilter->Update();
+    AliensGrid->Filter->Update();
     // Update other grids to reflect new colors
-    m_SystemsFilter->Update();
-    m_PlanetsFilter->Update();
-    m_ColoniesFilter->Update();
-    m_ShipsFilter->Update();
+    SystemsGrid->Filter->Update();
+    PlanetsGrid->Filter->Update();
+    ColoniesGrid->Filter->Update();
+    ShipsGrid->Filter->Update();
 }
 
 ////////////////////////////////////////////////////////////////

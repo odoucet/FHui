@@ -87,7 +87,7 @@ namespace FHUI {
         void        ColumnsFilterMenu(DataGridView ^grid, DataGridViewCellMouseEventArgs ^e);
         Color       GetAlienColor(Alien ^sp);
         void        SetGridBgAndTooltip(DataGridView ^grid);
-        void        SetGridRefSystemOnMouseClick(DataGridView ^grid, int rowIndex);
+        void        SetGridRefSystemOnMouseClick(DblBufDGV ^grid, int rowIndex);
         void        ShowGridContextMenu(DataGridView^ grid, DataGridViewCellMouseEventArgs ^e);
 
         typedef Pair<DataGridView^, int> ColumnsFilterData;
@@ -173,8 +173,6 @@ namespace FHUI {
             int Notes;
         };
 
-        IGridFilter        ^m_SystemsFilter;
-        IGridSorter        ^m_SystemsSorter;
         StarSystem         ^m_SystemsMenuRef;
         int                 m_SystemsMenuRefRow;
         SystemsColumns      m_SystemsColumns;
@@ -209,8 +207,6 @@ namespace FHUI {
             int Notes;
         };
 
-        IGridFilter        ^m_PlanetsFilter;
-        IGridSorter        ^m_PlanetsSorter;
         Planet             ^m_PlanetsMenuRef;
         int                 m_PlanetsMenuRefRow;
         PlanetsColumns      m_PlanetsColumns;
@@ -247,8 +243,6 @@ namespace FHUI {
             int Notes;
         };
 
-        IGridFilter        ^m_ColoniesFilter;
-        IGridSorter        ^m_ColoniesSorter;
         Colony             ^m_ColoniesMenuRef;
         ColoniesColumns     m_ColoniesColumns;
 
@@ -287,8 +281,6 @@ namespace FHUI {
             int Order;
         };
 
-        IGridFilter        ^m_ShipsFilter;
-        IGridSorter        ^m_ShipsSorter;
         Ship               ^m_ShipsMenuRef;
         ShipsColumns        m_ShipsColumns;
 
@@ -322,8 +314,6 @@ namespace FHUI {
             int EMail;
         };
 
-        IGridFilter        ^m_AliensFilter;
-        IGridSorter        ^m_AliensSorter;
         Alien              ^m_AliensMenuRef;
         AliensColumns       m_AliensColumns;
 
@@ -504,21 +494,20 @@ private: System::Windows::Forms::CheckBox^  ColoniesMiMaBalanced;
     private: System::Windows::Forms::TabPage^  TabAliens;
     private: System::Windows::Forms::ComboBox^  SystemsRefXYZ;
     private: System::Windows::Forms::ComboBox^  SystemsRefShip;
-    private: System::Windows::Forms::DataGridView^  SystemsGrid;
-    private: System::Windows::Forms::DataGridView^  PlanetsGrid;
+    private: FHUI::DblBufDGV^  SystemsGrid;
+    private: FHUI::DblBufDGV^  PlanetsGrid;
     private: System::Windows::Forms::TabPage^  TabAbout;
     private: System::Windows::Forms::TextBox^  TextAbout;
     private: System::Windows::Forms::SplitContainer^  splitContainer4;
-    private: System::Windows::Forms::DataGridView^  ColoniesGrid;
+    private: FHUI::DblBufDGV^  ColoniesGrid;
     private: System::Windows::Forms::SplitContainer^  splitContainer5;
-    private: System::Windows::Forms::DataGridView^  ShipsGrid;
+    private: FHUI::DblBufDGV^  ShipsGrid;
     private: System::Windows::Forms::ComboBox^  comboBox1;
     private: System::Windows::Forms::CheckBox^  checkBox1;
     private: System::Windows::Forms::TextBox^  textBox1;
     private: System::Windows::Forms::ComboBox^  comboBox2;
-    private: System::Windows::Forms::DataGridView^  dataGridView1;
     private: System::Windows::Forms::SplitContainer^  splitContainer6;
-    private: System::Windows::Forms::DataGridView^  AliensGrid;
+    private: FHUI::DblBufDGV^  AliensGrid;
 private: System::Windows::Forms::Panel^  panel1;
 private: System::Windows::Forms::GroupBox^  MapSPSelf;
 
@@ -686,7 +675,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->SystemsRefHome = (gcnew System::Windows::Forms::ComboBox());
             this->SystemsRefXYZ = (gcnew System::Windows::Forms::ComboBox());
             this->SystemsRef = (gcnew System::Windows::Forms::Label());
-            this->SystemsGrid = (gcnew System::Windows::Forms::DataGridView());
+            this->SystemsGrid = (gcnew FHUI::DblBufDGV());
             this->TabPlanets = (gcnew System::Windows::Forms::TabPage());
             this->PlanetsFiltVisN = (gcnew System::Windows::Forms::CheckBox());
             this->PlanetsFiltColN = (gcnew System::Windows::Forms::CheckBox());
@@ -702,7 +691,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->PlanetsRefHome = (gcnew System::Windows::Forms::ComboBox());
             this->PlanetsRefXYZ = (gcnew System::Windows::Forms::ComboBox());
             this->PlanetsRef = (gcnew System::Windows::Forms::Label());
-            this->PlanetsGrid = (gcnew System::Windows::Forms::DataGridView());
+            this->PlanetsGrid = (gcnew FHUI::DblBufDGV());
             this->TabColonies = (gcnew System::Windows::Forms::TabPage());
             this->splitContainer4 = (gcnew System::Windows::Forms::SplitContainer());
             this->ColoniesFiltOwnN = (gcnew System::Windows::Forms::CheckBox());
@@ -719,7 +708,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ColoniesRefColony = (gcnew System::Windows::Forms::ComboBox());
             this->ColoniesRefXYZ = (gcnew System::Windows::Forms::ComboBox());
             this->ColoniesRef = (gcnew System::Windows::Forms::Label());
-            this->ColoniesGrid = (gcnew System::Windows::Forms::DataGridView());
+            this->ColoniesGrid = (gcnew FHUI::DblBufDGV());
             this->TabShips = (gcnew System::Windows::Forms::TabPage());
             this->splitContainer5 = (gcnew System::Windows::Forms::SplitContainer());
             this->ShipsGroupByOwner = (gcnew System::Windows::Forms::CheckBox());
@@ -740,7 +729,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ShipsRefShip = (gcnew System::Windows::Forms::ComboBox());
             this->ShipsRefColony = (gcnew System::Windows::Forms::ComboBox());
             this->ShipsRef = (gcnew System::Windows::Forms::Label());
-            this->ShipsGrid = (gcnew System::Windows::Forms::DataGridView());
+            this->ShipsGrid = (gcnew FHUI::DblBufDGV());
             this->TabAliens = (gcnew System::Windows::Forms::TabPage());
             this->splitContainer6 = (gcnew System::Windows::Forms::SplitContainer());
             this->AliensFiltersReset = (gcnew System::Windows::Forms::Button());
@@ -748,7 +737,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->AliensFiltRelN = (gcnew System::Windows::Forms::CheckBox());
             this->AliensFiltRelE = (gcnew System::Windows::Forms::CheckBox());
             this->AliensFiltRelA = (gcnew System::Windows::Forms::CheckBox());
-            this->AliensGrid = (gcnew System::Windows::Forms::DataGridView());
+            this->AliensGrid = (gcnew FHUI::DblBufDGV());
             this->TabOrders = (gcnew System::Windows::Forms::TabPage());
             this->OrderTemplate = (gcnew System::Windows::Forms::RichTextBox());
             this->OrdersCtxMenu = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
@@ -786,7 +775,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->checkBox1 = (gcnew System::Windows::Forms::CheckBox());
             this->textBox1 = (gcnew System::Windows::Forms::TextBox());
             this->comboBox2 = (gcnew System::Windows::Forms::ComboBox());
-            this->dataGridView1 = (gcnew System::Windows::Forms::DataGridView());
             this->BtnTooltip = (gcnew System::Windows::Forms::ToolTip(this->components));
             TopSplitCont = (gcnew System::Windows::Forms::SplitContainer());
             splitContainer7 = (gcnew System::Windows::Forms::SplitContainer());
@@ -903,7 +891,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->MapSPSelf->SuspendLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSPSelfGV))->BeginInit();
             this->TabAbout->SuspendLayout();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->dataGridView1))->BeginInit();
             this->SuspendLayout();
             // 
             // TopSplitCont
@@ -1507,7 +1494,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->SystemsGrid->AllowUserToAddRows = false;
             this->SystemsGrid->AllowUserToDeleteRows = false;
             this->SystemsGrid->AllowUserToOrderColumns = true;
-            this->SystemsGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
             dataGridViewCellStyle1->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
             dataGridViewCellStyle1->BackColor = System::Drawing::SystemColors::Control;
             dataGridViewCellStyle1->Font = (gcnew System::Drawing::Font(L"Tahoma", 6.75F));
@@ -1546,7 +1532,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->SystemsGrid->TabIndex = 0;
             this->SystemsGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
             this->SystemsGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
-            this->SystemsGrid->ColumnHeaderMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::SystemsGrid_ColumnHeaderMouseClick);
+            this->SystemsGrid->ColumnHeaderMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_ColumnHeaderMouseClick);
             this->SystemsGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseEnter);
             this->SystemsGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::SystemsGrid_CellMouseDoubleClick);
             this->SystemsGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
@@ -1806,7 +1792,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->PlanetsGrid->AllowUserToAddRows = false;
             this->PlanetsGrid->AllowUserToDeleteRows = false;
             this->PlanetsGrid->AllowUserToOrderColumns = true;
-            this->PlanetsGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
             dataGridViewCellStyle4->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
             dataGridViewCellStyle4->BackColor = System::Drawing::SystemColors::Control;
             dataGridViewCellStyle4->Font = (gcnew System::Drawing::Font(L"Tahoma", 6.75F));
@@ -1845,7 +1830,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->PlanetsGrid->TabIndex = 0;
             this->PlanetsGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
             this->PlanetsGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
-            this->PlanetsGrid->ColumnHeaderMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::PlanetsGrid_ColumnHeaderMouseClick);
+            this->PlanetsGrid->ColumnHeaderMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_ColumnHeaderMouseClick);
             this->PlanetsGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseEnter);
             this->PlanetsGrid->CellEndEdit += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::PlanetsGrid_CellEndEdit);
             this->PlanetsGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::PlanetsGrid_CellMouseDoubleClick);
@@ -2105,7 +2090,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ColoniesGrid->AllowUserToAddRows = false;
             this->ColoniesGrid->AllowUserToDeleteRows = false;
             this->ColoniesGrid->AllowUserToOrderColumns = true;
-            this->ColoniesGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
             dataGridViewCellStyle7->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
             dataGridViewCellStyle7->BackColor = System::Drawing::SystemColors::Control;
             dataGridViewCellStyle7->Font = (gcnew System::Drawing::Font(L"Tahoma", 6.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
@@ -2145,7 +2129,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ColoniesGrid->TabIndex = 0;
             this->ColoniesGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
             this->ColoniesGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
-            this->ColoniesGrid->ColumnHeaderMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::ColoniesGrid_ColumnHeaderMouseClick);
+            this->ColoniesGrid->ColumnHeaderMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_ColumnHeaderMouseClick);
             this->ColoniesGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseEnter);
             this->ColoniesGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::ColoniesGrid_CellMouseDoubleClick);
             // 
@@ -2450,7 +2434,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ShipsGrid->AllowUserToAddRows = false;
             this->ShipsGrid->AllowUserToDeleteRows = false;
             this->ShipsGrid->AllowUserToOrderColumns = true;
-            this->ShipsGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
             dataGridViewCellStyle10->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
             dataGridViewCellStyle10->BackColor = System::Drawing::SystemColors::Control;
             dataGridViewCellStyle10->Font = (gcnew System::Drawing::Font(L"Tahoma", 6.75F));
@@ -2489,7 +2472,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ShipsGrid->TabIndex = 0;
             this->ShipsGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
             this->ShipsGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
-            this->ShipsGrid->ColumnHeaderMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::ShipsGrid_ColumnHeaderMouseClick);
+            this->ShipsGrid->ColumnHeaderMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_ColumnHeaderMouseClick);
             this->ShipsGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseEnter);
             this->ShipsGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::ShipsGrid_CellMouseDoubleClick);
             this->ShipsGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
@@ -2603,7 +2586,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->AliensGrid->AllowUserToAddRows = false;
             this->AliensGrid->AllowUserToDeleteRows = false;
             this->AliensGrid->AllowUserToOrderColumns = true;
-            this->AliensGrid->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
             dataGridViewCellStyle13->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
             dataGridViewCellStyle13->BackColor = System::Drawing::SystemColors::Control;
             dataGridViewCellStyle13->Font = (gcnew System::Drawing::Font(L"Tahoma", 6.75F));
@@ -2642,7 +2624,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->AliensGrid->TabIndex = 0;
             this->AliensGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
             this->AliensGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
-            this->AliensGrid->ColumnHeaderMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::AliensGrid_ColumnHeaderMouseClick);
+            this->AliensGrid->ColumnHeaderMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_ColumnHeaderMouseClick);
             this->AliensGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseEnter);
             this->AliensGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseDoubleClick);
             this->AliensGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
@@ -3261,40 +3243,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->comboBox2->Size = System::Drawing::Size(147, 21);
             this->comboBox2->TabIndex = 1;
             // 
-            // dataGridView1
-            // 
-            this->dataGridView1->AllowUserToAddRows = false;
-            this->dataGridView1->AllowUserToDeleteRows = false;
-            this->dataGridView1->AllowUserToOrderColumns = true;
-            this->dataGridView1->AutoSizeColumnsMode = System::Windows::Forms::DataGridViewAutoSizeColumnsMode::AllCells;
-            this->dataGridView1->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-            dataGridViewCellStyle16->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle16->BackColor = System::Drawing::SystemColors::Window;
-            dataGridViewCellStyle16->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
-                static_cast<System::Byte>(238)));
-            dataGridViewCellStyle16->ForeColor = System::Drawing::SystemColors::ControlText;
-            dataGridViewCellStyle16->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle16->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle16->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
-            this->dataGridView1->DefaultCellStyle = dataGridViewCellStyle16;
-            this->dataGridView1->Dock = System::Windows::Forms::DockStyle::Fill;
-            this->dataGridView1->Location = System::Drawing::Point(0, 0);
-            this->dataGridView1->Name = L"dataGridView1";
-            this->dataGridView1->ReadOnly = true;
-            dataGridViewCellStyle17->Alignment = System::Windows::Forms::DataGridViewContentAlignment::MiddleLeft;
-            dataGridViewCellStyle17->BackColor = System::Drawing::SystemColors::Control;
-            dataGridViewCellStyle17->Font = (gcnew System::Drawing::Font(L"Tahoma", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
-                static_cast<System::Byte>(238)));
-            dataGridViewCellStyle17->ForeColor = System::Drawing::SystemColors::WindowText;
-            dataGridViewCellStyle17->SelectionBackColor = System::Drawing::SystemColors::Highlight;
-            dataGridViewCellStyle17->SelectionForeColor = System::Drawing::SystemColors::HighlightText;
-            dataGridViewCellStyle17->WrapMode = System::Windows::Forms::DataGridViewTriState::True;
-            this->dataGridView1->RowHeadersDefaultCellStyle = dataGridViewCellStyle17;
-            this->dataGridView1->RowHeadersWidth = 4;
-            this->dataGridView1->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
-            this->dataGridView1->Size = System::Drawing::Size(569, 504);
-            this->dataGridView1->TabIndex = 0;
-            // 
             // Form1
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -3387,7 +3335,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSPSelfGV))->EndInit();
             this->TabAbout->ResumeLayout(false);
             this->TabAbout->PerformLayout();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->dataGridView1))->EndInit();
             this->ResumeLayout(false);
 
         }
@@ -3418,10 +3365,10 @@ private: System::Void RepMode_CheckedChanged(System::Object^  sender, System::Ev
              RepModeChanged();
          }
 private: System::Void Systems_Update(System::Object^  sender, System::EventArgs^  e) {
-             m_SystemsFilter->Update(sender);
+             SystemsGrid->Filter->Update(sender);
          }
 private: System::Void SystemsFiltersReset_Click(System::Object^  sender, System::EventArgs^  e) {
-             m_SystemsFilter->Reset();
+             SystemsGrid->Filter->Reset();
          }
 private: System::Void SystemsGrid_CellMouseDoubleClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
              if( e->Button == Windows::Forms::MouseButtons::Left )
@@ -3432,10 +3379,10 @@ private: System::Void SystemsGrid_CellMouseDoubleClick(System::Object^  sender, 
                  Grid_CellMouseDoubleClick(sender, e);
          }
 private: System::Void Planets_Update(System::Object^  sender, System::EventArgs^  e) {
-             m_PlanetsFilter->Update(sender);
+             PlanetsGrid->Filter->Update(sender);
          }
 private: System::Void PlanetsFiltersReset_Click(System::Object^  sender, System::EventArgs^  e) {
-             m_PlanetsFilter->Reset();
+             PlanetsGrid->Filter->Reset();
          }
 private: System::Void PlanetsGrid_CellMouseDoubleClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
              if( e->Button == Windows::Forms::MouseButtons::Left )
@@ -3446,10 +3393,10 @@ private: System::Void PlanetsGrid_CellMouseDoubleClick(System::Object^  sender, 
                  Grid_CellMouseDoubleClick(sender, e);
          }
 private: System::Void Colonies_Update(System::Object^  sender, System::EventArgs^  e) {
-             m_ColoniesFilter->Update(sender);
+             ColoniesGrid->Filter->Update(sender);
          }
 private: System::Void ColoniesFiltersReset_Click(System::Object^  sender, System::EventArgs^  e) {
-             m_ColoniesFilter->Reset();
+             ColoniesGrid->Filter->Reset();
          }
 private: System::Void ColoniesGrid_CellMouseDoubleClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
              if( e->Button == Windows::Forms::MouseButtons::Left )
@@ -3460,10 +3407,10 @@ private: System::Void ColoniesGrid_CellMouseDoubleClick(System::Object^  sender,
                  Grid_CellMouseDoubleClick(sender, e);
          }
 private: System::Void Ships_Update(System::Object^  sender, System::EventArgs^  e) {
-             m_ShipsFilter->Update(sender);
+             ShipsGrid->Filter->Update(sender);
          }
 private: System::Void ShipsFiltersReset_Click(System::Object^  sender, System::EventArgs^  e) {
-             m_ShipsFilter->Reset();
+             ShipsGrid->Filter->Reset();
          }
 private: System::Void ShipsGrid_CellMouseDoubleClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
              if( e->Button == Windows::Forms::MouseButtons::Left )
@@ -3474,15 +3421,15 @@ private: System::Void ShipsGrid_CellMouseDoubleClick(System::Object^  sender, Sy
                  Grid_CellMouseDoubleClick(sender, e);
          }
 private: System::Void Aliens_Update(System::Object^  sender, System::EventArgs^  e) {
-             m_AliensFilter->Update(sender);
+             AliensGrid->Filter->Update(sender);
          }
 private: System::Void AliensFiltersReset_Click(System::Object^  sender, System::EventArgs^  e) {
-             m_AliensFilter->Reset();
+             AliensGrid->Filter->Reset();
          }
 private: System::Void Grid_CellMouseDoubleClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
              if( e->Button == Windows::Forms::MouseButtons::Middle )
              {
-                 SetGridRefSystemOnMouseClick(safe_cast<DataGridView^>(sender), e->RowIndex);
+                 SetGridRefSystemOnMouseClick(safe_cast<DblBufDGV^>(sender), e->RowIndex);
              }
          }
 
@@ -3528,35 +3475,11 @@ private: System::Void MenuTabs_SelectedIndexChanged(System::Object^  sender, Sys
 private: System::Void PlanetsGrid_CellEndEdit(System::Object^  sender, System::Windows::Forms::DataGridViewCellEventArgs^  e) {
              PlanetsMenuAddName(e);
          }
-private: System::Void SystemsGrid_ColumnHeaderMouseClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
+private: System::Void Grid_ColumnHeaderMouseClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
              if( e->Button == Windows::Forms::MouseButtons::Left )
-                 m_SystemsSorter->SetSortColumn( e->ColumnIndex );
+                 safe_cast<DblBufDGV^>(sender)->Sorter->SetSortColumn( e->ColumnIndex );
              else
-                 ColumnsFilterMenu( SystemsGrid, e );
-         }
-private: System::Void PlanetsGrid_ColumnHeaderMouseClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
-             if( e->Button == Windows::Forms::MouseButtons::Left )
-                 m_PlanetsSorter->SetSortColumn( e->ColumnIndex );
-             else
-                 ColumnsFilterMenu( PlanetsGrid, e );
-         }
-private: System::Void ColoniesGrid_ColumnHeaderMouseClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
-             if( e->Button == Windows::Forms::MouseButtons::Left )
-                 m_ColoniesSorter->SetSortColumn( e->ColumnIndex );
-             else
-                 ColumnsFilterMenu( ColoniesGrid, e );
-         }
-private: System::Void ShipsGrid_ColumnHeaderMouseClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
-             if( e->Button == Windows::Forms::MouseButtons::Left )
-                 m_ShipsSorter->SetSortColumn( e->ColumnIndex );
-             else
-                 ColumnsFilterMenu( ShipsGrid, e );
-         }
-private: System::Void AliensGrid_ColumnHeaderMouseClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
-             if( e->Button == Windows::Forms::MouseButtons::Left )
-                 m_AliensSorter->SetSortColumn( e->ColumnIndex );
-             else
-                 ColumnsFilterMenu( AliensGrid, e );
+                 ColumnsFilterMenu( safe_cast<DataGridView^>(sender), e );
          }
 private: System::Void copyToClipboardToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
              CopyOrdersTemplateToClipboard();
@@ -3565,10 +3488,10 @@ private: System::Void UtilTRSize_ValueChanged(System::Object^  sender, System::E
              UtilUpdateAll();
          }
 private: System::Void ColoniesGroupByOwner_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
-             m_ColoniesSorter->SetGroupBySpecies( safe_cast<CheckBox^>(sender)->Checked );
+             ColoniesGrid->Sorter->SetGroupBySpecies( safe_cast<CheckBox^>(sender)->Checked );
          }
 private: System::Void ShipsGroupByOwner_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
-             m_ShipsSorter->SetGroupBySpecies( safe_cast<CheckBox^>(sender)->Checked );
+             ShipsGrid->Sorter->SetGroupBySpecies( safe_cast<CheckBox^>(sender)->Checked );
          }
 };
 
