@@ -369,9 +369,19 @@ void Form1::GeneratePreDeparture()
 
     for each ( StarSystem^ system in m_GameData->GetStarSystems() )
     {
-        if ( system->ColoniesOwned->Count + system->ShipsOwned->Count == 0 )
-            continue;
-
+        if ( system->ShipsOwned->Count == 0 )
+        {
+            if ( system->ColoniesOwned->Count == 0)
+            {
+                continue;
+            }
+            else if ( system->ColoniesOwned->Count == 1 )
+            {
+                Colony^ colony = system->ColoniesOwned[0];
+                if ( (colony->EconomicBase <= 0) && (colony->HasInventory == false) )
+                    continue;
+            }
+        }
         m_OrderList->Add("");
         GeneratePreDepartureInfo( system );
 
@@ -607,6 +617,9 @@ void Form1::GenerateProduction()
     // Generate production template for each colony
     for each( Colony ^colony in GameData::Player->Colonies )
     {
+        if ( (colony->EconomicBase <= 0) && (colony->HasInventory == false) )
+            continue;
+
         m_OrderList->Add("");
         m_OrderList->Add("  PRODUCTION PL " + colony->Name);
 

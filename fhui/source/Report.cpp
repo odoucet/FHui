@@ -691,6 +691,11 @@ void Report::MatchColonyScan(String ^s)
     {
         m_ScanColony->UnderSiege = true;
     }
+    else if ( m_RM->Match(s, "(\\d+) IUs and (\\d+) AUs will have to be installed for complete recovery.") )
+    {
+        m_ScanColony->RecoveryIU = m_RM->GetResultInt(0);
+        m_ScanColony->RecoveryAU = m_RM->GetResultInt(1);
+    }
     else if( m_RM->Match(s, "^Production penalty = (\\d+)% \\(LSN = (\\d+)\\)") )
     {
         m_ScanColony->ProdPenalty = m_RM->GetResultInt(0);

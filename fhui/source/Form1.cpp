@@ -1583,17 +1583,30 @@ void Form1::ColoniesSetup()
             cells[c.Shipyards]->Value = colony->Shipyards;
         }
 
+        String^ notes = gcnew String("");
         if( colony->Hidden )
         {
-            cells[c.Notes]->Value = "Hidden";
+            if ( notes->Length > 0 ) notes += ", ";
+            notes += "Hidden";
         }
 
         if( colony->UnderSiege )
         {
-            cells[c.Notes]->Value = "Under siege";
-            cells[c.Notes]->Style->ForeColor = Color::Red;
+            if ( notes->Length > 0 ) notes += ", ";
+            notes += "Under siege";
             cells[c.Prod]->Style->ForeColor = Color::Red;
+            cells[c.Notes]->Style->ForeColor = Color::Red;
         }
+
+        if( colony->RecoveryIU + colony->RecoveryAU > 0 )
+        {
+            if ( notes->Length > 0 ) notes += ", ";
+            notes += String::Format("Recovery: {0} IU, {1} AU", colony->RecoveryIU, colony->RecoveryAU);
+            cells[c.Prod]->Style->ForeColor = Color::Red;
+            cells[c.Notes]->Style->ForeColor = Color::Red;
+        }
+
+        cells[c.Notes]->Value = notes;
 
         for each( IGridPlugin ^plugin in m_GridPlugins )
             plugin->AddRowData(row, m_ColoniesFilter, colony);

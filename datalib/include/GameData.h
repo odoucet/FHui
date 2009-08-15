@@ -318,6 +318,8 @@ public:
         MiBase = -1;
         NeedIU = 0;
         NeedAU = 0;
+        RecoveryIU = 0;
+        RecoveryAU = 0;
         MiDiff = 0;
         MaBase = -1;
         LSN = 99;
@@ -364,6 +366,8 @@ public:
     int             MiBase; // *10
     int             NeedIU;
     int             NeedAU;
+    int             RecoveryIU;
+    int             RecoveryAU;
     int             MiDiff; // *100
     int             LSN;
     int             Shipyards;
@@ -378,6 +382,15 @@ public:
     property int EUAvail { int get() { return EUProd - EUFleet; } }
 
     property array<int>^    Inventory;
+    property bool           HasInventory 
+    {
+        bool get()
+        {
+            for (int i=0; i<INV_MAX; i++)
+                if (Inventory[i] > 0) return true;
+            return false;
+        }
+    }
 };
 
 // ---------------------------------------------------
