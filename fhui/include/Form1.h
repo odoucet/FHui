@@ -133,6 +133,12 @@ namespace FHUI {
 
         bool                m_HadException;
         bool               ^m_bGridUpdateEnabled;
+private: System::Windows::Forms::Label^  SystemsNumRows;
+private: System::Windows::Forms::Label^  PlanetsNumRows;
+private: System::Windows::Forms::Label^  ColoniesNumRows;
+private: System::Windows::Forms::Label^  ShipsNumRows;
+private: System::Windows::Forms::Label^  AliensNumRows;
+
 
         System::Windows::Forms::ToolTip^    m_GridToolTip;
 
@@ -641,8 +647,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             System::Windows::Forms::Label^  label7;
             System::Windows::Forms::Label^  label5;
             System::Windows::Forms::Label^  label6;
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle16 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
-            System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle17 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             this->TurnReloadBtn = (gcnew System::Windows::Forms::Button());
             this->TurnSelect = (gcnew System::Windows::Forms::ComboBox());
             this->Summary = (gcnew System::Windows::Forms::TextBox());
@@ -661,6 +665,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->RepTurnNr = (gcnew System::Windows::Forms::ComboBox());
             this->RepModeReports = (gcnew System::Windows::Forms::RadioButton());
             this->TabSystems = (gcnew System::Windows::Forms::TabPage());
+            this->SystemsNumRows = (gcnew System::Windows::Forms::Label());
             this->SystemsFiltVisN = (gcnew System::Windows::Forms::CheckBox());
             this->SystemsFiltColN = (gcnew System::Windows::Forms::CheckBox());
             this->SystemsFiltVisV = (gcnew System::Windows::Forms::CheckBox());
@@ -677,6 +682,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->SystemsRef = (gcnew System::Windows::Forms::Label());
             this->SystemsGrid = (gcnew FHUI::DblBufDGV());
             this->TabPlanets = (gcnew System::Windows::Forms::TabPage());
+            this->PlanetsNumRows = (gcnew System::Windows::Forms::Label());
             this->PlanetsFiltVisN = (gcnew System::Windows::Forms::CheckBox());
             this->PlanetsFiltColN = (gcnew System::Windows::Forms::CheckBox());
             this->PlanetsFiltVisV = (gcnew System::Windows::Forms::CheckBox());
@@ -694,6 +700,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->PlanetsGrid = (gcnew FHUI::DblBufDGV());
             this->TabColonies = (gcnew System::Windows::Forms::TabPage());
             this->splitContainer4 = (gcnew System::Windows::Forms::SplitContainer());
+            this->ColoniesNumRows = (gcnew System::Windows::Forms::Label());
             this->ColoniesFiltOwnN = (gcnew System::Windows::Forms::CheckBox());
             this->ColoniesFiltOwnO = (gcnew System::Windows::Forms::CheckBox());
             this->ColoniesGroupByOwner = (gcnew System::Windows::Forms::CheckBox());
@@ -711,6 +718,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ColoniesGrid = (gcnew FHUI::DblBufDGV());
             this->TabShips = (gcnew System::Windows::Forms::TabPage());
             this->splitContainer5 = (gcnew System::Windows::Forms::SplitContainer());
+            this->ShipsNumRows = (gcnew System::Windows::Forms::Label());
             this->ShipsGroupByOwner = (gcnew System::Windows::Forms::CheckBox());
             this->ShipsRefXYZ = (gcnew System::Windows::Forms::ComboBox());
             this->ShipsFiltTypeML = (gcnew System::Windows::Forms::CheckBox());
@@ -732,6 +740,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ShipsGrid = (gcnew FHUI::DblBufDGV());
             this->TabAliens = (gcnew System::Windows::Forms::TabPage());
             this->splitContainer6 = (gcnew System::Windows::Forms::SplitContainer());
+            this->AliensNumRows = (gcnew System::Windows::Forms::Label());
             this->AliensFiltersReset = (gcnew System::Windows::Forms::Button());
             this->AliensFiltRelP = (gcnew System::Windows::Forms::CheckBox());
             this->AliensFiltRelN = (gcnew System::Windows::Forms::CheckBox());
@@ -1261,6 +1270,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // splitContainer2.Panel1
             // 
             splitContainer2->Panel1->BackColor = System::Drawing::SystemColors::Control;
+            splitContainer2->Panel1->Controls->Add(this->SystemsNumRows);
             splitContainer2->Panel1->Controls->Add(this->SystemsFiltVisN);
             splitContainer2->Panel1->Controls->Add(this->SystemsFiltColN);
             splitContainer2->Panel1->Controls->Add(this->SystemsFiltVisV);
@@ -1287,6 +1297,16 @@ private: System::Windows::Forms::Label^  SystemsRef;
             splitContainer2->SplitterDistance = 82;
             splitContainer2->SplitterWidth = 1;
             splitContainer2->TabIndex = 0;
+            // 
+            // SystemsNumRows
+            // 
+            this->SystemsNumRows->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left) 
+                | System::Windows::Forms::AnchorStyles::Right));
+            this->SystemsNumRows->Location = System::Drawing::Point(624, 7);
+            this->SystemsNumRows->Name = L"SystemsNumRows";
+            this->SystemsNumRows->Size = System::Drawing::Size(56, 13);
+            this->SystemsNumRows->TabIndex = 78;
+            this->SystemsNumRows->Text = L"num rows";
             // 
             // SystemsFiltVisN
             // 
@@ -1513,6 +1533,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             dataGridViewCellStyle2->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
             this->SystemsGrid->DefaultCellStyle = dataGridViewCellStyle2;
             this->SystemsGrid->Dock = System::Windows::Forms::DockStyle::Fill;
+            this->SystemsGrid->Filter = nullptr;
             this->SystemsGrid->Location = System::Drawing::Point(0, 0);
             this->SystemsGrid->Name = L"SystemsGrid";
             this->SystemsGrid->ReadOnly = true;
@@ -1529,6 +1550,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->SystemsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
             this->SystemsGrid->ShowCellToolTips = false;
             this->SystemsGrid->Size = System::Drawing::Size(683, 452);
+            this->SystemsGrid->Sorter = nullptr;
             this->SystemsGrid->TabIndex = 0;
             this->SystemsGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
             this->SystemsGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
@@ -1559,6 +1581,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // splitContainer3.Panel1
             // 
+            splitContainer3->Panel1->Controls->Add(this->PlanetsNumRows);
             splitContainer3->Panel1->Controls->Add(this->PlanetsFiltVisN);
             splitContainer3->Panel1->Controls->Add(this->PlanetsFiltColN);
             splitContainer3->Panel1->Controls->Add(this->PlanetsFiltVisV);
@@ -1585,6 +1608,16 @@ private: System::Windows::Forms::Label^  SystemsRef;
             splitContainer3->SplitterDistance = 82;
             splitContainer3->SplitterWidth = 1;
             splitContainer3->TabIndex = 1;
+            // 
+            // PlanetsNumRows
+            // 
+            this->PlanetsNumRows->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left) 
+                | System::Windows::Forms::AnchorStyles::Right));
+            this->PlanetsNumRows->Location = System::Drawing::Point(623, 7);
+            this->PlanetsNumRows->Name = L"PlanetsNumRows";
+            this->PlanetsNumRows->Size = System::Drawing::Size(56, 13);
+            this->PlanetsNumRows->TabIndex = 79;
+            this->PlanetsNumRows->Text = L"num rows";
             // 
             // PlanetsFiltVisN
             // 
@@ -1811,6 +1844,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             dataGridViewCellStyle5->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
             this->PlanetsGrid->DefaultCellStyle = dataGridViewCellStyle5;
             this->PlanetsGrid->Dock = System::Windows::Forms::DockStyle::Fill;
+            this->PlanetsGrid->Filter = nullptr;
             this->PlanetsGrid->Location = System::Drawing::Point(0, 0);
             this->PlanetsGrid->Name = L"PlanetsGrid";
             this->PlanetsGrid->ReadOnly = true;
@@ -1827,6 +1861,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->PlanetsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
             this->PlanetsGrid->ShowCellToolTips = false;
             this->PlanetsGrid->Size = System::Drawing::Size(683, 452);
+            this->PlanetsGrid->Sorter = nullptr;
             this->PlanetsGrid->TabIndex = 0;
             this->PlanetsGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
             this->PlanetsGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
@@ -1859,6 +1894,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // splitContainer4.Panel1
             // 
+            this->splitContainer4->Panel1->Controls->Add(this->ColoniesNumRows);
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesFiltOwnN);
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesFiltOwnO);
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesGroupByOwner);
@@ -1885,6 +1921,16 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->splitContainer4->SplitterDistance = 82;
             this->splitContainer4->SplitterWidth = 1;
             this->splitContainer4->TabIndex = 2;
+            // 
+            // ColoniesNumRows
+            // 
+            this->ColoniesNumRows->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left) 
+                | System::Windows::Forms::AnchorStyles::Right));
+            this->ColoniesNumRows->Location = System::Drawing::Point(623, 7);
+            this->ColoniesNumRows->Name = L"ColoniesNumRows";
+            this->ColoniesNumRows->Size = System::Drawing::Size(56, 13);
+            this->ColoniesNumRows->TabIndex = 79;
+            this->ColoniesNumRows->Text = L"num rows";
             // 
             // ColoniesFiltOwnN
             // 
@@ -2110,6 +2156,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             dataGridViewCellStyle8->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
             this->ColoniesGrid->DefaultCellStyle = dataGridViewCellStyle8;
             this->ColoniesGrid->Dock = System::Windows::Forms::DockStyle::Fill;
+            this->ColoniesGrid->Filter = nullptr;
             this->ColoniesGrid->Location = System::Drawing::Point(0, 0);
             this->ColoniesGrid->Name = L"ColoniesGrid";
             this->ColoniesGrid->ReadOnly = true;
@@ -2126,6 +2173,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ColoniesGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
             this->ColoniesGrid->ShowCellToolTips = false;
             this->ColoniesGrid->Size = System::Drawing::Size(683, 452);
+            this->ColoniesGrid->Sorter = nullptr;
             this->ColoniesGrid->TabIndex = 0;
             this->ColoniesGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
             this->ColoniesGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
@@ -2156,6 +2204,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // splitContainer5.Panel1
             // 
+            this->splitContainer5->Panel1->Controls->Add(this->ShipsNumRows);
             this->splitContainer5->Panel1->Controls->Add(this->ShipsGroupByOwner);
             this->splitContainer5->Panel1->Controls->Add(this->ShipsRefXYZ);
             this->splitContainer5->Panel1->Controls->Add(this->ShipsFiltTypeML);
@@ -2184,6 +2233,16 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->splitContainer5->SplitterDistance = 82;
             this->splitContainer5->SplitterWidth = 1;
             this->splitContainer5->TabIndex = 2;
+            // 
+            // ShipsNumRows
+            // 
+            this->ShipsNumRows->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left) 
+                | System::Windows::Forms::AnchorStyles::Right));
+            this->ShipsNumRows->Location = System::Drawing::Point(624, 7);
+            this->ShipsNumRows->Name = L"ShipsNumRows";
+            this->ShipsNumRows->Size = System::Drawing::Size(56, 13);
+            this->ShipsNumRows->TabIndex = 79;
+            this->ShipsNumRows->Text = L"num rows";
             // 
             // ShipsGroupByOwner
             // 
@@ -2453,6 +2512,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             dataGridViewCellStyle11->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
             this->ShipsGrid->DefaultCellStyle = dataGridViewCellStyle11;
             this->ShipsGrid->Dock = System::Windows::Forms::DockStyle::Fill;
+            this->ShipsGrid->Filter = nullptr;
             this->ShipsGrid->Location = System::Drawing::Point(0, 0);
             this->ShipsGrid->Name = L"ShipsGrid";
             this->ShipsGrid->ReadOnly = true;
@@ -2469,6 +2529,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ShipsGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
             this->ShipsGrid->ShowCellToolTips = false;
             this->ShipsGrid->Size = System::Drawing::Size(683, 452);
+            this->ShipsGrid->Sorter = nullptr;
             this->ShipsGrid->TabIndex = 0;
             this->ShipsGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
             this->ShipsGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
@@ -2500,6 +2561,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // splitContainer6.Panel1
             // 
+            this->splitContainer6->Panel1->Controls->Add(this->AliensNumRows);
             this->splitContainer6->Panel1->Controls->Add(this->AliensFiltersReset);
             this->splitContainer6->Panel1->Controls->Add(this->AliensFiltRelP);
             this->splitContainer6->Panel1->Controls->Add(this->AliensFiltRelN);
@@ -2513,6 +2575,16 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->splitContainer6->SplitterDistance = 29;
             this->splitContainer6->SplitterWidth = 1;
             this->splitContainer6->TabIndex = 2;
+            // 
+            // AliensNumRows
+            // 
+            this->AliensNumRows->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left) 
+                | System::Windows::Forms::AnchorStyles::Right));
+            this->AliensNumRows->Location = System::Drawing::Point(624, 8);
+            this->AliensNumRows->Name = L"AliensNumRows";
+            this->AliensNumRows->Size = System::Drawing::Size(56, 13);
+            this->AliensNumRows->TabIndex = 79;
+            this->AliensNumRows->Text = L"num rows";
             // 
             // AliensFiltersReset
             // 
@@ -2605,6 +2677,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             dataGridViewCellStyle14->WrapMode = System::Windows::Forms::DataGridViewTriState::False;
             this->AliensGrid->DefaultCellStyle = dataGridViewCellStyle14;
             this->AliensGrid->Dock = System::Windows::Forms::DockStyle::Fill;
+            this->AliensGrid->Filter = nullptr;
             this->AliensGrid->Location = System::Drawing::Point(0, 0);
             this->AliensGrid->Name = L"AliensGrid";
             this->AliensGrid->ReadOnly = true;
@@ -2621,6 +2694,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->AliensGrid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
             this->AliensGrid->ShowCellToolTips = false;
             this->AliensGrid->Size = System::Drawing::Size(683, 505);
+            this->AliensGrid->Sorter = nullptr;
             this->AliensGrid->TabIndex = 0;
             this->AliensGrid->CellMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseClick);
             this->AliensGrid->CellMouseLeave += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseLeave);
@@ -2667,7 +2741,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // TabUtils
             // 
-            this->TabUtils->BackColor = System::Drawing::Color::Transparent;
+            this->TabUtils->BackColor = System::Drawing::SystemColors::Control;
             this->TabUtils->Controls->Add(groupBox5);
             this->TabUtils->Controls->Add(groupBox4);
             this->TabUtils->Location = System::Drawing::Point(4, 22);
@@ -2675,7 +2749,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabUtils->Size = System::Drawing::Size(683, 535);
             this->TabUtils->TabIndex = 10;
             this->TabUtils->Text = L"Utils";
-            this->TabUtils->UseVisualStyleBackColor = true;
             // 
             // groupBox5
             // 

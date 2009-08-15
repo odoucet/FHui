@@ -26,6 +26,8 @@ public:
         RefSystem = nullptr;
     }
 
+    virtual void OnGridSetup();
+
     virtual property GameData^      GameData;
     virtual property StarSystem^    RefSystem
     {
@@ -81,6 +83,7 @@ public:
     CheckBox        ^CtrlFiltTypeBas;
     CheckBox        ^CtrlFiltTypeMl;
     CheckBox        ^CtrlFiltTypeTr;
+    Label           ^CtrlNumRows;
 
     event GridSetupHandler      ^GridSetup;
     event GridExceptionHandler  ^GridException;
@@ -105,6 +108,7 @@ protected:
     Object          ^m_RefreshDummy;
 
     __int64          m_LastFiltMask;
+    int              m_RowsCnt;
 };
 
 } // end namespace FHUI

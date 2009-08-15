@@ -47,6 +47,8 @@ public interface class IGridFilter
 
     void    SetRefSystem(StarSystem ^system);
 
+    void    OnGridSetup();
+
     property GameData^      GameData;
     property bool           EnableUpdates;
     property StarSystem^    RefSystem;

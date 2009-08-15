@@ -8,6 +8,15 @@ using namespace System::Text::RegularExpressions;
 namespace FHUI
 {
 
+void GridFilter::OnGridSetup()
+{
+    m_RowsCnt = 0;
+    GridSetup();
+
+    if( CtrlNumRows )
+        CtrlNumRows->Text = "Num grid rows: " + m_RowsCnt.ToString();
+}
+
 void GridFilter::Update()
 {
     Update(m_RefreshDummy);
@@ -36,7 +45,7 @@ void GridFilter::Update(Object ^sender)
                 if( ship && Decimal::ToInt32(CtrlShipAge->Value) != ship->Age )
                     CtrlRefShip->Text = s_CaptionShip;
 
-                GridSetup();
+                OnGridSetup();
             }
             else if( sender == m_RefreshDummy ||
                 sender == CtrlMaxMishap ||
@@ -77,7 +86,7 @@ void GridFilter::Update(Object ^sender)
                     filtMask != m_LastFiltMask )
                 {
                     m_LastFiltMask = filtMask;
-                    GridSetup();
+                    OnGridSetup();
                 }
             }
         }
@@ -203,6 +212,8 @@ bool GridFilter::Filter(IGridDataSrc ^item)
         }
     }
 
+    ++m_RowsCnt;
+
     return false;
 }
 
@@ -282,7 +293,7 @@ void GridFilter::SetRefText()
         CtrlRefXYZ->Text    = s_CaptionXYZ;
 
         RefSystem = system;
-        GridSetup();
+        OnGridSetup();
 
         CtrlRef->Text = String::Format("Ref. system: [{0}]",
             RefSystem->PrintLocation());
@@ -316,7 +327,7 @@ void GridFilter::SetRefXYZ()
         CtrlRefColony->Text = s_CaptionColony;
 
         RefSystem = system;
-        GridSetup();
+        OnGridSetup();
 
         CtrlRef->Text = String::Format("Ref. system: [{0}]",
             RefSystem->PrintLocation());
@@ -341,7 +352,7 @@ void GridFilter::SetRefHome()
     CtrlRefColony->Text = s_CaptionColony;
 
     RefSystem = sp->HomeSystem;
-    GridSetup();
+    OnGridSetup();
 
     CtrlRef->Text = String::Format("Ref. system: [{0}] HOME {1}",
         RefSystem->PrintLocation(),
@@ -391,7 +402,7 @@ void GridFilter::SetRefColony()
     CtrlRefHome->Text   = s_CaptionHome;
 
     RefSystem = colony->System;
-    GridSetup();
+    OnGridSetup();
 
     CtrlRef->Text = String::Format("Ref. system: [{0}] PL {1}",
         RefSystem->PrintLocation(), ref);
@@ -410,7 +421,7 @@ void GridFilter::SetRefSystem(StarSystem ^system)
             CtrlRefColony->Text = s_CaptionColony;
 
             RefSystem = system;
-            GridSetup();
+            OnGridSetup();
 
             CtrlRef->Text = String::Format("Ref. system: [{0}] (space void)",
                 RefSystem->PrintLocation());
@@ -454,7 +465,7 @@ void GridFilter::SetRefShip()
             CtrlRefColony->Text = s_CaptionColony;
 
             RefSystem = ship->System;
-            GridSetup();
+            OnGridSetup();
 
             CtrlRef->Text = String::Format("Ref. system: [{0}] {1} {2}",
                 RefSystem->PrintLocation(),

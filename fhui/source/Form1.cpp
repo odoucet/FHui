@@ -920,6 +920,7 @@ void Form1::SystemsInitControls()
     filter->CtrlFiltVisN    = SystemsFiltVisN;
     filter->CtrlFiltColC    = SystemsFiltColC;
     filter->CtrlFiltColN    = SystemsFiltColN;
+    filter->CtrlNumRows     = SystemsNumRows;
 
     // Store objects
     SystemsGrid->Filter = filter;
@@ -1126,6 +1127,7 @@ void Form1::PlanetsInitControls()
     filter->CtrlFiltVisN    = PlanetsFiltVisN;
     filter->CtrlFiltColC    = PlanetsFiltColC;
     filter->CtrlFiltColN    = PlanetsFiltColN;
+    filter->CtrlNumRows     = PlanetsNumRows;
 
     // Store objects
     PlanetsGrid->Filter = filter;
@@ -1474,6 +1476,7 @@ void Form1::ColoniesInitControls()
     filter->CtrlFiltOwnO    = ColoniesFiltOwnO;
     filter->CtrlFiltOwnN    = ColoniesFiltOwnN;
     filter->CtrlMiMaBalance = ColoniesMiMaBalanced;
+    filter->CtrlNumRows     = ColoniesNumRows;
 
     // Store objects
     ColoniesGrid->Filter = filter;
@@ -1784,6 +1787,7 @@ void Form1::ShipsInitControls()
     filter->CtrlFiltTypeBas = ShipsFiltTypeBA;
     filter->CtrlFiltTypeMl  = ShipsFiltTypeML;
     filter->CtrlFiltTypeTr  = ShipsFiltTypeTR;
+    filter->CtrlNumRows     = ShipsNumRows;
 
     // Store objects
     ShipsGrid->Filter = filter;
@@ -2137,6 +2141,7 @@ void Form1::AliensInitControls()
     filter->CtrlFiltRelE    = AliensFiltRelE;
     filter->CtrlFiltRelN    = AliensFiltRelN;
     filter->CtrlFiltRelP    = AliensFiltRelP;
+    filter->CtrlNumRows     = AliensNumRows;
 
     // Store objects
     AliensGrid->Filter = filter;
