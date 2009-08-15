@@ -440,7 +440,8 @@ namespace FHUI {
     private: System::Windows::Forms::CheckBox^  SystemsFiltVisV;
     private: System::Windows::Forms::CheckBox^  SystemsFiltColC;
     private: System::Windows::Forms::Button^  ShipsFiltersReset;
-    private: System::Windows::Forms::TextBox^  ShipsRefText;
+private: System::Windows::Forms::TextBox^  ShipsRefEdit;
+
     private: System::Windows::Forms::NumericUpDown^  ShipsMaxMishap;
 
 
@@ -458,7 +459,8 @@ namespace FHUI {
     private: System::Windows::Forms::CheckBox^  ShipsFiltTypeBA;
     private: System::Windows::Forms::Button^  AliensFiltersReset;
     private: System::Windows::Forms::Button^  ColoniesFiltersReset;
-    private: System::Windows::Forms::TextBox^  ColoniesRefText;
+private: System::Windows::Forms::TextBox^  ColoniesRefEdit;
+
     private: System::Windows::Forms::NumericUpDown^  ColoniesMaxLSN;
     private: System::Windows::Forms::NumericUpDown^  ColoniesMaxMishap;
     private: System::Windows::Forms::NumericUpDown^  ColoniesShipAge;
@@ -710,7 +712,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ColoniesMiMaBalanced = (gcnew System::Windows::Forms::CheckBox());
             this->ColoniesRefHome = (gcnew System::Windows::Forms::ComboBox());
             this->ColoniesFiltersReset = (gcnew System::Windows::Forms::Button());
-            this->ColoniesRefText = (gcnew System::Windows::Forms::TextBox());
+            this->ColoniesRefEdit = (gcnew System::Windows::Forms::TextBox());
             this->ColoniesMaxLSN = (gcnew System::Windows::Forms::NumericUpDown());
             this->ColoniesMaxMishap = (gcnew System::Windows::Forms::NumericUpDown());
             this->ColoniesShipAge = (gcnew System::Windows::Forms::NumericUpDown());
@@ -734,7 +736,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ShipsFiltRelA = (gcnew System::Windows::Forms::CheckBox());
             this->ShipsRefHome = (gcnew System::Windows::Forms::ComboBox());
             this->ShipsFiltersReset = (gcnew System::Windows::Forms::Button());
-            this->ShipsRefText = (gcnew System::Windows::Forms::TextBox());
+            this->ShipsRefEdit = (gcnew System::Windows::Forms::TextBox());
             this->ShipsMaxMishap = (gcnew System::Windows::Forms::NumericUpDown());
             this->ShipsRefShip = (gcnew System::Windows::Forms::ComboBox());
             this->ShipsRefColony = (gcnew System::Windows::Forms::ComboBox());
@@ -1675,6 +1677,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->PlanetsRefEdit->TabIndex = 18;
             this->BtnTooltip->SetToolTip(this->PlanetsRefEdit, L"Enter reference system coordinates in form: X Y Z");
             this->PlanetsRefEdit->WordWrap = false;
+            this->PlanetsRefEdit->TextChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
             // 
             // PlanetsMaxLSN
             // 
@@ -1878,7 +1881,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesMiMaBalanced);
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesRefHome);
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesFiltersReset);
-            this->splitContainer4->Panel1->Controls->Add(this->ColoniesRefText);
+            this->splitContainer4->Panel1->Controls->Add(this->ColoniesRefEdit);
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesMaxLSN);
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesMaxMishap);
             this->splitContainer4->Panel1->Controls->Add(label8);
@@ -1975,15 +1978,16 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ColoniesFiltersReset->UseVisualStyleBackColor = true;
             this->ColoniesFiltersReset->Click += gcnew System::EventHandler(this, &Form1::ColoniesFiltersReset_Click);
             // 
-            // ColoniesRefText
+            // ColoniesRefEdit
             // 
-            this->ColoniesRefText->Location = System::Drawing::Point(396, 4);
-            this->ColoniesRefText->MaxLength = 12;
-            this->ColoniesRefText->Name = L"ColoniesRefText";
-            this->ColoniesRefText->Size = System::Drawing::Size(82, 20);
-            this->ColoniesRefText->TabIndex = 36;
-            this->BtnTooltip->SetToolTip(this->ColoniesRefText, L"Enter reference system coordinates in form: X Y Z");
-            this->ColoniesRefText->WordWrap = false;
+            this->ColoniesRefEdit->Location = System::Drawing::Point(396, 4);
+            this->ColoniesRefEdit->MaxLength = 12;
+            this->ColoniesRefEdit->Name = L"ColoniesRefEdit";
+            this->ColoniesRefEdit->Size = System::Drawing::Size(82, 20);
+            this->ColoniesRefEdit->TabIndex = 36;
+            this->BtnTooltip->SetToolTip(this->ColoniesRefEdit, L"Enter reference system coordinates in form: X Y Z");
+            this->ColoniesRefEdit->WordWrap = false;
+            this->ColoniesRefEdit->TextChanged += gcnew System::EventHandler(this, &Form1::Colonies_Update);
             // 
             // ColoniesMaxLSN
             // 
@@ -2182,7 +2186,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->splitContainer5->Panel1->Controls->Add(this->ShipsFiltRelA);
             this->splitContainer5->Panel1->Controls->Add(this->ShipsRefHome);
             this->splitContainer5->Panel1->Controls->Add(this->ShipsFiltersReset);
-            this->splitContainer5->Panel1->Controls->Add(this->ShipsRefText);
+            this->splitContainer5->Panel1->Controls->Add(this->ShipsRefEdit);
             this->splitContainer5->Panel1->Controls->Add(this->ShipsMaxMishap);
             this->splitContainer5->Panel1->Controls->Add(label10);
             this->splitContainer5->Panel1->Controls->Add(this->ShipsRefShip);
@@ -2370,15 +2374,16 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ShipsFiltersReset->UseVisualStyleBackColor = true;
             this->ShipsFiltersReset->Click += gcnew System::EventHandler(this, &Form1::ShipsFiltersReset_Click);
             // 
-            // ShipsRefText
+            // ShipsRefEdit
             // 
-            this->ShipsRefText->Location = System::Drawing::Point(396, 4);
-            this->ShipsRefText->MaxLength = 12;
-            this->ShipsRefText->Name = L"ShipsRefText";
-            this->ShipsRefText->Size = System::Drawing::Size(82, 20);
-            this->ShipsRefText->TabIndex = 56;
-            this->BtnTooltip->SetToolTip(this->ShipsRefText, L"Enter reference system coordinates in form: X Y Z");
-            this->ShipsRefText->WordWrap = false;
+            this->ShipsRefEdit->Location = System::Drawing::Point(396, 4);
+            this->ShipsRefEdit->MaxLength = 12;
+            this->ShipsRefEdit->Name = L"ShipsRefEdit";
+            this->ShipsRefEdit->Size = System::Drawing::Size(82, 20);
+            this->ShipsRefEdit->TabIndex = 56;
+            this->BtnTooltip->SetToolTip(this->ShipsRefEdit, L"Enter reference system coordinates in form: X Y Z");
+            this->ShipsRefEdit->WordWrap = false;
+            this->ShipsRefEdit->TextChanged += gcnew System::EventHandler(this, &Form1::Ships_Update);
             // 
             // ShipsMaxMishap
             // 

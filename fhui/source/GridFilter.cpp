@@ -21,6 +21,8 @@ void GridFilter::Update(Object ^sender)
         {
             if( sender == CtrlRefHome )
                 SetRefHome();
+            else if( sender == CtrlRefEdit )
+                SetRefText();
             else if( sender == CtrlRefXYZ )
                 SetRefXYZ();
             else if( sender == CtrlRefColony )
@@ -249,6 +251,46 @@ void GridFilter::Reset()
 
 void GridFilter::SetRefText()
 {
+    String ^ref = CtrlRefEdit->Text;
+    Match ^m = Regex("\\s*(\\d+)\\s+(\\d+)\\s+(\\d+)").Match(ref);
+    if( m->Success )
+    {
+        CtrlRefEdit->ForeColor = System::Drawing::Color::Black;
+
+        int x = int::Parse(m->Groups[1]->ToString());
+        int y = int::Parse(m->Groups[2]->ToString());
+        int z = int::Parse(m->Groups[3]->ToString());
+
+        StarSystem ^system = nullptr;
+
+        try
+        {
+            system = GameData->GetStarSystem(x, y, z);
+        }
+        catch( FHUIDataIntegrityException^ )
+        {
+            // reference location may be outside of any system just in deep, empty space
+            system = gcnew StarSystem(x, y, z, "deep space");
+        }
+
+        if( RefSystem == system )
+            return;
+
+        EnableUpdates       = false;
+        CtrlRefHome->Text   = s_CaptionHome;
+        CtrlRefColony->Text = s_CaptionColony;
+        CtrlRefXYZ->Text    = s_CaptionXYZ;
+
+        RefSystem = system;
+        GridSetup();
+
+        CtrlRef->Text = String::Format("Ref. system: [{0}]",
+            RefSystem->PrintLocation());
+    }
+    else
+    {
+        CtrlRefEdit->ForeColor = System::Drawing::Color::Red;
+    }
 }
 
 void GridFilter::SetRefXYZ()

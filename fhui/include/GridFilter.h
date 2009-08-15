@@ -60,6 +60,7 @@ public:
     Label           ^CtrlRef;
     ComboBox        ^CtrlRefHome;
     ComboBox        ^CtrlRefXYZ;
+    TextBox         ^CtrlRefEdit;
     ComboBox        ^CtrlRefColony;
     ComboBox        ^CtrlRefShip;
     NumericUpDown   ^CtrlGV;

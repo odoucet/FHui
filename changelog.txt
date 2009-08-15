@@ -3,6 +3,14 @@ Major new features and bug fixes will be listed here.
 + New features
 * Bug fixes
 
+FHUI build ??
+* Named planets with inventory are now correctly listed in Colony tab
+* Fixed misreporting mining colony size
+* Auto & Scan orders are no longer generated when Auto is disabled
+* Ally / Enemy / Teach orders generated from user interface are no longer repeated in the next turn
++ All tabs now have functionality introduced in build 139
++ Support for manually entered ref coordinates added
+
 FHUI build 140
 * Sorting by distance to ref system on Colonies tab fixed.
 + Colonies tab goodies from build 139 now also on Systems tab.

@@ -920,6 +920,7 @@ void Form1::SystemsInitControls()
 
     filter->CtrlRef         = SystemsRef;
     filter->CtrlRefHome     = SystemsRefHome;
+    filter->CtrlRefEdit     = SystemsRefEdit;
     filter->CtrlRefXYZ      = SystemsRefXYZ;
     filter->CtrlRefColony   = SystemsRefColony;
     filter->CtrlRefShip     = SystemsRefShip;
@@ -1129,6 +1130,7 @@ void Form1::PlanetsInitControls()
 
     filter->CtrlRef         = PlanetsRef;
     filter->CtrlRefHome     = PlanetsRefHome;
+    filter->CtrlRefEdit     = PlanetsRefEdit;
     filter->CtrlRefXYZ      = PlanetsRefXYZ;
     filter->CtrlRefColony   = PlanetsRefColony;
     filter->CtrlRefShip     = PlanetsRefShip;
@@ -1481,6 +1483,7 @@ void Form1::ColoniesInitControls()
 
     filter->CtrlRef         = ColoniesRef;
     filter->CtrlRefHome     = ColoniesRefHome;
+    filter->CtrlRefEdit     = ColoniesRefEdit;
     filter->CtrlRefXYZ      = ColoniesRefXYZ;
     filter->CtrlRefColony   = ColoniesRefColony;
     filter->CtrlRefShip     = ColoniesRefShip;
@@ -1777,6 +1780,7 @@ void Form1::ShipsInitControls()
 
     filter->CtrlRef         = ShipsRef;
     filter->CtrlRefHome     = ShipsRefHome;
+    filter->CtrlRefEdit     = ShipsRefEdit;
     filter->CtrlRefXYZ      = ShipsRefXYZ;
     filter->CtrlRefColony   = ShipsRefColony;
     filter->CtrlRefShip     = ShipsRefShip;
