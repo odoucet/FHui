@@ -349,6 +349,11 @@ void StarSystem::Planets::set(int plNum, Planet ^pl)
     m_Planets[plNum] = pl;
 }
 
+int StarSystem::GetId()
+{
+    return GameData::GetSystemId(X, Y, Z); 
+}
+
 // ---------------------------------------------------------
 
 Int32 Colony::CompareTo( Object^ obj )
@@ -642,7 +647,7 @@ GameData::GameData(void)
     , m_FleetCost(0)
     , m_FleetCostPercent(0)
     , m_Aliens(gcnew SortedList<String^, Alien^>)
-    , m_Systems(gcnew array<StarSystem^>(0))
+    , m_Systems(gcnew SortedList<int, StarSystem^>)
     , m_Colonies(gcnew SortedList<String^, Colony^>)
     , m_PlanetNames(gcnew SortedList<String^, PlanetName^>)
     , m_Ships(gcnew SortedList<String^, Ship^>)
@@ -655,7 +660,10 @@ GameData::GameData(void)
     AutoEnabled = false;
 }
 
-// ---------------------------------------------------------
+int GameData::GetSystemId(int x, int y, int z)
+{
+    return (x * MaxGalaxyDiameter + y) * MaxGalaxyDiameter + z;
+}
 
 String^ GameData::GetSummary()
 {
@@ -956,6 +964,14 @@ bool GameData::TurnCheck(int turn)
 
         // remove planet names
         m_PlanetNames->Clear();
+        // remove empty sectors with ships from from system list
+        for each(Ship^ ship in m_Ships->Values)
+        {
+            if ( ship->System->PlanetsCount == 0 )
+            {
+                m_Systems->Remove(ship->System->GetId());
+            }
+        }
         // remove ships
         m_Ships->Clear();
         // clear auto orders
@@ -1082,38 +1098,32 @@ void GameData::SetAtmospherePoisonous(GasType gas)
 
 StarSystem^ GameData::GetStarSystem(int x, int y, int z)
 {
-    for each( StarSystem ^system in m_Systems )
+    if ( m_Systems->ContainsKey( GetSystemId(x,y,z) ) )
     {
-        if( system->X == x &&
-            system->Y == y &&
-            system->Z == z )
-        {
-            return system;
-        }
+        return m_Systems[GetSystemId(x,y,z)];
     }
-
-    throw gcnew FHUIDataIntegrityException(
-        String::Format("Trying to get not existing star system: {0} {1} {2}", x, y, z) );
+    else
+    {
+        throw gcnew FHUIDataIntegrityException(
+            String::Format("Trying to access unknown star system: {0} {1} {2}", x, y, z) );
+    }
 }
 
-void GameData::AddStarSystem(int x, int y, int z, String ^type, String ^comment)
+StarSystem^ GameData::AddStarSystem(int x, int y, int z, String ^type, String ^comment)
 {
-    for each( StarSystem ^system in m_Systems )
+    int systemId = GetSystemId(x,y,z);
+    if ( m_Systems->ContainsKey( systemId ) )
     {
-        if( system->X == x &&
-            system->Y == y &&
-            system->Z == z )
-        {
-            throw gcnew FHUIDataIntegrityException(
-                String::Format("Star system already added: [{0} {1} {2}]", x, y, z) );
-        }
+        throw gcnew FHUIDataIntegrityException(
+            String::Format("Star system already exists: [{0} {1} {2}]", x, y, z) );
     }
 
     StarSystem ^system = gcnew StarSystem(x, y, z, type);
     system->Comment = comment;
     system->IsVoid = false;
-    Array::Resize(m_Systems, m_Systems->Length + 1);
-    m_Systems[m_Systems->Length - 1] = system;
+    m_Systems->Add( systemId, system );
+
+    return system;
 }
 
 void GameData::AddPlanetScan(int turn, int x, int y, int z, Planet ^planet)
@@ -1274,31 +1284,34 @@ void GameData::UpdateAliens()
 
 void GameData::UpdateSystems()
 {
-    for each( StarSystem ^system in m_Systems )
+    for each( Colony ^colony in GetColonies() )
     {
-        for each( Colony ^colony in GetColonies() )
+        colony->System->Colonies->Add(colony);
+        if( colony->Owner == Player )
         {
-            if( colony->System == system )
-            {
-                system->Colonies->Add(colony);
-                if( colony->Owner == Player )
-                    system->ColoniesOwned->Add(colony);
-                else
-                    system->ColoniesAlien->Add(colony);
-            }
+            colony->System->ColoniesOwned->Add(colony);
         }
-        for each( Ship ^ship in GetShips() )
+        else
         {
-            if( ship->System == system )
-            {
-                system->Ships->Add(ship);
-                if( ship->Owner == Player )
-                    system->ShipsOwned->Add(ship);
-                else
-                    system->ShipsAlien->Add(ship);
-            }
+            colony->System->ColoniesAlien->Add(colony);
         }
+    }
 
+    for each( Ship ^ship in GetShips() )
+    {
+        ship->System->Ships->Add(ship);
+        if( ship->Owner == Player )
+        {
+            ship->System->ShipsOwned->Add(ship);
+        }
+        else
+        {
+            ship->System->ShipsAlien->Add(ship);
+        }
+    }
+
+    for each( StarSystem ^system in GetStarSystems() )
+    {
         // Calculate LSN
         int minLSN = 99999;
         int minLSNAvail = 99999;

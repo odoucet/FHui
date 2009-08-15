@@ -42,7 +42,7 @@ void Form1::MapDraw()
         Graphics ^g = Graphics::FromHwnd( TabMap->Handle );
 
         RectangleF mapSize = g->VisibleClipBounds;
-        m_MapSectorSize = Math::Min(mapSize.Width, mapSize.Height) / m_GalaxySize;
+        m_MapSectorSize = Math::Min(mapSize.Width, mapSize.Height) / GameData::GalaxyDiameter;
 
         MapDrawGrid(g);
         MapDrawDistances(g);
@@ -129,7 +129,7 @@ PointF Form1::MapGetSystemXY(StarSystem ^sys)
 {
     float halfSectorSize = m_MapSectorSize / 2.0F;
     float x = sys->X * m_MapSectorSize + halfSectorSize;
-    float y = (m_GalaxySize - (sys->Y + 1)) * m_MapSectorSize + halfSectorSize;
+    float y = (GameData::GalaxyDiameter - (sys->Y + 1)) * m_MapSectorSize + halfSectorSize;
     return PointF(x, y);
 }
 
@@ -174,9 +174,9 @@ void Form1::MapDrawGrid(Graphics ^g)
     Pen ^pen = gcnew Pen( MapColors::Grid );
     pen->DashStyle = Drawing2D::DashStyle::Dot;
 
-    float maxX = m_GalaxySize * m_MapSectorSize;
-    float maxY = m_GalaxySize * m_MapSectorSize;
-    for( int i = 0; i <= m_GalaxySize; ++i )
+    float maxX = GameData::GalaxyDiameter * m_MapSectorSize;
+    float maxY = GameData::GalaxyDiameter * m_MapSectorSize;
+    for( int i = 0; i <= GameData::GalaxyDiameter; ++i )
     {
         float f = i * m_MapSectorSize;
         g->DrawLine( pen, f, 0.0, f, maxY );
@@ -191,8 +191,6 @@ void Form1::MapDrawDistances(Graphics ^g)
     if( MapEnDist->Checked == false )
         return;
 
-    array<StarSystem^> ^galaxy = m_GameData->GetStarSystems();
-
     for( int sp = 0; sp < MapMaxSpecies; ++sp )
     {
         Alien ^alien = MapGetAlien(sp);
@@ -203,7 +201,7 @@ void Form1::MapDrawDistances(Graphics ^g)
         StarSystem ^system = MapGetRefSystem(sp);
         if( system )
         {
-            for each( StarSystem ^s in galaxy )
+            for each( StarSystem ^s in m_GameData->GetStarSystems() )
                 MapDrawDistance(g, sp, system, s);
         }
     }
@@ -235,13 +233,11 @@ void Form1::MapDrawWormholes(Graphics ^g)
 
 void Form1::MapDrawSystems(Graphics ^g)
 {
-    array<StarSystem^> ^galaxy = m_GameData->GetStarSystems();
-
     Alien ^sp1 = MapGetAlien(0);
     Alien ^sp2 = MapGetAlien(1);
     Alien ^sp3 = MapGetAlien(2);
 
-    for each( StarSystem ^system in galaxy )
+    for each( StarSystem ^system in m_GameData->GetStarSystems() )
     {
         List<Colony^> ^colonies = system->Colonies;
 

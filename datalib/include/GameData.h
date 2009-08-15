@@ -246,6 +246,7 @@ public:
 
     int         CompareLocation(StarSystem ^sys);
 
+    int         GetId();
     Planet^     GetPlanet(int plNum);
 
     bool        IsExplored() { return TurnScanned != -1; }
@@ -533,7 +534,7 @@ public:
     Ship^           GetShip(String ^name);
 
     IList<Alien^>^          GetAliens()                         { return m_Aliens->Values; }
-    array<StarSystem^>^     GetStarSystems()                    { return m_Systems; }
+    IList<StarSystem^>^     GetStarSystems()                    { return m_Systems->Values; }
     IList<PlanetName^>^     GetPlanetNames()                    { return m_PlanetNames->Values; }
     IList<Ship^>^           GetShips()                          { return m_ShipsByTonnage; }
     IList<Colony^>^         GetColonies()                       { return m_Colonies->Values; }
@@ -553,7 +554,7 @@ public:
     void            SetFleetCost(int turn, int, int);
     Alien^          AddAlien(int turn, String ^sp);
     void            SetAlienRelation(int turn, String ^sp, SPRelType);
-    void            AddStarSystem(int x, int y, int z, String ^type, String ^comment);
+    StarSystem^     AddStarSystem(int x, int y, int z, String ^type, String ^comment);
     void            AddPlanetScan(int turn, int x, int y, int z, Planet ^planet);
     void            SetTurnStartEU(int turn, int eu);
     void            AddTurnProducedEU(int turn, int eu);
@@ -572,9 +573,12 @@ public:
     List<String^>^  GetAutoOrdersJumps(Ship^);
     List<Pair<String^, int>^>^  GetAutoOrdersProduction(Colony^);
 
+    static int      GetSystemId(int, int, int);
     // ------------------------------------------
 
     static property Alien^  Player;
+    static const int MaxGalaxyDiameter = 100;
+    static int GalaxyDiameter = MaxGalaxyDiameter;
 
 protected:
     bool            TurnCheck(int turn);
@@ -607,7 +611,7 @@ protected:
     int                 m_TurnEUProduced;
     int                 m_FleetCost;
     int                 m_FleetCostPercent; // * 100
-    array<StarSystem^>                 ^m_Systems;
+    SortedList<int, StarSystem^>       ^m_Systems;
     SortedList<String^, Alien^>        ^m_Aliens;
     SortedList<String^, Colony^>       ^m_Colonies;
     SortedList<String^, PlanetName^>   ^m_PlanetNames;

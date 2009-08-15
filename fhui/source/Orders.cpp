@@ -320,7 +320,7 @@ void Form1::GenerateCombatInfo(StarSystem^ system)
     }
 
     m_OrderList->Add(
-        String::Format("  ; Location: {0} ({1})", system->PrintLocation(), sysInfo ) );
+        String::Format("  ; Battle location: [{0}] ({1})", system->PrintLocation(), sysInfo ) );
 
     List<String^>^ MyShipInfo = gcnew List<String^>;
     List<String^>^ AlienShipInfo = gcnew List<String^>;

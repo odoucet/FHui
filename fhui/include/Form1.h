@@ -384,7 +384,6 @@ namespace FHUI {
         Alien^      MapGetAlienFromUI(ComboBox^);
 
 
-        int                 m_GalaxySize;
         float               m_MapSectorSize;
 
         initonly static int MapMaxSpecies = 4;

@@ -82,8 +82,6 @@ void Form1::InitData()
 
     m_bGridUpdateEnabled = gcnew bool(false);
 
-    m_GalaxySize = 0;
-
     m_RepTurnNrData = nullptr;
 
     m_GameTurns = gcnew SortedList<int, GameData^>;
@@ -347,7 +345,7 @@ void Form1::LoadGalaxy()
             m = Regex("^The galaxy has a radius of (\\d+) parsecs.").Match(line);
             if( m->Success )
             {
-                m_GalaxySize = 2 * int::Parse(m->Groups[1]->ToString());
+                GameData::GalaxyDiameter = 2 * int::Parse(m->Groups[1]->ToString());
                 break;
             }
             else

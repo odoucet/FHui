@@ -876,7 +876,8 @@ void Report::MatchShipScan(String ^s, bool bColony)
             catch( FHUIDataIntegrityException^ )
             {   // When reading other ships and planets,
                 // ship may be outside of any system just in deep, empty space
-                system = gcnew StarSystem(m_ScanX, m_ScanY, m_ScanZ, "deep space");
+                // add this location temporarily to star system list
+                system = m_GameData->AddStarSystem(m_ScanX, m_ScanY, m_ScanZ, "empty", "");
             }
         }
         system->LastVisited = m_Turn;
