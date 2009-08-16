@@ -1539,7 +1539,7 @@ void Form1::ColoniesSetup()
         if( colony->EconomicBase != -1 )
             cells[c.Size]->Value    = (double)colony->EconomicBase / 10;
         cells[c.Dist]->Value        = String::Format("{0:F1}  ({1:F1}%)", distance, mishap);
-        cells[c.Inventory]->Value   = colony->PrintInventoryShort();
+        cells[c.Inventory]->Value   = colony->PrintInventory();
         if( colony->Planet )
             cells[c.LSN]->Value     = colony->Planet->LSN;
 
@@ -1578,13 +1578,13 @@ void Form1::ColoniesSetup()
         String^ notes = gcnew String("");
         if( colony->Hidden )
         {
-            if ( notes->Length > 0 ) notes += ", ";
+            if ( ! String::IsNullOrEmpty(notes) ) notes += ", ";
             notes += "Hidden";
         }
 
         if( colony->UnderSiege )
         {
-            if ( notes->Length > 0 ) notes += ", ";
+            if ( ! String::IsNullOrEmpty(notes) ) notes += ", ";
             notes += "Under siege";
             cells[c.Prod]->Style->ForeColor = Color::Red;
             cells[c.Notes]->Style->ForeColor = Color::Red;
@@ -1592,7 +1592,7 @@ void Form1::ColoniesSetup()
 
         if( colony->RecoveryIU + colony->RecoveryAU > 0 )
         {
-            if ( notes->Length > 0 ) notes += ", ";
+            if ( ! String::IsNullOrEmpty(notes) ) notes += ", ";
             notes += String::Format("Recovery: {0} IU, {1} AU", colony->RecoveryIU, colony->RecoveryAU);
             cells[c.Prod]->Style->ForeColor = Color::Red;
             cells[c.Notes]->Style->ForeColor = Color::Red;

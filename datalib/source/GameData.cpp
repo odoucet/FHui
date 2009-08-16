@@ -28,18 +28,9 @@ String^ PrintInventory(array<int> ^inv)
 
 // ---------------------------------------------------------
 
-private ref class ColonyProdOrderComparer : public IComparer<Colony^>
-{
-public:
-    virtual int Compare(Colony ^c1, Colony ^c2)
-    {
-        return c1->ProductionOrder - c2->ProductionOrder;
-    }
-};
-
 void Alien::SortColoniesByProdOrder()
 {
-    Colonies->Sort( gcnew ColonyProdOrderComparer );
+    Colonies->Sort( gcnew Colony::ProdOrderComparer );
 }
 
 String^ Alien::PrintHome()
@@ -321,27 +312,50 @@ String^ StarSystem::PrintColonies(int planetNum, Alien ^player)
     return ret;
 }
 
-String^ StarSystem::PrintAlienShipSummary()
+List<String^>^ StarSystem::PrintAliens()
 {
-    // TODO: Generate summary, examples below
-    // "TR1, TR10, 2x TR12"
-    // "2x DDS, 4x CLS"
-    // TODO2: Generate one list for each species
-    return "";
-}
+    // For each species, generates line "SP Name: PL #n(size), ..., Class(Ax,loc), ..."
 
-/*
-String^ StarSystem::PrintShips()
-{
-    String ^ret = "";
+    List<Alien^>^ species = gcnew List<Alien^>;
 
-    for each( Ship ^ship in Ships )
+    for each (Ship^ ship in ShipsAlien)
     {
+        if (species->Contains(ship->Owner))
+            continue;
+        species->Add(ship->Owner);
     }
+    for each (Colony^ colony in ColoniesAlien)
+    {
+        if (species->Contains(colony->Owner))
+            continue;
+        species->Add(colony->Owner);
+    }
+    
+    List<String^>^ results = gcnew List<String^>;
 
-    return ret;
+    for each (Alien^ race in species)
+    {
+        String^ info;
+        for each (Colony^ colony in ColoniesAlien)
+        {
+            if (colony->Owner == race)
+            {
+                info += String::Format("PL #{0}({1}) ", colony->PlanetNum, colony->EconomicBase / 10);
+            }
+        }
+
+        for each (Ship^ ship in ShipsAlien)
+        {
+            if (ship->Owner == race)
+            {
+                info += String::Format("{0}(A{1},{2}) ", ship->PrintClass(), ship->Age, ship->PrintLocationShort());
+            }
+        }
+
+        results->Add(String::Format("SP {0}: {1}", race->Name, info));
+    }
+    return results;
 }
-*/
 
 void StarSystem::Planets::set(int plNum, Planet ^pl)
 {
@@ -362,9 +376,9 @@ Int32 Colony::CompareTo( Object^ obj )
     return Name->CompareTo( colony->Name );
 }
 
-String^ Colony::PrintInventoryShort()
+String^ Colony::PrintInventory()
 {
-    return PrintInventory(Inventory);
+    return FHUI::PrintInventory(Inventory);
 }
 
 String^ Colony::PrintRefListEntry()
@@ -439,16 +453,58 @@ Int32 Ship::CompareTo( Object^ obj )
 
 String^ Ship::PrintClass()
 {
-    return String::Format(
-        "{0}{1}{2}",
-        FHStrings::ShipToString( Type ),
-        Type == SHIP_TR ? Size.ToString() : "",
-        SubLight ? "s" : "" );
+    String^ out;
+    switch( Type )
+    {
+    case SHIP_TR:
+        out = String::Format( "TR{0}", Size.ToString() );
+        break;
+    case SHIP_BAS:
+        out = String::Format( "BAS[{0}k]", (Tonnage/1000).ToString() );
+        break;
+    default:
+        out = FHStrings::ShipToString( Type );
+        break;
+    }
+
+    if ( SubLight )
+    {
+        out += "s";
+    }
+    return out;
 }
 
 String^ Ship::PrintRefListEntry()
 {
-    return PrintClass() + " " + Name + " (A" + Age.ToString() + ")";
+    return PrintClassWithName() + " (A" + Age.ToString() + ")";
+}
+
+String^ Ship::PrintAgeLocation()
+{
+    if (EUToComplete > 0)
+    {
+        return String::Format( "(+{0},{1})", EUToComplete, PrintLocationShort() );
+    }
+    else
+    {
+        return String::Format( "(A{0},{1})", Age, PrintLocationShort() );
+    }
+}
+
+
+String^ Ship::PrintLocationShort()
+{
+    switch( Location )
+    {
+        case SHIP_LOC_DEEP_SPACE:
+            return "D";
+        case SHIP_LOC_ORBIT:
+            return String::Format("O{0}", PlanetNum);
+        case SHIP_LOC_LANDED:
+            return String::Format("L{0}", PlanetNum);
+    }
+    throw gcnew FHUIDataIntegrityException(
+        String::Format("Invalid ship location: {0}!", (int)Location) );
 }
 
 String^ Ship::PrintLocation()
@@ -757,17 +813,6 @@ String^ GameData::GetTechSummary(TechType tech)
     return String::Format("{0,2}   ", lev);
 }
 
-private ref class AlienRelComparer : public IComparer<Alien^>
-{
-public:
-    virtual int Compare(Alien ^a1, Alien ^a2)
-    {
-        if( a1->Relation == a2->Relation )
-            return String::Compare(a1->Name, a2->Name);
-        return a1->Relation - a2->Relation;
-    }
-};
-
 String^ GameData::GetAliensSummary()
 {
     String ^ret = "";
@@ -782,7 +827,7 @@ String^ GameData::GetAliensSummary()
         }
     }
 
-    aliens->Sort( gcnew AlienRelComparer );
+    aliens->Sort( gcnew Alien::RelationComparer );
 
     for each( Alien ^alien in aliens )
     {
@@ -819,25 +864,13 @@ String^ GameData::GetPlanetsSummary()
     return ret;
 }
 
-private ref class ShipLocComparer : public IComparer<Ship^>
-{
-public:
-    virtual int Compare(Ship ^s1, Ship ^s2)
-    {
-        if( s1->System->X != s2->System->X ) return s1->System->X - s2->System->X;
-        if( s1->System->Y != s2->System->Y ) return s1->System->Y - s2->System->Y;
-        if( s1->System->Z != s2->System->Z ) return s1->System->Z - s2->System->Z;
-        return s1->Location - s2->Location;
-    }
-};
-
 String^ GameData::GetShipsSummary()
 {
     List<Ship^> ^ships = GetShips(Player);
     if( ships->Count == 0 )
         return "You have no ships\r\n";
 
-    ships->Sort( gcnew ShipLocComparer );
+    ships->Sort( gcnew Ship::LocationComparer );
 
     String ^ret = "";
     for each( Ship ^ship in ships )
@@ -1252,23 +1285,11 @@ void GameData::Update()
     UpdateColonies();
 }
 
-private ref class ShipWarTonnageComparer : public IComparer<Ship^>
-{
-public:
-    virtual int Compare(Ship ^s1, Ship ^s2)
-    {
-        // Newer, Bigger ships first
-        if( s2->WarTonnage == s1->WarTonnage )
-            return s1->Age - s2->Age;
-        return s2->WarTonnage - s1->WarTonnage;
-    }
-};
-
 void GameData::UpdateShips()
 {
     m_ShipsByTonnage = gcnew List<Ship^>;
     m_ShipsByTonnage->AddRange(m_Ships->Values);
-    m_ShipsByTonnage->Sort( gcnew ShipWarTonnageComparer );
+    m_ShipsByTonnage->Sort( gcnew Ship::WarTonnageComparer );
 }
 
 void GameData::UpdateAliens()

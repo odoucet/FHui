@@ -309,51 +309,69 @@ void Form1::GenerateCombat()
     m_OrderList->Add("");
 }
 
+List<String^>^ Form1::PrintSystemStatus(StarSystem^ system, bool listIncomplete)
+{
+    List<String^>^ status = gcnew List<String^>;
+
+    // list own colonies
+    for each ( Colony^ colony in system->ColoniesOwned )
+    {
+        String^ inv = colony->PrintInventory();
+        String^ flags;
+        if (colony->Hidden) 
+        {
+            if (! String::IsNullOrEmpty(flags) ) flags += "/";
+            flags += "hidden";
+        }
+        if (colony->Shared) 
+        {
+            if (! String::IsNullOrEmpty(flags) ) flags += "/";
+            flags += "shared";
+        }
+        if (colony->UnderSiege) 
+        {
+            if (! String::IsNullOrEmpty(flags) ) flags += "/";
+            flags += "siege";
+        }
+        if (! String::IsNullOrEmpty(flags) )
+        {
+            flags = String::Format(" ({0})", flags);
+        }
+        status->Add( String::Format("  ;   #{0} PL {1} ({2}.{3}){4}{5}", 
+            colony->PlanetNum,
+            colony->Name,
+            colony->EconomicBase / 10,
+            colony->EconomicBase % 10,
+            (String::IsNullOrEmpty(inv) ? "" : ": " + inv),
+            flags ) );
+    }
+    // list own ships
+    for each ( Ship^ ship in system->ShipsOwned )
+    {
+        // Skip incomplete ships
+        if( (listIncomplete == false) && (ship->EUToComplete > 0) ) continue;
+
+        String^ inv = ship->PrintCargo();
+        status->Add( String::Format("  ;   {0} {1}{2}", 
+            ship->PrintClassWithName(),
+            ship->PrintAgeLocation(),
+            String::IsNullOrEmpty(inv) ? "" : ": " + inv ) );
+    }
+
+    // list aliens
+    List<String^>^ alienList = system->PrintAliens();
+    status->Add( String::Format("  ; Aliens:{0}", alienList->Count ? "" : " none" ) );
+    for each ( String^ line in alienList )
+    {
+        status->Add( String::Format("  ;   {0}", line ) );
+    }
+    return status;
+}
+
 void Form1::GenerateCombatInfo(StarSystem^ system)
 {
-    Alien^ player = GameData::Player;
-
-    String^ sysInfo = system->PrintColonies(-1, player );
-    if ( String::IsNullOrEmpty(sysInfo) )
-    {
-        sysInfo = "empty";
-    }
-
-    m_OrderList->Add(
-        String::Format("  ; Battle location: [{0}] ({1})", system->PrintLocation(), sysInfo ) );
-
-    List<String^>^ MyShipInfo = gcnew List<String^>;
-    List<String^>^ AlienShipInfo = gcnew List<String^>;
-
-    for each ( Ship^ ship in system->Ships )
-    {   // Skip incomplete ships
-        if( ship->EUToComplete > 0 )
-            continue;
-
-        String^ shipLoc;
-        if (ship->Location == SHIP_LOC_DEEP_SPACE )
-        {
-            shipLoc = "Deep";
-        }
-        else
-        {
-            shipLoc = ship->PrintLocation();
-        }
-
-        if ( ship->Owner == player )
-        {
-            MyShipInfo->Add( String::Format("  ;    {0} (age {1}; {2}) [{3}]",
-                ship->PrintClassWithName(), ship->Age, shipLoc, ship->PrintCargo() ) );
-        }
-        else
-        {
-            AlienShipInfo->Add( String::Format("  ;    {0} (age {1}; {2})    SP {3}",
-                ship->PrintClassWithName(), ship->Age, shipLoc, ship->Owner->Name ) );
-        }
-    }
-    m_OrderList->AddRange( MyShipInfo );
-    m_OrderList->Add( String::Format("  ; Alien ships: {0}", ( AlienShipInfo->Count ? "" : "none" ) ) );
-    m_OrderList->AddRange( AlienShipInfo );
+    m_OrderList->Add( String::Format("  ; Battle location: {0}", system->PrintLocation() ) );
+    m_OrderList->AddRange( PrintSystemStatus(system, false) );
 }
 
 void Form1::GeneratePreDeparture()
@@ -406,126 +424,16 @@ void Form1::GeneratePreDeparture()
 
 void Form1::GeneratePreDepartureInfo(StarSystem^ system)
 {
-    // TODO: Use StarSystem->PrintAlienShipSummary
-
-    int alienScouts = 0;
-    int alienTransports = 0;
-    int alienWarships = 0;
-    for each (Ship ^ship in system->ShipsAlien)
-    {
-        if ( ship->Type == SHIP_TR )
-        {
-            if (ship->Tonnage == 10000)
-            {
-                alienScouts++;
-            }
-            else
-            {
-                alienTransports++;
-            }
-        }
-        else if ( ship->Type != SHIP_BAS )
-        {
-            alienWarships++;
-        }
-    }
-
-    String^ aliens;
-    if ( system->ColoniesAlien->Count )
-    {
-        if ( system->ColoniesAlien->Count == 1 )
-        {
-            aliens += "colony";
-        }
-        else
-        {
-            aliens += String::Format("{0} colonies", system->ColoniesAlien->Count );
-        }
-    }
-
-    if ( alienScouts )
-    {
-        if ( ! String::IsNullOrEmpty(aliens) )
-            aliens += ", ";
-
-        if ( alienScouts == 1 )
-        {
-            aliens += "scout";
-        }
-        else
-        {
-            aliens += String::Format("{0} scouts", alienScouts );
-        }
-    }
-
-    if ( alienTransports )
-    {
-        if ( ! String::IsNullOrEmpty(aliens) )
-            aliens += ", ";
-
-        if ( alienTransports == 1 )
-        {
-            aliens += "transport";
-        }
-        else
-        {
-            aliens += String::Format("{0} transports", alienTransports );
-        }
-    }
-
-    if ( alienWarships )
-    {
-        if ( ! String::IsNullOrEmpty(aliens) )
-            aliens += ", ";
-
-        if ( alienWarships == 1 )
-        {
-            aliens += "warship";
-        }
-        else
-        {
-            aliens += String::Format("{0} warships", alienWarships );
-        }
-    }
-
-    if ( String::IsNullOrEmpty(aliens) )
-    {
-        aliens = "none";
-    }
-
-    m_OrderList->Add(String::Format("  ; Location: [{0}] Aliens: [{1}]", system->PrintLocation(), aliens ) );
-
-    for each (Colony^ colony in system->ColoniesOwned)
-    {
-        m_OrderList->Add( String::Format( "  ;    PL {0} : {1}", colony->Name, colony->PrintInventoryShort() ) );
-    }
-    for each (Ship^ ship in system->ShipsOwned)
-    {
-        m_OrderList->Add( String::Format( "  ;    {0} : {1}", ship->PrintClassWithName(), ship->PrintCargo() ) );
-    }
+    m_OrderList->Add(String::Format("  ; Location: {0}", system->PrintLocation() ) );
+    m_OrderList->AddRange( PrintSystemStatus(system, false) );
 }
-
-private ref class ShipJumpComparer : public IComparer<Ship^>
-{
-public:
-    virtual int Compare(Ship ^s1, Ship ^s2)
-    {
-        if( s1->Type != s2->Type ) return ((int)s1->Type - (int)s2->Type);
-        if( s1->Tonnage != s2->Tonnage ) return s1->Tonnage - s2->Tonnage;
-        if( s1->System->X != s2->System->X ) return s1->System->X - s2->System->X;
-        if( s1->System->Y != s2->System->Y ) return s1->System->Y - s2->System->Y;
-        if( s1->System->Z != s2->System->Z ) return s1->System->Z - s2->System->Z;
-        if( s1->Age != s2->Age) return s1->Age - s2->Age;
-        return s1->Location - s2->Location;
-    }
-};
 
 void Form1::GenerateJumps()
 {
     m_OrderList->Add("START JUMPS");
     
     List<Ship^>^ jumpList = GameData::Player->Ships;
-    jumpList->Sort( gcnew ShipJumpComparer );
+    jumpList->Sort( gcnew Ship::TypeTonnageLocationComparer );
 
     for each( Ship ^ship in jumpList )
     {
@@ -622,6 +530,8 @@ void Form1::GenerateProduction()
 
         m_OrderList->Add("");
         m_OrderList->Add("  PRODUCTION PL " + colony->Name);
+
+        m_OrderList->AddRange( PrintSystemStatus(colony->System, true) );
 
         int euCarried = budget->GetTotalBudget();
         budget->SetColony(colony);

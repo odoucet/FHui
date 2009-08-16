@@ -354,6 +354,7 @@ private: System::Windows::Forms::NumericUpDown^  UtilProdPenaltyLSN;
 
         List<String^>      ^m_OrderList;
 
+        List<String^>^ PrintSystemStatus(StarSystem^ system, bool listIncomplete);
         // ==================================================
         // --- UTILS ---
         void        UtilTabSelected();

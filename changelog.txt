@@ -14,6 +14,8 @@ FHUI build ??
 + Support for manually entered ref coordinates added.
 + Production penalty calculator on Utils tab.
 + Display performance improved.
++ Special handling for bombarded home planet
++ Improved order template comments
 
 FHUI build 140
 * Sorting by distance to ref system on Colonies tab fixed.

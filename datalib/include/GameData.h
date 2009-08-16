@@ -101,6 +101,17 @@ public:
     // -------- IGridDataSrc ----------------------------
     virtual Alien^      GetAlienForBgColor() override   { return this; }
     virtual SPRelType   GetFilterRelType() override     { return Relation; }
+    // -------- IComparers ------------------------------
+    ref class RelationComparer : public IComparer<Alien^>
+    {
+    public:
+        virtual int Compare(Alien ^a1, Alien ^a2)
+        {
+            if( a1->Relation == a2->Relation )
+                return String::Compare(a1->Name, a2->Name);
+            return a1->Relation - a2->Relation;
+        }
+    };
     // --------------------------------------------------
 
     void            SortColoniesByProdOrder();
@@ -252,13 +263,12 @@ public:
     bool        IsExplored() { return TurnScanned != -1; }
 
     String^     GenerateScan();
-    String^     PrintLocation() { return String::Format("{0,2} {1,2} {2,2}", X, Y, Z); }
-    String^     PrintScanStatus();
-    String^     PrintColonies(int planetNum, Alien ^player);   // -1 for all colonies in system
-    String^     PrintAlienShipSummary();
-    //String^     PrintShips();
-
     void        UpdateMaster();
+
+    String^         PrintLocation() { return String::Format("{0,2} {1,2} {2,2}", X, Y, Z); }
+    String^         PrintScanStatus();
+    String^         PrintColonies(int planetNum, Alien ^player);   // -1 for all colonies in system
+    List<String^>^  PrintAliens();
 
     property int        X;
     property int        Y;
@@ -329,9 +339,10 @@ public:
         OrderBuildShipyard = false;
         Hidden = false;
         UnderSiege = false;
+        Shared = false;
     }
 
-    // -------- IComparable ----------------------------
+    // -------- IComparable -----------------------------
     virtual Int32 CompareTo( Object^ obj );
 
     // -------- IGridDataSrc ----------------------------
@@ -341,10 +352,19 @@ public:
     virtual StarSystem^ GetFilterLocation(int %pl) override { pl = PlanetNum; return System; }
     virtual Alien^      GetFilterOwner() override       { return Owner; }
     virtual int         GetFilterLSN() override         { return Planet ? Planet->LSN : 99999; }
+    // -------- IComparers ------------------------------
+    ref class ProdOrderComparer : public IComparer<Colony^>
+    {
+    public:
+        virtual int Compare(Colony ^c1, Colony ^c2)
+        {
+            return c1->ProductionOrder - c2->ProductionOrder;
+        }
+    };
     // --------------------------------------------------
 
     String^         PrintLocation() { return String::Format("{0} {1}", System->PrintLocation(), PlanetNum); }
-    String^         PrintInventoryShort();
+    String^         PrintInventory();
     String^         PrintRefListEntry();
     String^         PrintBalance();
 
@@ -377,6 +397,7 @@ public:
     bool            OrderBuildShipyard;
     bool            Hidden;
     bool            UnderSiege;
+    bool            Shared;
 
     property int EconomicBase { int get() { return Math::Max(-1, MiBase + MaBase); } }
     property int EUAvail { int get() { return EUProd - EUFleet; } }
@@ -433,7 +454,7 @@ public:
         m_Cargo = gcnew array<int>(INV_MAX){0};
     }
 
-    // -------- IComparable ----------------------------
+    // -------- IComparable -----------------------------
     virtual Int32 CompareTo( Object^ obj );
 
     // -------- IGridDataSrc ----------------------------
@@ -444,11 +465,52 @@ public:
     virtual Alien^      GetFilterOwner() override       { return Owner; }
     virtual SPRelType   GetFilterRelType() override     { return Owner->GetFilterRelType(); }
     virtual ShipType    GetFilterShipType() override    { return Type; }
+    // -------- IComparers ------------------------------
+    ref class TypeTonnageLocationComparer : public IComparer<Ship^>
+    {
+    public:
+        virtual int Compare(Ship ^s1, Ship ^s2)
+        {
+            if( s1->Type != s2->Type ) return ((int)s1->Type - (int)s2->Type);
+            if( s1->Tonnage != s2->Tonnage ) return s1->Tonnage - s2->Tonnage;
+            if( s1->System->X != s2->System->X ) return s1->System->X - s2->System->X;
+            if( s1->System->Y != s2->System->Y ) return s1->System->Y - s2->System->Y;
+            if( s1->System->Z != s2->System->Z ) return s1->System->Z - s2->System->Z;
+            if( s1->Age != s2->Age) return s1->Age - s2->Age;
+            return s1->Location - s2->Location;
+        }
+    };
+
+    ref class LocationComparer : public IComparer<Ship^>
+    {
+    public:
+        virtual int Compare(Ship ^s1, Ship ^s2)
+        {
+            if( s1->System->X != s2->System->X ) return s1->System->X - s2->System->X;
+            if( s1->System->Y != s2->System->Y ) return s1->System->Y - s2->System->Y;
+            if( s1->System->Z != s2->System->Z ) return s1->System->Z - s2->System->Z;
+            return s1->Location - s2->Location;
+        }
+    };
+
+    ref class WarTonnageComparer : public IComparer<Ship^>
+    {
+    public:
+        virtual int Compare(Ship ^s1, Ship ^s2)
+        {
+            // Newer, Bigger ships first
+            if( s2->WarTonnage == s1->WarTonnage )
+                return s1->Age - s2->Age;
+            return s2->WarTonnage - s1->WarTonnage;
+        }
+    };
     // --------------------------------------------------
 
     String^         PrintClass();
     String^         PrintClassWithName()                { return PrintClass() + " " + Name; }
     String^         PrintLocation();
+    String^         PrintLocationShort();
+    String^         PrintAgeLocation();
     String^         PrintCargo();
     String^         PrintRefListEntry();
 
