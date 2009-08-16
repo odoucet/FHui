@@ -137,6 +137,20 @@ void Form1::LoadCommands()
                         m_RM->GetResultInt(4)),
                     m_RM->GetResultInt(5) );
         }
+        /*
+        // WORMHOLE TODO
+        else if( m_RM->Match(line, m_RM->ExpCmdShipWormhole) )
+        {
+            m_GameData->GetShip(m_RM->Results[1])->Command =
+                gcnew Ship::Order(
+                    Ship::OrderType::Wormhole,
+                    m_GameData->GetStarSystem(
+                        m_RM->GetResultInt(2),
+                        m_RM->GetResultInt(3),
+                        m_RM->GetResultInt(4)),
+                    m_RM->GetResultInt(5) );
+        }
+        */
         else if( m_RM->Match(line, m_RM->ExpCmdShipUpg) )
         {
             m_GameData->GetShip(m_RM->Results[1])->Command =
@@ -447,17 +461,34 @@ void Form1::GenerateJumps()
             plugin->GenerateJumps(m_OrderList, ship);
         }
 
-        if( ship->Command && ship->Command->Type == Ship::OrderType::Jump )
+        if( ship->Command )
         {
-            m_OrderList->Add( String::Format("  Jump {0}, {1}  ; [{2}] -> [{3}]; Mishap: {4:F2}%",
-                ship->PrintClassWithName(),
-                ship->Command->PrintJumpDestination(),
-                ship->System->PrintLocation(),
-                ship->Command->JumpTarget->PrintLocation(),
-                ship->System->CalcMishap(
-                    ship->Command->JumpTarget,
-                    ship->Owner->TechLevelsAssumed[TECH_GV],
-                    ship->Age) ) );
+            if( ship->Command->Type == Ship::OrderType::Jump )
+            {
+                m_OrderList->Add( String::Format("  Jump {0}, {1}  ; [{2}] -> [{3}]; Mishap: {4:F2}%",
+                    ship->PrintClassWithName(),
+                    ship->Command->PrintJumpDestination(),
+                    ship->System->PrintLocation(),
+                    ship->Command->JumpTarget->PrintLocation(),
+                    ship->System->CalcMishap(
+                        ship->Command->JumpTarget,
+                        ship->Owner->TechLevelsAssumed[TECH_GV],
+                        ship->Age) ) );
+            }
+            else if( ship->Command->Type == Ship::OrderType::Wormhole )
+            {
+                String ^order = "  Wormhole " + ship->PrintClassWithName();
+                if( ship->Command->PlanetNum != -1 )
+                {
+                    Planet ^pl = ship->Command->JumpTarget->GetPlanet( ship->Command->PlanetNum );
+                    if( pl && !String::IsNullOrEmpty(pl->Name) )
+                        order += ", PL " + pl->Name;
+                    else
+                        order += ", " + ship->Command->PlanetNum.ToString();
+                }
+                order += " ; Distance: " + ship->System->CalcDistance( ship->System->WormholeTarget ).ToString("F1");
+                m_OrderList->Add( order );
+            }
         }
 
         String ^prefix = "  ";

@@ -866,6 +866,20 @@ ToolStripMenuItem^ Form1::CreateCustomMenuItem(
     return item;
 }
 
+String^ Form1::GridPrintDistance(StarSystem ^from, StarSystem ^to, int gv, int age)
+{
+    if( from->HasWormhole &&
+        from->WormholeTarget == to )
+    {
+        return "Wormhole";
+    }
+
+    double distance = from->CalcDistance(to);
+    double mishap = from->CalcMishap(to, gv, age);
+
+    return String::Format("{0:F1}  ({1:F1}%)", distance, mishap);
+}
+
 ////////////////////////////////////////////////////////////////
 // Systems
 
@@ -890,6 +904,8 @@ void Form1::SystemsInitControls()
     c.Dist     = ADD_COLUMN("Distance",     "Distance to ref system and mishap chance [%]", String, Ascending, Distance);
     c.Visited  = ADD_COLUMN("Vis",          "Last turn you visited this system", int, Descending, Default);
     c.Scan     = ADD_COLUMN("Scan",         "System scan source",   String,     Ascending,  Default);
+    // WORMHOLE TODO
+    //c.Wormhole = ADD_COLUMN("WH",           "Wormhole target",      String,     Ascending,  Default);
     c.Colonies = ADD_COLUMN("Colonies",     "Summary of colonies and named planets", String, Ascending,  Default);
 
     for each( IGridPlugin ^plugin in m_GridPlugins )
@@ -966,9 +982,6 @@ void Form1::SystemsSetup()
         if( SystemsGrid->Filter->Filter(system) )
             continue;
 
-        double distance = system->CalcDistance(SystemsGrid->Filter->RefSystem);
-        double mishap = system->CalcMishap(SystemsGrid->Filter->RefSystem, gv, age);
-
         DataGridViewRow ^row = SystemsGrid->Rows[ SystemsGrid->Rows->Add() ];
         DataGridViewCellCollection ^cells = row->Cells;
         cells[c.Object]->Value      = system;
@@ -983,8 +996,13 @@ void Form1::SystemsSetup()
             if( system->MinLSNAvail != 99999 )
                 cells[c.LSNAvail]->Value= system->MinLSNAvail;
         }
-        cells[c.Dist]->Value        = String::Format("{0:F1}  ({1:F1}%)", distance, mishap);;
+        cells[c.Dist]->Value        = GridPrintDistance(system, SystemsGrid->Filter->RefSystem, gv, age);
         cells[c.Scan]->Value        = system->PrintScanStatus();
+        /*
+        // WORMHOLE TODO
+        if( system->HasWormhole )
+            cells[c.Wormhole]->Value= system->PrintWormholeTarget();
+        */
         if( system->LastVisited != -1 )
             cells[c.Visited]->Value = system->LastVisited;
         cells[c.Colonies]->Value    = system->PrintColonies( -1, GameData::Player );
@@ -1172,9 +1190,6 @@ void Form1::PlanetsSetup()
 
     for each( StarSystem ^system in m_GameData->GetStarSystems() )
     {
-        double distance = system->CalcDistance(PlanetsGrid->Filter->RefSystem);
-        double mishap = system->CalcMishap(PlanetsGrid->Filter->RefSystem, gv, age);
-
         for each( Planet ^planet in system->GetPlanets() )
         {
             if( PlanetsGrid->Filter->Filter(planet) )
@@ -1189,7 +1204,7 @@ void Form1::PlanetsSetup()
             cells[c.PC]->Value      = planet->PressClass;
             cells[c.MD]->Value      = (double)planet->MiDiff / 100;
             cells[c.LSN]->Value     = planet->LSN;
-            cells[c.Dist]->Value    = String::Format("{0:F1}  ({1:F1}%)", distance, mishap);
+            cells[c.Dist]->Value    = GridPrintDistance(system, PlanetsGrid->Filter->RefSystem, gv, age);
             if( system->LastVisited != -1 )
                 cells[c.Visited]->Value = system->LastVisited;
             cells[c.Scan]->Value    = system->PrintScanStatus();
@@ -1526,9 +1541,6 @@ void Form1::ColoniesSetup()
         if( ColoniesGrid->Filter->Filter(colony) )
             continue;
 
-        double distance = colony->System->CalcDistance(ColoniesGrid->Filter->RefSystem);
-        double mishap = colony->System->CalcMishap(ColoniesGrid->Filter->RefSystem, gv, age);
-
         DataGridViewRow ^row = ColoniesGrid->Rows[ ColoniesGrid->Rows->Add() ];
         DataGridViewCellCollection ^cells = row->Cells;
         cells[c.Object]->Value      = colony;
@@ -1538,7 +1550,7 @@ void Form1::ColoniesSetup()
         cells[c.Location]->Value    = colony->PrintLocation();
         if( colony->EconomicBase != -1 )
             cells[c.Size]->Value    = (double)colony->EconomicBase / 10;
-        cells[c.Dist]->Value        = String::Format("{0:F1}  ({1:F1}%)", distance, mishap);
+        cells[c.Dist]->Value        = GridPrintDistance(colony->System, ColoniesGrid->Filter->RefSystem, gv, age);
         cells[c.Inventory]->Value   = colony->PrintInventory();
         if( colony->Planet )
             cells[c.LSN]->Value     = colony->Planet->LSN;
@@ -1838,9 +1850,6 @@ void Form1::ShipsSetup()
         if( ShipsGrid->Filter->Filter(ship) )
             continue;
 
-        double distance = ship->System->CalcDistance(ShipsGrid->Filter->RefSystem);
-        double mishap   = ship->System->CalcMishap(ShipsGrid->Filter->RefSystem, gv, ship->Age);
-
         DataGridViewRow ^row = ShipsGrid->Rows[ ShipsGrid->Rows->Add() ];
         DataGridViewCellCollection ^cells = row->Cells;
         cells[c.Object]->Value      = ship;
@@ -1853,7 +1862,7 @@ void Form1::ShipsSetup()
         if( !ship->IsPirate )
             cells[c.Age]->Value     = ship->Age;
         cells[c.Cap]->Value         = ship->Capacity;
-        cells[c.Dist]->Value        = String::Format("{0:F1}  ({1:F1}%)", distance, mishap);
+        cells[c.Dist]->Value        = GridPrintDistance(ship->System, ShipsGrid->Filter->RefSystem, gv, ship->Age);
         if( sp == ship->Owner )
         {
             cells[c.Cargo]->Value   = ship->PrintCargo();
@@ -1956,6 +1965,20 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
                 ship->Command->Type == Ship::OrderType::Recycle )
                 menuItem->Checked = true;
             menu->Items->Add( menuItem );
+
+            if( ship->System->HasWormhole )
+            {
+                menuItem = CreateCustomMenuItem(
+                    "Enter Wormhole: " + ship->System->PrintWormholeTarget(),
+                    gcnew ShipOrderData(
+                        ship,
+                        gcnew Ship::Order(Ship::OrderType::Wormhole) ),
+                     handler );
+                if( ship->Command &&
+                    ship->Command->Type == Ship::OrderType::Wormhole )
+                    menuItem->Checked = true;
+                menu->Items->Add( menuItem );
+            }
         }
 
         if( ship->CanJump )
@@ -2037,20 +2060,32 @@ ToolStripMenuItem^ Form1::ShipsMenuCreateJumpItem(
         Decimal::ToInt32(TechGV->Value),
         ship->Age );
 
-    String ^itemText = String::Format("{0}   {1:F2}% ({2} FS)  From {3}",
+    String ^itemText;
+    Ship::OrderType order = Ship::OrderType::Jump;
+    if( ship->System->WormholeTarget == system )
+    {
+        order = Ship::OrderType::Wormhole;
+        itemText = String::Format("{0}   (Wormhole)  From {1}",
+            text,
+            ship->PrintLocation() );
+    }
+    else
+    {
+        itemText = String::Format("{0}   {1:F2}% ({2} FS)  From {3}",
             text,
             mishap,
             ship->Cargo[INV_FS],
             ship->PrintLocation() );
+    }
 
     ToolStripMenuItem ^menuItem = CreateCustomMenuItem(
         itemText,
-        gcnew ShipOrderData(ship, gcnew Ship::Order(Ship::OrderType::Jump, system, planetNum)),
+        gcnew ShipOrderData(ship, gcnew Ship::Order(order, system, planetNum)),
         gcnew EventHandler1Arg<ShipOrderData^>(this, &Form1::ShipsMenuOrderSet) );
 
     // Add checkbox
     if( ship->Command &&
-        ship->Command->Type == Ship::OrderType::Jump &&
+        ship->Command->Type == order &&
         ship->Command->JumpTarget == system &&
         ship->Command->PlanetNum == planetNum )
     {

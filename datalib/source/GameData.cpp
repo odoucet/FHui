@@ -147,6 +147,40 @@ String^ Planet::PrintComment()
 
 // ---------------------------------------------------------
 
+double StarSystem::CalcDistance(StarSystem ^s)
+{
+    return s == WormholeTarget
+        ? 0
+        : Calculators::Distance(X, Y, Z, s->X, s->Y, s->Z);
+}
+
+double StarSystem::CalcMishap(StarSystem ^s, int gv, int age)
+{
+    return s == WormholeTarget
+        ? 0
+        : Calculators::Mishap(X, Y, Z, s->X, s->Y, s->Z, gv, age);
+}
+
+double StarSystem::CalcDistance(int x, int y, int z)
+{
+    return (WormholeTarget &&
+            x == WormholeTarget->X &&
+            y == WormholeTarget->Y &&
+            z == WormholeTarget->Z )
+        ? 0
+        : Calculators::Distance(X, Y, Z, x, y, z);
+}
+
+double StarSystem::CalcMishap(int x, int y, int z, int gv, int age)
+{
+    return (WormholeTarget &&
+            x == WormholeTarget->X &&
+            y == WormholeTarget->Y &&
+            z == WormholeTarget->Z )
+        ? 0
+        : Calculators::Mishap(X, Y, Z, x, y, z, gv, age);
+}
+
 Int32 StarSystem::CompareTo( Object^ obj )
 {
     StarSystem^ system = safe_cast<StarSystem^>(obj);
@@ -666,6 +700,8 @@ String^ Ship::Order::Print()
         return "Upgrade";
     case OrderType::Recycle:
         return "Recycle";
+    case OrderType::Wormhole:
+        return "Wormhole to " + PrintJumpDestination();
     }
 
     return "Invalid command";
@@ -675,6 +711,12 @@ String^ Ship::Order::PrintNumeric()
 {
     if( Type == OrderType::Jump )
         return String::Format("Jump to {0} {1} {2} {3}",
+            JumpTarget->X,
+            JumpTarget->Y,
+            JumpTarget->Z,
+            PlanetNum );
+    if( Type == OrderType::Wormhole )
+        return String::Format("Wormhole to {0} {1} {2} {3}",
             JumpTarget->X,
             JumpTarget->Y,
             JumpTarget->Z,
@@ -1164,13 +1206,8 @@ StarSystem^ GameData::AddStarSystem(int x, int y, int z, String ^type, String ^c
     return system;
 }
 
-void GameData::AddPlanetScan(int turn, int x, int y, int z, Planet ^planet)
+void GameData::AddPlanetScan(int turn, StarSystem ^system, Planet ^planet)
 {
-    StarSystem ^system = GetStarSystem(x, y, z);
-    if( system == nullptr )
-        throw gcnew FHUIDataIntegrityException(
-            String::Format("Star system [{0} {1} {2}] not found in galaxy list!", x, y, z) );
-
     int plNum = planet->Number - 1;
     if( system->PlanetsCount < planet->Number ||
         system->Planets[plNum] == nullptr ||

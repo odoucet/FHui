@@ -486,10 +486,11 @@ bool Report::MatchSystemScanStart(String ^s)
         m_ScanY = m_RM->GetResultInt(1);
         m_ScanZ = m_RM->GetResultInt(2);
         m_ScanHasPlanets = false;
+        m_ScanSystem = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ);
 
         // Set the home system
         if( m_ScanAlien )
-            m_ScanAlien->HomeSystem = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ);
+            m_ScanAlien->HomeSystem = m_ScanSystem;
 
         return true;
     }
@@ -498,6 +499,14 @@ bool Report::MatchSystemScanStart(String ^s)
 
 void Report::MatchPlanetScan(String ^s)
 {
+    /*
+    // WORMHOLE TODO
+    if( m_RM->Match(s, "^This star system is the terminus of a natural wormhole\\.$") )
+    {
+        m_ScanSystem->HasWormhole = true;
+    }
+    */
+
     //                          0:plNum   1:dia    2:gv            3:tc       4:pc    5:mining diff
     if( m_RM->Match(s, "^(\\d+)\\s+(\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\.(\\d+)\\s+") )
     {
@@ -551,7 +560,7 @@ void Report::MatchPlanetScan(String ^s)
         if( !String::IsNullOrEmpty(s) )
             planet->Comment = s;
 
-        m_GameData->AddPlanetScan( m_Turn, m_ScanX, m_ScanY, m_ScanZ, planet );
+        m_GameData->AddPlanetScan( m_Turn, m_ScanSystem, planet );
         m_ScanHasPlanets = true;
     }
 }

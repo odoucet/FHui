@@ -113,6 +113,7 @@ private:
     int             m_ScanY;
     int             m_ScanZ;
     bool            m_ScanHasPlanets;
+    StarSystem     ^m_ScanSystem;
     Alien          ^m_ScanAlien;
     Colony         ^m_ScanColony;
     Ship           ^m_ScanShip;

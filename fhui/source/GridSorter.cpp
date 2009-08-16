@@ -238,6 +238,10 @@ int GridSorterBase::CompareType(IGridDataSrc ^o1, IGridDataSrc ^o2)
 
 int GridSorterBase::CompareLocation(IGridDataSrc ^o1, IGridDataSrc ^o2)
 {
+    // Detect wormholes
+    if( o1->GetFilterSystem()->WormholeTarget == o2->GetFilterSystem() )
+        return 0;
+
     int p1, p2;
     int result = o1->GetFilterLocation(p1)->CompareLocation(o2->GetFilterLocation(p2));
     if( result == 0 )

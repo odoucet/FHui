@@ -227,6 +227,7 @@ public:
         LastVisited = -1;
         MinLSN = 99999;
         MinLSNAvail = 99999;
+        HasWormhole = false;
         Master = nullptr;
         Ships = gcnew List<Ship^>;
         ShipsOwned = gcnew List<Ship^>;
@@ -251,10 +252,10 @@ public:
     virtual int         GetFilterNumColonies() override { return Colonies->Count; }
     // --------------------------------------------------
 
-    double      CalcDistance(StarSystem ^s)                         { return Calculators::Distance(X, Y, Z, s->X, s->Y, s->Z); }
-    double      CalcMishap(StarSystem ^s, int gv, int age)          { return Calculators::Mishap(X, Y, Z, s->X, s->Y, s->Z, gv, age); }
-    double      CalcDistance(int x, int y, int z)                   { return Calculators::Distance(X, Y, Z, x, y, z); }
-    double      CalcMishap(int x, int y, int z, int gv, int age)    { return Calculators::Mishap(X, Y, Z, x, y, z, gv, age); }
+    double      CalcDistance(StarSystem ^s);
+    double      CalcMishap(StarSystem ^s, int gv, int age);
+    double      CalcDistance(int x, int y, int z);
+    double      CalcMishap(int x, int y, int z, int gv, int age);
 
     int         CompareLocation(StarSystem ^sys);
 
@@ -267,23 +268,27 @@ public:
     void        UpdateMaster();
 
     String^         PrintLocation() { return String::Format("{0} {1} {2}", X, Y, Z); }
+    String^         PrintWormholeTarget() { return HasWormhole ? (WormholeTarget ? WormholeTarget->PrintLocation() : "???") : nullptr; }
     String^         PrintLocationAligned() { return String::Format("{0,2} {1,2} {2,2}", X, Y, Z); }
     String^         PrintScanStatus();
     String^         PrintColonies(int planetNum, Alien ^player);   // -1 for all colonies in system
     List<String^>^  PrintAliens();
 
-    property int        X;
-    property int        Y;
-    property int        Z;
-    property String^    Type;
-    property String^    Comment;
-    property int        TurnScanned;
-    property int        LastVisited;
-    property int        MinLSN;
-    property int        MinLSNAvail;
-    property bool       IsVoid;
+    property int            X;
+    property int            Y;
+    property int            Z;
+    property String^        Type;
+    property String^        Comment;
+    property int            TurnScanned;
+    property int            LastVisited;
+    property int            MinLSN;
+    property int            MinLSNAvail;
+    property bool           HasWormhole;
+    property StarSystem^    WormholeTarget;
 
-    property Alien^     HomeSpecies;
+    property Alien^         HomeSpecies;
+    property Alien^         Master;
+    property bool           IsVoid;
 
     property List<Ship^>^   Ships;
     property List<Ship^>^   ShipsOwned;
@@ -291,7 +296,6 @@ public:
     property List<Colony^>^ Colonies;
     property List<Colony^>^ ColoniesOwned;
     property List<Colony^>^ ColoniesAlien;
-    property Alien^         Master;
 
     property int        PlanetsCount { int get() { return m_Planets->Length; } }
     property Planet^    Planets [int] {
@@ -551,7 +555,7 @@ public:
     // ---- Ship orders ----
     enum class OrderType
     {
-        Jump, Upgrade, Recycle
+        Jump, Upgrade, Recycle, Wormhole
     };
 
     ref class Order
@@ -632,7 +636,7 @@ public:
     Alien^          AddAlien(int turn, String ^sp);
     void            SetAlienRelation(int turn, String ^sp, SPRelType);
     StarSystem^     AddStarSystem(int x, int y, int z, String ^type, String ^comment);
-    void            AddPlanetScan(int turn, int x, int y, int z, Planet ^planet);
+    void            AddPlanetScan(int turn, StarSystem ^system, Planet ^planet);
     void            SetTurnStartEU(int turn, int eu);
     void            AddTurnProducedEU(int turn, int eu);
     Colony^         AddColony(int turn, Alien ^sp, String ^name, StarSystem ^system, int plNum);

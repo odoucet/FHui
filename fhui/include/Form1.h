@@ -89,6 +89,7 @@ namespace FHUI {
         void        SetGridBgAndTooltip(DataGridView ^grid);
         void        SetGridRefSystemOnMouseClick(DblBufDGV ^grid, int rowIndex);
         void        ShowGridContextMenu(DataGridView^ grid, DataGridViewCellMouseEventArgs ^e);
+        String^     GridPrintDistance(StarSystem ^from, StarSystem ^to, int gv, int age);
 
         typedef Pair<DataGridView^, int> ColumnsFilterData;
         void        ColoniesFilterOnOff(ColumnsFilterData ^data);
@@ -133,17 +134,6 @@ namespace FHUI {
 
         bool                m_HadException;
         bool               ^m_bGridUpdateEnabled;
-private: System::Windows::Forms::Label^  SystemsNumRows;
-private: System::Windows::Forms::Label^  PlanetsNumRows;
-private: System::Windows::Forms::Label^  ColoniesNumRows;
-private: System::Windows::Forms::Label^  ShipsNumRows;
-private: System::Windows::Forms::Label^  AliensNumRows;
-private: System::Windows::Forms::Label^  UtilProdPenalty;
-private: System::Windows::Forms::NumericUpDown^  UtilProdPenaltyLS;
-
-private: System::Windows::Forms::NumericUpDown^  UtilProdPenaltyLSN;
-
-
 
         System::Windows::Forms::ToolTip^    m_GridToolTip;
 
@@ -180,6 +170,7 @@ private: System::Windows::Forms::NumericUpDown^  UtilProdPenaltyLSN;
             int Dist;
             int Visited;
             int Scan;
+            int Wormhole;
             int Colonies;
             int Notes;
         };
@@ -443,12 +434,16 @@ private: System::Windows::Forms::NumericUpDown^  UtilProdPenaltyLSN;
     private: System::Windows::Forms::CheckBox^  SystemsFiltVisV;
     private: System::Windows::Forms::CheckBox^  SystemsFiltColC;
     private: System::Windows::Forms::Button^  ShipsFiltersReset;
-private: System::Windows::Forms::TextBox^  ShipsRefEdit;
-
+    private: System::Windows::Forms::TextBox^  ShipsRefEdit;
+    private: System::Windows::Forms::Label^  SystemsNumRows;
+    private: System::Windows::Forms::Label^  PlanetsNumRows;
+    private: System::Windows::Forms::Label^  ColoniesNumRows;
+    private: System::Windows::Forms::Label^  ShipsNumRows;
+    private: System::Windows::Forms::Label^  AliensNumRows;
+    private: System::Windows::Forms::Label^  UtilProdPenalty;
+    private: System::Windows::Forms::NumericUpDown^  UtilProdPenaltyLS;
+    private: System::Windows::Forms::NumericUpDown^  UtilProdPenaltyLSN;
     private: System::Windows::Forms::NumericUpDown^  ShipsMaxMishap;
-
-
-
     private: System::Windows::Forms::ComboBox^  ShipsRefShip;
     private: System::Windows::Forms::ComboBox^  ShipsRefColony;
     private: System::Windows::Forms::ComboBox^  ShipsRefXYZ;
