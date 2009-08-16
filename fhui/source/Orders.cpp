@@ -352,8 +352,9 @@ List<String^>^ Form1::PrintSystemStatus(StarSystem^ system, bool listIncomplete)
         if( (listIncomplete == false) && (ship->EUToComplete > 0) ) continue;
 
         String^ inv = ship->PrintCargo();
-        status->Add( String::Format("  ;   {0} {1}{2}", 
+        status->Add( String::Format("  ;   {0} {1}{2}{3}", 
             ship->PrintClassWithName(),
+            ship->Type == SHIP_BAS ? String::Format("({0}k)", ship->Size / 1000) : "",
             ship->PrintAgeLocation(),
             String::IsNullOrEmpty(inv) ? "" : ": " + inv ) );
     }

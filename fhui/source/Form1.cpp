@@ -104,7 +104,7 @@ void Form1::InitRefLists()
     // -- ref systems xyz:
     m_RefListSystemsXYZ->Add( GridFilter::s_CaptionXYZ );
     for each( StarSystem ^system in m_GameData->GetStarSystems() )
-        m_RefListSystemsXYZ->Add( system->PrintLocation() );
+        m_RefListSystemsXYZ->Add( system->PrintLocationAligned() );
 
     // -- home systems:
     m_RefListHomes->Add( GridFilter::s_CaptionHome );

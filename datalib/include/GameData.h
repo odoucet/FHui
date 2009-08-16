@@ -189,6 +189,7 @@ public:
     void        DelName();
 
     String^     PrintLocation();
+    String^     PrintLocationAligned();
     String^     PrintComment();
 
     property StarSystem^    System;
@@ -265,7 +266,8 @@ public:
     String^     GenerateScan();
     void        UpdateMaster();
 
-    String^         PrintLocation() { return String::Format("{0,2} {1,2} {2,2}", X, Y, Z); }
+    String^         PrintLocation() { return String::Format("{0} {1} {2}", X, Y, Z); }
+    String^         PrintLocationAligned() { return String::Format("{0,2} {1,2} {2,2}", X, Y, Z); }
     String^         PrintScanStatus();
     String^         PrintColonies(int planetNum, Alien ^player);   // -1 for all colonies in system
     List<String^>^  PrintAliens();

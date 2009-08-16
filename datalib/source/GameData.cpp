@@ -129,6 +129,11 @@ String^ Planet::PrintLocation()
     return String::Format("{0} {1}", System->PrintLocation(), Number);
 }
 
+String^ Planet::PrintLocationAligned()
+{
+    return String::Format("{0} {1}", System->PrintLocationAligned(), Number);
+}
+
 String^ Planet::PrintComment()
 {
     String ^ret = Comment;
@@ -348,7 +353,11 @@ List<String^>^ StarSystem::PrintAliens()
         {
             if (ship->Owner == race)
             {
-                info += String::Format("{0}(A{1},{2}) ", ship->PrintClass(), ship->Age, ship->PrintLocationShort());
+                info += String::Format("{0}{1}(A{2},{3}) ",
+                    ship->PrintClass(),
+                    (ship->Type == SHIP_BAS ? String::Format("({0}k)", ship->Size / 1000) : ""),
+                    ship->Age,
+                    ship->PrintLocationShort());
             }
         }
 
@@ -454,17 +463,13 @@ Int32 Ship::CompareTo( Object^ obj )
 String^ Ship::PrintClass()
 {
     String^ out;
-    switch( Type )
+    if ( Type == SHIP_TR)
     {
-    case SHIP_TR:
         out = String::Format( "TR{0}", Size.ToString() );
-        break;
-    case SHIP_BAS:
-        out = String::Format( "BAS[{0}k]", (Tonnage/1000).ToString() );
-        break;
-    default:
+    }
+    else
+    {
         out = FHStrings::ShipToString( Type );
-        break;
     }
 
     if ( SubLight )
