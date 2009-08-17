@@ -12,8 +12,6 @@ namespace FHUI
 public ref class FHStrings
 {
 public:
-    static String^          SpRelToString(SPRelType);
-
     static String^          TechToString(TechType);
     static TechType         TechFromString(String ^tech);
 

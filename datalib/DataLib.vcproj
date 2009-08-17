@@ -283,7 +283,15 @@
 				UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 				>
 				<File
+					RelativePath=".\include\Alien.h"
+					>
+				</File>
+				<File
 					RelativePath=".\include\Calculators.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\Colony.h"
 					>
 				</File>
 				<File
@@ -308,11 +316,27 @@
 					>
 				</File>
 				<File
+					RelativePath=".\include\GridDataSrcBase.h"
+					>
+				</File>
+				<File
 					RelativePath=".\include\IFHUIPlugin.h"
 					>
 				</File>
 				<File
 					RelativePath=".\include\IGridData.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\Planet.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\Ship.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\StarSystem.h"
 					>
 				</File>
 				<File
@@ -330,11 +354,19 @@
 				UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 				>
 				<File
+					RelativePath=".\source\Alien.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\Source\AssemblyInfo.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\source\Calculators.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\Colony.cpp"
 					>
 				</File>
 				<File
@@ -351,6 +383,18 @@
 				</File>
 				<File
 					RelativePath=".\source\NullPlugin.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\Planet.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\Ship.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\StarSystem.cpp"
 					>
 				</File>
 				<File

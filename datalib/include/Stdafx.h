@@ -4,7 +4,6 @@
 
 #pragma once
 
-
 //----------------------------------------
 #include "exceptions.h"
 #include "Utils.h"

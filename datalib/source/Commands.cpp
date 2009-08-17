@@ -1,6 +1,7 @@
 #include "StdAfx.h"
-#include "Commands.h"
 #include "GameData.h"
+#include "Commands.h"
+#include "FHStrings.h"
 
 ////////////////////////////////////////////////////////////////
 

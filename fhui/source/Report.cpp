@@ -116,7 +116,7 @@ bool Report::IsValid()
     return
         GameData::Player != nullptr &&
         GameData::Player->Name != nullptr &&
-        GameData::Player->AtmReq->IsValid() &&
+        GameData::AtmReq->IsValid() &&
         m_Phase == PHASE_ORDERS_TEMPLATE;
 }
 
@@ -528,8 +528,8 @@ void Report::MatchPlanetScan(String ^s)
             if( m_ScanAlien && planet->LSN == 0 )
             {
                 m_ScanAlien->HomePlanet = plNum;
-                m_ScanAlien->AtmReq->TempClass  = planet->TempClass;
-                m_ScanAlien->AtmReq->PressClass = planet->PressClass;
+                GameData::AtmReq->TempClass  = planet->TempClass;
+                GameData::AtmReq->PressClass = planet->PressClass;
             }
         }
         else if( m_RM->Match(s, "[x?\\-]+\\s+") )

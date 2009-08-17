@@ -1,26 +1,8 @@
 #include "stdafx.h"
-#include "enums.h"
-#include "GameData.h"
+#include "FHStrings.h"
 
 namespace FHUI
 {
-
-String^ FHStrings::SpRelToString(SPRelType rel)
-{
-    switch( rel )
-    {
-    case SP_PLAYER:     return "*Player*";
-    case SP_NEUTRAL:    return "Neutral";
-    case SP_ALLY:       return "Ally";
-    case SP_ENEMY:      return "Enemy";
-    case SP_PIRATE:     return "Pirate";
-    default:
-        {
-            int r = rel;
-            throw gcnew FHUIDataIntegrityException(String::Format("Invalid species relation: {0}", r));
-        }
-    }
-}
 
 String^ FHStrings::TechToString(TechType tech)
 {
