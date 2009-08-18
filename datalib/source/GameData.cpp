@@ -335,7 +335,7 @@ bool GameData::TurnCheck(int turn)
         // remove empty sectors with ships from from system list
         for each(Ship^ ship in m_Ships->Values)
         {
-            if ( ship->System->PlanetsCount == 0 )
+            if ( ship->System->IsVoid )
             {
                 m_Systems->Remove(ship->System->GetId());
             }

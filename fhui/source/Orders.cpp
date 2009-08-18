@@ -331,7 +331,7 @@ List<String^>^ Form1::PrintSystemStatus(StarSystem^ system, bool listIncomplete)
     for each ( Colony^ colony in system->ColoniesOwned )
     {
         String^ inv = colony->PrintInventory();
-        String^ flags;
+        String^ flags = "";
         if (colony->Hidden) 
         {
             if (! String::IsNullOrEmpty(flags) ) flags += "/";

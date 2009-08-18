@@ -892,6 +892,7 @@ void Report::MatchShipScan(String ^s, bool bColony)
                 // ship may be outside of any system just in deep, empty space
                 // add this location temporarily to star system list
                 system = m_GameData->AddStarSystem(m_ScanX, m_ScanY, m_ScanZ, "empty", "");
+                system->IsVoid = true;
             }
         }
         system->LastVisited = m_Turn;
