@@ -120,7 +120,6 @@ namespace FHUI {
 
         GameData^           m_GameData;
         RegexMatcher^       m_RM;
-        SortedList<int, GameData^>     ^m_GameTurns;
         SortedList<int, String^>       ^m_Reports;
         SortedList<int, String^>       ^m_RepFiles;
         SortedList<String^, String^>   ^m_CmdFiles;

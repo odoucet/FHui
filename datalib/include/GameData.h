@@ -1,13 +1,7 @@
 #pragma once
 
-#include "Alien.h"
-#include "Colony.h"
-#include "Planet.h"
-#include "Ship.h"
-#include "StarSystem.h"
-
-#include "Calculators.h"
-#include "FHStrings.h"
+#include "TurnData.h"
+#include "GameData.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -63,35 +57,29 @@ public ref class GameData
 public:
     GameData();
 
-    String^         GetSummary();
-    int             GetLastTurn()               { return m_TurnMax; }
-    int             GetCarriedEU()              { return m_TurnEUStart; }
+    String^         GetSummary()                        { return m_CurrentTurnData->GetSummary(); }
+    int             GetCarriedEU()                      { return m_CurrentTurnData->GetCarriedEU(); }
 
-    int             GetFleetCost();
-    int             GetFleetPercentCost();
-    Alien^          GetAlien(String ^sp);
-    StarSystem^     GetStarSystem(int x, int y, int z);
-    StarSystem^     GetStarSystem(String ^name);
-    Colony^         GetColony(String ^name);
-    Ship^           GetShip(String ^name);
+    int             GetFleetCost()                      { return m_CurrentTurnData->GetFleetCost(); }
+    int             GetFleetPercentCost()               { return m_CurrentTurnData->GetFleetPercentCost(); }
+    Alien^          GetAlien(String ^sp)                { return m_CurrentTurnData->GetAlien(sp); }
+    StarSystem^     GetStarSystem(int x, int y, int z)  { return m_CurrentTurnData->GetStarSystem(x,y,z); }
+    StarSystem^     GetStarSystem(String ^name)         { return m_CurrentTurnData->GetStarSystem(name); }
+    Colony^         GetColony(String ^name)             { return m_CurrentTurnData->GetColony(name); }
+    Ship^           GetShip(String ^name)               { return m_CurrentTurnData->GetShip(name); }
 
-    IList<Alien^>^          GetAliens()                         { return m_Aliens->Values; }
-    IList<StarSystem^>^     GetStarSystems()                    { return m_Systems->Values; }
-    IList<PlanetName^>^     GetPlanetNames()                    { return m_PlanetNames->Values; }
-    IList<Ship^>^           GetShips()                          { return m_ShipsByTonnage; }
-    IList<Colony^>^         GetColonies()                       { return m_Colonies->Values; }
+    IList<Alien^>^          GetAliens()                 { return m_CurrentTurnData->GetAliens(); }
+    IList<StarSystem^>^     GetStarSystems()            { return m_CurrentTurnData->GetStarSystems(); }
+    IList<PlanetName^>^     GetPlanetNames()            { return m_CurrentTurnData->GetPlanetNames(); }
+    IList<Ship^>^           GetShips()                  { return m_CurrentTurnData->GetShips(); }
+    IList<Colony^>^         GetColonies()               { return m_CurrentTurnData->GetColonies(); }
 
-    List<ICommand^>^    GetCommands()                       { return m_Commands; }
-    void                AddCommand(ICommand ^cmd)           { m_Commands->Add(cmd); }
-    void                DelCommand(ICommand ^cmd)           { m_Commands->Remove(cmd); }
-    void                SortCommands();
+    List<ICommand^>^        GetCommands()               { return m_CurrentTurnData->GetCommands(); }
+    void                    AddCommand(ICommand ^cmd)   { m_CurrentTurnData->AddCommand(cmd); }
+    void                    DelCommand(ICommand ^cmd)   { m_CurrentTurnData->DelCommand(cmd); }
+    void                    SortCommands()              { m_CurrentTurnData->SortCommands(); }
 
-    // ------------------------------------------
     void            Update();
-    void            SetSpecies(String ^sp);
-    void            SetAtmosphereReq(GasType gas, int, int);
-    void            SetAtmosphereNeutral(GasType gas);
-    void            SetAtmospherePoisonous(GasType gas);
     void            SetTechLevel(int turn, Alien ^sp, TechType, int, int);
     void            SetFleetCost(int turn, int, int);
     Alien^          AddAlien(int turn, String ^sp);
@@ -104,9 +92,8 @@ public:
     void            AddPlanetName(int turn, StarSystem ^system, int pl, String ^name);
     Ship^           AddShip(int turn, Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);
 
-    property bool   AutoEnabled;
-
-    void            SetAutoEnabled(int turn);
+    property bool   AutoEnabled { bool get() { return m_CurrentTurnData->AutoEnabled; } }
+    void            SetAutoEnabled(int turn) { return m_CurrentTurnData->SetAutoEnabled(turn); }
     void            SetAutoOrderPreDeparture(int turn, StarSystem^, String^);
     void            SetAutoOrderJumps(int turn, Ship^, String^);
     void            SetAutoOrderProduction(int turn, Colony^, String^, int);
@@ -115,60 +102,54 @@ public:
     List<String^>^  GetAutoOrdersJumps(Ship^);
     List<Pair<String^, int>^>^  GetAutoOrdersProduction(Colony^);
 
+    static void     SetSpecies(String ^sp);
+    static void     SetAtmosphereReq(GasType gas, int, int);
+    static void     SetAtmosphereNeutral(GasType gas);
+    static void     SetAtmospherePoisonous(GasType gas);
+
     static int      GetSystemId(int, int, int);
-    // ------------------------------------------
+    static property int CurrentTurn { int get() { return m_CurrentTurn; } }
     static property AtmosphericReq^    AtmReq;
-    static property Alien^  Player;
+    static property Alien^ Player
+    {
+        Alien^ get ()
+        {
+            try
+            {
+                return m_CurrentTurnData->GetAlien( m_PlayerName );
+            }
+            catch ( FHUIDataIntegrityException^ )
+            {
+                return nullptr;
+            }
+        }
+    }
     static const int MaxGalaxyDiameter = 100;
     static int GalaxyDiameter = MaxGalaxyDiameter;
 
     static String^ PrintInventory(array<int> ^inv);
 
+    bool SelectTurn(int turn)
+    {
+        m_CurrentTurn = turn;
+        if ( m_TurnData->ContainsKey(turn) )
+        {
+            m_CurrentTurnData = m_TurnData[turn];
+            return true;
+        }
+        else
+        {
+            m_TurnData[turn] = gcnew TurnData;
+            m_CurrentTurnData = m_TurnData[turn];
+            return false;
+        }
+    }
+
 protected:
-    bool            TurnCheck(int turn);
-    int             TurnAlign(int turn);
-
-    void            UpdateShips();
-    void            UpdateAliens();
-    void            UpdateSystems();
-    void            LinkPlanetNames();
-    void            UpdateHomeWorlds();
-    void            UpdateColonies();
-
-    String^         GetSpeciesSummary();
-    String^         GetAllTechsSummary();
-    String^         GetTechSummary(TechType tech);
-    String^         GetEconomicSummary();
-    String^         GetAliensSummary();
-    String^         GetPlanetsSummary();
-    String^         GetShipsSummary();
-
-    List<Ship^>^        GetShips(Alien ^sp)                 { return GetShips(nullptr, sp); }
-    List<Ship^>^        GetShips(StarSystem ^sys)           { return GetShips(sys, nullptr); }
-    List<Ship^>^        GetShips(StarSystem^, Alien^);
-    List<Colony^>^      GetColonies(Alien ^sp)              { return GetColonies(nullptr, sp); }
-    List<Colony^>^      GetColonies(StarSystem ^sys)        { return GetColonies(sys, nullptr); }
-    List<Colony^>^      GetColonies(StarSystem^, Alien^);
-
-    // ------------------------------------------
-    int                 m_TurnEUStart;
-    int                 m_TurnEUProduced;
-    int                 m_FleetCost;
-    int                 m_FleetCostPercent; // * 100
-    SortedList<int, StarSystem^>       ^m_Systems;
-    SortedList<String^, Alien^>        ^m_Aliens;
-    SortedList<String^, Colony^>       ^m_Colonies;
-    SortedList<String^, PlanetName^>   ^m_PlanetNames;
-    SortedList<String^, Ship^>         ^m_Ships;
-    List<Ship^>                        ^m_ShipsByTonnage;
-
-    List<ICommand^>^    m_Commands;
-
-    SortedList<StarSystem^, List<String^>^> ^m_AutoOrdersPreDeparture;
-    SortedList<Ship^, List<String^>^>       ^m_AutoOrdersJumps;
-    SortedList<Colony^, List<Pair<String^, int>^>^> ^m_AutoOrdersProduction;
-
-    int                 m_TurnMax;
+    static String^              m_PlayerName;
+    static int                  m_CurrentTurn;
+    static TurnData^            m_CurrentTurnData;
+    SortedList<int, TurnData^>^ m_TurnData;
 };
 
 } // end namespace FHUI

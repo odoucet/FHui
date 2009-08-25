@@ -344,6 +344,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\include\TurnData.h"
+					>
+				</File>
+				<File
 					RelativePath=".\include\Utils.h"
 					>
 				</File>
@@ -424,6 +428,10 @@
 							UsePrecompiledHeader="1"
 						/>
 					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\source\TurnData.cpp"
+					>
 				</File>
 			</Filter>
 		</Filter>

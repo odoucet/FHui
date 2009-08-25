@@ -33,7 +33,7 @@ void Form1::DelCommand(ICommand ^cmd)
 void Form1::DeleteCommands()
 {
     FileInfo ^fileInfo = gcnew FileInfo(
-        GetDataDir(OrdersDir::Folder) + String::Format(OrdersDir::Commands, m_GameData->GetLastTurn()) );
+        GetDataDir(OrdersDir::Folder) + String::Format(OrdersDir::Commands, GameData::CurrentTurn) );
     if( fileInfo->Exists )
         fileInfo->Delete();
 }
@@ -48,7 +48,7 @@ void Form1::SaveCommands()
 
     // Create stream
     StreamWriter ^sw = File::CreateText(
-        dir + String::Format(OrdersDir::Commands, m_GameData->GetLastTurn()) );
+        dir + String::Format(OrdersDir::Commands, GameData::CurrentTurn) );
 
     // Header
     sw->WriteLine("; FHUI generated file. Please don't edit.");
@@ -89,7 +89,7 @@ void Form1::LoadCommands()
     StreamReader ^sr;
     try {
         sr = File::OpenText(
-            GetDataDir(OrdersDir::Folder) + String::Format(OrdersDir::Commands, m_GameData->GetLastTurn()) );
+            GetDataDir(OrdersDir::Folder) + String::Format(OrdersDir::Commands, GameData::CurrentTurn) );
     } catch( DirectoryNotFoundException^ )
     {
         return;

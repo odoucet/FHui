@@ -84,7 +84,7 @@ void Form1::InitData()
 
     m_RepTurnNrData = nullptr;
 
-    m_GameTurns = gcnew SortedList<int, GameData^>;
+    m_GameData  = gcnew GameData;
     m_Reports   = gcnew SortedList<int, String^>;
     m_RepFiles  = gcnew SortedList<int, String^>;
     m_CmdFiles  = gcnew SortedList<String^, String^>;
@@ -404,20 +404,21 @@ void Form1::ScanReports()
 
 void Form1::TurnReload()
 {
-    System::Windows::Forms::DialogResult result = MessageBox::Show(
-        this,
-        "Delete ALL FHUI Commands?",
-        "Reload Turn",
-        MessageBoxButtons::YesNo,
-        MessageBoxIcon::Question,
-        MessageBoxDefaultButton::Button1);
-    if( result == System::Windows::Forms::DialogResult::Yes )
-    {
-        m_GameTurns->Remove( m_GameData->GetLastTurn() );
-        DeleteCommands();
+    throw gcnew FHUIDataImplException();
+    //System::Windows::Forms::DialogResult result = MessageBox::Show(
+    //    this,
+    //    "Delete ALL FHUI Commands?",
+    //    "Reload Turn",
+    //    MessageBoxButtons::YesNo,
+    //    MessageBoxIcon::Question,
+    //    MessageBoxDefaultButton::Button1);
+    //if( result == System::Windows::Forms::DialogResult::Yes )
+    //{
+    //    m_GameTurns->Remove( m_GameData->GetLastTurn() );
+    //    DeleteCommands();
 
-        DisplayTurn();
-    }
+    //    DisplayTurn();
+    //}
 }
 
 void Form1::DisplayTurn()
@@ -438,7 +439,7 @@ void Form1::DisplayTurn()
 
         this->Text = String::Format("[SP {0}, Turn {1}] Far Horizons User Interface, build {2}",
             GameData::Player->Name,
-            m_GameData->GetLastTurn(),
+            GameData::CurrentTurn,
             BuildInfo::Version );
 
         MapSetup();
@@ -453,13 +454,11 @@ void Form1::DisplayTurn()
 
 void Form1::LoadGameTurn(int turn)
 {
-    if( m_GameTurns->ContainsKey(turn) )
+    if( m_GameData->SelectTurn(turn) )
     {
-        m_GameData = m_GameTurns[turn];
         return;
     }
 
-    m_GameData = gcnew GameData;
     LoadGalaxy();
 
     for each( int t in m_RepFiles->Keys )
@@ -471,7 +470,6 @@ void Form1::LoadGameTurn(int turn)
     }
 
     m_GameData->Update();
-    m_GameTurns[turn] = m_GameData;
 
     LoadCommands();
 }
