@@ -378,6 +378,31 @@ void Form1::ScanReports()
         }
     }
 
+    int prevTurn = -1;
+    for each( int currTurn in m_RepFiles->Keys )
+    {
+        if( true == m_GameData->SelectTurn(currTurn) )
+        {
+            throw gcnew FHUIDataIntegrityException(String::Format("Turn #{0} was already parsed.", currTurn));
+        }
+
+        if ( prevTurn == -1 )
+        {
+            // first turn on the list, parse galaxy data
+            LoadGalaxy();
+        }
+        else
+        {
+            m_GameData->InitTurnFrom(prevTurn);
+        }
+
+        LoadReport( m_RepFiles[currTurn] );
+        m_GameData->Update();
+        LoadCommands();
+
+        prevTurn = currTurn;
+    }
+
     if( m_RepFiles->Count > 0 )
     {
         // Setup combo box with list of loaded reports
@@ -429,7 +454,10 @@ void Form1::DisplayTurn()
         int turn = int::Parse(sel->Substring(16));    // Skip 'Status for Turn '
 
         *m_bGridUpdateEnabled = false;
-        LoadGameTurn(turn);
+        if ( m_GameData->SelectTurn(turn) == false)
+        {
+            throw gcnew FHUIDataIntegrityException(String::Format("No information about selected turn #{0}.", turn));
+        }
         RepModeChanged();
         UpdatePlugins();
         UpdateControls();
@@ -450,28 +478,6 @@ void Form1::DisplayTurn()
         Summary->Text = "Failed loading game data.";
         ShowException(e);
     }
-}
-
-void Form1::LoadGameTurn(int turn)
-{
-    if( m_GameData->SelectTurn(turn) )
-    {
-        return;
-    }
-
-    LoadGalaxy();
-
-    for each( int t in m_RepFiles->Keys )
-    {
-        if( t <= turn )
-            LoadReport( m_RepFiles[t] );
-        else
-            break;
-    }
-
-    m_GameData->Update();
-
-    LoadCommands();
 }
 
 int Form1::CheckReport(String ^fileName)

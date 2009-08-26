@@ -1,11 +1,11 @@
 #pragma once
 #include "GridDataSrcBase.h"
+#include "Planet.h"
 
 namespace FHUI
 {
 
 ref class Colony;
-ref class Planet;
 ref class Ship;
 
 // ---------------------------------------------------
@@ -34,7 +34,34 @@ public:
         ColoniesAlien = gcnew List<Colony^>;
         IsVoid = true;
     }
+    // --- copy constructor - does not perform full copy !!! ---
+    StarSystem(StarSystem^ src)
+        : m_Planets(gcnew array<Planet^>(0))
+    {
+        X = src->X;
+        Y = src->Y;
+        Z = src->Z;
+        Type = src->Type;
+        TurnScanned = src->TurnScanned;
+        LastVisited = src->LastVisited;
+        MinLSN = src->MinLSN;
+        MinLSNAvail = src->MinLSNAvail;
+        HasWormhole = src->HasWormhole;
+        IsVoid = src->IsVoid;
 
+        Master = nullptr;
+        Ships = gcnew List<Ship^>;
+        ShipsOwned = gcnew List<Ship^>;
+        ShipsAlien = gcnew List<Ship^>;
+        Colonies = gcnew List<Colony^>;
+        ColoniesOwned = gcnew List<Colony^>;
+        ColoniesAlien = gcnew List<Colony^>;
+
+        for each ( Planet^ planet in src->GetPlanets() )
+        {
+            Planets[planet->Number-1] = gcnew Planet(this, planet);
+        }
+    }
     // -------- IComparable ----------------------------
     virtual Int32 CompareTo( Object^ obj );
 

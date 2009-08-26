@@ -28,6 +28,28 @@ public:
         Atmosphere = gcnew array<int>(GAS_MAX) {0};
         SuspectedColonies = gcnew SortedList<Alien^, int>;
     }
+    // --- copy constructor - does not perform full copy !!! ---
+    Planet(StarSystem^ system, Planet^ src)
+    {
+        System = system;
+        Number = src->Number;
+        Name = src->Name;
+        Comment = src->Comment;
+        Diameter = src->Diameter;
+        Grav = src->Grav;
+        TempClass = src->TempClass;
+        PressClass = src->PressClass;
+        MiDiff = src->MiDiff;
+        LSN = src->LSN;
+        Atmosphere = gcnew array<int>(GAS_MAX) {0};
+        src->Atmosphere->CopyTo(Atmosphere, 0);
+
+        Master = nullptr;
+        NumColonies = 0;
+        NameIsNew = false;
+        NameIsDisband = false;
+        SuspectedColonies = gcnew SortedList<Alien^, int>;
+    }
 
     static Planet^ Default(StarSystem ^system, int nr)
     {

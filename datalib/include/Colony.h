@@ -42,7 +42,37 @@ public:
         UnderSiege = false;
         Shared = false;
     }
-
+    // --- copy constructor - does not perform full copy !!! ---
+    Colony(StarSystem ^system, Alien^ owner, Colony^ src)
+    {
+        Owner = owner;
+        Name = src->Name;
+        PlanetType = src->PlanetType;
+        System = system;
+        PlanetNum = src->PlanetNum;
+        Planet = system->GetPlanet(PlanetNum);
+        AvailPop = src->AvailPop;
+        EconomicEff = src->EconomicEff;
+        ProdPenalty = src->ProdPenalty;
+        EUProd = src->EUProd;
+        EUFleet = src->EUFleet;
+        MiBase = src->MiBase;
+        NeedIU = src->NeedIU;
+        NeedAU = src->NeedAU;
+        RecoveryIU = src->RecoveryIU;
+        RecoveryAU = src->RecoveryAU;
+        MiDiff = src->MiDiff;
+        MaBase = src->MaBase;
+        LSN = src->LSN;
+        Shipyards = src->Shipyards;
+        LastSeen = src->LastSeen;
+        Inventory = gcnew array<int>(INV_MAX){0};
+        src->Inventory->CopyTo(Inventory, 0);
+        OrderBuildShipyard = false;
+        Hidden = false;
+        UnderSiege = false;
+        Shared = false;
+    }
     // -------- IComparable -----------------------------
     virtual Int32 CompareTo( Object^ obj );
 

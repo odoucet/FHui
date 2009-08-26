@@ -145,6 +145,8 @@ public:
         }
     }
 
+    void InitTurnFrom(int srcTurn);
+
 protected:
     static String^              m_PlayerName;
     static int                  m_CurrentTurn;

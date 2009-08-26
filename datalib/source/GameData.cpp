@@ -29,8 +29,11 @@ String^ GameData::PrintInventory(array<int> ^inv)
 
 void GameData::SetSpecies(String ^sp)
 {
-    m_PlayerName = sp;
-    m_CurrentTurnData->SetSpecies(sp);
+    if ( String::IsNullOrEmpty(m_PlayerName) )
+    {
+        m_PlayerName = sp;
+        m_CurrentTurnData->SetSpecies(sp);
+    }
 }
 
 // ---------------------------------------------------------
@@ -41,6 +44,49 @@ GameData::GameData(void)
     if (AtmReq == nullptr)
     {
         AtmReq = gcnew AtmosphericReq();
+    }
+}
+
+void GameData::InitTurnFrom(int srcTurn)
+{
+    // Copy relevant data from one turn to another
+    // copy constructors invoked DO NOT perform full copies !!!
+
+    for each ( StarSystem^ srcSystem in m_TurnData[srcTurn]->GetStarSystems() )
+    {
+        if ( srcSystem->IsVoid == false )
+        {
+            m_CurrentTurnData->AddStarSystem( gcnew StarSystem(srcSystem) );
+        }
+    }
+
+    for each ( Alien^ srcAlien in m_TurnData[srcTurn]->GetAliens() )
+    {
+        if ( srcAlien->HomeSystem == nullptr )
+        {
+            m_CurrentTurnData->AddAlien( gcnew Alien(nullptr, srcAlien) );
+        }
+        else
+        {
+            StarSystem^ home = m_CurrentTurnData->GetStarSystem(
+                srcAlien->HomeSystem->X,
+                srcAlien->HomeSystem->Y,
+                srcAlien->HomeSystem->Z );
+            m_CurrentTurnData->AddAlien( gcnew Alien(home, srcAlien) );
+        }
+    }
+
+    for each ( Colony^ srcColony in m_TurnData[srcTurn]->GetColonies() )
+    {
+        if ( srcColony->Owner->Name != m_PlayerName )
+        {
+            StarSystem^ system = m_CurrentTurnData->GetStarSystem(
+                srcColony->System->X,
+                srcColony->System->Y,
+                srcColony->System->Z );
+            Alien^ owner = m_CurrentTurnData->GetAlien( srcColony->Owner->Name );
+            m_CurrentTurnData->AddColony( gcnew Colony( system, owner, srcColony) );
+        }
     }
 }
 

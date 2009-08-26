@@ -55,7 +55,6 @@ namespace FHUI {
         void        ScanReports();
         int         CheckReport(String ^fileName);
         void        LoadGalaxy();
-        void        LoadGameTurn(int turn);
         void        LoadReport(String ^fileName);
         void        LoadOrders();
         void        TurnReload();

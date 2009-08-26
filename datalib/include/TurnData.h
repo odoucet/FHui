@@ -51,12 +51,15 @@ public:
     void            SetSpecies(String ^sp);
     void            SetTechLevel(int turn, Alien ^sp, TechType, int, int);
     void            SetFleetCost(int turn, int, int);
+    void            AddAlien(Alien^);
     Alien^          AddAlien(int turn, String ^sp);
     void            SetAlienRelation(int turn, String ^sp, SPRelType);
+    void            AddStarSystem(StarSystem^ system);
     StarSystem^     AddStarSystem(int x, int y, int z, String ^type, String ^comment);
     void            AddPlanetScan(int turn, StarSystem ^system, Planet ^planet);
     void            SetTurnStartEU(int turn, int eu);
     void            AddTurnProducedEU(int turn, int eu);
+    void            AddColony(Colony^);
     Colony^         AddColony(int turn, Alien ^sp, String ^name, StarSystem ^system, int plNum);
     void            AddPlanetName(int turn, StarSystem ^system, int pl, String ^name);
     Ship^           AddShip(int turn, Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);

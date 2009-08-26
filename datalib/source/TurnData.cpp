@@ -120,6 +120,9 @@ String^ TurnData::GetAliensSummary()
 {
     String ^ret = "";
 
+    if( GetAliens()->Count == 1 )
+        return "No alien races met\r\n";
+
     List<Alien^> ^aliens = gcnew List<Alien^>;
     for each( Alien ^alien in GetAliens() )
     {
@@ -400,6 +403,21 @@ StarSystem^ TurnData::GetStarSystem(int x, int y, int z)
         throw gcnew FHUIDataIntegrityException(
             String::Format("Trying to access unknown star system: {0} {1} {2}", x, y, z) );
     }
+}
+
+void TurnData::AddStarSystem(StarSystem^ system)
+{
+    m_Systems->Add( GameData::GetSystemId(system->X, system->Y, system->Z), system );
+}
+
+void TurnData::AddAlien(Alien^ alien)
+{
+    m_Aliens->Add( alien->Name->ToLower(), alien );
+}
+
+void TurnData::AddColony(Colony^ colony)
+{
+    m_Colonies->Add( colony->Name, colony );
 }
 
 StarSystem^ TurnData::AddStarSystem(int x, int y, int z, String ^type, String ^comment)

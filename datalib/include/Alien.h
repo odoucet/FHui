@@ -32,7 +32,29 @@ public:
         TechLevelsAssumed = gcnew array<int>(TECH_MAX){0};
         TeachOrders = 0;
     }
+    // --- copy constructor - does not perform full copy !!! ---
+    Alien(StarSystem^ home, Alien^ src)
+    {
+        Name = src->Name;
+        GovName = src->GovName;
+        GovType = src->GovType;
+        Relation = src->Relation;
+        RelationOriginal = src->Relation;
+        TurnMet = src->TurnMet;
+        Email = src->Email;
+        HomeSystem = home;
+        HomePlanet = src->HomePlanet;
+        TechEstimateTurn = src->TechEstimateTurn;
+        Ships = gcnew List<Ship^>;
+        Colonies = gcnew List<Colony^>;
 
+        TechLevels        = gcnew array<int>(TECH_MAX){0};
+        TechLevelsTeach   = gcnew array<int>(TECH_MAX){0};
+        TechLevelsAssumed = gcnew array<int>(TECH_MAX){0};
+        src->TechLevels->CopyTo(TechLevels, 0);
+
+        TeachOrders = 0;
+    }
     // -------- IGridDataSrc ----------------------------
     virtual Alien^      GetAlienForBgColor() override   { return this; }
     virtual SPRelType   GetFilterRelType() override     { return Relation; }
