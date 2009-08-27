@@ -2,9 +2,12 @@
 #include "Form1.h"
 #include "BuildInfo.h"
 
-#include "Report.h"
 #include "GridFilter.h"
 #include "GridSorter.h"
+
+#include "ReportParser.h"
+#include "PluginManager.h"
+#include "CommandManager.h"
 
 using namespace System::IO;
 using namespace System::Text::RegularExpressions;
@@ -41,22 +44,18 @@ protected:
 
 ////////////////////////////////////////////////////////////////
 
-void Form1::LoadGameData()
+void Form1::Initialize()
 {
     try
     {
         InitializeComponent();
-
-        FillAboutBox();
         InitData();
-        LoadPlugins();
         InitControls();
-        ScanReports();
         LoadOrders();
     }
     catch( Exception ^e )
     {
-        Summary->Text = "Failed loading game data.";
+        Summary->Text = "Failed to initialize application.";
         ShowException(e);
     }
 }
@@ -67,29 +66,56 @@ void Form1::InitControls()
 
     m_GridToolTip = gcnew ToolTip;
 
+    TextAbout->Text = GetAboutText();
+
     SystemsInitControls();
     PlanetsInitControls();
     ColoniesInitControls();
     ShipsInitControls();
     AliensInitControls();
+
+    if( m_ReportParser->Reports->Count > 0 )
+    {
+        // Setup combo box with list of loaded reports
+        int n0 = m_ReportParser->Reports->Count;
+        int n1 = n0 - (m_ReportParser->Reports->ContainsKey(0) ? 1 : 0);
+        array<String^> ^arrN0 = gcnew array<String^>(n0);
+        array<String^> ^arrN1 = gcnew array<String^>(n1);
+        for each( int key in m_ReportParser->Reports->Keys )
+        {
+            String ^text = "Turn " + key.ToString();
+            arrN0[--n0] = text;
+            if( key != 0 )
+                arrN1[--n1] = "Status for " + text;
+        }
+
+        m_RepTurnNrData = arrN0;
+        TurnSelect->DataSource = arrN1;
+    }
+    else
+    {
+        RepText->Text = "No report successfully loaded.";
+    }
 }
 
 void Form1::InitData()
 {
-    m_RM = gcnew RegexMatcher;
-
-    m_HadException = false;
-
+    m_bHadException = false;
     m_bGridUpdateEnabled = gcnew bool(false);
 
+    m_OrderFiles = gcnew SortedList<String^, String^>;
     m_RepTurnNrData = nullptr;
 
-    m_GameData  = gcnew GameData;
-    m_Reports   = gcnew SortedList<int, String^>;
-    m_RepFiles  = gcnew SortedList<int, String^>;
-    m_CmdFiles  = gcnew SortedList<String^, String^>;
+    m_GameData      = gcnew GameData;
+    m_ReportParser  = gcnew ReportParser(m_GameData, GetDataDir("galaxy_list.txt"), GetDataDir("reports"));
+    m_PluginMgr     = gcnew PluginManager(m_GameData, Application::StartupPath);
+    m_CommandMgr    = gcnew CommandManager(m_GameData, GetDataDir(OrdersDir::Folder));
 
-    m_OrderList = gcnew List<String^>;
+    if (EnablePlugins)
+    {
+        m_PluginMgr->LoadPlugins();
+    }
+    m_ReportParser->ScanReports();
 }
 
 void Form1::InitRefLists()
@@ -131,12 +157,6 @@ void Form1::InitRefLists()
         {
             m_RefListShips->Add( ship->PrintRefListEntry() );
         }
-}
-
-void Form1::UpdatePlugins()
-{
-    for each( IGridPlugin ^plugin in m_GridPlugins )
-        plugin->SetGameData(m_GameData);
 }
 
 void Form1::UpdateControls()
@@ -184,7 +204,7 @@ void Form1::UpdateTabs()
         break;
 
     case TabIndex::Orders:
-        GenerateTemplate();
+        m_CommandMgr->GenerateTemplate( OrderTemplate );
         break;
 
     case TabIndex::Utils:
@@ -255,13 +275,13 @@ void Form1::TechLevelsChanged()
         if( MenuTabs->SelectedIndex == TabIndex::Map )
             MapDraw();
         if( MenuTabs->SelectedIndex == TabIndex::Orders )
-            GenerateTemplate();
+            m_CommandMgr->GenerateTemplate( OrderTemplate );
     }
 }
 
 void Form1::ShowException(Exception ^e)
 {
-    m_HadException = true;
+    m_bHadException = true;
 
     RepText->Text = String::Format(
         "Fatal Exception !\r\n"
@@ -288,7 +308,7 @@ void Form1::ShowException(Exception ^e)
     TurnSelect->Enabled = false;
 }
 
-void Form1::FillAboutBox()
+String^ Form1::GetAboutText()
 {
     String ^changeLog = nullptr;
 
@@ -301,7 +321,7 @@ void Form1::FillAboutBox()
         changeLog = "** Change log file not found or unreadable **";
     }
 
-    TextAbout->Text = String::Format(
+    return String::Format(
         "---------------------------------------------------------------------------\r\n"
         "   Far Horizons User Interface\r\n"
         "     Revision: {0}\r\n"
@@ -325,125 +345,21 @@ String^ Form1::GetDataDir(String ^suffix)
     return ret;
 }
 
-void Form1::LoadGalaxy()
-{
-    String^ galaxyList = GetDataDir("galaxy_list.txt");
-
-    StreamReader ^sr = File::OpenText(galaxyList);
-    String ^line;
-    while( (line = sr->ReadLine()) != nullptr ) 
-    {
-        if( String::IsNullOrEmpty(line) )
-            continue;
-
-        Match ^m = Regex("^x\\s+=\\s+(\\d+)\\s*y\\s+=\\s+(\\d+)\\s*z\\s+=\\s+(\\d+)\\s*stellar type =\\s+(\\w+)\\s*(\\w*)$").Match(line);
-        if( m->Success )
-        {
-            int x = int::Parse(m->Groups[1]->ToString());
-            int y = int::Parse(m->Groups[2]->ToString());
-            int z = int::Parse(m->Groups[3]->ToString());
-            String ^type = m->Groups[4]->ToString();
-            String ^comment = m->Groups[5]->ToString();
-
-            m_GameData->AddStarSystem(x, y, z, type, comment);
-        }
-        else
-        {
-            m = Regex("^The galaxy has a radius of (\\d+) parsecs.").Match(line);
-            if( m->Success )
-            {
-                GameData::GalaxyDiameter = 2 * int::Parse(m->Groups[1]->ToString());
-                break;
-            }
-            else
-                throw gcnew FHUIParsingException(
-                    String::Format("Unrecognized entry in galaxy list: {0}", line) );
-        }
-    }
-    sr->Close();
-}
-
-void Form1::ScanReports()
-{
-    String^ reportsDir = GetDataDir("reports");
-    DirectoryInfo ^dir = gcnew DirectoryInfo(reportsDir);
-
-    for each( FileInfo ^f in dir->GetFiles("*"))
-    {   // First check each file if it is a report and find out for which turn.
-        // Then reports will be loaded in chronological order.
-        int turn = CheckReport(f->FullName);
-        if( turn != -1 )
-        {
-            m_RepFiles[turn] = f->FullName;
-        }
-    }
-
-    int prevTurn = -1;
-    for each( int currTurn in m_RepFiles->Keys )
-    {
-        if( true == m_GameData->SelectTurn(currTurn) )
-        {
-            throw gcnew FHUIDataIntegrityException(String::Format("Turn #{0} was already parsed.", currTurn));
-        }
-
-        if ( prevTurn == -1 )
-        {
-            // first turn on the list, parse galaxy data
-            LoadGalaxy();
-        }
-        else
-        {
-            m_GameData->InitTurnFrom(prevTurn);
-        }
-
-        LoadReport( m_RepFiles[currTurn] );
-        m_GameData->Update();
-        LoadCommands();
-
-        prevTurn = currTurn;
-    }
-
-    if( m_RepFiles->Count > 0 )
-    {
-        // Setup combo box with list of loaded reports
-        int n0 = m_RepFiles->Count;
-        int n1 = n0 - (m_RepFiles->ContainsKey(0) ? 1 : 0);
-        array<String^> ^arrN0 = gcnew array<String^>(n0);
-        array<String^> ^arrN1 = gcnew array<String^>(n1);
-        for each( int key in m_RepFiles->Keys )
-        {
-            String ^text = "Turn " + key.ToString();
-            arrN0[--n0] = text;
-            if( key != 0 )
-                arrN1[--n1] = "Status for " + text;
-        }
-
-        m_RepTurnNrData = arrN0;
-        TurnSelect->DataSource = arrN1;
-    }
-    else
-    {
-        RepText->Text = "No report successfully loaded.";
-    }
-}
-
 void Form1::TurnReload()
 {
     throw gcnew FHUIDataImplException();
-    //System::Windows::Forms::DialogResult result = MessageBox::Show(
-    //    this,
-    //    "Delete ALL FHUI Commands?",
-    //    "Reload Turn",
-    //    MessageBoxButtons::YesNo,
-    //    MessageBoxIcon::Question,
-    //    MessageBoxDefaultButton::Button1);
-    //if( result == System::Windows::Forms::DialogResult::Yes )
-    //{
-    //    m_GameTurns->Remove( m_GameData->GetLastTurn() );
-    //    DeleteCommands();
-
-    //    DisplayTurn();
-    //}
+    System::Windows::Forms::DialogResult result = MessageBox::Show(
+        this,
+        "Delete ALL FHUI Commands?",
+        "Reload Turn",
+        MessageBoxButtons::YesNo,
+        MessageBoxIcon::Question,
+        MessageBoxDefaultButton::Button1);
+    if( result == System::Windows::Forms::DialogResult::Yes )
+    {
+        m_CommandMgr->DeleteCommands();
+        DisplayTurn();
+    }
 }
 
 void Form1::DisplayTurn()
@@ -459,8 +375,10 @@ void Form1::DisplayTurn()
             throw gcnew FHUIDataIntegrityException(String::Format("No information about selected turn #{0}.", turn));
         }
         RepModeChanged();
-        UpdatePlugins();
+        m_PluginMgr->UpdatePlugins();
         UpdateControls();
+
+        m_ColoniesMenuRef = m_CommandMgr->LoadCommands();
 
         // Display summary
         Summary->Text = m_GameData->GetSummary();
@@ -480,80 +398,9 @@ void Form1::DisplayTurn()
     }
 }
 
-int Form1::CheckReport(String ^fileName)
-{
-    Report ^report = gcnew Report(nullptr, m_RM); // turn scan mode
-
-    StreamReader ^sr = File::OpenText(fileName);
-    String ^line;
-
-    try
-    {
-        while( (line = sr->ReadLine()) != nullptr ) 
-        {
-            if( false == report->Parse(line) )
-                break;
-            if( report->GetTurn() != -1 )
-                return report->GetTurn();
-        }
-    }
-    catch( Exception ^ex )
-    {
-        throw gcnew FHUIParsingException(
-            String::Format("Error occured while parsing report: {0}, line {1}:\r\n{2}\r\nError description:\r\n  {3}",
-                fileName,
-                report->GetLineCount(),
-                line,
-                ex->Message),
-            ex );
-    }
-    finally
-    {
-        sr->Close();
-    }
-    return -1;
-}
-
-void Form1::LoadReport(String ^fileName)
-{
-    Report ^report = gcnew Report(m_GameData, m_RM);
-
-    StreamReader ^sr = File::OpenText(fileName);
-    String ^line;
-
-    try
-    {
-        while( (line = sr->ReadLine()) != nullptr ) 
-        {
-            if( false == report->Parse(line) )
-                break;
-        }
-
-        if( report->GetTurn() > 0 &&
-            !report->IsValid() )
-            throw gcnew FHUIParsingException("File is not a valid FH report.");
-
-        m_Reports[report->GetTurn()] = report->GetContent();
-    }
-    catch( Exception ^ex )
-    {
-        throw gcnew FHUIParsingException(
-            String::Format("Error occured while parsing report: {0}, line {1}:\r\n{2}\r\nError description:\r\n  {3}",
-                fileName,
-                report->GetLineCount(),
-                line,
-                ex->Message),
-            ex );
-    }
-    finally
-    {
-        sr->Close();
-    }
-}
-
 void Form1::RepModeChanged()
 {
-    if( m_HadException )
+    if( m_bHadException )
         return;
 
     if( RepModeReports->Checked )
@@ -563,8 +410,10 @@ void Form1::RepModeChanged()
     else if( RepModeCommands->Checked )
     {
         List<String^> ^items = gcnew List<String^>;
-        for each( String ^s in m_CmdFiles->Keys )
+        for each( String ^s in m_OrderFiles->Keys )
+        {
             items->Add(s);
+        }
         items->Sort(StringComparer::CurrentCultureIgnoreCase);
         RepTurnNr->DataSource = items;
     }
@@ -583,17 +432,17 @@ void Form1::DisplayReport()
         String ^sel = RepTurnNr->SelectedItem->ToString();
         int key = int::Parse(sel->Substring(5));    // Skip 'Turn '
 
-        RepText->Text = m_Reports[key];
+        RepText->Text = m_ReportParser->Reports[key];
     }
     else if( RepModeCommands->Checked )
     {
-        RepText->Text = m_CmdFiles[ RepTurnNr->SelectedItem->ToString() ];
+        RepText->Text = m_OrderFiles[ RepTurnNr->SelectedItem->ToString() ];
     }
 }
 
 void Form1::LoadOrders()
 {
-    m_CmdFiles->Clear();
+    m_OrderFiles->Clear();
 
     try
     {
@@ -604,11 +453,11 @@ void Form1::LoadOrders()
         {
             if( f->Length <= 0x10000 ) // 64 KB, more than enough for any commands
             {
-                m_CmdFiles[f->Name] = File::OpenText(f->FullName)->ReadToEnd();
+                m_OrderFiles[f->Name] = File::OpenText(f->FullName)->ReadToEnd();
             }
             else
             {
-                m_CmdFiles[f->Name] = "File too large (limit is 64KB).";
+                m_OrderFiles[f->Name] = "File too large (limit is 64KB).";
             }
         }
     }
@@ -617,63 +466,7 @@ void Form1::LoadOrders()
     }
     finally
     {
-        RepModeCommands->Enabled = m_CmdFiles->Count > 0;
-    }
-}
-
-////////////////////////////////////////////////////////////////
-// Plugins
-
-void Form1::LoadPlugins()
-{
-    m_AllPlugins = gcnew List<IPluginBase^>;
-    m_GridPlugins = gcnew List<IGridPlugin^>;
-    m_OrdersPlugins = gcnew List<IOrdersPlugin^>;
-
-    if( ! EnablePlugins )
-    {
-        return;
-    }
-
-    DirectoryInfo ^dir = gcnew DirectoryInfo(Application::StartupPath);
-
-    for each( FileInfo ^f in dir->GetFiles("fhui.*.dll"))
-    {
-        if( f->Name->ToLower() == "fhui.datalib.dll" )
-            continue;
-
-        try
-        {
-            Assembly ^assembly = Assembly::LoadFrom(f->FullName);
-
-            // Walk through each type in the assembly
-            for each( Type ^type in assembly->GetTypes() )
-            {
-                if( type->IsClass && type->IsPublic )
-                {
-                    if( type->GetInterface("FHUI.IPluginBase") )
-                    {
-                        IPluginBase^ plugin = safe_cast<IPluginBase^>(Activator::CreateInstance(type));
-                        m_AllPlugins->Add(plugin);
-                        
-                        IGridPlugin^ gridPlugin = dynamic_cast<IGridPlugin^>(plugin);
-                        if( gridPlugin )
-                            m_GridPlugins->Add(gridPlugin);
-
-                        IOrdersPlugin^ ordersPlugin = dynamic_cast<IOrdersPlugin^>(plugin);
-                        if( ordersPlugin )
-                            m_OrdersPlugins->Add(ordersPlugin);
-                    }
-                }
-            }
-        }
-        catch( Exception ^ex )
-        {
-            throw gcnew FHUIPluginException(
-                String::Format("Error occured while loading plugin: {0}\r\n Error message: {1}",
-                    f->Name, ex->Message),
-                ex );
-        }
+        RepModeCommands->Enabled = m_OrderFiles->Count > 0;
     }
 }
 
@@ -912,7 +705,7 @@ void Form1::SystemsInitControls()
     //c.Wormhole = ADD_COLUMN("WH",           "Wormhole target",      String,     Ascending,  Default);
     c.Colonies = ADD_COLUMN("Colonies",     "Summary of colonies and named planets", String, Ascending,  Default);
 
-    for each( IGridPlugin ^plugin in m_GridPlugins )
+    for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
         plugin->AddColumns(GridType::Systems, sorter);
 
     c.Notes    = ADD_COLUMN("Notes", "Notes", String, Ascending,  Default);
@@ -920,7 +713,7 @@ void Form1::SystemsInitControls()
 
     // Formatting
     ApplyDataAndFormat(SystemsGrid, nullptr, c.Object, c.LSNAvail, sorter);
-    for each( IGridPlugin ^plugin in m_GridPlugins )
+    for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
         plugin->GridFormat(GridType::Systems, SystemsGrid);
 
     SystemsGrid->Columns[c.Dist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
@@ -1014,7 +807,7 @@ void Form1::SystemsSetup()
 
         //SystemsGrid->Columns[colColonies->Ordinal]->DefaultCellStyle->WrapMode = DataGridViewTriState::True;
 
-        for each( IGridPlugin ^plugin in m_GridPlugins )
+        for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
             plugin->AddRowData(row, SystemsGrid->Filter, system);
     }
 
@@ -1121,7 +914,7 @@ void Form1::PlanetsInitControls()
     c.Scan      = ADD_COLUMN("Scan",        "Planet scan source",   String,     Ascending,  Default);
     c.Colonies  = ADD_COLUMN("Colonies",    "Summary of colonies and named planets", String, Ascending,  Default);
 
-    for each( IGridPlugin ^plugin in m_GridPlugins )
+    for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
         plugin->AddColumns(GridType::Planets, sorter);
 
     c.Notes    = ADD_COLUMN("Notes", "Notes", String, Ascending,  Default);
@@ -1129,7 +922,7 @@ void Form1::PlanetsInitControls()
 
     // Formatting
     ApplyDataAndFormat(PlanetsGrid, nullptr, c.Object, c.LSN, sorter);
-    for each( IGridPlugin ^plugin in m_GridPlugins )
+    for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
         plugin->GridFormat(GridType::Planets, PlanetsGrid);
 
     PlanetsGrid->Columns[c.Dist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
@@ -1230,7 +1023,7 @@ void Form1::PlanetsSetup()
                 cells[c.Notes]->Value    = planet->Comment;
             }
 
-            for each( IGridPlugin ^plugin in m_GridPlugins )
+            for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
                 plugin->AddRowData(row, PlanetsGrid->Filter, planet);
         }
     }
@@ -1379,10 +1172,8 @@ void Form1::PlanetsMenuAddName(DataGridViewCellEventArgs ^cell)
 
     if( addName )
     {
-        AddCommand( gcnew CmdPlanetName(
-            m_PlanetsMenuRef->System,
-            m_PlanetsMenuRef->Number,
-            name ) );
+        m_CommandMgr->AddCommand( 
+            gcnew CmdPlanetName( m_PlanetsMenuRef->System, m_PlanetsMenuRef->Number, name ) );
 
         m_PlanetsMenuRef->AddName(name);
     }
@@ -1402,7 +1193,7 @@ void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
                 if( cmd->m_System == m_PlanetsMenuRef->System &&
                     cmd->m_PlanetNum == m_PlanetsMenuRef->Number )
                 {
-                    DelCommand(iCmd);
+                    m_CommandMgr->DelCommand(iCmd);
                     break;
                 }
             }
@@ -1410,7 +1201,7 @@ void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
     }
     else
     {   // Add Disband command
-        AddCommand( gcnew CmdDisband( m_PlanetsMenuRef->Name ) );
+        m_CommandMgr->AddCommand( gcnew CmdDisband( m_PlanetsMenuRef->Name ) );
     }
 
     m_PlanetsMenuRef->DelName();
@@ -1428,7 +1219,7 @@ void Form1::PlanetsMenuRemoveNameCancel(Object^, EventArgs^)
             CmdDisband ^cmd = safe_cast<CmdDisband^>(iCmd);
             if( cmd->m_Name == m_PlanetsMenuRef->Name )
             {
-                DelCommand(iCmd);
+                m_CommandMgr->DelCommand(iCmd);
                 m_PlanetsMenuRef->NameIsDisband = false;
                 PlanetsGrid->Filter->Update();
                 return;
@@ -1467,7 +1258,7 @@ void Form1::ColoniesInitControls()
     c.ProdPerc  = ADD_COLUMN("Eff",         "Production effectiveness",     int,    Descending, Default);
     c.Seen      = ADD_COLUMN("Seen",        "Last seen turn",               int,    Descending, Default);
 
-    for each( IGridPlugin ^plugin in m_GridPlugins )
+    for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
         plugin->AddColumns(GridType::Colonies, sorter);
 
     c.Notes        = ADD_COLUMN("Notes", "Notes", String, Ascending, Default);
@@ -1475,7 +1266,7 @@ void Form1::ColoniesInitControls()
 
     // Formatting
     ApplyDataAndFormat(ColoniesGrid, nullptr, c.Object, c.Prod, sorter);
-    for each( IGridPlugin ^plugin in m_GridPlugins )
+    for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
         plugin->GridFormat(GridType::Colonies, ColoniesGrid);
 
     ColoniesGrid->Columns[c.Size]->DefaultCellStyle->Format = "F1";
@@ -1616,7 +1407,7 @@ void Form1::ColoniesSetup()
 
         cells[c.Notes]->Value = notes;
 
-        for each( IGridPlugin ^plugin in m_GridPlugins )
+        for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
             plugin->AddRowData(row, ColoniesGrid->Filter, colony);
     }
 
@@ -1739,13 +1530,13 @@ void Form1::ColoniesMenuProdOrderAdjust(int adjustment)
     GameData::Player->SortColoniesByProdOrder();
     ColoniesGrid->Filter->Update();
 
-    SaveCommands();
+    m_CommandMgr->SaveCommands();
 }
 
 void Form1::ColoniesMenuProdShipyard(Object^, EventArgs^)
 {
     m_ColoniesMenuRef->OrderBuildShipyard = !m_ColoniesMenuRef->OrderBuildShipyard;
-    SaveCommands();
+    m_CommandMgr->SaveCommands();
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1775,13 +1566,13 @@ void Form1::ShipsInitControls()
     c.RecVal    = ADD_COLUMN("Rec",         "Recycle value",            int,    Descending, Default);
     c.Order     = ADD_COLUMN("Order",       "Order",                    String, Ascending,  Default);
 
-    for each( IGridPlugin ^plugin in m_GridPlugins )
+    for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
         plugin->AddColumns(GridType::Ships, sorter);
 #undef ADD_COLUMN
 
     // Formatting
     ApplyDataAndFormat(ShipsGrid, nullptr, c.Object, c.Class, sorter);
-    for each( IGridPlugin ^plugin in m_GridPlugins )
+    for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
         plugin->GridFormat(GridType::Ships, ShipsGrid);
 
     ShipsGrid->Columns[c.Dist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
@@ -1879,7 +1670,7 @@ void Form1::ShipsSetup()
                 cells[c.Order]->Value = ship->EUToComplete.ToString() + " EU to complete";
         }
 
-        for each( IGridPlugin ^plugin in m_GridPlugins )
+        for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
             plugin->AddRowData(row, ShipsGrid->Filter, ship);
     }
 
@@ -2140,7 +1931,7 @@ void Form1::ShipsMenuOrderSet(ShipOrderData ^data)
 {
     data->A->Command = data->B;
     ShipsGrid->Filter->Update();
-    SaveCommands();
+    m_CommandMgr->SaveCommands();
 }
 
 ////////////////////////////////////////////////////////////////
@@ -2167,13 +1958,13 @@ void Form1::AliensInitControls()
     c.Teach     = ADD_COLUMN("Teach",       "Teach orders",             String, Ascending,  Default);
     c.EMail     = ADD_COLUMN("EMail",       "Species email",            String, Ascending,  Default);
 
-    for each( IGridPlugin ^plugin in m_GridPlugins )
+    for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
         plugin->AddColumns(GridType::Aliens, sorter);
 #undef ADD_COLUMN
 
     // Formatting
     ApplyDataAndFormat(AliensGrid, nullptr, c.Object, c.Relation, sorter);
-    for each( IGridPlugin ^plugin in m_GridPlugins )
+    for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
         plugin->GridFormat(GridType::Aliens, AliensGrid);
 
     AliensGrid->Columns[c.Dist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
@@ -2243,7 +2034,7 @@ void Form1::AliensSetup()
                 cells[c.Teach]->Value = teach->Substring(2);
         }
 
-        for each( IGridPlugin ^plugin in m_GridPlugins )
+        for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
             plugin->AddRowData(row, AliensGrid->Filter, alien);
     }
 
@@ -2359,7 +2150,7 @@ void Form1::AliensMenuTeach(TeachData ^data)
         }
     }
 
-    AddCommand( gcnew CmdTeach(alien, tech, level) );
+    m_CommandMgr->AddCommand( gcnew CmdTeach(alien, tech, level) );
 
     alien->TeachOrders |= 1 << tech;
     AliensGrid->Filter->Update();
@@ -2417,8 +2208,11 @@ void Form1::AliensMenuTeachCancel(Object^, EventArgs^)
             }
         }
     } while( removed );
+    
     if( removedAny )
-        SaveCommands();
+    {
+        m_CommandMgr->SaveCommands();
+    }
 
     m_AliensMenuRef->TeachOrders = 0;
     AliensGrid->Filter->Update();
@@ -2440,11 +2234,13 @@ void Form1::AliensMenuSetRelation(AlienRelationData ^data)
             if( cmd->m_Alien == alien )
             {
                 if( rel == alien->RelationOriginal )
-                    DelCommand(iCmd);
+                {
+                    m_CommandMgr->DelCommand(iCmd);
+                }
                 else
                 {
                     cmd->m_Relation = rel;
-                    SaveCommands();
+                    m_CommandMgr->SaveCommands();
                 }
                 addNew = false;
                 break;
@@ -2454,7 +2250,7 @@ void Form1::AliensMenuSetRelation(AlienRelationData ^data)
 
     if( addNew )
     {   // Add relation command
-        AddCommand( gcnew CmdAlienRelation(alien, rel) );
+        m_CommandMgr->AddCommand( gcnew CmdAlienRelation(alien, rel) );
     }
 
     // Set relation
@@ -2470,6 +2266,11 @@ void Form1::AliensMenuSetRelation(AlienRelationData ^data)
     PlanetsGrid->Filter->Update();
     ColoniesGrid->Filter->Update();
     ShipsGrid->Filter->Update();
+}
+
+void Form1::CopyOrdersTemplateToClipboard()
+{
+    Clipboard::SetText(OrderTemplate->Text, TextDataFormat::Text);
 }
 
 ////////////////////////////////////////////////////////////////

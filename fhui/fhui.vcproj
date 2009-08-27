@@ -322,6 +322,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\source\CommandManager.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\source\fhui.cpp"
 					>
 				</File>
@@ -342,11 +346,19 @@
 					>
 				</File>
 				<File
-					RelativePath=".\source\Orders.cpp"
+					RelativePath=".\source\PluginManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\RegexMatcher.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\source\Report.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\ReportParser.cpp"
 					>
 				</File>
 				<File
@@ -406,6 +418,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\include\CommandManager.h"
+					>
+				</File>
+				<File
 					RelativePath=".\include\Form1.h"
 					FileType="3"
 					>
@@ -424,7 +440,19 @@
 					>
 				</File>
 				<File
+					RelativePath=".\include\PluginManager.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\RegexMatcher.h"
+					>
+				</File>
+				<File
 					RelativePath=".\include\Report.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\ReportParser.h"
 					>
 				</File>
 				<File

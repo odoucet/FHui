@@ -14,7 +14,9 @@ namespace FHUI {
     generic <typename T>
     private delegate void EventHandler1Arg(T);
 
-    ref class RegexMatcher;
+    ref class ReportParser;
+    ref class PluginManager;
+    ref class CommandManager;
 
     /// <summary>
     /// Summary for Form1
@@ -32,7 +34,7 @@ namespace FHUI {
         {
         }
 
-        void        LoadGameData();
+        void Initialize();
 
         // ==================================================
         // -- Config properties --
@@ -52,11 +54,12 @@ namespace FHUI {
             }
         }
 
-        void        ScanReports();
-        int         CheckReport(String ^fileName);
-        void        LoadGalaxy();
-        void        LoadReport(String ^fileName);
+        String^     GetAboutText();
+        void        CopyOrdersTemplateToClipboard();
+
         void        LoadOrders();
+        SortedList<String^, String^>^   m_OrderFiles;
+
         void        TurnReload();
         void        InitData();
         void        InitRefLists();
@@ -64,7 +67,6 @@ namespace FHUI {
         void        UpdateControls();
         void        UpdateTabs();
 
-        void        FillAboutBox();
         void        RepModeChanged();
         void        DisplayReport();
         void        DisplayTurn();
@@ -118,10 +120,9 @@ namespace FHUI {
         ////////////////////////////////////////////////////////////////
 
         GameData^           m_GameData;
-        RegexMatcher^       m_RM;
-        SortedList<int, String^>       ^m_Reports;
-        SortedList<int, String^>       ^m_RepFiles;
-        SortedList<String^, String^>   ^m_CmdFiles;
+        ReportParser^       m_ReportParser;
+        PluginManager^      m_PluginMgr;
+        CommandManager^     m_CommandMgr;
 
         array<String^>     ^m_RepTurnNrData;
 
@@ -130,19 +131,10 @@ namespace FHUI {
         List<String^>      ^m_RefListColonies;
         List<String^>      ^m_RefListShips;
 
-        bool                m_HadException;
+        bool                m_bHadException;
         bool               ^m_bGridUpdateEnabled;
 
         System::Windows::Forms::ToolTip^    m_GridToolTip;
-
-        // ==================================================
-        // --- Plugins ---
-        void        LoadPlugins();
-        void        UpdatePlugins();
-
-        List<IPluginBase^>^     m_AllPlugins;
-        List<IGridPlugin^>^     m_GridPlugins;
-        List<IOrdersPlugin^>^   m_OrdersPlugins;
 
         // ==================================================
         // --- SYSTEMS ---
@@ -317,33 +309,6 @@ namespace FHUI {
         Alien              ^m_AliensMenuRef;
         AliensColumns       m_AliensColumns;
 
-        // ==================================================
-        // --- ORDER TEMPLATE ---
-        void        GenerateTemplate();
-        void        SaveCommands();
-        void        DeleteCommands();
-        void        LoadCommands();
-        void        AddCommand(ICommand ^cmd);
-        void        DelCommand(ICommand ^cmd);
-        void        CopyOrdersTemplateToClipboard();
-
-        void        GenerateCombat();
-        void        GeneratePreDeparture();
-        void        GenerateJumps();
-        void        GenerateProduction();
-        void        GeneratePostArrival();
-        void        GenerateStrikes();
-
-        void        GenerateCombatInfo(StarSystem^);
-        void        GeneratePreDepartureInfo(StarSystem^);
-        void        GenerateJumpInfo(Ship^);
-        void        GenerateScanOrders();
-        void        GenerateProductionRecycle(Colony ^colony, BudgetTracker ^budget);
-        void        GenerateProductionUpgrade(Colony ^colony, BudgetTracker ^budget);
-
-        List<String^>      ^m_OrderList;
-
-        List<String^>^ PrintSystemStatus(StarSystem^ system, bool listIncomplete);
         // ==================================================
         // --- UTILS ---
         void        UtilTabSelected();

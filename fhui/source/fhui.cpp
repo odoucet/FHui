@@ -30,7 +30,7 @@ int main(array<System::String ^> ^args)
     Form1 ^fhui = gcnew Form1;
     fhui->DataDir = dataDir;
     fhui->EnablePlugins = plugins;
-    fhui->LoadGameData();
+    fhui->Initialize();
 
     // Create the main window and run it
     Application::Run(fhui);
