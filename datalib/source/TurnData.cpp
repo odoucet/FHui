@@ -7,8 +7,9 @@
 namespace FHUI
 {
 
-TurnData::TurnData(void)
-    : m_TurnEUStart(0)
+TurnData::TurnData(int turn)
+    : m_Turn(turn)
+    , m_TurnEUStart(0)
     , m_TurnEUProduced(0)
     , m_FleetCost(0)
     , m_FleetCostPercent(0)
@@ -17,13 +18,7 @@ TurnData::TurnData(void)
     , m_Colonies(gcnew SortedList<String^, Colony^>)
     , m_PlanetNames(gcnew SortedList<String^, PlanetName^>)
     , m_Ships(gcnew SortedList<String^, Ship^>)
-    , m_Commands(gcnew List<ICommand^>)
-    , m_AutoOrdersPreDeparture(gcnew SortedList<StarSystem^, List<String^>^>)
-    , m_AutoOrdersJumps(gcnew SortedList<Ship^, List<String^>^>)
-    , m_AutoOrdersProduction(gcnew SortedList<Colony^, List<Pair<String^, int>^>^>)
-    , m_TurnMax(0)
 {
-    AutoEnabled = false;
 }
 
 String^ TurnData::GetSummary()
@@ -156,7 +151,7 @@ String^ TurnData::GetPlanetsSummary()
 
     for each( StarSystem ^system in GetStarSystems() )
     {
-        for each( Planet ^planet in system->GetPlanets() )
+        for each( Planet ^planet in system->Planets->Values )
         {
             if( String::IsNullOrEmpty(planet->Name) )
                 continue;
@@ -266,76 +261,11 @@ List<Colony^>^ TurnData::GetColonies(StarSystem ^sys, Alien ^sp)
     return ret;
 }
 
-// ---------------------------------------------------------
-
-bool TurnData::TurnCheck(int turn)
-{
-    if( turn > m_TurnMax )
-    {
-        m_TurnMax = turn;
-
-        // New turn cleanup
-        for each( Alien ^alien in GetAliens() )
-        {
-            if( alien != GameData::Player && alien->Relation != SP_PIRATE )
-                alien->Relation = SP_NEUTRAL; // FIXME: default relation may be different...
-        }
-
-        m_TurnEUStart       = 0;
-        m_TurnEUProduced    = 0;
-        m_FleetCost         = 0;
-        m_FleetCostPercent  = 0;
-
-        // Remove all player's colonies in case one of them no longer exists
-        bool removed = false;
-        do {
-            removed = false;
-            for each( KeyValuePair<String^, Colony^> ^iter in m_Colonies )
-            {
-                if( iter->Value->Owner == GameData::Player )
-                {
-                    m_Colonies->Remove(iter->Key);
-                    removed = true;
-                    break;
-                }
-            }
-        } while( removed );
-
-        // remove planet names
-        m_PlanetNames->Clear();
-        // remove empty sectors with ships from from system list
-        for each(Ship^ ship in m_Ships->Values)
-        {
-            if ( ship->System->IsVoid )
-            {
-                m_Systems->Remove(ship->System->GetId());
-            }
-        }
-        // remove ships
-        m_Ships->Clear();
-        // clear auto orders
-        AutoEnabled = false;
-        m_AutoOrdersPreDeparture->Clear();
-        m_AutoOrdersJumps->Clear();
-        m_AutoOrdersProduction->Clear();
-    }
-    return turn == m_TurnMax;
-}
-
-int TurnData::TurnAlign(int turn)
-{
-    if( turn == 0 )
-    {
-        return TURN_NOTES;
-    }
-    return turn;
-}
-
 void TurnData::SetSpecies(String ^sp)
 {
     if( GameData::Player == nullptr )
     {
-        AddAlien(0, sp)->Relation = SP_PLAYER;
+        AddAlien(sp)->Relation = SP_PLAYER;
     }
     else if( String::Compare(GameData::Player->Name, sp) != 0 )
     {
@@ -344,52 +274,35 @@ void TurnData::SetSpecies(String ^sp)
     }
 }
 
-Alien^ TurnData::AddAlien(int turn, String ^sp)
+Alien^ TurnData::AddAlien(String ^sp)
 {
     String ^spKey = sp->ToLower();
     if( m_Aliens->ContainsKey(spKey) )
     {
-        Alien ^alien = m_Aliens[spKey];
-        alien->TurnMet = Math::Min(TurnAlign(turn), alien->TurnMet);
-
-        return alien;
+        return m_Aliens[spKey];
     }
-
-    Alien ^alien = gcnew Alien(sp, turn);
+    Alien ^alien = gcnew Alien(sp, m_Turn);
     m_Aliens->Add(spKey, alien);
-
     return alien;
 }
 
-void TurnData::SetAlienRelation(int turn, String ^sp, SPRelType rel)
+void TurnData::SetAlienRelation(String ^sp, SPRelType rel)
 {
-    if( TurnCheck(turn) )
-    {
-        Alien ^alien = AddAlien(turn, sp);
-        alien->Relation = rel;
-    }
+    AddAlien(sp)->Relation = rel;
 }
 
-void TurnData::SetTechLevel(int turn, Alien ^sp, TechType tech, int lev, int levTeach)
+void TurnData::SetTechLevel(Alien ^sp, TechType tech, int lev, int levTeach)
 {
-    if( TurnCheck(turn) || sp->TechEstimateTurn == -1 )
-    {
-        m_TurnMax = turn;
-
-        sp->TechEstimateTurn        = turn;
-        sp->TechLevels[tech]        = lev;
-        sp->TechLevelsAssumed[tech] = lev;
-        sp->TechLevelsTeach[tech]   = levTeach;
-    }
+    sp->TechEstimateTurn        = m_Turn;
+    sp->TechLevels[tech]        = lev;
+    sp->TechLevelsAssumed[tech] = lev;
+    sp->TechLevelsTeach[tech]   = levTeach;
 }
 
-void TurnData::SetFleetCost(int turn, int cost, int percent)
+void TurnData::SetFleetCost(int cost, int percent)
 {
-    if( TurnCheck(turn) )
-    {
-        m_FleetCost = cost;
-        m_FleetCostPercent = percent;
-    }
+    m_FleetCost = cost;
+    m_FleetCostPercent = percent;
 }
 
 StarSystem^ TurnData::GetStarSystem(int x, int y, int z)
@@ -437,115 +350,73 @@ StarSystem^ TurnData::AddStarSystem(int x, int y, int z, String ^type, String ^c
     return system;
 }
 
-void TurnData::AddPlanetScan(int turn, StarSystem ^system, Planet ^planet)
+void TurnData::AddPlanetScan(StarSystem ^system, Planet ^planet)
 {
-    int plNum = planet->Number - 1;
-    if( system->PlanetsCount < planet->Number ||
-        system->Planets[plNum] == nullptr ||
-        turn == m_TurnMax )
+    if( system->Planets->ContainsKey(planet->Number) )
     {
-        if( system->PlanetsCount >= planet->Number &&
-            system->Planets[plNum] != nullptr )
+        Planet ^plExisting = system->Planets[planet->Number];
+        if( !String::IsNullOrEmpty(plExisting->Comment) )
         {
-            Planet ^plExisting = system->Planets[plNum];
-            if( !String::IsNullOrEmpty(plExisting->Comment) )
-            {
-                if( String::IsNullOrEmpty(planet->Comment) )
-                    planet->Comment = plExisting->Comment;
-                else
-                    planet->Comment += "; " + plExisting->Comment;
-            }
-            //TODO: WTF? WHY DOES IT CRASH???
-            //planet->SuspectedColonies = plExisting->SuspectedColonies;
-
-            for each( Colony ^colony in m_Colonies->Values )
-                if( colony->Planet == plExisting )
-                    colony->Planet = planet;
+            if( String::IsNullOrEmpty(planet->Comment) )
+                planet->Comment = plExisting->Comment;
+            else
+                planet->Comment += "; " + plExisting->Comment;
         }
-        system->Planets[plNum] = planet;
-        system->TurnScanned   = Math::Max(system->TurnScanned, turn);
+        //TODO: WTF? WHY DOES IT CRASH???
+        //planet->SuspectedColonies = plExisting->SuspectedColonies;
+
+        for each( Colony ^colony in m_Colonies->Values )
+            if( colony->Planet == plExisting )
+                colony->Planet = planet;
     }
+    else
+    {
+        system->Planets->Add(planet->Number, planet);
+    }
+    system->TurnScanned = m_Turn;
 }
 
-void TurnData::SetTurnStartEU(int turn, int eu)
+void TurnData::SetTurnStartEU(int eu)
 {
-    if( TurnCheck(turn) )
-    {
-        m_TurnEUStart = eu;
-    }
+    m_TurnEUStart = eu;
 }
 
-void TurnData::AddTurnProducedEU(int turn, int eu)
+void TurnData::AddTurnProducedEU(int eu)
 {
-    if( TurnCheck(turn) )
-    {
-        m_TurnEUProduced += eu;
-    }
+    m_TurnEUProduced += eu;
 }
 
-Colony^ TurnData::AddColony(int turn, Alien ^sp, String ^name, StarSystem ^system, int plNum)
+Colony^ TurnData::AddColony(Alien ^sp, String ^name, StarSystem ^system, int plNum)
 {
-    bool createColony = false;
-
-    if( TurnCheck(turn) )
+    if( m_Colonies->ContainsKey( name->ToLower() ) )
     {
-        createColony = true;
+        return m_Colonies[name->ToLower()];
     }
-
-    if( createColony )
+    else
     {
         Colony ^colony = gcnew Colony(sp, name, system, plNum);
-        m_Colonies[name->ToLower()] = colony;
+        m_Colonies->Add(name->ToLower(), colony);
 
-        if( system->PlanetsCount < plNum )
+        if( ! system->Planets->ContainsKey(plNum) )
         {
             // System is not yet known, initialize with defaults
-            for(int i = 0; i < plNum; ++i)
-            {
-                if( system->Planets[i] == nullptr )
-                    system->Planets[i] = Planet::Default(system, i + 1);
-            }
+            system->Planets->Add(plNum, Planet::Default(system, plNum) );
         }
-        colony->Planet = system->GetPlanet(plNum);
+        colony->Planet = system->Planets[plNum];
         //TODO: WTF? WHY DOES IT CRASH???
         //if( colony->Planet->SuspectedColonies->ContainsKey(sp) )
         //    colony->Planet->SuspectedColonies->Remove(sp);
-
-        // If this is species' own colony, remove alien colonies from this system.
-        // They'll be restored by 'Aliens at...' parsing. If not - it means that alien
-        // colony was destroyed or assimilated.
         if( sp == GameData::Player )
         {
-            bool bRemoved = false;
-            do
-            {
-                bRemoved = false;
-                for each( KeyValuePair<String^, Colony^> ^iter in m_Colonies )
-                {
-                    Colony ^c = iter->Value;
-                    if( c->Owner != GameData::Player &&
-                        c->System == system )
-                    {
-                        m_Colonies->Remove(iter->Key);
-                        bRemoved = true;
-                        break; // for each
-                    }
-                }
-            } while( bRemoved );
+            DeleteAlienColonies(system);
         }
-
         return colony;
     }
-
-    return nullptr;
 }
 
-void TurnData::AddPlanetName(int turn, StarSystem ^system, int pl, String ^name)
+void TurnData::AddPlanetName(StarSystem ^system, int pl, String ^name)
 {
-    if( TurnCheck(turn) )
-    {
-        m_PlanetNames[name->ToLower()] = gcnew PlanetName(system, pl, name);
-    }
+    m_PlanetNames[name->ToLower()] = gcnew PlanetName(system, pl, name);
 }
 
 void TurnData::Update()
@@ -609,7 +480,7 @@ void TurnData::UpdateSystems()
         // Calculate LSN
         int minLSN = 99999;
         int minLSNAvail = 99999;
-        for each( Planet ^planet in system->GetPlanets() )
+        for each( Planet ^planet in system->Planets->Values )
         {
             planet->LSN = planet->CalculateLSN();
             planet->NumColonies = 0;
@@ -657,7 +528,7 @@ void TurnData::LinkPlanetNames()
     for each( Colony ^colony in GetColonies() )
     {
         StarSystem ^system = colony->System;
-        colony->Planet = system->GetPlanet( colony->PlanetNum );
+        colony->Planet = system->Planets[colony->PlanetNum];
 
         if( colony->Owner == GameData::Player )
         {
@@ -674,9 +545,10 @@ void TurnData::LinkPlanetNames()
 
     for each( PlanetName ^plName in m_PlanetNames->Values )
     {
-        Planet ^planet = plName->System->GetPlanet( plName->PlanetNum );
-        if( planet )
-            planet->Name = plName->Name;
+        if( plName->System->Planets->ContainsKey( plName->PlanetNum ) )
+        {
+            plName->System->Planets[plName->PlanetNum]->Name = plName->Name;
+        }
     }
 }
 
@@ -689,9 +561,9 @@ void TurnData::UpdateHomeWorlds()
             if( GameData::AtmReq->IsValid() )
                 continue;
 
-            Planet ^planet = colony->System->GetPlanet(colony->PlanetNum);
-            if( planet )
+            if( colony->System->Planets->ContainsKey( colony->PlanetNum ) )
             {
+                Planet ^planet = colony->System->Planets[colony->PlanetNum];
                 GameData::AtmReq->TempClass = planet->TempClass;
                 GameData::AtmReq->PressClass = planet->PressClass;
                 for( int i = 0; i < GAS_MAX; ++i )
@@ -736,154 +608,43 @@ void TurnData::UpdateColonies()
     GameData::Player->SortColoniesByProdOrder();
 }
 
-Ship^ TurnData::AddShip(int turn, Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system)
+Ship^ TurnData::AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system)
 {
-    if( TurnCheck(turn) )
-    {
-        Ship ^ship = gcnew Ship(sp, type, name, subLight);
-        ship->System = system;
-        m_Ships[name->ToLower()] = ship;
+    Ship ^ship = gcnew Ship(sp, type, name, subLight);
+    ship->System = system;
+    m_Ships[name->ToLower()] = ship;
 
-        if( sp == GameData::Player )
+    if( sp == GameData::Player )
+    {
+        DeleteAlienColonies(system);
+    }
+    return ship;
+}
+
+void TurnData::DeleteAlienColonies(StarSystem^ system)
+{
+    // Remove alien colonies from this system.
+    // They'll be restored by 'Aliens at...' parsing. If not - it means that alien
+    // colony was destroyed, assimilated or it is hiding. Add a note.
+    bool bRemoved = false;
+    do
+    {
+        bRemoved = false;
+        for each( KeyValuePair<String^, Colony^> ^iter in m_Colonies )
         {
-            // Remove alien colonies from this system.
-            // They'll be restored by 'Aliens at...' parsing. If not - it means that alien
-            // colony was destroyed, assimilated or it is hiding. Add a note.
-            bool bRemoved = false;
-            do
+            Colony ^c = iter->Value;
+            if( c->Owner != GameData::Player &&
+                c->System == system )
             {
-                bRemoved = false;
-                for each( KeyValuePair<String^, Colony^> ^iter in m_Colonies )
-                {
-                    Colony ^c = iter->Value;
-                    if( c->Owner != GameData::Player &&
-                        c->System == system )
-                    {
-                        if( c->Planet == nullptr )
-                        {
-                            // System is not yet known, initialize with defaults
-                            for(int i = 0; i < c->PlanetNum; ++i)
-                            {
-                                if( c->System->Planets[i] == nullptr )
-                                    c->System->Planets[i] = Planet::Default(c->System, i + 1);
-                            }
-                            c->Planet = c->System->GetPlanet(c->PlanetNum);
-                        }
-                        //TODO: WTF? WHY DOES IT CRASH???
-                        //c->Planet->SuspectedColonies[c->Owner] = c->LastSeen;
+                //TODO: WTF? WHY DOES IT CRASH???
+                //c->Planet->SuspectedColonies[c->Owner] = c->LastSeen;
 
-                        m_Colonies->Remove(iter->Key);
-                        bRemoved = true;
-                        break; // for each
-                    }
-                }
-            } while( bRemoved );
+                m_Colonies->Remove(iter->Key);
+                bRemoved = true;
+                break; // for each
+            }
         }
-
-        return ship;
-    }
-
-    return nullptr;
-}
-
-private ref class CommandComparer : public IComparer<ICommand^>
-{
-public:
-    virtual int Compare(ICommand ^c1, ICommand ^c2)
-    {
-        return (int)c1->GetType() - (int)c2->GetType();
-    }
-};
-
-void TurnData::SortCommands()
-{
-    m_Commands->Sort( gcnew CommandComparer );
-}
-
-void TurnData::SetAutoEnabled(int turn)
-{   
-    if( TurnCheck(turn) )
-    {
-        AutoEnabled = true;
-    }
-}
-
-void TurnData::SetAutoOrderPreDeparture(int turn, StarSystem^ system, String^ line)
-{   
-    if( TurnCheck(turn) )
-    {
-        if ( m_AutoOrdersPreDeparture->ContainsKey( system ) )
-        {
-            m_AutoOrdersPreDeparture[system]->Add(line);
-        }
-        else
-        {
-            List<String^>^ list = gcnew List<String^>;
-            list->Add(line);
-            m_AutoOrdersPreDeparture->Add(system, list);
-        }
-    }
-}
-
-void TurnData::SetAutoOrderJumps(int turn, Ship^ ship, String^ line)
-{
-    if( TurnCheck(turn) )
-    {
-        if ( m_AutoOrdersJumps->ContainsKey( ship ) )
-        {
-            m_AutoOrdersJumps[ship]->Add(line);
-        }
-        else
-        {
-            List<String^>^ list = gcnew List<String^>;
-            list->Add(line);
-            m_AutoOrdersJumps->Add(ship, list);
-        }
-    }
-}
-
-void TurnData::SetAutoOrderProduction(int turn, Colony^ colony, String^ line, int cost)
-{
-    if( TurnCheck(turn) )
-    {
-        if ( m_AutoOrdersProduction->ContainsKey( colony ) )
-        {
-            m_AutoOrdersProduction[colony]->Add(gcnew Pair<String^, int>(line, cost));
-        }
-        else
-        {
-            List<Pair<String^, int>^>^ list = gcnew List<Pair<String^, int>^>;
-            list->Add(gcnew Pair<String^, int>(line, cost));
-            m_AutoOrdersProduction->Add(colony, list);
-        }
-    }
-}
-
-List<String^>^ TurnData::GetAutoOrdersPreDeparture(StarSystem^ system)
-{
-    if ( m_AutoOrdersPreDeparture->ContainsKey( system ) )
-    {
-        return m_AutoOrdersPreDeparture[system];
-    }
-    return nullptr;
-}
-
-List<String^>^ TurnData::GetAutoOrdersJumps(Ship^ ship)
-{
-    if ( m_AutoOrdersJumps->ContainsKey( ship ) )
-    {
-        return m_AutoOrdersJumps[ship];
-    }
-    return nullptr;
-}
-
-List<Pair<String^, int>^>^ TurnData::GetAutoOrdersProduction(Colony^ colony)
-{
-    if ( m_AutoOrdersProduction->ContainsKey( colony ) )
-    {
-        return m_AutoOrdersProduction[colony];
-    }
-    return nullptr;
+    } while( bRemoved );
 }
 
 } // end namespace FHUI

@@ -107,15 +107,16 @@ void Form1::InitData()
     m_RepTurnNrData = nullptr;
 
     m_GameData      = gcnew GameData;
-    m_ReportParser  = gcnew ReportParser(m_GameData, GetDataDir("galaxy_list.txt"), GetDataDir("reports"));
     m_PluginMgr     = gcnew PluginManager(m_GameData, Application::StartupPath);
     m_CommandMgr    = gcnew CommandManager(m_GameData, GetDataDir(OrdersDir::Folder));
+    m_ReportParser  = gcnew ReportParser(m_GameData, m_CommandMgr, GetDataDir("galaxy_list.txt"), GetDataDir("reports"));
 
     if (EnablePlugins)
     {
         m_PluginMgr->LoadPlugins();
     }
     m_ReportParser->ScanReports();
+    m_CommandMgr->LoadCommands();
 }
 
 void Form1::InitRefLists()
@@ -378,7 +379,9 @@ void Form1::DisplayTurn()
         m_PluginMgr->UpdatePlugins();
         UpdateControls();
 
-        m_ColoniesMenuRef = m_CommandMgr->LoadCommands();
+        m_CommandMgr->SelectTurn(turn);
+        //TODO: Set it properly. What should it be ?
+        //m_ColoniesMenuRef = 
 
         // Display summary
         Summary->Text = m_GameData->GetSummary();
@@ -788,7 +791,7 @@ void Form1::SystemsSetup()
         cells[c.Type]->Value        = system->Type;
         if( system->IsExplored() )
         {
-            cells[c.Planets]->Value = system->PlanetsCount;
+            cells[c.Planets]->Value = system->Planets->Count;
             cells[c.LSN]->Value     = system->MinLSN;
             if( system->MinLSNAvail != 99999 )
                 cells[c.LSNAvail]->Value= system->MinLSNAvail;
@@ -837,7 +840,7 @@ void Form1::SystemsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex
     m_SystemsMenuRef    = system;
     m_SystemsMenuRefRow = rowIndex;
 
-    if( system->PlanetsCount > 0 )
+    if( system->Planets->Count > 0 )
     {
         menu->Items->Add(
             "Show Planets in " + system->PrintLocation(),
@@ -987,7 +990,7 @@ void Form1::PlanetsSetup()
 
     for each( StarSystem ^system in m_GameData->GetStarSystems() )
     {
-        for each( Planet ^planet in system->GetPlanets() )
+        for each( Planet ^planet in system->Planets->Values )
         {
             if( PlanetsGrid->Filter->Filter(planet) )
                 continue;
@@ -1154,9 +1157,8 @@ void Form1::PlanetsMenuAddName(DataGridViewCellEventArgs ^cell)
     String ^nameLower = name->ToLower();
     for each( StarSystem ^system in m_GameData->GetStarSystems() )
     {
-        for each( Planet ^planet in system->GetPlanets() )
-            if( planet &&
-                !String::IsNullOrEmpty(planet->Name) &&
+        for each( Planet ^planet in system->Planets->Values )
+            if( !String::IsNullOrEmpty(planet->Name) &&
                 planet->Name->ToLower() == nameLower )
             {
                 MessageBox::Show(
@@ -1185,7 +1187,7 @@ void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
 {
     if( m_PlanetsMenuRef->NameIsNew )
     {   // Remove Name command
-        for each( ICommand ^iCmd in m_GameData->GetCommands() )
+        for each( ICommand ^iCmd in m_CommandMgr->GetCommands() )
         {
             if( iCmd->GetType() == CommandType::Name )
             {
@@ -1212,7 +1214,7 @@ void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
 void Form1::PlanetsMenuRemoveNameCancel(Object^, EventArgs^)
 {
     // Remove Disband command
-    for each( ICommand ^iCmd in m_GameData->GetCommands() )
+    for each( ICommand ^iCmd in m_CommandMgr->GetCommands() )
     {
         if( iCmd->GetType() == CommandType::Disband )
         {
@@ -2137,7 +2139,7 @@ void Form1::AliensMenuTeach(TeachData ^data)
     TechType tech = (TechType)data->B;
     int level = data->C;
 
-    for each( ICommand ^iCmd in m_GameData->GetCommands() )
+    for each( ICommand ^iCmd in m_CommandMgr->GetCommands() )
     {
         if( iCmd->GetType() == CommandType::Teach )
         {
@@ -2194,7 +2196,7 @@ void Form1::AliensMenuTeachCancel(Object^, EventArgs^)
     do
     {
         removed = false;
-        for each( ICommand ^iCmd in m_GameData->GetCommands() )
+        for each( ICommand ^iCmd in m_CommandMgr->GetCommands() )
         {
             if( iCmd->GetType() == CommandType::Teach )
             {
@@ -2202,7 +2204,7 @@ void Form1::AliensMenuTeachCancel(Object^, EventArgs^)
                 if( cmd->m_Alien == m_AliensMenuRef )
                 {
                     removed = removedAny = true;
-                    m_GameData->DelCommand(iCmd);
+                    m_CommandMgr->DelCommand(iCmd);
                     break;
                 }
             }
@@ -2226,7 +2228,7 @@ void Form1::AliensMenuSetRelation(AlienRelationData ^data)
     bool addNew = true;
 
     // Modify existing relation command
-    for each( ICommand ^iCmd in m_GameData->GetCommands() )
+    for each( ICommand ^iCmd in m_CommandMgr->GetCommands() )
     {
         if( iCmd->GetType() == CommandType::AlienRelation )
         {
@@ -2249,7 +2251,8 @@ void Form1::AliensMenuSetRelation(AlienRelationData ^data)
     }
 
     if( addNew )
-    {   // Add relation command
+    {
+        // Add relation command
         m_CommandMgr->AddCommand( gcnew CmdAlienRelation(alien, rel) );
     }
 

@@ -74,42 +74,27 @@ public:
     IList<Ship^>^           GetShips()                  { return m_CurrentTurnData->GetShips(); }
     IList<Colony^>^         GetColonies()               { return m_CurrentTurnData->GetColonies(); }
 
-    List<ICommand^>^        GetCommands()               { return m_CurrentTurnData->GetCommands(); }
-    void                    AddCommand(ICommand ^cmd)   { m_CurrentTurnData->AddCommand(cmd); }
-    void                    DelCommand(ICommand ^cmd)   { m_CurrentTurnData->DelCommand(cmd); }
-    void                    SortCommands()              { m_CurrentTurnData->SortCommands(); }
-
     void            Update();
-    void            SetTechLevel(int turn, Alien ^sp, TechType, int, int);
-    void            SetFleetCost(int turn, int, int);
-    Alien^          AddAlien(int turn, String ^sp);
-    void            SetAlienRelation(int turn, String ^sp, SPRelType);
+    void            SetTechLevel(Alien ^sp, TechType, int, int);
+    void            SetFleetCost(int, int);
+    Alien^          AddAlien(String ^sp);
+    void            SetAlienRelation(String ^sp, SPRelType);
     StarSystem^     AddStarSystem(int x, int y, int z, String ^type, String ^comment);
-    void            AddPlanetScan(int turn, StarSystem ^system, Planet ^planet);
-    void            SetTurnStartEU(int turn, int eu);
-    void            AddTurnProducedEU(int turn, int eu);
-    Colony^         AddColony(int turn, Alien ^sp, String ^name, StarSystem ^system, int plNum);
-    void            AddPlanetName(int turn, StarSystem ^system, int pl, String ^name);
-    Ship^           AddShip(int turn, Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);
+    void            AddPlanetScan(StarSystem ^system, Planet ^planet);
+    void            SetTurnStartEU(int eu);
+    void            AddTurnProducedEU(int eu);
+    Colony^         AddColony(Alien ^sp, String ^name, StarSystem ^system, int plNum);
+    void            AddPlanetName(StarSystem ^system, int pl, String ^name);
+    Ship^           AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);
 
-    property bool   AutoEnabled { bool get() { return m_CurrentTurnData->AutoEnabled; } }
-    void            SetAutoEnabled(int turn) { return m_CurrentTurnData->SetAutoEnabled(turn); }
-    void            SetAutoOrderPreDeparture(int turn, StarSystem^, String^);
-    void            SetAutoOrderJumps(int turn, Ship^, String^);
-    void            SetAutoOrderProduction(int turn, Colony^, String^, int);
-
-    List<String^>^  GetAutoOrdersPreDeparture(StarSystem^);
-    List<String^>^  GetAutoOrdersJumps(Ship^);
-    List<Pair<String^, int>^>^  GetAutoOrdersProduction(Colony^);
-
-    static void     SetSpecies(String ^sp);
-    static void     SetAtmosphereReq(GasType gas, int, int);
-    static void     SetAtmosphereNeutral(GasType gas);
-    static void     SetAtmospherePoisonous(GasType gas);
+    void            SetSpecies(String ^sp);
+    void            SetAtmosphereReq(GasType gas, int, int);
+    void            SetAtmosphereNeutral(GasType gas);
+    void            SetAtmospherePoisonous(GasType gas);
 
     static int      GetSystemId(int, int, int);
     static property int CurrentTurn { int get() { return m_CurrentTurn; } }
-    static property AtmosphericReq^    AtmReq;
+    static property AtmosphericReq^ AtmReq;
     static property Alien^ Player
     {
         Alien^ get ()
@@ -139,7 +124,7 @@ public:
         }
         else
         {
-            m_TurnData[turn] = gcnew TurnData;
+            m_TurnData[turn] = gcnew TurnData(turn);
             m_CurrentTurnData = m_TurnData[turn];
             return false;
         }

@@ -100,24 +100,24 @@ void GameData::Update()
     m_CurrentTurnData->Update();
 }
 
-void GameData::SetTechLevel(int turn, Alien ^sp, TechType tech, int lev, int levTeach)
+void GameData::SetTechLevel(Alien ^sp, TechType tech, int lev, int levTeach)
 {
-    m_CurrentTurnData->SetTechLevel(turn, sp, tech, lev, levTeach);
+    m_CurrentTurnData->SetTechLevel(sp, tech, lev, levTeach);
 }
 
-void GameData::SetFleetCost(int turn, int cost, int percent)
+void GameData::SetFleetCost(int cost, int percent)
 {
-    m_CurrentTurnData->SetFleetCost(turn, cost, percent);
+    m_CurrentTurnData->SetFleetCost(cost, percent);
 }
 
-Alien^ GameData::AddAlien(int turn, String ^sp)
+Alien^ GameData::AddAlien(String ^sp)
 {
-    return m_CurrentTurnData->AddAlien(turn, sp);
+    return m_CurrentTurnData->AddAlien(sp);
 }
 
-void GameData::SetAlienRelation(int turn, String ^sp, SPRelType rel)
+void GameData::SetAlienRelation(String ^sp, SPRelType rel)
 {
-    m_CurrentTurnData->SetAlienRelation(turn, sp, rel);
+    m_CurrentTurnData->SetAlienRelation(sp, rel);
 }
 
 StarSystem^ GameData::AddStarSystem(int x, int y, int z, String ^type, String ^comment)
@@ -125,64 +125,34 @@ StarSystem^ GameData::AddStarSystem(int x, int y, int z, String ^type, String ^c
     return m_CurrentTurnData->AddStarSystem(x, y, z, type, comment);
 }
 
-void GameData::AddPlanetScan(int turn, StarSystem ^system, Planet ^planet)
+void GameData::AddPlanetScan(StarSystem ^system, Planet ^planet)
 {
-    m_CurrentTurnData->AddPlanetScan(turn, system, planet);
+    m_CurrentTurnData->AddPlanetScan(system, planet);
 }
 
-void GameData::SetTurnStartEU(int turn, int eu)
+void GameData::SetTurnStartEU(int eu)
 {
-    m_CurrentTurnData->SetTurnStartEU(turn, eu);
+    m_CurrentTurnData->SetTurnStartEU(eu);
 }
 
-void GameData::AddTurnProducedEU(int turn, int eu)
+void GameData::AddTurnProducedEU(int eu)
 {
-    m_CurrentTurnData->AddTurnProducedEU(turn, eu);
+    m_CurrentTurnData->AddTurnProducedEU(eu);
 }
 
-Colony^ GameData::AddColony(int turn, Alien ^sp, String ^name, StarSystem ^system, int plNum)
+Colony^ GameData::AddColony(Alien ^sp, String ^name, StarSystem ^system, int plNum)
 {
-    return m_CurrentTurnData->AddColony(turn, sp, name, system, plNum);
+    return m_CurrentTurnData->AddColony(sp, name, system, plNum);
 }
 
-void GameData::AddPlanetName(int turn, StarSystem ^system, int pl, String ^name)
+void GameData::AddPlanetName(StarSystem ^system, int pl, String ^name)
 {
-    m_CurrentTurnData->AddPlanetName(turn, system, pl, name);
+    m_CurrentTurnData->AddPlanetName(system, pl, name);
 }
 
-Ship^ GameData::AddShip(int turn, Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system)
+Ship^ GameData::AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system)
 {
-    return m_CurrentTurnData->AddShip(turn, sp, type, name, subLight, system);
-}
-
-void GameData::SetAutoOrderPreDeparture(int turn, StarSystem^ system, String^ order)
-{
-    m_CurrentTurnData->SetAutoOrderPreDeparture(turn, system, order);
-}
-
-void GameData::SetAutoOrderJumps(int turn, Ship^ ship, String^ order)
-{
-    m_CurrentTurnData->SetAutoOrderJumps(turn, ship, order);
-}
-
-void GameData::SetAutoOrderProduction(int turn, Colony^ colony, String^ order, int cost)
-{
-    m_CurrentTurnData->SetAutoOrderProduction(turn, colony, order, cost);
-}
-
-List<String^>^ GameData::GetAutoOrdersPreDeparture(StarSystem^ system)
-{
-    return m_CurrentTurnData->GetAutoOrdersPreDeparture(system);
-}
-
-List<String^>^ GameData::GetAutoOrdersJumps(Ship^ ship)
-{
-    return m_CurrentTurnData->GetAutoOrdersJumps(ship);
-}
-
-List<Pair<String^, int>^>^ GameData::GetAutoOrdersProduction(Colony^ colony)
-{
-    return m_CurrentTurnData->GetAutoOrdersProduction(colony);
+    return m_CurrentTurnData->AddShip(sp, type, name, subLight, system);
 }
 
 void GameData::SetAtmosphereReq(GasType gas, int reqMin, int reqMax)

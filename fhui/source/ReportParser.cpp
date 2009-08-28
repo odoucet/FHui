@@ -2,14 +2,16 @@
 #include "Report.h"
 #include "RegexMatcher.h"
 #include "ReportParser.h"
+#include "CommandManager.h"
 
 using namespace System::IO;
 
 namespace FHUI
 {
 
-ReportParser::ReportParser(GameData^ gd, String^ galaxyPath, String^ reportPath)
+ReportParser::ReportParser(GameData^ gd, CommandManager^ cm, String^ galaxyPath, String^ reportPath)
     : m_GameData(gd)
+    , m_CommandMgr(cm)
     , m_GalaxyPath(galaxyPath)
     , m_ReportPath(reportPath)
     , m_RM(gcnew RegexMatcher)
@@ -71,10 +73,8 @@ void ReportParser::ScanReports()
     int prevTurn = -1;
     for each( int currTurn in m_RepFiles->Keys )
     {
-        if( true == m_GameData->SelectTurn(currTurn) )
-        {
-            throw gcnew FHUIDataIntegrityException(String::Format("Turn #{0} was already parsed.", currTurn));
-        }
+        m_GameData->SelectTurn(currTurn);
+        m_CommandMgr->SelectTurn(currTurn);
 
         if ( prevTurn == -1 )
         {
@@ -88,6 +88,7 @@ void ReportParser::ScanReports()
 
         LoadReport( m_RepFiles[currTurn] );
         m_GameData->Update();
+        m_CommandMgr->LoadCommands();
 
         prevTurn = currTurn;
     }
@@ -95,7 +96,7 @@ void ReportParser::ScanReports()
 
 int ReportParser::VerifyReport(String ^fileName)
 {
-    Report ^report = gcnew Report(nullptr, m_RM); // turn scan mode
+    Report ^report = gcnew Report(nullptr, nullptr, m_RM); // turn scan mode
 
     StreamReader ^sr = File::OpenText(fileName);
     String ^line;
@@ -129,7 +130,7 @@ int ReportParser::VerifyReport(String ^fileName)
 
 void ReportParser::LoadReport(String ^fileName)
 {
-    Report ^report = gcnew Report(m_GameData, m_RM);
+    Report ^report = gcnew Report(m_GameData, m_CommandMgr, m_RM);
 
     StreamReader ^sr = File::OpenText(fileName);
     String ^line;

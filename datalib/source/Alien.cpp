@@ -14,10 +14,9 @@ String^ Alien::PrintHome()
     if( HomeSystem == nullptr )
         return "???";
     String ^plName = nullptr;
-    if( HomePlanet != -1 &&
-        HomePlanet <= HomeSystem->PlanetsCount )
+    if( HomeSystem->Planets->ContainsKey(HomePlanet) )
     {
-        String ^n = HomeSystem->GetPlanets()[HomePlanet - 1]->Name;
+        String ^n = HomeSystem->Planets[HomePlanet]->Name;
         if( String::IsNullOrEmpty(n) )
             plName = "-";
         else

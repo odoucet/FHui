@@ -5,12 +5,13 @@ using namespace System::Collections::Generic;
 namespace FHUI
 {
 
+ref class CommandManager;
 ref class RegexMatcher;
 
 private ref class ReportParser
 {
 public:
-    ReportParser(GameData^, String^, String^);
+    ReportParser(GameData^, CommandManager^, String^, String^);
 
     property SortedList<int, String^>^ Reports
     {
@@ -27,6 +28,7 @@ private:
     String^                         m_ReportPath;
     RegexMatcher^                   m_RM;
     GameData^                       m_GameData;
+    CommandManager^                 m_CommandMgr;
     SortedList<int, String^>^       m_Reports;
     SortedList<int, String^>^       m_RepFiles;
 

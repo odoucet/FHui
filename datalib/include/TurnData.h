@@ -22,7 +22,7 @@ interface class ICommand;
 public ref class TurnData
 {
 public:
-    TurnData();
+    TurnData(int turn);
 
     String^         GetSummary();
     int             GetCarriedEU()              { return m_TurnEUStart; }
@@ -41,43 +41,27 @@ public:
     IList<Ship^>^           GetShips()                          { return m_ShipsByTonnage; }
     IList<Colony^>^         GetColonies()                       { return m_Colonies->Values; }
 
-    List<ICommand^>^    GetCommands()                       { return m_Commands; }
-    void                AddCommand(ICommand ^cmd)           { m_Commands->Add(cmd); }
-    void                DelCommand(ICommand ^cmd)           { m_Commands->Remove(cmd); }
-    void                SortCommands();
-
     // ------------------------------------------
     void            Update();
     void            SetSpecies(String ^sp);
-    void            SetTechLevel(int turn, Alien ^sp, TechType, int, int);
-    void            SetFleetCost(int turn, int, int);
+    void            SetTechLevel(Alien ^sp, TechType, int, int);
+    void            SetFleetCost(int, int);
     void            AddAlien(Alien^);
-    Alien^          AddAlien(int turn, String ^sp);
-    void            SetAlienRelation(int turn, String ^sp, SPRelType);
+    Alien^          AddAlien(String ^sp);
+    void            SetAlienRelation(String ^sp, SPRelType);
     void            AddStarSystem(StarSystem^ system);
     StarSystem^     AddStarSystem(int x, int y, int z, String ^type, String ^comment);
-    void            AddPlanetScan(int turn, StarSystem ^system, Planet ^planet);
-    void            SetTurnStartEU(int turn, int eu);
-    void            AddTurnProducedEU(int turn, int eu);
+    void            AddPlanetScan(StarSystem ^system, Planet ^planet);
+    void            SetTurnStartEU(int eu);
+    void            AddTurnProducedEU(int eu);
     void            AddColony(Colony^);
-    Colony^         AddColony(int turn, Alien ^sp, String ^name, StarSystem ^system, int plNum);
-    void            AddPlanetName(int turn, StarSystem ^system, int pl, String ^name);
-    Ship^           AddShip(int turn, Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);
-
-    property bool   AutoEnabled;
-
-    void            SetAutoEnabled(int turn);
-    void            SetAutoOrderPreDeparture(int turn, StarSystem^, String^);
-    void            SetAutoOrderJumps(int turn, Ship^, String^);
-    void            SetAutoOrderProduction(int turn, Colony^, String^, int);
-
-    List<String^>^  GetAutoOrdersPreDeparture(StarSystem^);
-    List<String^>^  GetAutoOrdersJumps(Ship^);
-    List<Pair<String^, int>^>^  GetAutoOrdersProduction(Colony^);
+    Colony^         AddColony(Alien ^sp, String ^name, StarSystem ^system, int plNum);
+    void            AddPlanetName(StarSystem ^system, int pl, String ^name);
+    Ship^           AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);
 
 protected:
-    bool            TurnCheck(int turn);
-    int             TurnAlign(int turn);
+
+    void            DeleteAlienColonies(StarSystem^ system);
 
     void            UpdateShips();
     void            UpdateAliens();
@@ -101,7 +85,6 @@ protected:
     List<Colony^>^      GetColonies(StarSystem ^sys)        { return GetColonies(sys, nullptr); }
     List<Colony^>^      GetColonies(StarSystem^, Alien^);
 
-    // ------------------------------------------
     int                 m_TurnEUStart;
     int                 m_TurnEUProduced;
     int                 m_FleetCost;
@@ -113,13 +96,7 @@ protected:
     SortedList<String^, Ship^>         ^m_Ships;
     List<Ship^>                        ^m_ShipsByTonnage;
 
-    List<ICommand^>^    m_Commands;
-
-    SortedList<StarSystem^, List<String^>^> ^m_AutoOrdersPreDeparture;
-    SortedList<Ship^, List<String^>^>       ^m_AutoOrdersJumps;
-    SortedList<Colony^, List<Pair<String^, int>^>^> ^m_AutoOrdersProduction;
-
-    int                 m_TurnMax;
+    initonly int        m_Turn;
 };
 
 } // end namespace FHUI

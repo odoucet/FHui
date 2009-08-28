@@ -53,18 +53,6 @@ int StarSystem::CompareLocation(StarSystem ^sys)
                       return Z - sys->Z;
 }
 
-Planet^ StarSystem::GetPlanet(int plNum)
-{
-    if( plNum < 1 )
-        throw gcnew FHUIDataIntegrityException(
-            String::Format("Invalid planet number: {0}!", plNum) );
-
-    if( plNum <= m_Planets->Length )
-        return m_Planets[plNum - 1];
-
-    return nullptr;
-}
-
 String^ StarSystem::GenerateScan()
 {
     String ^scan = String::Format(
@@ -73,14 +61,13 @@ String^ StarSystem::GenerateScan()
         "  #  Dia  Grav Class Class  Diff  LSN  Atmosphere\r\n"
         " ---------------------------------------------------------------------\r\n",
         X, Y, Z, Type,
-        m_Planets->Length == 0 ? "?" : m_Planets->Length.ToString() );
+        Planets->Count == 0 ? "?" : Planets->Count.ToString() );
 
-    for( int i = 0; i < m_Planets->Length; ++i )
+    for each(Planet^ planet in Planets->Values )
     {
-        Planet ^planet = m_Planets[i];
         String ^plStr = String::Format(
             "{0,3}{1,5}{2,7:F2}{3,4}{4,6}{5,8:F2}{6,5}  ",
-            i + 1,
+            planet->Number,
             planet->Diameter,
             planet->Grav,
             planet->TempClass,
@@ -187,7 +174,7 @@ String^ StarSystem::PrintColonies(int planetNum, Alien ^player)
         }
     }
 
-    for each (Planet^ planet in GetPlanets() )
+    for each (Planet^ planet in Planets->Values )
     {
         if ( ( planet->NumColonies == 0 ) &&
              ( String::IsNullOrEmpty( planet->Name ) == false ) )
@@ -257,12 +244,6 @@ List<String^>^ StarSystem::PrintAliens()
     return results;
 }
 
-void StarSystem::Planets::set(int plNum, Planet ^pl)
-{
-    Array::Resize(m_Planets, Math::Max(plNum + 1, m_Planets->Length));
-    m_Planets[plNum] = pl;
-}
-
 int StarSystem::GetId()
 {
     return GameData::GetSystemId(X, Y, Z); 
@@ -273,7 +254,9 @@ void StarSystem::UpdateMaster()
     for each( Colony ^colony in Colonies )
     {
         if( Master == nullptr )
+        {
             Master = colony->Owner;
+        }
         else if( Master != colony->Owner &&
                  Master->Relation != SP_MIXED )
         {
@@ -281,11 +264,13 @@ void StarSystem::UpdateMaster()
             Master->Relation = SP_MIXED;
         }
 
-        Planet ^planet = Planets[colony->PlanetNum - 1];
-        if( planet )
+        if( Planets->ContainsKey(colony->PlanetNum) )
         {
+            Planet ^planet = Planets[colony->PlanetNum];
             if( planet->Master == nullptr )
+            {
                 planet->Master = colony->Owner;
+            }
             else if( planet->Master != colony->Owner &&
                      planet->Master->Relation != SP_MIXED )
             {

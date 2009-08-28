@@ -11,22 +11,44 @@ namespace FHUI
 {
 
 CommandManager::CommandManager(GameData^ gd, String^ path)
-    : m_GameData(gd)
-    , m_Path(path)
-    , m_RM(gcnew RegexMatcher)
-    , m_OrderList(gcnew List<String^>)
+    : m_RM(gcnew RegexMatcher)
 {
+    m_GameData = gd;
+    m_Path = path;
+    m_OrderList = gcnew List<String^>;
+    m_CommandData = gcnew SortedList<int, TurnCommands^>;
+}
+
+private ref class CommandComparer : public IComparer<ICommand^>
+{
+public:
+    virtual int Compare(ICommand ^c1, ICommand ^c2)
+    {
+        return (int)c1->GetType() - (int)c2->GetType();
+    }
+};
+
+void CommandManager::SortCommands()
+{
+    m_CommandData[m_CurrentTurn]->Commands->Sort( gcnew CommandComparer );
 }
 
 void CommandManager::AddCommand(ICommand ^cmd)
 {
-    m_GameData->AddCommand(cmd);
+    m_CommandData[m_CurrentTurn]->Commands->Add(cmd);
+    SortCommands();
     SaveCommands();
+}
+
+void CommandManager::AddCommandDontSave(ICommand ^cmd)
+{
+    m_CommandData[m_CurrentTurn]->Commands->Add(cmd);
+    SortCommands();
 }
 
 void CommandManager::DelCommand(ICommand ^cmd)
 {
-    m_GameData->DelCommand(cmd);
+    m_CommandData[m_CurrentTurn]->Commands->Remove(cmd);
     SaveCommands();
 }
 
@@ -43,7 +65,9 @@ void CommandManager::SaveCommands()
     // Create directory
     DirectoryInfo ^dirInfo = gcnew DirectoryInfo(m_Path);
     if( !dirInfo->Exists )
+    {
         dirInfo->Create();
+    }
 
     // Create stream
     StreamWriter ^sw = File::CreateText( m_Path + String::Format(OrdersDir::Commands, GameData::CurrentTurn) );
@@ -52,36 +76,44 @@ void CommandManager::SaveCommands()
     sw->WriteLine("; FHUI generated file. Please don't edit.");
 
     // Prepare commands
-    m_OrderList->Clear();
+    List<String^>^ commandList = gcnew List<String^>;
 
     // -- Colonies
     GameData::Player->SortColoniesByProdOrder();
     for each( Colony ^colony in GameData::Player->Colonies )
     {
-        m_OrderList->Add( "COLONY " + colony->Name );
+        commandList->Add( "COLONY " + colony->Name );
         if( colony->OrderBuildShipyard )
-            m_OrderList->Add("  build shipyard");
+        {
+            commandList->Add("  build shipyard");
+        }
     }
 
     // -- Ships
     for each( Ship ^ship in GameData::Player->Ships )
+    {
         if( ship->Command )
-            m_OrderList->Add( String::Format("SHIP {0} {1}",
+        {
+            commandList->Add( String::Format("SHIP {0} {1}",
                 ship->PrintClassWithName(),
                 ship->Command->PrintNumeric()) );
-
+        }
+    }
     // -- Commands
-    m_GameData->SortCommands();
-    for each( ICommand ^cmd in m_GameData->GetCommands() )
-        cmd->Print(m_OrderList);
+    for each( ICommand ^cmd in GetCommands() )
+    {
+        cmd->Print( commandList );
+    }
 
     // Write to stream
-    for each( String ^cmd in m_OrderList )
+    for each( String ^cmd in commandList )
+    {
         sw->WriteLine(cmd);
+    }
     sw->Close();
 }
 
-Colony^ CommandManager::LoadCommands()
+void CommandManager::LoadCommands()
 {
     Colony^ refColony = nullptr;
 
@@ -93,11 +125,11 @@ Colony^ CommandManager::LoadCommands()
     }
     catch( DirectoryNotFoundException^ )
     {
-        return refColony;
+        return;
     }
     catch( FileNotFoundException^ )
     {
-        return refColony;
+        return;
     }
 
     String ^line;
@@ -123,9 +155,13 @@ Colony^ CommandManager::LoadCommands()
         else if( m_RM->Match(line, m_RM->ExpCmdBuiShipyard) )
         {
             if( refColony )
+            {
                 refColony->OrderBuildShipyard = true;
+            }
             else
+            {
                 throw gcnew FHUIParsingException("Inconsistent commands template (shipyard)!");
+            }
         }
         else if( m_RM->Match(line, m_RM->ExpCmdShipJump) )
         {
@@ -168,10 +204,9 @@ Colony^ CommandManager::LoadCommands()
                 m_RM->GetResultInt(0),
                 m_RM->GetResultInt(1),
                 m_RM->GetResultInt(2));
-            Planet ^planet = system->GetPlanet( m_RM->GetResultInt(3) );
+            Planet ^planet = system->Planets[ m_RM->GetResultInt(3) ];
             String ^name = m_RM->Results[4];
-            m_GameData->AddCommand(
-                gcnew CmdPlanetName(system, planet->Number, name) );
+            AddCommandDontSave( gcnew CmdPlanetName(system, planet->Number, name) );
             planet->AddName(name);
         }
         else if( m_RM->Match(line, m_RM->ExpCmdPLDisband) )
@@ -181,8 +216,8 @@ Colony^ CommandManager::LoadCommands()
             {
                 if( pn->Name == name )
                 {
-                    m_GameData->AddCommand( gcnew CmdDisband(name) );
-                    pn->System->GetPlanet( pn->PlanetNum )->DelName();
+                    AddCommandDontSave( gcnew CmdDisband(name) );
+                    pn->System->Planets[ pn->PlanetNum ]->DelName();
                     break;
                 }
             }
@@ -195,7 +230,7 @@ Colony^ CommandManager::LoadCommands()
                 throw gcnew FHUIParsingException("Inconsistent alien relation command (neutral)!");
 
             alien->Relation = SP_NEUTRAL;
-            m_GameData->AddCommand(gcnew CmdAlienRelation(alien, SP_NEUTRAL));
+            AddCommandDontSave( gcnew CmdAlienRelation(alien, SP_NEUTRAL) );
         }
         else if( m_RM->Match(line, m_RM->ExpCmdSPAlly) )
         {
@@ -205,7 +240,7 @@ Colony^ CommandManager::LoadCommands()
                 throw gcnew FHUIParsingException("Inconsistent alien relation command (ally)!");
 
             alien->Relation = SP_ALLY;
-            m_GameData->AddCommand(gcnew CmdAlienRelation(alien, SP_ALLY));
+            AddCommandDontSave(gcnew CmdAlienRelation(alien, SP_ALLY));
         }
         else if( m_RM->Match(line, m_RM->ExpCmdSPEnemy) )
         {
@@ -215,7 +250,7 @@ Colony^ CommandManager::LoadCommands()
                 throw gcnew FHUIParsingException("Inconsistent alien relation command (enemy)!");
 
             alien->Relation = SP_ENEMY;
-            m_GameData->AddCommand(gcnew CmdAlienRelation(alien, SP_ENEMY));
+            AddCommandDontSave( gcnew CmdAlienRelation(alien, SP_ENEMY) );
         }
         else if( m_RM->Match(line, m_RM->ExpCmdSPTeach) )
         {
@@ -228,13 +263,12 @@ Colony^ CommandManager::LoadCommands()
             if( level != GameData::Player->TechLevels[tech] )
                 throw gcnew FHUIParsingException("Inconsistent tech level for Teach command!");
 
-            m_GameData->AddCommand( gcnew CmdTeach(alien, tech, level) );
+            AddCommandDontSave( gcnew CmdTeach(alien, tech, level) );
             alien->TeachOrders |= 1 << tech;
         }
         else
             throw gcnew FHUIParsingException("Unrecognized line in commands template: " + line);
     }
-    return refColony;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -243,8 +277,6 @@ Colony^ CommandManager::LoadCommands()
 void CommandManager::GenerateTemplate(System::Windows::Forms::RichTextBox^ target)
 {
     m_OrderList->Clear();
-
-    m_GameData->SortCommands();
 
     GenerateCombat();
     GeneratePreDeparture();
@@ -299,10 +331,12 @@ void CommandManager::GenerateCombat()
     m_OrderList->Add("START COMBAT");
 
     // Print UI commands
-    for each( ICommand ^cmd in m_GameData->GetCommands() )
+    for each( ICommand ^cmd in GetCommands() )
     {
         if( cmd->GetPhase() == CommandPhase::Combat )
+        {
             cmd->Print(m_OrderList);
+        }
     }
 
     // TODO: Sort locations by relevance (effective tonnage)
@@ -396,7 +430,7 @@ void CommandManager::GeneratePreDeparture()
     m_OrderList->Add("START PRE-DEPARTURE");
 
     // Print UI commands
-    for each( ICommand ^cmd in m_GameData->GetCommands() )
+    for each( ICommand ^cmd in GetCommands() )
     {
         if( cmd->GetPhase() == CommandPhase::PreDeparture )
             cmd->Print(m_OrderList);
@@ -420,7 +454,7 @@ void CommandManager::GeneratePreDeparture()
         m_OrderList->Add("");
         GeneratePreDepartureInfo( system );
 
-        List<String^>^ autoOrders = m_GameData->GetAutoOrdersPreDeparture( system );
+        List<String^>^ autoOrders = GetAutoOrdersPreDeparture( system );
         if ( autoOrders )
         {
             for each (String^ line in autoOrders )
@@ -480,13 +514,17 @@ void CommandManager::GenerateJumps()
             else if( ship->Command->Type == Ship::OrderType::Wormhole )
             {
                 String ^order = "  Wormhole " + ship->PrintClassWithName();
-                if( ship->Command->PlanetNum != -1 )
+                if( ship->Command->JumpTarget->Planets->ContainsKey( ship->Command->PlanetNum ) )
                 {
-                    Planet ^pl = ship->Command->JumpTarget->GetPlanet( ship->Command->PlanetNum );
-                    if( pl && !String::IsNullOrEmpty(pl->Name) )
-                        order += ", PL " + pl->Name;
-                    else
+                    Planet ^pl = ship->Command->JumpTarget->Planets[ ship->Command->PlanetNum ];
+                    if( String::IsNullOrEmpty(pl->Name) )
+                    {
                         order += ", " + ship->Command->PlanetNum.ToString();
+                    }
+                    else
+                    {
+                        order += ", PL " + pl->Name;
+                    }
                 }
                 order += " ; Distance: " + ship->System->CalcDistance( ship->System->WormholeTarget ).ToString("F1");
                 m_OrderList->Add( order );
@@ -502,7 +540,7 @@ void CommandManager::GenerateJumps()
             prefix += "; ";
         }
 
-        List<String^>^ autoOrders = m_GameData->GetAutoOrdersJumps( ship );
+        List<String^>^ autoOrders = GetAutoOrdersJumps( ship );
         if ( autoOrders )
         {
             for each (String^ line in autoOrders )
@@ -586,7 +624,7 @@ void CommandManager::GenerateProduction()
             plugin->GenerateProduction(m_OrderList, colony, budget);
         bool useAuto = m_OrderList->Count == prePluginNum;
 
-        List<Pair<String^, int>^>^ autoOrders = m_GameData->GetAutoOrdersProduction( colony );
+        List<Pair<String^, int>^>^ autoOrders = GetAutoOrdersProduction( colony );
         if ( autoOrders )
         {
             String ^prefix = "    ";
@@ -729,13 +767,13 @@ void CommandManager::GeneratePostArrival()
     m_OrderList->Add("START POST-ARRIVAL");
 
     // Print UI commands
-    for each( ICommand ^cmd in m_GameData->GetCommands() )
+    for each( ICommand ^cmd in GetCommands() )
     {
         if( cmd->GetPhase() == CommandPhase::PostArrival )
             cmd->Print(m_OrderList);
     }
 
-    if ( m_GameData->AutoEnabled )
+    if ( AutoEnabled )
     {
         m_OrderList->Add( "  AUTO" );
         GenerateScanOrders();
@@ -769,7 +807,7 @@ void CommandManager::GenerateStrikes()
     m_OrderList->Add("START STRIKES");
 
     // Print UI commands
-    for each( ICommand ^cmd in m_GameData->GetCommands() )
+    for each( ICommand ^cmd in GetCommands() )
     {
         if( cmd->GetPhase() == CommandPhase::Strike )
             cmd->Print(m_OrderList);
@@ -777,6 +815,60 @@ void CommandManager::GenerateStrikes()
 
     m_OrderList->Add("END");
     m_OrderList->Add("");
+}
+
+void CommandManager::SetAutoOrderPreDeparture(StarSystem^ system, String^ line)
+{   
+    if( !m_CommandData[m_CurrentTurn]->AutoOrdersPreDeparture->ContainsKey( system ) )
+    {
+        m_CommandData[m_CurrentTurn]->AutoOrdersPreDeparture->Add(system, gcnew List<String^>);
+    }
+    m_CommandData[m_CurrentTurn]->AutoOrdersPreDeparture[system]->Add(line);
+}
+
+void CommandManager::SetAutoOrderJumps(Ship^ ship, String^ line)
+{
+    if( !m_CommandData[m_CurrentTurn]->AutoOrdersJumps->ContainsKey( ship ) )
+    {
+        m_CommandData[m_CurrentTurn]->AutoOrdersJumps->Add(ship, gcnew List<String^>);
+    }
+    m_CommandData[m_CurrentTurn]->AutoOrdersJumps[ship]->Add(line);
+}
+
+void CommandManager::SetAutoOrderProduction(Colony^ colony, String^ line, int cost)
+{
+    if( !m_CommandData[m_CurrentTurn]->AutoOrdersProduction->ContainsKey( colony ) )
+    {
+        m_CommandData[m_CurrentTurn]->AutoOrdersProduction->Add(colony, gcnew List<Pair<String^, int>^>);
+    }
+    m_CommandData[m_CurrentTurn]->AutoOrdersProduction[colony]->Add(gcnew Pair<String^, int>(line, cost));
+}
+
+List<String^>^ CommandManager::GetAutoOrdersPreDeparture(StarSystem^ system)
+{
+    if ( m_CommandData[m_CurrentTurn]->AutoOrdersPreDeparture->ContainsKey( system ) )
+    {
+        return m_CommandData[m_CurrentTurn]->AutoOrdersPreDeparture[system];
+    }
+    return nullptr;
+}
+
+List<String^>^ CommandManager::GetAutoOrdersJumps(Ship^ ship)
+{
+    if ( m_CommandData[m_CurrentTurn]->AutoOrdersJumps->ContainsKey( ship ) )
+    {
+        return m_CommandData[m_CurrentTurn]->AutoOrdersJumps[ship];
+    }
+    return nullptr;
+}
+
+List<Pair<String^, int>^>^ CommandManager::GetAutoOrdersProduction(Colony^ colony)
+{
+    if ( m_CommandData[m_CurrentTurn]->AutoOrdersProduction->ContainsKey( colony ) )
+    {
+        return m_CommandData[m_CurrentTurn]->AutoOrdersProduction[colony];
+    }
+    return nullptr;
 }
 
 } // end namespace FHUI

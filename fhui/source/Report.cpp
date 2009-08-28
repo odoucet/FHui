@@ -1,12 +1,14 @@
 #include "StdAfx.h"
 #include "RegexMatcher.h"
+#include "CommandManager.h"
 #include "Report.h"
 
 namespace FHUI
 {
 
-Report::Report(GameData ^gd, RegexMatcher ^rm)
+Report::Report(GameData ^gd, CommandManager^ cm, RegexMatcher ^rm)
     : m_GameData(gd)
+    , m_CommandMgr(cm)
     , m_RM(rm)
     , m_Phase(gd == nullptr ? PHASE_FILE_DETECT : PHASE_GLOBAL)
     , m_PhasePreAggregate(PHASE_GLOBAL)
@@ -123,15 +125,15 @@ bool Report::Parse(String ^s)
         }
         // Economy
         else if( m_RM->Match(s, "^Economic units = (\\d+)") )
-            m_GameData->SetTurnStartEU( m_Turn, m_RM->GetResultInt(0) );
+            m_GameData->SetTurnStartEU( m_RM->GetResultInt(0) );
         // Fleet maintenance
         else if( m_RM->Match(s, "^Fleet maintenance cost = (\\d+) \\((\\d+)\\.(\\d+)% of total production\\)") )
-            m_GameData->SetFleetCost(m_Turn, m_RM->GetResultInt(0), m_RM->GetResultInt(1)*100 + m_RM->GetResultInt(2) );
+            m_GameData->SetFleetCost(m_RM->GetResultInt(0), m_RM->GetResultInt(1)*100 + m_RM->GetResultInt(2) );
         // Species...
         else if( Regex("^Species met:").Match(s)->Success )
             StartLineAggregate(PHASE_SPECIES_MET, s, AGGREGATE_LINES_MAX);
         else if( m_RM->Match(s, "^Scan of home star system for SP\\s+([^,;]+):$") )
-            m_ScanAlien = m_GameData->AddAlien(m_Turn, m_RM->Results[0]);
+            m_ScanAlien = m_GameData->AddAlien(m_RM->Results[0]);
         else if( Regex("^Allies:").Match(s)->Success )
             StartLineAggregate(PHASE_SPECIES_ALLIES, s, AGGREGATE_LINES_MAX);
         else if( Regex("^Enemies:").Match(s)->Success )
@@ -168,7 +170,7 @@ bool Report::Parse(String ^s)
         // Message
         else if( m_RM->Match(s, "^You received the following message from SP ([^,;]+):") )
         {
-            m_ScanAlien = m_GameData->AddAlien(m_Turn, m_RM->Results[0]);
+            m_ScanAlien = m_GameData->AddAlien(m_RM->Results[0]);
             m_Phase = PHASE_MESSAGE;
         }
         // Parsing ends here
@@ -190,7 +192,7 @@ bool Report::Parse(String ^s)
         if( m_RM->MatchList(FinishLineAggregate(true), "^Species met:", "SP\\s+([^,;]+)") )
         {
             for( int i = 0; i < m_RM->Results->Length; ++i )
-                m_GameData->AddAlien(m_Turn, m_RM->Results[i]);
+                m_GameData->AddAlien(m_RM->Results[i]);
             break;
         }
         return false;
@@ -199,7 +201,7 @@ bool Report::Parse(String ^s)
         if( m_RM->MatchList(FinishLineAggregate(true), "^Allies:", "SP\\s+([^,;]+)") )
         {
             for( int i = 0; i < m_RM->Results->Length; ++i )
-                m_GameData->SetAlienRelation(m_Turn, m_RM->Results[i], SP_ALLY);
+                m_GameData->SetAlienRelation(m_RM->Results[i], SP_ALLY);
             break;
         }
         return false;
@@ -208,7 +210,7 @@ bool Report::Parse(String ^s)
         if( m_RM->MatchList(FinishLineAggregate(true), "^Enemies:", "SP\\s+([^,;]+)") )
         {
             for( int i = 0; i < m_RM->Results->Length; ++i )
-                m_GameData->SetAlienRelation(m_Turn, m_RM->Results[i], SP_ENEMY);
+                m_GameData->SetAlienRelation(m_RM->Results[i], SP_ENEMY);
             break;
         }
         return false;
@@ -256,7 +258,7 @@ bool Report::Parse(String ^s)
         // It may happen that no other events were present, but there's incoming message
         else if( m_RM->Match(s, "^You received the following message from SP ([^,;]+):") )
         {
-            m_ScanAlien = m_GameData->AddAlien(m_Turn, m_RM->Results[0]);
+            m_ScanAlien = m_GameData->AddAlien(m_RM->Results[0]);
             m_Phase = PHASE_MESSAGE;
         }
         break;
@@ -302,7 +304,7 @@ bool Report::Parse(String ^s)
         {
             if( m_RM->Match(s, "^Estimate of the technology of SP\\s+([^,;]+)\\s+\\(government name '([^']+)', government type '([^']+)'\\)") )
             {
-                m_EstimateAlien = m_GameData->AddAlien(m_Turn, m_RM->Results[0]);
+                m_EstimateAlien = m_GameData->AddAlien(m_RM->Results[0]);
                 m_EstimateAlien->GovName = m_RM->Results[1];
                 m_EstimateAlien->GovType = m_RM->Results[2];
             }
@@ -477,7 +479,7 @@ void Report::MatchPlanetScan(String ^s)
         if( !String::IsNullOrEmpty(s) )
             planet->Comment = s;
 
-        m_GameData->AddPlanetScan( m_Turn, m_ScanSystem, planet );
+        m_GameData->AddPlanetScan( m_ScanSystem, planet );
         m_ScanHasPlanets = true;
     }
 }
@@ -489,7 +491,6 @@ bool Report::MatchTech(String ^s, String ^techName, TechType tech)
     if( m_RM->Match(s, e2) )
     {
         m_GameData->SetTechLevel(
-            m_Turn,
             GameData::Player,
             tech,
             m_RM->GetResultInt(0),
@@ -499,7 +500,6 @@ bool Report::MatchTech(String ^s, String ^techName, TechType tech)
     if( m_RM->Match(s, e1) )
     {
         m_GameData->SetTechLevel(
-            m_Turn,
             GameData::Player,
             tech,
             m_RM->GetResultInt(0),
@@ -547,7 +547,6 @@ void Report::MatchColonyScan(String ^s)
             int plNum = m_RM->GetResultInt(4);
  
             m_ScanColony = m_GameData->AddColony(
-                m_Turn,
                 GameData::Player,
                 plName,
                 system,
@@ -580,7 +579,7 @@ void Report::MatchColonyScan(String ^s)
         {
             m_ScanColony->EUProd  = m_RM->GetResultInt(0);
             m_ScanColony->EUFleet = m_RM->GetResultInt(1);
-            m_GameData->AddTurnProducedEU( m_Turn, m_ScanColony->EUProd );
+            m_GameData->AddTurnProducedEU( m_ScanColony->EUProd );
         }
         break;
 
@@ -590,7 +589,7 @@ void Report::MatchColonyScan(String ^s)
             m_ScanColony->MaBase = 0;
             m_ScanColony->EUProd  = m_RM->GetResultInt(0);
             m_ScanColony->EUFleet = m_RM->GetResultInt(1);
-            m_GameData->AddTurnProducedEU( m_Turn, m_ScanColony->EUProd );
+            m_GameData->AddTurnProducedEU( m_ScanColony->EUProd );
         }
         break;
 
@@ -600,7 +599,7 @@ void Report::MatchColonyScan(String ^s)
             m_ScanColony->MiBase = 0;
             m_ScanColony->EUProd  = m_RM->GetResultInt(0);
             m_ScanColony->EUFleet = m_RM->GetResultInt(1);
-            m_GameData->AddTurnProducedEU( m_Turn, m_ScanColony->EUProd );
+            m_GameData->AddTurnProducedEU( m_ScanColony->EUProd );
         }
         break;
     }
@@ -875,8 +874,7 @@ void Report::MatchShipScan(String ^s, bool bColony)
 
         if( m_Phase != PHASE_ALIENS_REPORT )
         {
-            m_ScanShip = m_GameData->AddShip(
-                m_Turn, GameData::Player, type, name, subLight, system);
+            m_ScanShip = m_GameData->AddShip( GameData::Player, type, name, subLight, system);
             if( m_ScanShip == nullptr )
                 return;
 
@@ -911,9 +909,8 @@ void Report::MatchShipScan(String ^s, bool bColony)
             if( m_RM->Match(s, "^SP ([^,;]+)\\s*$") )
             {
                 String ^spName = m_RM->Results[0];
-                Alien ^sp = m_GameData->AddAlien(m_Turn, spName);
-                m_ScanShip = m_GameData->AddShip(
-                    m_Turn, sp, type, name, subLight, system);
+                Alien ^sp = m_GameData->AddAlien(spName);
+                m_ScanShip = m_GameData->AddShip( sp, type, name, subLight, system );
 
                 if( bInFD )
                 {
@@ -952,13 +949,12 @@ void Report::MatchOtherPlanetsShipsScan(String ^s)
         int plNum = m_RM->GetResultInt(3);
         String^ plName = m_RM->Results[4];
 
-        m_GameData->AddPlanetName( m_Turn, system, plNum, plName);
+        m_GameData->AddPlanetName( system, plNum, plName);
 
         if( m_RM->Results[5]->Length > 0 )
         {
             // Treat as colony of size 0
             Colony^ colony = m_GameData->AddColony(
-                m_Turn,
                 GameData::Player,
                 plName,
                 system,
@@ -1019,9 +1015,9 @@ void Report::MatchAliensReport(String ^s)
             StarSystem ^system = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ);
             String ^name = m_RM->Results[0];
             int plNum    = m_RM->GetResultInt(1);
-            Alien ^sp    = m_GameData->AddAlien(m_Turn, m_RM->Results[2]);
+            Alien ^sp    = m_GameData->AddAlien(m_RM->Results[2]);
 
-            m_ScanColony = m_GameData->AddColony(m_Turn, sp, name, system, plNum);
+            m_ScanColony = m_GameData->AddColony(sp, name, system, plNum);
             if( m_ScanColony )
             {
                 m_ScanColony->LastSeen = Math::Max(m_Turn, m_ScanColony->LastSeen);
@@ -1077,7 +1073,7 @@ void Report::MatchOrdersTemplate(String ^s)
         StarSystem^ system = m_GameData->GetStarSystem(m_RM->Results[0]);  
         if ( system )
         {
-            m_GameData->SetAutoOrderPreDeparture(m_Turn, system, line );
+            m_CommandMgr->SetAutoOrderPreDeparture( system, line );
             return;
         }
         throw gcnew FHUIParsingException(
@@ -1090,7 +1086,7 @@ void Report::MatchOrdersTemplate(String ^s)
         Ship^ ship = m_GameData->GetShip(m_RM->Results[1]);  
         if ( ship )
         {
-            m_GameData->SetAutoOrderPreDeparture(m_Turn, ship->System, line );
+            m_CommandMgr->SetAutoOrderPreDeparture( ship->System, line );
             return;
         }
         throw gcnew FHUIParsingException(
@@ -1103,7 +1099,7 @@ void Report::MatchOrdersTemplate(String ^s)
         Ship^ ship = m_GameData->GetShip(m_RM->Results[1]);  
         if ( ship )
         {
-            m_GameData->SetAutoOrderJumps(m_Turn, ship, line );
+            m_CommandMgr->SetAutoOrderJumps( ship, line );
             return;
         }
         throw gcnew FHUIParsingException(
@@ -1126,20 +1122,20 @@ void Report::MatchOrdersTemplate(String ^s)
     // DEVELOP
     if( m_RM->Match(s, "^Develop\\s+(\\d+)$" ) )
     {
-        m_GameData->SetAutoOrderProduction(
-            m_Turn, m_ColonyProduction, line, m_RM->GetResultInt(0) );
+        m_CommandMgr->SetAutoOrderProduction(
+            m_ColonyProduction, line, m_RM->GetResultInt(0) );
         return;
     }
     if( m_RM->Match(s, "^Develop\\s+(\\d+)\\s+PL\\s+([^,]+)$" ) )
     {
-        m_GameData->SetAutoOrderProduction(
-            m_Turn, m_ColonyProduction, line, m_RM->GetResultInt(0) );
+        m_CommandMgr->SetAutoOrderProduction(
+            m_ColonyProduction, line, m_RM->GetResultInt(0) );
         return;
     }
     if( m_RM->Match(s, "^Develop\\s+PL\\s+([^,]+),\\s+TR(\\d+)\\s+([^,]+)$") )
     {
-        m_GameData->SetAutoOrderProduction(
-            m_Turn, m_ColonyProduction, line, Calculators::TransportCapacity(m_RM->GetResultInt(1)) );
+        m_CommandMgr->SetAutoOrderProduction(
+            m_ColonyProduction, line, Calculators::TransportCapacity(m_RM->GetResultInt(1)) );
         return;
     }
 
@@ -1149,7 +1145,8 @@ void Report::MatchOrdersTemplate(String ^s)
         Ship^ ship = m_GameData->GetShip(m_RM->Results[1]);
         if ( ship )
         {
-            m_GameData->SetAutoOrderProduction(m_Turn, m_ColonyProduction, line, m_RM->GetResultInt(2) );
+            m_CommandMgr->SetAutoOrderProduction(
+                m_ColonyProduction, line, m_RM->GetResultInt(2) );
             return;
         }
         throw gcnew FHUIParsingException(
@@ -1159,20 +1156,21 @@ void Report::MatchOrdersTemplate(String ^s)
     // RECYCLE
     if( m_RM->Match(s, "^Recycle\\s+(\\d+)\\s+RM$") )
     {
-        m_GameData->SetAutoOrderProduction( m_Turn, m_ColonyProduction, line, -m_RM->GetResultInt(0)/5 );
+        m_CommandMgr->SetAutoOrderProduction( 
+            m_ColonyProduction, line, -m_RM->GetResultInt(0)/5 );
         return;
     } 
     if( m_RM->Match(s, "^Recycle\\s+\\S+\\s+([^,]+)$") )
     {
-        m_GameData->SetAutoOrderProduction(
-            m_Turn, m_ColonyProduction, line, -m_GameData->GetShip(m_RM->Results[0])->GetRecycleValue() );
+        m_CommandMgr->SetAutoOrderProduction(
+            m_ColonyProduction, line, -m_GameData->GetShip(m_RM->Results[0])->GetRecycleValue() );
         return;
     }
 
     // AUTO
     if( m_RM->Match(s, "^Auto$") )
     {
-        m_GameData->SetAutoEnabled( m_Turn );
+        m_CommandMgr->AutoEnabled = true;
         return;
     } 
     // SCAN (ignore) assume it is generated for all scouts

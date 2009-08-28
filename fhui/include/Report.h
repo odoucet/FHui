@@ -9,6 +9,7 @@ namespace FHUI
 {
 
 ref class RegexMatcher;
+ref class CommandManager;
 
 enum PhaseType
 {
@@ -40,7 +41,7 @@ enum PhaseType
 private ref class Report
 {
 public:
-    Report(GameData^, RegexMatcher^);
+    Report(GameData^, CommandManager^, RegexMatcher^);
 
     bool            IsValid();
     int             GetTurn()       { return m_Turn; }
@@ -65,9 +66,10 @@ private:
     void            MatchAliensReport(String ^s);
     void            MatchOrdersTemplate(String ^s);
 
-    GameData       ^m_GameData;
-    RegexMatcher   ^m_RM;
-    String         ^m_Content;
+    GameData^       m_GameData;
+    CommandManager^ m_CommandMgr;
+    RegexMatcher^   m_RM;
+    String^         m_Content;
     int             m_Turn;
     int             m_LineCnt;
 
@@ -75,21 +77,21 @@ private:
     PhaseType       m_PhasePreAggregate;
 
     bool            m_bParsingAggregate;
-    String         ^m_StringAggregate;
+    String^         m_StringAggregate;
     int             m_AggregateMaxLines;
 
     int             m_ScanX;
     int             m_ScanY;
     int             m_ScanZ;
     bool            m_ScanHasPlanets;
-    StarSystem     ^m_ScanSystem;
-    Alien          ^m_ScanAlien;
-    Colony         ^m_ScanColony;
-    Ship           ^m_ScanShip;
+    StarSystem^     m_ScanSystem;
+    Alien^          m_ScanAlien;
+    Colony^         m_ScanColony;
+    Ship^           m_ScanShip;
     int             m_PirateShipsCnt;
 
-    Colony         ^m_ColonyProduction;
-    Alien          ^m_EstimateAlien;
+    Colony^         m_ColonyProduction;
+    Alien^          m_EstimateAlien;
 };
 
 } // end namespace FHUI

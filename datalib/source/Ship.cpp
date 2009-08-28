@@ -68,30 +68,33 @@ String^ Ship::PrintLocation()
 
     if( System )
     {
-        if( PlanetNum == -1 )
+        int plSize = 0;
+        int plNum = PlanetNum;
+        if( System->Planets->ContainsKey(plNum) )
         {
             // check if there is player colony in the system
-            int biggest = 0;
+
             for each( Colony ^colony in System->ColoniesOwned )
             {
-                if( colony->EconomicBase > biggest )
+                if( colony->EconomicBase > plSize )
                 {
-                    PlanetNum = colony->PlanetNum;
-                    biggest = colony->EconomicBase;
+                    plNum = colony->PlanetNum;
+                    plSize = colony->EconomicBase;
                 }
             }
         }
 
-        if( PlanetNum != -1 )
+        if( System->Planets->ContainsKey(plNum) )
         {
-            Planet ^planet = System->Planets[PlanetNum - 1];
-            if( planet != nullptr &&
-                !String::IsNullOrEmpty(planet->Name) )
+            Planet ^planet = System->Planets[PlanetNum];
+            if( String::IsNullOrEmpty(planet->Name) )
+            {
+                xyz = String::Format("[{0} {1}]", System->PrintLocation(), PlanetNum);
+            }
+            else
             {
                 xyz = String::Format("PL {0}", planet->Name);
             }
-            else
-                xyz = String::Format("[{0} {1}]", System->PrintLocation(), PlanetNum);
         }
         else
         {
@@ -100,22 +103,25 @@ String^ Ship::PrintLocation()
     }
     else
     {
-        if( PlanetNum != -1 )
-            xyz = String::Format("[{0} {1}]", System->PrintLocation(), PlanetNum);
-        else
+        if( PlanetNum > 0 )
+        {
             xyz = System->PrintLocation();
+        }
+        else
+        {
+            xyz = String::Format("[{0} {1}]", System->PrintLocation(), PlanetNum);
+        }
     }
 
     switch( Location )
     {
-    case SHIP_LOC_DEEP_SPACE:   return xyz + ", Deep";
-    case SHIP_LOC_ORBIT:        return xyz + ", Orbit";
-    case SHIP_LOC_LANDED:       return xyz + ", Landed";
+        case SHIP_LOC_DEEP_SPACE:   return xyz + ", Deep";
+        case SHIP_LOC_ORBIT:        return xyz + ", Orbit";
+        case SHIP_LOC_LANDED:       return xyz + ", Landed";
     }
 
-    int l = Location;
     throw gcnew FHUIDataIntegrityException(
-        String::Format("Invalid ship location! ({0})", l) );
+        String::Format("Invalid ship location! ({0})", (int)Location) );
 }
 
 String^ Ship::PrintCargo()
@@ -245,13 +251,17 @@ String^ Ship::Order::PrintJumpDestination()
 {
     if( PlanetNum != -1 )
     {
-        Planet ^planet = JumpTarget->GetPlanet(PlanetNum);
-        if( planet )
+        if( JumpTarget->Planets->ContainsKey(PlanetNum) )
         {
+            Planet ^planet = JumpTarget->Planets[PlanetNum];
             if( String::IsNullOrEmpty(planet->Name) )
+            {
                 return planet->PrintLocation();
+            }
             else
+            {
                 return "PL " + planet->Name;
+            }
         }
         return JumpTarget->PrintLocation() + " " + PlanetNum.ToString();
     }

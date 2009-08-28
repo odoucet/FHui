@@ -14,7 +14,6 @@ public ref class StarSystem : public GridDataSrcBase, public IComparable
 {
 public:
     StarSystem(int x, int y, int z, String ^type)
-        : m_Planets(gcnew array<Planet^>(0))
     {
         X = x;
         Y = y;
@@ -32,11 +31,11 @@ public:
         Colonies = gcnew List<Colony^>;
         ColoniesOwned = gcnew List<Colony^>;
         ColoniesAlien = gcnew List<Colony^>;
+        Planets = gcnew SortedList<int, Planet^>;
         IsVoid = true;
     }
     // --- copy constructor - does not perform full copy !!! ---
     StarSystem(StarSystem^ src)
-        : m_Planets(gcnew array<Planet^>(0))
     {
         X = src->X;
         Y = src->Y;
@@ -56,10 +55,11 @@ public:
         Colonies = gcnew List<Colony^>;
         ColoniesOwned = gcnew List<Colony^>;
         ColoniesAlien = gcnew List<Colony^>;
+        Planets = gcnew SortedList<int, Planet^>;
 
-        for each ( Planet^ planet in src->GetPlanets() )
+        for each ( Planet^ planet in src->Planets->Values )
         {
-            Planets[planet->Number-1] = gcnew Planet(this, planet);
+            Planets->Add(planet->Number, gcnew Planet(this, planet));
         }
     }
     // -------- IComparable ----------------------------
@@ -84,7 +84,6 @@ public:
     int         CompareLocation(StarSystem ^sys);
 
     int         GetId();
-    Planet^     GetPlanet(int plNum);
 
     bool        IsExplored() { return TurnScanned != -1; }
 
@@ -121,16 +120,9 @@ public:
     property List<Colony^>^ ColoniesOwned;
     property List<Colony^>^ ColoniesAlien;
 
-    property int        PlanetsCount { int get() { return m_Planets->Length; } }
-    property Planet^    Planets [int] {
-        Planet^ get(int i) { return i < m_Planets->Length ? m_Planets[i] : nullptr; }
-        void    set(int i, Planet^);
-    }
-
-    array<Planet^>^     GetPlanets()        { return m_Planets; }
+    property SortedList<int, Planet^>^ Planets;
 
 protected:
-    array<Planet^>     ^m_Planets;
 
     initonly static String^ s_ScanNone = "Not scanned";
     initonly static String^ s_ScanDipl = "Received";

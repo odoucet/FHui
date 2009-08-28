@@ -50,7 +50,7 @@ public:
         PlanetType = src->PlanetType;
         System = system;
         PlanetNum = src->PlanetNum;
-        Planet = system->GetPlanet(PlanetNum);
+        Planet = system->Planets[PlanetNum];
         AvailPop = src->AvailPop;
         EconomicEff = src->EconomicEff;
         ProdPenalty = src->ProdPenalty;

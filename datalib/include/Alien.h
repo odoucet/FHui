@@ -12,14 +12,14 @@ ref class Colony;
 public ref class Alien : public GridDataSrcBase
 {
 public:
-    Alien(String ^name, int turn)
+    Alien(String ^name, int turnMet)
     {
         Name = name;
         GovName = nullptr;
         GovType = nullptr;
         Relation = SP_NEUTRAL;
         RelationOriginal = SP_NEUTRAL;
-        TurnMet = turn;
+        TurnMet = turnMet;
         Email = nullptr;
         HomeSystem = nullptr;
         HomePlanet = -1;
