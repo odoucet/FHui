@@ -451,28 +451,12 @@ void TurnData::UpdateSystems()
 {
     for each( Colony ^colony in GetColonies() )
     {
-        colony->System->Colonies->Add(colony);
-        if( colony->Owner == GameData::Player )
-        {
-            colony->System->ColoniesOwned->Add(colony);
-        }
-        else
-        {
-            colony->System->ColoniesAlien->Add(colony);
-        }
+        colony->System->AddColony(colony);
     }
 
     for each( Ship ^ship in GetShips() )
     {
-        ship->System->Ships->Add(ship);
-        if( ship->Owner == GameData::Player )
-        {
-            ship->System->ShipsOwned->Add(ship);
-        }
-        else
-        {
-            ship->System->ShipsAlien->Add(ship);
-        }
+        ship->System->AddShip(ship);
     }
 
     for each( StarSystem ^system in GetStarSystems() )
@@ -489,7 +473,7 @@ void TurnData::UpdateSystems()
             // Update min LSN and num colonies
             minLSN = Math::Min(planet->LSN, minLSN);
             bool available = true;
-            for each( Colony ^colony in system->Colonies )
+            for each( Colony^ colony in system->Colonies )
             {
                 if( colony->PlanetNum == planet->Number )
                 {

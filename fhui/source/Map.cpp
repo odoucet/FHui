@@ -239,7 +239,7 @@ void Form1::MapDrawSystems(Graphics ^g)
 
     for each( StarSystem ^system in m_GameData->GetStarSystems() )
     {
-        List<Colony^> ^colonies = system->Colonies;
+        IList<Colony^> ^colonies = system->Colonies;
 
         bool bIsHome = false;
         int homeSp = MapMaxSpecies;

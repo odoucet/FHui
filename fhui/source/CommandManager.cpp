@@ -367,6 +367,7 @@ List<String^>^ CommandManager::PrintSystemStatus(StarSystem^ system, bool listIn
     for each ( Colony^ colony in system->ColoniesOwned )
     {
         String^ inv = colony->PrintInventory();
+        // Flags -> String
         String^ flags = "";
         if (colony->Hidden) 
         {
@@ -387,11 +388,29 @@ List<String^>^ CommandManager::PrintSystemStatus(StarSystem^ system, bool listIn
         {
             flags = String::Format(" ({0})", flags);
         }
-        status->Add( String::Format("  ;   #{0} PL {1} ({2}.{3}){4}{5}", 
+        // Capabilities -> String
+        String^ capabilities = "";
+        if (colony->AvailPop) 
+        {
+            if (! String::IsNullOrEmpty(capabilities) ) capabilities += ";";
+            capabilities += "pop:" + colony->AvailPop;
+        }
+        if (colony->Shipyards) 
+        {
+            if (! String::IsNullOrEmpty(capabilities) ) capabilities += ";";
+            capabilities += "SY:" + colony->Shipyards;
+        }
+        if (! String::IsNullOrEmpty(capabilities) )
+        {
+            capabilities = String::Format("[{0}] ", capabilities);
+        }
+
+        status->Add( String::Format("  ;   #{0} PL {1} ({2}.{3}){4}{5}{6}", 
             colony->PlanetNum,
             colony->Name,
             colony->EconomicBase / 10,
             colony->EconomicBase % 10,
+            capabilities,
             (String::IsNullOrEmpty(inv) ? "" : ": " + inv),
             flags ) );
     }

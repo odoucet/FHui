@@ -4,6 +4,33 @@
 namespace FHUI
 {
 
+void StarSystem::AddShip(Ship^ ship)
+{
+    m_Ships->Add(ship);
+    if (ship->Owner == GameData::Player)
+    {
+        m_ShipsOwned->Add(ship);
+    }
+    else
+    {
+        m_ShipsAlien->Add(ship);
+    }
+}
+
+void StarSystem::AddColony(Colony^ colony)
+{
+    // Keep the list sorted - insert new elements in the proper place
+    m_Colonies->Add(colony);
+    if (colony->Owner == GameData::Player)
+    {
+        m_ColoniesOwned->Add(colony->PlanetNum, colony);
+    }
+    else
+    {
+        m_ColoniesAlien->Add(colony);
+    }
+}
+
 double StarSystem::CalcDistance(StarSystem ^s)
 {
     return s == WormholeTarget
@@ -109,7 +136,7 @@ String^ StarSystem::PrintColonies(int planetNum, Alien ^player)
 {
     String ^ret = "";
 
-    for each( Colony ^colony in Colonies )
+    for each( Colony ^colony in m_Colonies )
     {
         if( planetNum != -1 &&
             colony->PlanetNum != planetNum )
@@ -119,7 +146,7 @@ String^ StarSystem::PrintColonies(int planetNum, Alien ^player)
             ret += ", ";
     }
 
-    for each( Colony ^colony in Colonies )
+    for each( Colony ^colony in m_Colonies )
     {
         if( planetNum != -1 &&
             colony->PlanetNum != planetNum )
@@ -201,7 +228,7 @@ List<String^>^ StarSystem::PrintAliens()
 
     List<Alien^>^ species = gcnew List<Alien^>;
 
-    for each (Ship^ ship in ShipsAlien)
+    for each (Ship^ ship in m_ShipsAlien)
     {
         if (species->Contains(ship->Owner))
             continue;
@@ -227,7 +254,7 @@ List<String^>^ StarSystem::PrintAliens()
             }
         }
 
-        for each (Ship^ ship in ShipsAlien)
+        for each (Ship^ ship in m_ShipsAlien)
         {
             if (ship->Owner == race)
             {
@@ -251,7 +278,7 @@ int StarSystem::GetId()
 
 void StarSystem::UpdateMaster()
 {
-    for each( Colony ^colony in Colonies )
+    for each( Colony ^colony in m_Colonies )
     {
         if( Master == nullptr )
         {

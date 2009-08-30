@@ -25,12 +25,12 @@ public:
         MinLSNAvail = 99999;
         HasWormhole = false;
         Master = nullptr;
-        Ships = gcnew List<Ship^>;
-        ShipsOwned = gcnew List<Ship^>;
-        ShipsAlien = gcnew List<Ship^>;
-        Colonies = gcnew List<Colony^>;
-        ColoniesOwned = gcnew List<Colony^>;
-        ColoniesAlien = gcnew List<Colony^>;
+        m_Ships = gcnew List<Ship^>;
+        m_ShipsOwned = gcnew List<Ship^>;
+        m_ShipsAlien = gcnew List<Ship^>;
+        m_Colonies = gcnew List<Colony^>;
+        m_ColoniesOwned = gcnew SortedList<int, Colony^>;
+        m_ColoniesAlien = gcnew List<Colony^>;
         Planets = gcnew SortedList<int, Planet^>;
         IsVoid = true;
     }
@@ -49,12 +49,12 @@ public:
         IsVoid = src->IsVoid;
 
         Master = nullptr;
-        Ships = gcnew List<Ship^>;
-        ShipsOwned = gcnew List<Ship^>;
-        ShipsAlien = gcnew List<Ship^>;
-        Colonies = gcnew List<Colony^>;
-        ColoniesOwned = gcnew List<Colony^>;
-        ColoniesAlien = gcnew List<Colony^>;
+        m_Ships = gcnew List<Ship^>;
+        m_ShipsOwned = gcnew List<Ship^>;
+        m_ShipsAlien = gcnew List<Ship^>;
+        m_Colonies = gcnew List<Colony^>;
+        m_ColoniesOwned = gcnew SortedList<int, Colony^>;
+        m_ColoniesAlien = gcnew List<Colony^>;
         Planets = gcnew SortedList<int, Planet^>;
 
         for each ( Planet^ planet in src->Planets->Values )
@@ -73,7 +73,7 @@ public:
     virtual StarSystem^ GetFilterLocation(int %pl) override { pl = -1; return this; }
     virtual Alien^      GetFilterOwner() override       { return Master; }
     virtual int         GetFilterLSN() override         { return MinLSN; }
-    virtual int         GetFilterNumColonies() override { return Colonies->Count; }
+    virtual int         GetFilterNumColonies() override { return m_Colonies->Count; }
     // --------------------------------------------------
 
     double      CalcDistance(StarSystem ^s);
@@ -89,6 +89,9 @@ public:
 
     String^     GenerateScan();
     void        UpdateMaster();
+
+    void        AddShip(Ship^);
+    void        AddColony(Colony^);
 
     String^         PrintLocation() { return String::Format("{0} {1} {2}", X, Y, Z); }
     String^         PrintWormholeTarget() { return HasWormhole ? (WormholeTarget ? WormholeTarget->PrintLocation() : "???") : nullptr; }
@@ -113,16 +116,24 @@ public:
     property Alien^         Master;
     property bool           IsVoid;
 
-    property List<Ship^>^   Ships;
-    property List<Ship^>^   ShipsOwned;
-    property List<Ship^>^   ShipsAlien;
-    property List<Colony^>^ Colonies;
-    property List<Colony^>^ ColoniesOwned;
-    property List<Colony^>^ ColoniesAlien;
+    property IList<Ship^>^   Ships         { IList<Ship^>^ get()   { return m_Ships->AsReadOnly(); } }
+    property IList<Ship^>^   ShipsOwned    { IList<Ship^>^ get()   { return m_ShipsOwned->AsReadOnly(); } }
+    property IList<Ship^>^   ShipsAlien    { IList<Ship^>^ get()   { return m_ShipsAlien->AsReadOnly(); } }
+    property IList<Colony^>^ Colonies      { IList<Colony^>^ get() { return m_Colonies->AsReadOnly(); } }
+    property IList<Colony^>^ ColoniesOwned { IList<Colony^>^ get() { return m_ColoniesOwned->Values; } }
+    property IList<Colony^>^ ColoniesAlien { IList<Colony^>^ get() { return m_ColoniesAlien->AsReadOnly(); } }
 
     property SortedList<int, Planet^>^ Planets;
 
 protected:
+
+    List<Ship^>^            m_Ships;
+    List<Ship^>^            m_ShipsOwned;
+    List<Ship^>^            m_ShipsAlien;
+
+    List<Colony^>^            m_Colonies;
+    SortedList<int, Colony^>^ m_ColoniesOwned;
+    List<Colony^>^            m_ColoniesAlien;
 
     initonly static String^ s_ScanNone = "Not scanned";
     initonly static String^ s_ScanDipl = "Received";
