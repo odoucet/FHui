@@ -99,6 +99,13 @@ public:
     {
         Alien^ get ()
         {
+            // In "turn 0" player may be uninitialized
+            if( m_CurrentTurn == 0 &&
+                String::IsNullOrEmpty(m_PlayerName) )
+            {
+                return nullptr;
+            }
+
             try
             {
                 return m_CurrentTurnData->GetAlien( m_PlayerName );

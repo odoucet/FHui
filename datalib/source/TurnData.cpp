@@ -421,12 +421,18 @@ void TurnData::AddPlanetName(StarSystem ^system, int pl, String ^name)
 
 void TurnData::Update()
 {
-    UpdateShips();
-    UpdateAliens();
-    UpdateSystems();
-    LinkPlanetNames();
-    UpdateHomeWorlds();
-    UpdateColonies();
+    // Don't update turn data for "turn 0"
+    // because Player and related structures in GameData
+    // are not yet initialized
+    if( m_Turn > 0 )
+    {
+        UpdateShips();
+        UpdateAliens();
+        UpdateSystems();
+        LinkPlanetNames();
+        UpdateHomeWorlds();
+        UpdateColonies();
+    }
 }
 
 void TurnData::UpdateShips()

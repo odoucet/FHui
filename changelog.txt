@@ -4,6 +4,9 @@ Major new features and bug fixes will be listed here.
 * Bug fixes
 
 FHUI build ??
+* ...
+
+FHUI build 154
 * Named planets with inventory are now correctly listed in Colonies tab.
 * Fixed misreporting mining colony size.
 * Auto & Scan orders are no longer generated when Auto is disabled.
