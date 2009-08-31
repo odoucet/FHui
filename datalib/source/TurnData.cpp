@@ -35,7 +35,7 @@ String^ TurnData::GetSummary()
         "{4}"
         "---------------------------\r\n"
         "{5}"
-        "---------------------------\r\n",
+        "---------------------------",
         GetSpeciesSummary(),
         GetAllTechsSummary(),
         GetEconomicSummary(),

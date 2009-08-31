@@ -593,6 +593,10 @@ private: System::Windows::Forms::Label^  SystemsRef;
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle14 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle15 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::ToolStripMenuItem^  copyToClipboardToolStripMenuItem;
+            System::Windows::Forms::GroupBox^  groupBox6;
+            System::Windows::Forms::Label^  label42;
+            System::Windows::Forms::Label^  label43;
+            System::Windows::Forms::Label^  label44;
             System::Windows::Forms::GroupBox^  groupBox5;
             System::Windows::Forms::Label^  label33;
             System::Windows::Forms::Label^  label35;
@@ -613,10 +617,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             System::Windows::Forms::Label^  label7;
             System::Windows::Forms::Label^  label5;
             System::Windows::Forms::Label^  label6;
-            System::Windows::Forms::GroupBox^  groupBox6;
-            System::Windows::Forms::Label^  label42;
-            System::Windows::Forms::Label^  label43;
-            System::Windows::Forms::Label^  label44;
             this->TurnReloadBtn = (gcnew System::Windows::Forms::Button());
             this->TurnSelect = (gcnew System::Windows::Forms::ComboBox());
             this->Summary = (gcnew System::Windows::Forms::TextBox());
@@ -721,6 +721,9 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->OrderTemplate = (gcnew System::Windows::Forms::RichTextBox());
             this->OrdersCtxMenu = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
             this->TabUtils = (gcnew System::Windows::Forms::TabPage());
+            this->UtilProdPenalty = (gcnew System::Windows::Forms::Label());
+            this->UtilProdPenaltyLS = (gcnew System::Windows::Forms::NumericUpDown());
+            this->UtilProdPenaltyLSN = (gcnew System::Windows::Forms::NumericUpDown());
             this->UtilResInfoAverage = (gcnew System::Windows::Forms::Label());
             this->UtilResInfoGuaranteed = (gcnew System::Windows::Forms::Label());
             this->UtilResInfoGuided = (gcnew System::Windows::Forms::Label());
@@ -755,9 +758,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->textBox1 = (gcnew System::Windows::Forms::TextBox());
             this->comboBox2 = (gcnew System::Windows::Forms::ComboBox());
             this->BtnTooltip = (gcnew System::Windows::Forms::ToolTip(this->components));
-            this->UtilProdPenalty = (gcnew System::Windows::Forms::Label());
-            this->UtilProdPenaltyLS = (gcnew System::Windows::Forms::NumericUpDown());
-            this->UtilProdPenaltyLSN = (gcnew System::Windows::Forms::NumericUpDown());
             TopSplitCont = (gcnew System::Windows::Forms::SplitContainer());
             splitContainer7 = (gcnew System::Windows::Forms::SplitContainer());
             label25 = (gcnew System::Windows::Forms::Label());
@@ -784,6 +784,10 @@ private: System::Windows::Forms::Label^  SystemsRef;
             label10 = (gcnew System::Windows::Forms::Label());
             label27 = (gcnew System::Windows::Forms::Label());
             copyToClipboardToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+            groupBox6 = (gcnew System::Windows::Forms::GroupBox());
+            label42 = (gcnew System::Windows::Forms::Label());
+            label43 = (gcnew System::Windows::Forms::Label());
+            label44 = (gcnew System::Windows::Forms::Label());
             groupBox5 = (gcnew System::Windows::Forms::GroupBox());
             label33 = (gcnew System::Windows::Forms::Label());
             label35 = (gcnew System::Windows::Forms::Label());
@@ -804,10 +808,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             label7 = (gcnew System::Windows::Forms::Label());
             label5 = (gcnew System::Windows::Forms::Label());
             label6 = (gcnew System::Windows::Forms::Label());
-            groupBox6 = (gcnew System::Windows::Forms::GroupBox());
-            label42 = (gcnew System::Windows::Forms::Label());
-            label43 = (gcnew System::Windows::Forms::Label());
-            label44 = (gcnew System::Windows::Forms::Label());
             TopSplitCont->Panel1->SuspendLayout();
             TopSplitCont->Panel2->SuspendLayout();
             TopSplitCont->SuspendLayout();
@@ -860,6 +860,9 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabOrders->SuspendLayout();
             this->OrdersCtxMenu->SuspendLayout();
             this->TabUtils->SuspendLayout();
+            groupBox6->SuspendLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->UtilProdPenaltyLS))->BeginInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->UtilProdPenaltyLSN))->BeginInit();
             groupBox5->SuspendLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->UtilResTo))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->UtilResFrom))->BeginInit();
@@ -877,9 +880,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->MapSPSelf->SuspendLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSPSelfGV))->BeginInit();
             this->TabAbout->SuspendLayout();
-            groupBox6->SuspendLayout();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->UtilProdPenaltyLS))->BeginInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->UtilProdPenaltyLSN))->BeginInit();
             this->SuspendLayout();
             // 
             // TopSplitCont
@@ -976,6 +976,8 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->Summary->Size = System::Drawing::Size(226, 567);
             this->Summary->TabIndex = 3;
             this->Summary->WordWrap = false;
+            this->Summary->TextChanged += gcnew System::EventHandler(this, &Form1::Summary_TextChanged);
+            this->Summary->ClientSizeChanged += gcnew System::EventHandler(this, &Form1::Summary_TextChanged);
             // 
             // TechBI
             // 
@@ -2731,6 +2733,80 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabUtils->TabIndex = 10;
             this->TabUtils->Text = L"Utils";
             // 
+            // groupBox6
+            // 
+            groupBox6->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left) 
+                | System::Windows::Forms::AnchorStyles::Right));
+            groupBox6->Controls->Add(this->UtilProdPenalty);
+            groupBox6->Controls->Add(label42);
+            groupBox6->Controls->Add(label43);
+            groupBox6->Controls->Add(label44);
+            groupBox6->Controls->Add(this->UtilProdPenaltyLS);
+            groupBox6->Controls->Add(this->UtilProdPenaltyLSN);
+            groupBox6->Location = System::Drawing::Point(0, 104);
+            groupBox6->Name = L"groupBox6";
+            groupBox6->Size = System::Drawing::Size(677, 46);
+            groupBox6->TabIndex = 0;
+            groupBox6->TabStop = false;
+            groupBox6->Text = L"Production penalty";
+            // 
+            // UtilProdPenalty
+            // 
+            this->UtilProdPenalty->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
+            this->UtilProdPenalty->Location = System::Drawing::Point(295, 19);
+            this->UtilProdPenalty->Name = L"UtilProdPenalty";
+            this->UtilProdPenalty->Size = System::Drawing::Size(49, 20);
+            this->UtilProdPenalty->TabIndex = 2;
+            this->UtilProdPenalty->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            // 
+            // label42
+            // 
+            label42->AutoSize = true;
+            label42->Location = System::Drawing::Point(195, 23);
+            label42->Name = L"label42";
+            label42->Size = System::Drawing::Size(98, 13);
+            label42->TabIndex = 1;
+            label42->Text = L"Production penalty:";
+            // 
+            // label43
+            // 
+            label43->AutoSize = true;
+            label43->Location = System::Drawing::Point(101, 23);
+            label43->Name = L"label43";
+            label43->Size = System::Drawing::Size(23, 13);
+            label43->TabIndex = 1;
+            label43->Text = L"LS:";
+            // 
+            // label44
+            // 
+            label44->AutoSize = true;
+            label44->Location = System::Drawing::Point(4, 23);
+            label44->Name = L"label44";
+            label44->Size = System::Drawing::Size(31, 13);
+            label44->TabIndex = 1;
+            label44->Text = L"LSN:";
+            // 
+            // UtilProdPenaltyLS
+            // 
+            this->UtilProdPenaltyLS->Location = System::Drawing::Point(124, 19);
+            this->UtilProdPenaltyLS->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {200, 0, 0, 0});
+            this->UtilProdPenaltyLS->Name = L"UtilProdPenaltyLS";
+            this->UtilProdPenaltyLS->Size = System::Drawing::Size(53, 20);
+            this->UtilProdPenaltyLS->TabIndex = 0;
+            this->UtilProdPenaltyLS->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
+            this->UtilProdPenaltyLS->ValueChanged += gcnew System::EventHandler(this, &Form1::Util_ValueChanged);
+            // 
+            // UtilProdPenaltyLSN
+            // 
+            this->UtilProdPenaltyLSN->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {3, 0, 0, 0});
+            this->UtilProdPenaltyLSN->Location = System::Drawing::Point(37, 19);
+            this->UtilProdPenaltyLSN->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {99, 0, 0, 0});
+            this->UtilProdPenaltyLSN->Name = L"UtilProdPenaltyLSN";
+            this->UtilProdPenaltyLSN->Size = System::Drawing::Size(53, 20);
+            this->UtilProdPenaltyLSN->TabIndex = 0;
+            this->UtilProdPenaltyLSN->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
+            this->UtilProdPenaltyLSN->ValueChanged += gcnew System::EventHandler(this, &Form1::Util_ValueChanged);
+            // 
             // groupBox5
             // 
             groupBox5->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left) 
@@ -3297,80 +3373,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->comboBox2->Size = System::Drawing::Size(147, 21);
             this->comboBox2->TabIndex = 1;
             // 
-            // groupBox6
-            // 
-            groupBox6->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left) 
-                | System::Windows::Forms::AnchorStyles::Right));
-            groupBox6->Controls->Add(this->UtilProdPenalty);
-            groupBox6->Controls->Add(label42);
-            groupBox6->Controls->Add(label43);
-            groupBox6->Controls->Add(label44);
-            groupBox6->Controls->Add(this->UtilProdPenaltyLS);
-            groupBox6->Controls->Add(this->UtilProdPenaltyLSN);
-            groupBox6->Location = System::Drawing::Point(0, 104);
-            groupBox6->Name = L"groupBox6";
-            groupBox6->Size = System::Drawing::Size(677, 46);
-            groupBox6->TabIndex = 0;
-            groupBox6->TabStop = false;
-            groupBox6->Text = L"Production penalty";
-            // 
-            // UtilProdPenalty
-            // 
-            this->UtilProdPenalty->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-            this->UtilProdPenalty->Location = System::Drawing::Point(295, 19);
-            this->UtilProdPenalty->Name = L"UtilProdPenalty";
-            this->UtilProdPenalty->Size = System::Drawing::Size(49, 20);
-            this->UtilProdPenalty->TabIndex = 2;
-            this->UtilProdPenalty->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            // 
-            // label42
-            // 
-            label42->AutoSize = true;
-            label42->Location = System::Drawing::Point(195, 23);
-            label42->Name = L"label42";
-            label42->Size = System::Drawing::Size(98, 13);
-            label42->TabIndex = 1;
-            label42->Text = L"Production penalty:";
-            // 
-            // label43
-            // 
-            label43->AutoSize = true;
-            label43->Location = System::Drawing::Point(101, 23);
-            label43->Name = L"label43";
-            label43->Size = System::Drawing::Size(23, 13);
-            label43->TabIndex = 1;
-            label43->Text = L"LS:";
-            // 
-            // label44
-            // 
-            label44->AutoSize = true;
-            label44->Location = System::Drawing::Point(4, 23);
-            label44->Name = L"label44";
-            label44->Size = System::Drawing::Size(31, 13);
-            label44->TabIndex = 1;
-            label44->Text = L"LSN:";
-            // 
-            // UtilProdPenaltyLS
-            // 
-            this->UtilProdPenaltyLS->Location = System::Drawing::Point(124, 19);
-            this->UtilProdPenaltyLS->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {200, 0, 0, 0});
-            this->UtilProdPenaltyLS->Name = L"UtilProdPenaltyLS";
-            this->UtilProdPenaltyLS->Size = System::Drawing::Size(53, 20);
-            this->UtilProdPenaltyLS->TabIndex = 0;
-            this->UtilProdPenaltyLS->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
-            this->UtilProdPenaltyLS->ValueChanged += gcnew System::EventHandler(this, &Form1::Util_ValueChanged);
-            // 
-            // UtilProdPenaltyLSN
-            // 
-            this->UtilProdPenaltyLSN->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {3, 0, 0, 0});
-            this->UtilProdPenaltyLSN->Location = System::Drawing::Point(37, 19);
-            this->UtilProdPenaltyLSN->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {99, 0, 0, 0});
-            this->UtilProdPenaltyLSN->Name = L"UtilProdPenaltyLSN";
-            this->UtilProdPenaltyLSN->Size = System::Drawing::Size(53, 20);
-            this->UtilProdPenaltyLSN->TabIndex = 0;
-            this->UtilProdPenaltyLSN->TextAlign = System::Windows::Forms::HorizontalAlignment::Center;
-            this->UtilProdPenaltyLSN->ValueChanged += gcnew System::EventHandler(this, &Form1::Util_ValueChanged);
-            // 
             // Form1
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -3438,6 +3440,10 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabOrders->ResumeLayout(false);
             this->OrdersCtxMenu->ResumeLayout(false);
             this->TabUtils->ResumeLayout(false);
+            groupBox6->ResumeLayout(false);
+            groupBox6->PerformLayout();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->UtilProdPenaltyLS))->EndInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->UtilProdPenaltyLSN))->EndInit();
             groupBox5->ResumeLayout(false);
             groupBox5->PerformLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->UtilResTo))->EndInit();
@@ -3463,10 +3469,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->MapSPSelfGV))->EndInit();
             this->TabAbout->ResumeLayout(false);
             this->TabAbout->PerformLayout();
-            groupBox6->ResumeLayout(false);
-            groupBox6->PerformLayout();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->UtilProdPenaltyLS))->EndInit();
-            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->UtilProdPenaltyLSN))->EndInit();
             this->ResumeLayout(false);
 
         }
@@ -3624,6 +3626,29 @@ private: System::Void ColoniesGroupByOwner_CheckedChanged(System::Object^  sende
          }
 private: System::Void ShipsGroupByOwner_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
              ShipsGrid->Sorter->SetGroupBySpecies( safe_cast<CheckBox^>(sender)->Checked );
+         }
+// Called on Summary TextChanged and ClientSizeChanged to update
+// display of scrollbars depending on displayed text and window sizes
+private: System::Void Summary_TextChanged(System::Object^  sender, System::EventArgs^  e) {
+             static bool busy = false;
+             if( busy ) return;
+             busy = true;
+
+             TextBox ^tb = safe_cast<TextBox^>(sender);
+             System::Drawing::Size ts = TextRenderer::MeasureText(tb->Text, tb->Font);
+             bool hsb = tb->ClientSize.Height < ts.Height + Convert::ToInt32(tb->Font->Size);
+             bool vsb = tb->ClientSize.Width < ts.Width;
+
+             if( hsb && vsb )
+                 tb->ScrollBars = ScrollBars::Both;
+             else if( !hsb && !vsb )
+                 tb->ScrollBars = ScrollBars::None;
+             else if( hsb && !vsb )
+                 tb->ScrollBars = ScrollBars::Vertical;
+             else if( !hsb && vsb )
+                 tb->ScrollBars = ScrollBars::Horizontal;
+
+             busy = false;
          }
 };
 
