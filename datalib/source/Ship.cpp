@@ -64,64 +64,84 @@ String^ Ship::PrintLocationShort()
 
 String^ Ship::PrintLocation()
 {
-    String ^xyz;
+    String ^location;
+    String ^nearColony;
 
-    if( System )
+    // First see if ship is orbiting owned colony
+    if( PlanetNum != -1 )
     {
-        int plSize = 0;
-        int plNum = PlanetNum;
-        if( System->Planets->ContainsKey(plNum) )
+        for each( Colony ^colony in System->ColoniesOwned )
         {
-            // check if there is player colony in the system
+            if( colony->PlanetNum == PlanetNum )
+            {
+                location = "PL " + colony->Name;
+                break;
+            }
+        }
+    }
 
+    if( !location )
+    {
+        if( System->ColoniesOwned->Count > 0 )
+        {
+            // Not orbiting owned colony, but there is at least one owned colony
+            // in this system, so find the largest one
+            int plSize = -1;
             for each( Colony ^colony in System->ColoniesOwned )
             {
                 if( colony->EconomicBase > plSize )
                 {
-                    plNum = colony->PlanetNum;
                     plSize = colony->EconomicBase;
+                    nearColony = colony->Name;
                 }
             }
         }
 
-        if( System->Planets->ContainsKey(plNum) )
+        if( System->Planets->ContainsKey(PlanetNum) )
         {
+            // Still check the planet name, it may be a named planet not yet colonized
             Planet ^planet = System->Planets[PlanetNum];
             if( String::IsNullOrEmpty(planet->Name) )
             {
-                xyz = String::Format("[{0} {1}]", System->PrintLocation(), PlanetNum);
+                if( nearColony )
+                    location = String::Format("[{0}]", nearColony);
+                else
+                    location = String::Format("[{0} {1}]", System->PrintLocation(), PlanetNum);
             }
             else
             {
-                xyz = String::Format("PL {0}", planet->Name);
+                location = "PL " + planet->Name;
             }
         }
         else
         {
-           xyz = String::Format("[{0}]", System->PrintLocation());
-        }
-    }
-    else
-    {
-        if( PlanetNum > 0 )
-        {
-            xyz = System->PrintLocation();
-        }
-        else
-        {
-            xyz = String::Format("[{0} {1}]", System->PrintLocation(), PlanetNum);
+           location = String::Format("[{0}]",
+               nearColony ? nearColony : System->PrintLocation());
         }
     }
 
     switch( Location )
     {
-        case SHIP_LOC_DEEP_SPACE:   return xyz + ", Deep";
-        case SHIP_LOC_ORBIT:        return xyz + ", Orbit";
-        case SHIP_LOC_LANDED:       return xyz + ", Landed";
+    case SHIP_LOC_DEEP_SPACE:
+        location += ", Deep";
+        break;
+    case SHIP_LOC_ORBIT:
+        location += ", Orbit";
+        if( nearColony )
+            location += " PL #" + PlanetNum.ToString();
+        break;
+    case SHIP_LOC_LANDED:
+        location + ", Landed";
+        if( nearColony )
+            location += " PL #" + PlanetNum.ToString();
+        break;
+
+    default:
+        throw gcnew FHUIDataIntegrityException(
+            String::Format("Invalid ship location! ({0})", (int)Location) );
     }
 
-    throw gcnew FHUIDataIntegrityException(
-        String::Format("Invalid ship location! ({0})", (int)Location) );
+    return location;
 }
 
 String^ Ship::PrintCargo()
