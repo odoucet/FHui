@@ -115,15 +115,24 @@ String^ Ship::PrintLocation()
         }
         else
         {
-           location = String::Format("[{0}]",
-               nearColony ? nearColony : System->PrintLocation());
+            // Use <> to mark void sector
+            if( System->IsVoid )
+            {
+                location = String::Format("<{0}>", System->PrintLocation());
+            }
+            else
+            {
+                location = String::Format("[{0}]",
+                    nearColony ? nearColony : System->PrintLocation());
+            }
         }
     }
 
     switch( Location )
     {
     case SHIP_LOC_DEEP_SPACE:
-        location += ", Deep";
+        if ( !System->IsVoid )
+            location += ", Deep";
         break;
     case SHIP_LOC_ORBIT:
         location += ", Orbit";
@@ -131,7 +140,7 @@ String^ Ship::PrintLocation()
             location += " PL #" + PlanetNum.ToString();
         break;
     case SHIP_LOC_LANDED:
-        location + ", Landed";
+        location += ", Landed";
         if( nearColony )
             location += " PL #" + PlanetNum.ToString();
         break;

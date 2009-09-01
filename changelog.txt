@@ -1,10 +1,15 @@
 This is a change log for FHUI releases.
 Major new features and bug fixes will be listed here.
-+ New features
+Minor changes are listed only if originally requested by player
 * Bug fixes
++ New features / [P] denotes player requested features
 
 FHUI build ??
-* ...
+* Status for older turns is shown correctly
+* [P] Order template: planets in comments are sorted by number
+* [P] Order template: available population and shipyards added to production comments
+* [P] Scrollbars added to summary textbox on the left side
++ Improved parsing - all information is scanned once, there is no delay when switching turns
 
 FHUI build 154
 * Named planets with inventory are now correctly listed in Colonies tab.
