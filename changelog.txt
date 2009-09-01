@@ -2,14 +2,19 @@ This is a change log for FHUI releases.
 Major new features and bug fixes will be listed here.
 Minor changes are listed only if originally requested by player
 * Bug fixes
-+ New features / [P] denotes player requested features
++ New features
+[P] denotes player requested features
 
 FHUI build ??
-* Status for older turns is shown correctly
-* [P] Order template: planets in comments are sorted by number
-* [P] Order template: available population and shipyards added to production comments
-* [P] Scrollbars added to summary textbox on the left side
-+ Improved parsing - all information is scanned once, there is no delay when switching turns
+* Status for older turns is shown correctly.
+* [P] Order template: planets in comments are sorted by number.
+* [P] Order template: available population and shipyards added to production comments.
+* [P] Scrollbars added to summary textbox on the left side.
+* Mishap filter allows systems with mishap above 100% when set to max value (100%).
++ Improved parsing - all information is scanned once, there is no delay when switching turns.
++ [P] Utils tab: TR info shows transport build cost.
++ [P] Grav column added to Planets and Colonies tabs, MD added to Colonies. These columns
+      are by default not visible. Use context menu to show them.
 
 FHUI build 154
 * Named planets with inventory are now correctly listed in Colonies tab.
@@ -22,8 +27,8 @@ FHUI build 154
 + Support for manually entered ref coordinates added.
 + Production penalty calculator on Utils tab.
 + Display performance improved.
-+ Special handling for bombarded home planet
-+ Improved order template comments
++ Special handling for bombarded home planet.
++ Improved order template comments.
 
 FHUI build 140
 * Sorting by distance to ref system on Colonies tab fixed.

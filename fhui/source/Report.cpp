@@ -427,17 +427,17 @@ void Report::MatchPlanetScan(String ^s)
     */
 
     //                          0:plNum   1:dia    2:gv            3:tc       4:pc    5:mining diff
-    if( m_RM->Match(s, "^(\\d+)\\s+(\\d+)\\s+(\\d+\\.\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\.(\\d+)\\s+") )
+    if( m_RM->Match(s, "^(\\d+)\\s+(\\d+)\\s+(\\d+)\\.(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\.(\\d+)\\s+") )
     {
         int plNum = m_RM->GetResultInt(0);
         Planet ^planet = gcnew Planet(
             m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ),
             plNum,
             m_RM->GetResultInt(1),
-            m_RM->GetResultFloat(2),
-            m_RM->GetResultInt(3),
+            m_RM->GetResultInt(2) * 100 + m_RM->GetResultInt(3),
             m_RM->GetResultInt(4),
-            m_RM->GetResultInt(5) * 100 + m_RM->GetResultInt(6) );
+            m_RM->GetResultInt(5),
+            m_RM->GetResultInt(6) * 100 + m_RM->GetResultInt(7) );
 
         // Try reading LSN
         if( m_RM->Match(s, "(\\d+)\\s+") )

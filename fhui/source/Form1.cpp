@@ -779,7 +779,8 @@ void Form1::SystemsSetup()
 
     for each( StarSystem ^system in m_GameData->GetStarSystems() )
     {
-        if( SystemsGrid->Filter->Filter(system) )
+        if( system->IsVoid ||   // Never show void systems on the grid
+            SystemsGrid->Filter->Filter(system) )
             continue;
 
         DataGridViewRow ^row = SystemsGrid->Rows[ SystemsGrid->Rows->Add() ];
@@ -911,6 +912,7 @@ void Form1::PlanetsInitControls()
     c.TC        = ADD_COLUMN("TC",          "Temperature class",    int,        Ascending,  Default);
     c.PC        = ADD_COLUMN("PC",          "Pressure class",       int,        Ascending,  Default);
     c.MD        = ADD_COLUMN("MD",          "Mining difficulty",    double,     Ascending,  Default);
+    c.Grav      = ADD_COLUMN("Grav",        "Gravitation",          double,     Ascending,  Default);
     c.LSN       = ADD_COLUMN("LSN",         "LSN",                  int,        Ascending,  Default);
     c.Dist      = ADD_COLUMN("Distance",    "Distance to ref system and mishap chance [%]", String, Ascending, Distance);
     c.Visited   = ADD_COLUMN("Vis",         "Last turn you visited planet's system", int, Descending, Default);
@@ -931,6 +933,7 @@ void Form1::PlanetsInitControls()
     PlanetsGrid->Columns[c.Dist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
     PlanetsGrid->Columns[c.Colonies]->DefaultCellStyle->Font =
         gcnew System::Drawing::Font(L"Tahoma", 6.75F);
+    PlanetsGrid->Columns[c.Grav]->Visible = false;
 
     // Filter setup
     GridFilter ^filter = gcnew GridFilter(PlanetsGrid, m_bGridUpdateEnabled);
@@ -1002,7 +1005,8 @@ void Form1::PlanetsSetup()
             cells[c.Location]->Value= planet->PrintLocation();
             cells[c.TC]->Value      = planet->TempClass;
             cells[c.PC]->Value      = planet->PressClass;
-            cells[c.MD]->Value      = (double)planet->MiDiff / 100;
+            cells[c.MD]->Value      = (double)planet->MiDiff / 100.0;
+            cells[c.Grav]->Value    = (double)planet->Grav / 100.0;
             cells[c.LSN]->Value     = planet->LSN;
             cells[c.Dist]->Value    = GridPrintDistance(system, PlanetsGrid->Filter->RefSystem, gv, age);
             if( system->LastVisited != -1 )
@@ -1251,6 +1255,8 @@ void Form1::ColoniesInitControls()
     c.Size      = ADD_COLUMN("Size",        "Colony economic base",         double, Descending, Default);
     c.Prod      = ADD_COLUMN("PR",          "Production",                   int,    Descending, Default);
     c.Shipyards = ADD_COLUMN("SY",          "Shipyards",                    int,    Descending, Default);
+    c.MD        = ADD_COLUMN("MD",          "Mining Difficulty",            double, Ascending,  Default);
+    c.Grav      = ADD_COLUMN("Grav",        "Gravitation",                  double, Ascending,  Default);
     c.LSN       = ADD_COLUMN("LSN",         "LSN",                          int,    Ascending,  Default);
     c.Balance   = ADD_COLUMN("Balance",     "IU/AU balance",                String, Descending, Default);
     c.Pop       = ADD_COLUMN("Pop",         "Available population",         int,    Descending, Default);
@@ -1275,6 +1281,8 @@ void Form1::ColoniesInitControls()
     ColoniesGrid->Columns[c.Dist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
     ColoniesGrid->Columns[c.Inventory]->DefaultCellStyle->Font =
         gcnew System::Drawing::Font(L"Tahoma", 6.75F);
+    ColoniesGrid->Columns[c.MD]->Visible = false;
+    ColoniesGrid->Columns[c.Grav]->Visible = false;
 
     // Filter setup
     GridFilter ^filter = gcnew GridFilter(ColoniesGrid, m_bGridUpdateEnabled);
@@ -1346,11 +1354,15 @@ void Form1::ColoniesSetup()
         cells[c.Type]->Value        = FHStrings::PlTypeToString(colony->PlanetType);
         cells[c.Location]->Value    = colony->PrintLocation();
         if( colony->EconomicBase != -1 )
-            cells[c.Size]->Value    = (double)colony->EconomicBase / 10;
+            cells[c.Size]->Value    = (double)colony->EconomicBase / 10.0;
         cells[c.Dist]->Value        = GridPrintDistance(colony->System, ColoniesGrid->Filter->RefSystem, gv, age);
         cells[c.Inventory]->Value   = colony->PrintInventory();
         if( colony->Planet )
+        {
             cells[c.LSN]->Value     = colony->Planet->LSN;
+            cells[c.MD]->Value      = (double)colony->Planet->MiDiff / 100.0;
+            cells[c.Grav]->Value    = (double)colony->Planet->Grav / 100.0;
+        }
 
         if( colony->Owner == sp )
         {

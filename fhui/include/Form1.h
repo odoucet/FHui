@@ -58,7 +58,9 @@ namespace FHUI {
         void        CopyOrdersTemplateToClipboard();
 
         void        LoadOrders();
-        SortedList<String^, String^>^   m_OrderFiles;
+    private: System::Windows::Forms::Label^  UtilTrInfoCost;
+
+             SortedList<String^, String^>^   m_OrderFiles;
 
         void        TurnReload();
         void        InitData();
@@ -191,6 +193,7 @@ namespace FHUI {
             int TC;
             int PC;
             int MD;
+            int Grav;
             int LSN;
             int Dist;
             int Visited;
@@ -225,6 +228,8 @@ namespace FHUI {
             int Seen;
             int Prod;
             int Shipyards;
+            int MD;
+            int Grav;
             int LSN;
             int ProdPerc;
             int Balance;
@@ -617,6 +622,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             System::Windows::Forms::Label^  label7;
             System::Windows::Forms::Label^  label5;
             System::Windows::Forms::Label^  label6;
+            System::Windows::Forms::Label^  label31;
             this->TurnReloadBtn = (gcnew System::Windows::Forms::Button());
             this->TurnSelect = (gcnew System::Windows::Forms::ComboBox());
             this->Summary = (gcnew System::Windows::Forms::TextBox());
@@ -758,6 +764,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->textBox1 = (gcnew System::Windows::Forms::TextBox());
             this->comboBox2 = (gcnew System::Windows::Forms::ComboBox());
             this->BtnTooltip = (gcnew System::Windows::Forms::ToolTip(this->components));
+            this->UtilTrInfoCost = (gcnew System::Windows::Forms::Label());
             TopSplitCont = (gcnew System::Windows::Forms::SplitContainer());
             splitContainer7 = (gcnew System::Windows::Forms::SplitContainer());
             label25 = (gcnew System::Windows::Forms::Label());
@@ -808,6 +815,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             label7 = (gcnew System::Windows::Forms::Label());
             label5 = (gcnew System::Windows::Forms::Label());
             label6 = (gcnew System::Windows::Forms::Label());
+            label31 = (gcnew System::Windows::Forms::Label());
             TopSplitCont->Panel1->SuspendLayout();
             TopSplitCont->Panel2->SuspendLayout();
             TopSplitCont->SuspendLayout();
@@ -2928,6 +2936,8 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             groupBox4->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left) 
                 | System::Windows::Forms::AnchorStyles::Right));
+            groupBox4->Controls->Add(this->UtilTrInfoCost);
+            groupBox4->Controls->Add(label31);
             groupBox4->Controls->Add(this->UtilTrInfoMA);
             groupBox4->Controls->Add(label32);
             groupBox4->Controls->Add(this->UtilTrInfoMaint);
@@ -3372,6 +3382,24 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->comboBox2->Name = L"comboBox2";
             this->comboBox2->Size = System::Drawing::Size(147, 21);
             this->comboBox2->TabIndex = 1;
+            // 
+            // label31
+            // 
+            label31->AutoSize = true;
+            label31->Location = System::Drawing::Point(510, 23);
+            label31->Name = L"label31";
+            label31->Size = System::Drawing::Size(56, 13);
+            label31->TabIndex = 1;
+            label31->Text = L"Build cost:";
+            // 
+            // UtilTrInfoCost
+            // 
+            this->UtilTrInfoCost->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
+            this->UtilTrInfoCost->Location = System::Drawing::Point(569, 19);
+            this->UtilTrInfoCost->Name = L"UtilTrInfoCost";
+            this->UtilTrInfoCost->Size = System::Drawing::Size(49, 20);
+            this->UtilTrInfoCost->TabIndex = 2;
+            this->UtilTrInfoCost->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
             // 
             // Form1
             // 

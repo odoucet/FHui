@@ -194,6 +194,8 @@ bool GridFilter::Filter(IGridDataSrc ^item)
                     age = ship->Age;
             }
             double maxMishap = Decimal::ToDouble(CtrlMaxMishap->Value);
+            if( maxMishap == 100.0 )    // Allow systems with mishap above 100% when filter is at max value
+                maxMishap = Double::MaxValue;
             if( maxMishap < system->CalcMishap(RefSystem, gv, age) )
             {
                 return true;

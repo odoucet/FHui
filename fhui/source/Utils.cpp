@@ -33,6 +33,7 @@ void Form1::UtilUpdateTRInfo()
     UtilTrInfoMA->ForeColor =
         ( (2 * trSize) > GameData::Player->TechLevels[TECH_MA] )
             ? Color::Red : Color::Black;
+    UtilTrInfoCost->Text = (trSize * 100).ToString();
 }
 
 void Form1::UtilUpdateResearch()

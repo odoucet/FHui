@@ -9,7 +9,7 @@ namespace FHUI
 public ref class Planet : public GridDataSrcBase
 {
 public:
-    Planet(StarSystem ^s, int nr, int dia, float gv, int tc, int pc, int md)
+    Planet(StarSystem ^s, int nr, int dia, int gv, int tc, int pc, int md)
     {
         System = s;
         Number = nr;
@@ -53,7 +53,7 @@ public:
 
     static Planet^ Default(StarSystem ^system, int nr)
     {
-        return gcnew Planet(system, nr, 99, 99.99F, 99, 99, 999);
+        return gcnew Planet(system, nr, 99, 99, 99, 99, 999);
     }
 
     // -------- IGridDataSrc ----------------------------
@@ -83,7 +83,7 @@ public:
     property bool           NameIsDisband;
     property String^        Comment;
     property int            Diameter;
-    property float          Grav;
+    property int            Grav;   // * 100
     property int            TempClass;
     property int            PressClass;
     property int            MiDiff; // * 100
