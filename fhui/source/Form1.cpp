@@ -178,6 +178,7 @@ void Form1::UpdateControls()
     AliensUpdateControls();
 
     UtilUpdateAll();
+    UpdateAllGrids();
 }
 
 void Form1::UpdateTabs()
@@ -476,6 +477,15 @@ void Form1::LoadOrders()
 ////////////////////////////////////////////////////////////////
 // GUI misc
 
+void Form1::UpdateAllGrids()
+{
+    SystemsGrid->Filter->Update( SystemsRefHome );
+    PlanetsGrid->Filter->Update( PlanetsRefHome );
+    ColoniesGrid->Filter->Update( ColoniesRefHome );
+    ShipsGrid->Filter->Update( ShipsRefHome );
+    AliensGrid->Filter->Update();
+}
+
 void Form1::ApplyDataAndFormat(
     DataGridView ^grid,
     DataTable ^data,
@@ -748,6 +758,8 @@ void Form1::SystemsInitControls()
     // Store objects
     SystemsGrid->Filter = filter;
     SystemsGrid->Sorter = sorter;
+
+    filter->ResetControls(false);
 }
 
 void Form1::SystemsUpdateControls()
@@ -762,10 +774,10 @@ void Form1::SystemsUpdateControls()
     SystemsRefColony->DataSource    = m_RefListColonies;
     SystemsRefShip->DataSource      = m_RefListShips;
 
-    // Trigger grid update
-    SystemsGrid->Filter->EnableUpdates  = true;
     SystemsRefHome->Text            = GameData::Player->Name;
-    SystemsGrid->Filter->Reset();
+
+    // Enable grid update
+    SystemsGrid->Filter->EnableUpdates  = true;
 }
 
 void Form1::SystemsSetup()
@@ -960,6 +972,8 @@ void Form1::PlanetsInitControls()
     // Store objects
     PlanetsGrid->Filter = filter;
     PlanetsGrid->Sorter = sorter;
+
+    filter->ResetControls(false);
 }
 
 void Form1::PlanetsUpdateControls()
@@ -975,11 +989,8 @@ void Form1::PlanetsUpdateControls()
     PlanetsRefColony->DataSource    = m_RefListColonies;
     PlanetsRefShip->DataSource      = m_RefListShips;
 
-    PlanetsRefHome->Text = GridFilter::s_CaptionHome;
-    // Trigger grid update
+    // Enable grid update
     PlanetsGrid->Filter->EnableUpdates  = true;
-    PlanetsRefHome->Text = GameData::Player->Name;
-    PlanetsGrid->Filter->Reset();
 }
 
 void Form1::PlanetsSetup()
@@ -1308,6 +1319,8 @@ void Form1::ColoniesInitControls()
     // Store objects
     ColoniesGrid->Filter = filter;
     ColoniesGrid->Sorter = sorter;
+
+    filter->ResetControls(false);
 }
 
 void Form1::ColoniesUpdateControls()
@@ -1322,13 +1335,10 @@ void Form1::ColoniesUpdateControls()
     ColoniesRefColony->DataSource   = m_RefListColonies;
     ColoniesRefShip->DataSource     = m_RefListShips;
 
-    ColoniesRefHome->Text = GridFilter::s_CaptionHome;
-    // Trigger grid update
-    ColoniesGrid->Filter->EnableUpdates = true;
-    ColoniesRefHome->Text = GameData::Player->Name;
-    ColoniesGrid->Filter->Reset();
-
     ColoniesGrid->Sorter->SetGroupBySpecies( ColoniesGroupByOwner->Checked );
+
+    // Enable grid update
+    ColoniesGrid->Filter->EnableUpdates = true;
 }
 
 void Form1::ColoniesSetup()
@@ -1620,6 +1630,8 @@ void Form1::ShipsInitControls()
     // Store objects
     ShipsGrid->Filter = filter;
     ShipsGrid->Sorter = sorter;
+
+    filter->ResetControls(false);
 }
 
 void Form1::ShipsUpdateControls()
@@ -1634,13 +1646,10 @@ void Form1::ShipsUpdateControls()
     ShipsRefColony->DataSource   = m_RefListColonies;
     ShipsRefShip->DataSource     = m_RefListShips;
 
-    ShipsRefHome->Text = GridFilter::s_CaptionHome;
-    // Trigger grid update
-    ShipsGrid->Filter->EnableUpdates = true;
-    ShipsRefHome->Text = GameData::Player->Name;
-    ShipsGrid->Filter->Reset();
-
     ShipsGrid->Sorter->SetGroupBySpecies( ColoniesGroupByOwner->Checked );
+
+    // Enable grid update
+    ShipsGrid->Filter->EnableUpdates = true;
 }
 
 void Form1::ShipsSetup()
@@ -1997,12 +2006,13 @@ void Form1::AliensInitControls()
     // Store objects
     AliensGrid->Filter = filter;
     AliensGrid->Sorter = sorter;
+
+    filter->ResetControls(false);
 }
 
 void Form1::AliensUpdateControls()
 {
     AliensGrid->Filter->EnableUpdates = true;
-    AliensGrid->Filter->Reset();
 }
 
 void Form1::AliensSetup()

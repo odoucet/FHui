@@ -42,7 +42,7 @@ public interface class IGridFilter
 {
     void    Update();
     void    Update(System::Object^ sender);
-    void    Reset();
+    void    ResetControls(bool doUpdate);
     bool    Filter(IGridDataSrc ^item);
 
     void    SetRefSystem(StarSystem ^system);

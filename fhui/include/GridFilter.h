@@ -54,7 +54,7 @@ public:
 
     virtual void    Update();
     virtual void    Update(Object ^sender);
-    virtual void    Reset();
+    virtual void    ResetControls(bool doUpdate);
     virtual bool    Filter(IGridDataSrc ^item);
 
     virtual void    SetRefSystem(StarSystem ^system);

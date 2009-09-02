@@ -219,7 +219,7 @@ bool GridFilter::Filter(IGridDataSrc ^item)
     return false;
 }
 
-void GridFilter::Reset()
+void GridFilter::ResetControls(bool doUpdate)
 {
     EnableUpdates = false;
 
@@ -259,7 +259,9 @@ void GridFilter::Reset()
         CtrlMiMaBalance->Checked = false;
 
     EnableUpdates = true;
-    Update();
+
+    if( doUpdate )
+        Update();
 }
 
 void GridFilter::SetRefText()

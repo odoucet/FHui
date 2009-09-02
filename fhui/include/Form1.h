@@ -58,9 +58,7 @@ namespace FHUI {
         void        CopyOrdersTemplateToClipboard();
 
         void        LoadOrders();
-    private: System::Windows::Forms::Label^  UtilTrInfoCost;
-
-             SortedList<String^, String^>^   m_OrderFiles;
+        SortedList<String^, String^>^   m_OrderFiles;
 
         void        TurnReload();
         void        InitData();
@@ -80,7 +78,8 @@ namespace FHUI {
 
         String^     GetDataDir(String ^suffix);
 
-        // -- Data grids formatting
+        // -- Data grids misc
+        void        UpdateAllGrids();
         void        ApplyDataAndFormat(
                         DataGridView ^grid,
                         DataTable ^dataTable,
@@ -356,6 +355,7 @@ namespace FHUI {
         // Auto-generated code below this point
         // --------------------------------------------------
 
+    private: System::Windows::Forms::Label^  UtilTrInfoCost;
     private: System::Windows::Forms::CheckBox^  ShipsGroupByOwner;
     private: System::Windows::Forms::Label^  UtilResInfoAverage;
     private: System::Windows::Forms::Label^  UtilResInfoGuaranteed;
@@ -3530,7 +3530,7 @@ private: System::Void Systems_Update(System::Object^  sender, System::EventArgs^
              SystemsGrid->Filter->Update(sender);
          }
 private: System::Void SystemsFiltersReset_Click(System::Object^  sender, System::EventArgs^  e) {
-             SystemsGrid->Filter->Reset();
+             SystemsGrid->Filter->ResetControls(true);
          }
 private: System::Void SystemsGrid_CellMouseDoubleClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
              if( e->Button == Windows::Forms::MouseButtons::Left )
@@ -3544,7 +3544,7 @@ private: System::Void Planets_Update(System::Object^  sender, System::EventArgs^
              PlanetsGrid->Filter->Update(sender);
          }
 private: System::Void PlanetsFiltersReset_Click(System::Object^  sender, System::EventArgs^  e) {
-             PlanetsGrid->Filter->Reset();
+             PlanetsGrid->Filter->ResetControls(true);
          }
 private: System::Void PlanetsGrid_CellMouseDoubleClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
              if( e->Button == Windows::Forms::MouseButtons::Left )
@@ -3558,7 +3558,7 @@ private: System::Void Colonies_Update(System::Object^  sender, System::EventArgs
              ColoniesGrid->Filter->Update(sender);
          }
 private: System::Void ColoniesFiltersReset_Click(System::Object^  sender, System::EventArgs^  e) {
-             ColoniesGrid->Filter->Reset();
+             ColoniesGrid->Filter->ResetControls(true);
          }
 private: System::Void ColoniesGrid_CellMouseDoubleClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
              if( e->Button == Windows::Forms::MouseButtons::Left )
@@ -3572,7 +3572,7 @@ private: System::Void Ships_Update(System::Object^  sender, System::EventArgs^  
              ShipsGrid->Filter->Update(sender);
          }
 private: System::Void ShipsFiltersReset_Click(System::Object^  sender, System::EventArgs^  e) {
-             ShipsGrid->Filter->Reset();
+             ShipsGrid->Filter->ResetControls(true);
          }
 private: System::Void ShipsGrid_CellMouseDoubleClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
              if( e->Button == Windows::Forms::MouseButtons::Left )
@@ -3586,7 +3586,7 @@ private: System::Void Aliens_Update(System::Object^  sender, System::EventArgs^ 
              AliensGrid->Filter->Update(sender);
          }
 private: System::Void AliensFiltersReset_Click(System::Object^  sender, System::EventArgs^  e) {
-             AliensGrid->Filter->Reset();
+             AliensGrid->Filter->ResetControls(true);
          }
 private: System::Void Grid_CellMouseDoubleClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
              if( e->Button == Windows::Forms::MouseButtons::Middle )
