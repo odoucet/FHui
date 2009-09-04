@@ -8,6 +8,44 @@ ref class Ship;
 ref class Colony;
 
 // ---------------------------------------------------
+// Atmospheric requirements
+public ref class AtmosphericReq
+{
+public:
+    AtmosphericReq()
+    {
+        GasRequired = GAS_MAX;
+        ReqMin = 0;
+        ReqMax = 0;
+        TempClass = -1;
+        PressClass = -1;
+
+        m_Neutral = gcnew array<bool>(GAS_MAX){false};
+        m_Poisonous = gcnew array<bool>(GAS_MAX){false};
+    }
+
+    bool IsValid() { return GasRequired != GAS_MAX && TempClass != -1 && PressClass != -1; }
+
+    property GasType    GasRequired;
+    property int        ReqMin;
+    property int        ReqMax;
+    property int        TempClass;
+    property int        PressClass;
+    property bool       Neutral [int] {
+        bool get(int gas)           { return m_Neutral[gas]; }
+        void set(int gas, bool val) { m_Neutral[gas] = val; }
+    }
+    property bool       Poisonous [int] {
+        bool get(int gas)           { return m_Poisonous[gas]; }
+        void set(int gas, bool val) { m_Poisonous[gas] = val; }
+    }
+
+protected:
+    array<bool>        ^m_Neutral;
+    array<bool>        ^m_Poisonous;
+};
+
+// ---------------------------------------------------
 // Alien species
 public ref class Alien : public GridDataSrcBase
 {
@@ -23,6 +61,7 @@ public:
         Email = nullptr;
         HomeSystem = nullptr;
         HomePlanet = -1;
+        AtmReq = gcnew AtmosphericReq;
         TechEstimateTurn = -1;
         Ships = gcnew List<Ship^>;
         Colonies = gcnew List<Colony^>;
@@ -44,6 +83,7 @@ public:
         Email = src->Email;
         HomeSystem = home;
         HomePlanet = src->HomePlanet;
+        AtmReq = src->AtmReq;
         TechEstimateTurn = src->TechEstimateTurn;
         Ships = gcnew List<Ship^>;
         Colonies = gcnew List<Colony^>;
@@ -87,6 +127,7 @@ public:
 
     property StarSystem^        HomeSystem;
     property int                HomePlanet;
+    property AtmosphericReq^    AtmReq;
 
     property List<Ship^>^       Ships;
     property List<Colony^>^     Colonies;

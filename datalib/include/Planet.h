@@ -53,7 +53,7 @@ public:
 
     static Planet^ Default(StarSystem ^system, int nr)
     {
-        return gcnew Planet(system, nr, 99, 99, 99, 99, 999);
+        return gcnew Planet(system, nr, 99, 99, -1, -1, 999);
     }
 
     // -------- IGridDataSrc ----------------------------

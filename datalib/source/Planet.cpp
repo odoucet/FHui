@@ -1,23 +1,26 @@
 #include "StdAfx.h"
 #include "GameData.h"
+#include "Alien.h"
 
 namespace FHUI
 {
 
 int Planet::CalculateLSN()
 {
+    AtmosphericReq ^atm = GameData::Player->AtmReq;
+
     int lsn =
-        3 * Math::Abs(PressClass - GameData::AtmReq->PressClass) +
-        3 * Math::Abs(TempClass - GameData::AtmReq->TempClass);
+        3 * Math::Abs(PressClass - atm->PressClass) +
+        3 * Math::Abs(TempClass - atm->TempClass);
 
     for( int i = 0; i < GAS_MAX; ++i )
     {
-        if( Atmosphere[i] > 0 && GameData::AtmReq->Poisonous[i] )
+        if( Atmosphere[i] > 0 && atm->Poisonous[i] )
             lsn += 3;
     }
 
-    if( Atmosphere[GameData::AtmReq->GasRequired] < GameData::AtmReq->ReqMin ||
-        Atmosphere[GameData::AtmReq->GasRequired] > GameData::AtmReq->ReqMax )
+    if( Atmosphere[atm->GasRequired] < atm->ReqMin ||
+        Atmosphere[atm->GasRequired] > atm->ReqMax )
     {
         lsn += 3;
     }

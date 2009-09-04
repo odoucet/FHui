@@ -12,45 +12,6 @@ namespace FHUI
 interface class ICommand;
 
 // ---------------------------------------------------
-// Atmospheric requirements
-public ref class AtmosphericReq
-{
-public:
-    AtmosphericReq()
-    {
-        GasRequired = GAS_MAX;
-        ReqMin = 0;
-        ReqMax = 0;
-        TempClass = -1;
-        PressClass = -1;
-
-        m_Neutral = gcnew array<bool>(GAS_MAX){false};
-        m_Poisonous = gcnew array<bool>(GAS_MAX){false};
-    }
-
-    bool IsValid() { return GasRequired != GAS_MAX && TempClass != -1 && PressClass != -1; }
-
-    property GasType    GasRequired;
-    property int        ReqMin;
-    property int        ReqMax;
-    property int        TempClass;
-    property int        PressClass;
-    property bool       Neutral [int] {
-        bool get(int gas)           { return m_Neutral[gas]; }
-        void set(int gas, bool val) { m_Neutral[gas] = val; }
-    }
-    property bool       Poisonous [int] {
-        bool get(int gas)           { return m_Poisonous[gas]; }
-        void set(int gas, bool val) { m_Poisonous[gas] = val; }
-    }
-
-protected:
-    array<bool>        ^m_Neutral;
-    array<bool>        ^m_Poisonous;
-};
-
-
-// ---------------------------------------------------
 // Game data
 public ref class GameData
 {
@@ -94,7 +55,6 @@ public:
 
     static int      GetSystemId(int, int, int);
     static property int CurrentTurn { int get() { return m_CurrentTurn; } }
-    static property AtmosphericReq^ AtmReq;
     static property Alien^ Player
     {
         Alien^ get ()

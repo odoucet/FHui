@@ -46,10 +46,12 @@ String^ TurnData::GetSummary()
 
 String^ TurnData::GetSpeciesSummary()
 {
+    Alien ^player = GameData::Player;
+
     String ^toxicGases = "";
     for( int gas = 0; gas < GAS_MAX; ++gas )
     {
-        if( GameData::AtmReq->Poisonous[gas] )
+        if( player->AtmReq->Poisonous[gas] )
             toxicGases = toxicGases + String::Format(",{0}", FHStrings::GasToString(static_cast<GasType>(gas)));
     }
 
@@ -58,16 +60,16 @@ String^ TurnData::GetSpeciesSummary()
         "Home: [{1} {2} {3} {4}]\r\n"
         "Temp:{5} Press:{6}  Atm:{7} {8}-{9}%\r\n"
         "Poisons:{10}\r\n",
-        GameData::Player->Name,
-        GameData::Player->HomeSystem->X,
-        GameData::Player->HomeSystem->Y,
-        GameData::Player->HomeSystem->Z,
-        GameData::Player->HomePlanet,
-        GameData::AtmReq->TempClass == -1 ? "??" : GameData::AtmReq->TempClass.ToString(),
-        GameData::AtmReq->PressClass == -1 ? "??" : GameData::AtmReq->PressClass.ToString(),
-        FHStrings::GasToString( GameData::AtmReq->GasRequired ),
-        GameData::AtmReq->ReqMin,
-        GameData::AtmReq->ReqMax,
+        player->Name,
+        player->HomeSystem->X,
+        player->HomeSystem->Y,
+        player->HomeSystem->Z,
+        player->HomePlanet,
+        player->AtmReq->TempClass == -1 ? "??" : player->AtmReq->TempClass.ToString(),
+        player->AtmReq->PressClass == -1 ? "??" : player->AtmReq->PressClass.ToString(),
+        FHStrings::GasToString( player->AtmReq->GasRequired ),
+        player->AtmReq->ReqMin,
+        player->AtmReq->ReqMax,
         toxicGases->Substring(1));
 }
 
@@ -548,18 +550,25 @@ void TurnData::UpdateHomeWorlds()
     {
         if( colony->PlanetType == PLANET_HOME )
         {
-            if( GameData::AtmReq->IsValid() )
-                continue;
-
             if( colony->System->Planets->ContainsKey( colony->PlanetNum ) )
             {
                 Planet ^planet = colony->System->Planets[colony->PlanetNum];
-                GameData::AtmReq->TempClass = planet->TempClass;
-                GameData::AtmReq->PressClass = planet->PressClass;
-                for( int i = 0; i < GAS_MAX; ++i )
+
+                // Find species born here
+                for each( Alien ^alien in GetAliens() )
                 {
-                    if( planet->Atmosphere[i] )
-                        GameData::AtmReq->Neutral[i] = true;
+                    if( alien->HomeSystem &&
+                        alien->HomeSystem->GetId() == colony->System->GetId() &&
+                        alien->HomePlanet == colony->PlanetNum )
+                    {
+                        alien->AtmReq->TempClass = planet->TempClass;
+                        alien->AtmReq->PressClass = planet->PressClass;
+                        for( int i = 0; i < GAS_MAX; ++i )
+                        {
+                            if( planet->Atmosphere[i] )
+                                alien->AtmReq->Neutral[i] = true;
+                        }
+                    }
                 }
             }
         }

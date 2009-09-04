@@ -41,8 +41,6 @@ void GameData::SetSpecies(String ^sp)
 GameData::GameData(void)
     : m_TurnData(gcnew SortedList<int, TurnData^>)
 {
-    AtmReq = gcnew AtmosphericReq();
-
     m_PrevTurn = -1;
     m_CurrentTurn = -1;
     m_CurrentTurnData = nullptr;
@@ -182,38 +180,43 @@ Ship^ GameData::AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, S
 
 void GameData::SetAtmosphereReq(GasType gas, int reqMin, int reqMax)
 {
-    if( (AtmReq->GasRequired != GAS_MAX && AtmReq->GasRequired != gas) ||
-        AtmReq->Neutral[gas] ||
-        AtmReq->Poisonous[gas] )
+    AtmosphericReq ^atm = Player->AtmReq;
+
+    if( (atm->GasRequired != GAS_MAX && atm->GasRequired != gas) ||
+        atm->Poisonous[gas] )
     {
         throw gcnew FHUIDataIntegrityException("Inconsistent atmospheric data in reports.");
     }
 
-    AtmReq->GasRequired = gas;
-    AtmReq->ReqMin = reqMin;
-    AtmReq->ReqMax = reqMax;
+    atm->GasRequired = gas;
+    atm->ReqMin = reqMin;
+    atm->ReqMax = reqMax;
 }
 
 void GameData::SetAtmosphereNeutral(GasType gas)
 {
-    if( AtmReq->GasRequired == gas ||
-        AtmReq->Poisonous[gas] )
+    AtmosphericReq ^atm = Player->AtmReq;
+
+    if( atm->GasRequired == gas ||
+        atm->Poisonous[gas] )
     {
         throw gcnew FHUIDataIntegrityException("Inconsistent atmospheric data in reports.");
     }
 
-    AtmReq->Neutral[gas] = true;
+    atm->Neutral[gas] = true;
 }
 
 void GameData::SetAtmospherePoisonous(GasType gas)
 {
-    if( AtmReq->GasRequired == gas ||
-        AtmReq->Neutral[gas] )
+    AtmosphericReq ^atm = Player->AtmReq;
+
+    if( atm->GasRequired == gas ||
+        atm->Neutral[gas] )
     {
         throw gcnew FHUIDataIntegrityException("Inconsistent atmospheric data in reports.");
     }
 
-    AtmReq->Poisonous[gas] = true;
+    atm->Poisonous[gas] = true;
 }
 
 } // end namespace FHUI

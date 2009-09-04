@@ -2061,11 +2061,11 @@ void Form1::AliensSetup()
         {
             cells[c.Dist]->Value    = GameData::Player->HomeSystem->CalcDistance( alien->HomeSystem );
         }
-        if( GameData::AtmReq->TempClass != -1 &&
-            GameData::AtmReq->PressClass != -1 )
+        if( alien->AtmReq->TempClass != -1 &&
+            alien->AtmReq->PressClass != -1 )
         {
-            cells[c.TC]->Value      = GameData::AtmReq->TempClass;
-            cells[c.PC]->Value      = GameData::AtmReq->PressClass;
+            cells[c.TC]->Value      = alien->AtmReq->TempClass;
+            cells[c.PC]->Value      = alien->AtmReq->PressClass;
         }
         cells[c.EMail]->Value       = alien->Email;
 
