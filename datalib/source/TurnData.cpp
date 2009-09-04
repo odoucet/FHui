@@ -357,6 +357,8 @@ void TurnData::AddPlanetScan(StarSystem ^system, Planet ^planet)
     if( system->Planets->ContainsKey(planet->Number) )
     {
         Planet ^plExisting = system->Planets[planet->Number];
+        system->Planets[planet->Number] = planet;
+
         if( !String::IsNullOrEmpty(plExisting->Comment) )
         {
             if( String::IsNullOrEmpty(planet->Comment) )

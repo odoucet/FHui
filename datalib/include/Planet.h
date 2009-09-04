@@ -33,7 +33,9 @@ public:
     {
         System = system;
         Number = src->Number;
-        Name = src->Name;
+        // Do NOT copy planet name. This is to enable planet name disband.
+        // Planets that still have name will have it read from the report.
+        //Name = src->Name;
         Comment = src->Comment;
         Diameter = src->Diameter;
         Grav = src->Grav;

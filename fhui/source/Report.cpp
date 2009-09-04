@@ -411,6 +411,11 @@ bool Report::MatchSystemScanStart(String ^s)
         if( m_ScanAlien )
             m_ScanAlien->HomeSystem = m_ScanSystem;
 
+        if( m_ScanX == 14 && m_ScanY == 22 && m_ScanZ == 22 )
+        {
+            return true;
+        }
+
         return true;
     }
     return false;

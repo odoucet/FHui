@@ -1038,8 +1038,10 @@ void Form1::PlanetsSetup()
             cells[c.Object]->Value  = planet;
             cells[c.Name]->Value    = planet->GetNameWithOrders();
             cells[c.Location]->Value= planet->PrintLocation();
-            cells[c.TC]->Value      = planet->TempClass;
-            cells[c.PC]->Value      = planet->PressClass;
+            if( planet->TempClass != -1 )
+                cells[c.TC]->Value  = planet->TempClass;
+            if( planet->PressClass != -1 )
+                cells[c.PC]->Value  = planet->PressClass;
             cells[c.MD]->Value      = (double)planet->MiDiff / 100.0;
             cells[c.Grav]->Value    = (double)planet->Grav / 100.0;
             cells[c.LSN]->Value     = planet->LSN;

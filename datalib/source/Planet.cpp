@@ -9,9 +9,12 @@ int Planet::CalculateLSN()
 {
     AtmosphericReq ^atm = GameData::Player->AtmReq;
 
+    int pc = PressClass == -1 ? 99 : PressClass;
+    int tc = TempClass == -1 ? 99 : TempClass;
+
     int lsn =
-        3 * Math::Abs(PressClass - atm->PressClass) +
-        3 * Math::Abs(TempClass - atm->TempClass);
+        3 * Math::Abs(pc - atm->PressClass) +
+        3 * Math::Abs(tc - atm->TempClass);
 
     for( int i = 0; i < GAS_MAX; ++i )
     {

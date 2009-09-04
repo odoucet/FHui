@@ -8,6 +8,7 @@ Minor changes are listed only if originally requested by player
 FHUI build ??
 * [P] Reload buton works again.
 * [P] Fixed alien TC/PC display on Aliens tab.
+* [P] Names of disbanded planets were not removed.
 
 FHUI build 168
 * Status for older turns is shown correctly.
