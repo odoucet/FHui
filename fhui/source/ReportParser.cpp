@@ -70,27 +70,19 @@ void ReportParser::ScanReports()
         }
     }
 
-    int prevTurn = -1;
     for each( int currTurn in m_RepFiles->Keys )
     {
         m_GameData->SelectTurn(currTurn);
         m_CommandMgr->SelectTurn(currTurn);
 
-        if ( prevTurn == -1 )
-        {
-            // first turn on the list, parse galaxy data
+        if ( currTurn == m_RepFiles->Keys[0] )
+        {   // First turn on the list, parse galaxy data
             LoadGalaxy();
-        }
-        else
-        {
-            m_GameData->InitTurnFrom(prevTurn);
         }
 
         LoadReport( m_RepFiles[currTurn] );
         m_GameData->Update();
         m_CommandMgr->LoadCommands();
-
-        prevTurn = currTurn;
     }
 }
 

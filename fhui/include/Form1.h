@@ -60,10 +60,12 @@ namespace FHUI {
         void        LoadOrders();
         SortedList<String^, String^>^   m_OrderFiles;
 
-        void        TurnReload();
+        void        InitPlugins();
+        void        InitGameData();
         void        InitData();
         void        InitRefLists();
         void        InitControls();
+        void        TurnReload();
         void        UpdateControls();
         void        UpdateTabs();
 

@@ -46,18 +46,10 @@ protected:
 
 void Form1::Initialize()
 {
-    try
-    {
-        InitializeComponent();
-        InitData();
-        InitControls();
-        LoadOrders();
-    }
-    catch( Exception ^e )
-    {
-        Summary->Text = "Failed to initialize application.";
-        ShowException(e);
-    }
+    InitializeComponent();
+    InitPlugins();
+    InitControls();
+    InitGameData();
 }
 
 void Form1::InitControls()
@@ -68,11 +60,53 @@ void Form1::InitControls()
 
     TextAbout->Text = GetAboutText();
 
+    m_bGridUpdateEnabled = gcnew bool(false);
+
     SystemsInitControls();
     PlanetsInitControls();
     ColoniesInitControls();
     ShipsInitControls();
     AliensInitControls();
+}
+
+void Form1::InitPlugins()
+{
+    m_PluginMgr = gcnew PluginManager(m_GameData, Application::StartupPath);
+
+    if( EnablePlugins )
+    {
+        m_PluginMgr->LoadPlugins();
+    }
+}
+
+void Form1::InitGameData()
+{
+    try
+    {
+        InitData();
+        LoadOrders();
+    }
+    catch( Exception ^e )
+    {
+        Summary->Text = "Failed to initialize application.";
+        ShowException(e);
+    }
+}
+
+void Form1::InitData()
+{
+    m_bHadException = false;
+    *m_bGridUpdateEnabled = false;
+
+    m_OrderFiles = gcnew SortedList<String^, String^>;
+    m_RepTurnNrData = nullptr;
+
+    m_GameData      = gcnew GameData;
+    m_CommandMgr    = gcnew CommandManager(m_GameData, GetDataDir(OrdersDir::Folder));
+    m_ReportParser  = gcnew ReportParser(m_GameData, m_CommandMgr, GetDataDir("galaxy_list.txt"), GetDataDir("reports"));
+
+    m_ReportParser->ScanReports();
+    m_CommandMgr->LoadCommands();
 
     if( m_ReportParser->Reports->Count > 0 )
     {
@@ -96,27 +130,6 @@ void Form1::InitControls()
     {
         RepText->Text = "No report successfully loaded.";
     }
-}
-
-void Form1::InitData()
-{
-    m_bHadException = false;
-    m_bGridUpdateEnabled = gcnew bool(false);
-
-    m_OrderFiles = gcnew SortedList<String^, String^>;
-    m_RepTurnNrData = nullptr;
-
-    m_GameData      = gcnew GameData;
-    m_PluginMgr     = gcnew PluginManager(m_GameData, Application::StartupPath);
-    m_CommandMgr    = gcnew CommandManager(m_GameData, GetDataDir(OrdersDir::Folder));
-    m_ReportParser  = gcnew ReportParser(m_GameData, m_CommandMgr, GetDataDir("galaxy_list.txt"), GetDataDir("reports"));
-
-    if (EnablePlugins)
-    {
-        m_PluginMgr->LoadPlugins();
-    }
-    m_ReportParser->ScanReports();
-    m_CommandMgr->LoadCommands();
 }
 
 void Form1::InitRefLists()
@@ -304,7 +317,7 @@ void Form1::ShowException(Exception ^e)
         e->InnerException == nullptr ? e->StackTrace : e->InnerException->StackTrace );
 
     // Bring up the first tab
-    MenuTabs->SelectedTab = MenuTabs->TabPages[0];
+    MenuTabs->SelectedTab = MenuTabs->TabPages[ TabIndex::Reports ];
 
     // Disable some critical controls
     TurnSelect->Enabled = false;
@@ -349,18 +362,29 @@ String^ Form1::GetDataDir(String ^suffix)
 
 void Form1::TurnReload()
 {
-    throw gcnew FHUIDataImplException();
     System::Windows::Forms::DialogResult result = MessageBox::Show(
         this,
-        "Delete ALL FHUI Commands?",
+        String::Format("Delete ALL FHUI Commands for TURN {0}?", m_GameData->CurrentTurn),
         "Reload Turn",
         MessageBoxButtons::YesNo,
         MessageBoxIcon::Question,
         MessageBoxDefaultButton::Button1);
+
     if( result == System::Windows::Forms::DialogResult::Yes )
     {
         m_CommandMgr->DeleteCommands();
-        DisplayTurn();
+
+        // Bring up the first tab
+        MenuTabs->SelectedTab = MenuTabs->TabPages[ TabIndex::Reports ];
+
+        // Purge all grids
+        SystemsGrid->Rows->Clear();
+        PlanetsGrid->Rows->Clear();
+        ColoniesGrid->Rows->Clear();
+        ShipsGrid->Rows->Clear();
+        AliensGrid->Rows->Clear();
+
+        InitGameData();
     }
 }
 

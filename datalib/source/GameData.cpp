@@ -41,18 +41,43 @@ void GameData::SetSpecies(String ^sp)
 GameData::GameData(void)
     : m_TurnData(gcnew SortedList<int, TurnData^>)
 {
-    if (AtmReq == nullptr)
+    AtmReq = gcnew AtmosphericReq();
+
+    m_PrevTurn = -1;
+    m_CurrentTurn = -1;
+    m_CurrentTurnData = nullptr;
+    m_PlayerName = nullptr;
+}
+
+bool GameData::SelectTurn(int turn)
+{
+    m_PrevTurn = m_CurrentTurn;
+    m_CurrentTurn = turn;
+
+    if ( m_TurnData->ContainsKey(turn) )
     {
-        AtmReq = gcnew AtmosphericReq();
+        m_CurrentTurnData = m_TurnData[turn];
+        return true;
+    }
+    else
+    {
+        m_TurnData[turn] = gcnew TurnData(turn);
+        m_CurrentTurnData = m_TurnData[turn];
+
+        if( m_PrevTurn != -1 )
+            InitTurn();
+
+        return false;
     }
 }
 
-void GameData::InitTurnFrom(int srcTurn)
+void GameData::InitTurn()
 {
     // Copy relevant data from one turn to another
     // copy constructors invoked DO NOT perform full copies !!!
+    TurnData ^srcTurn = m_TurnData[m_PrevTurn];
 
-    for each ( StarSystem^ srcSystem in m_TurnData[srcTurn]->GetStarSystems() )
+    for each ( StarSystem^ srcSystem in srcTurn->GetStarSystems() )
     {
         if ( srcSystem->IsVoid == false )
         {
@@ -60,7 +85,7 @@ void GameData::InitTurnFrom(int srcTurn)
         }
     }
 
-    for each ( Alien^ srcAlien in m_TurnData[srcTurn]->GetAliens() )
+    for each ( Alien^ srcAlien in srcTurn->GetAliens() )
     {
         if ( srcAlien->HomeSystem == nullptr )
         {
@@ -76,7 +101,7 @@ void GameData::InitTurnFrom(int srcTurn)
         }
     }
 
-    for each ( Colony^ srcColony in m_TurnData[srcTurn]->GetColonies() )
+    for each ( Colony^ srcColony in srcTurn->GetColonies() )
     {
         if ( srcColony->Owner->Name != m_PlayerName )
         {

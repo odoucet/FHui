@@ -6,6 +6,9 @@ Minor changes are listed only if originally requested by player
 [P] denotes player requested features
 
 FHUI build ??
+* [P] Reload buton works again.
+
+FHUI build 168
 * Status for older turns is shown correctly.
 * [P] Order template: planets in comments are sorted by number.
 * [P] Order template: available population and shipyards added to production comments.

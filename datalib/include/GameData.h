@@ -121,27 +121,14 @@ public:
 
     static String^ PrintInventory(array<int> ^inv);
 
-    bool SelectTurn(int turn)
-    {
-        m_CurrentTurn = turn;
-        if ( m_TurnData->ContainsKey(turn) )
-        {
-            m_CurrentTurnData = m_TurnData[turn];
-            return true;
-        }
-        else
-        {
-            m_TurnData[turn] = gcnew TurnData(turn);
-            m_CurrentTurnData = m_TurnData[turn];
-            return false;
-        }
-    }
-
-    void InitTurnFrom(int srcTurn);
+    bool SelectTurn(int turn);
 
 protected:
+    void        InitTurn();
+
     static String^              m_PlayerName;
     static int                  m_CurrentTurn;
+    static int                  m_PrevTurn;
     static TurnData^            m_CurrentTurnData;
     SortedList<int, TurnData^>^ m_TurnData;
 };
