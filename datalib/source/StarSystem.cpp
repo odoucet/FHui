@@ -4,6 +4,37 @@
 namespace FHUI
 {
 
+// -----------------------------------------------
+
+private ref class PrintKey : public IComparable
+{
+public:
+    PrintKey(Alien ^sp, int plNum, String ^name)
+        : m_Sp(sp), m_PlNum(plNum), m_Name(name)
+    {
+    }
+
+    virtual int CompareTo(Object ^o)
+    {
+        PrintKey ^key = (PrintKey^)o;
+
+        int n = m_Sp->Relation - key->m_Sp->Relation;
+        if( n == 0 )
+            n = String::Compare(m_Sp->Name, key->m_Sp->Name);
+        if( n == 0 )
+            n = m_PlNum - key->m_PlNum;
+        if( n == 0 )
+            n = m_Name->CompareTo(key->m_Name);
+        return n;
+    }
+
+    Alien^  m_Sp;
+    int     m_PlNum;
+    String^ m_Name;
+};
+
+// -----------------------------------------------
+
 void StarSystem::AddShip(Ship^ ship)
 {
     m_Ships->Add(ship);
@@ -76,23 +107,98 @@ int StarSystem::CompareLocation(StarSystem ^sys)
                       return Z - sys->Z;
 }
 
+String^ StarSystem::GetTooltipText()
+{
+    String ^tooltip = GenerateScan();
+
+    if( Colonies->Count )
+    {
+        tooltip += "\r\nColonies:\r\n";
+
+        SortedList<PrintKey^, Colony^> ^colonies =
+            gcnew SortedList<PrintKey^, Colony^>;
+        for each( Colony ^colony in Colonies )
+            colonies->Add(
+                gcnew PrintKey(colony->Owner, colony->PlanetNum, colony->Name),
+                colony);
+
+        Alien ^player = GameData::Player;
+        for each( Colony ^colony in colonies->Values )
+        {
+            tooltip += String::Format("#{0} {1} {2}{3}, size {4}{5}\r\n",
+                colony->PlanetNum,
+                colony->Owner->Name,
+                FHStrings::PlTypeToString(colony->PlanetType),
+                colony->Owner == player ? (" " + colony->Name) : "",
+                colony->PrintSize(),
+                colony->Owner == player ? (" " + colony->PrintInventory()) : "" );
+        }
+    }
+
+    if( Ships->Count )
+    {
+        tooltip += "\r\nShips:\r\n";
+
+        SortedList<PrintKey^, Ship^> ^ships =
+            gcnew SortedList<PrintKey^, Ship^>;
+        for each( Ship ^ship in Ships )
+            ships->Add(
+                gcnew PrintKey(ship->Owner, ship->PlanetNum, ship->Name),
+                ship);
+
+        Alien ^player = GameData::Player;
+        for each( Ship ^ship in ships->Values )
+        {
+            // Skip incomplete ships
+            if( ship->EUToComplete > 0 )
+                continue;
+
+            String^ inv = ship->PrintCargo();
+            tooltip += String::Format("{0} {1} {2}{3}{4}\r\n",
+                ship->Owner->Name,
+                ship->PrintClassWithName(),
+                ship->Type == SHIP_BAS ? String::Format("({0}k)", ship->Size / 1000) : "",
+                ship->PrintAgeLocation(),
+                String::IsNullOrEmpty(inv) ? "" : ": " + inv );
+        }
+    }
+
+    return tooltip;
+}
+
 String^ StarSystem::GenerateScan()
 {
     String ^scan = String::Format(
-        "Coordinates: x = {0}  y = {1}  z = {2}  stellar type = {3}  {4} planets.\r\n\r\n"
-        "               Temp  Press Mining\r\n"
-        "  #  Dia  Grav Class Class  Diff  LSN  Atmosphere\r\n"
-        " ---------------------------------------------------------------------\r\n",
+        "Coordinates: x = {0}  y = {1}  z = {2}  stellar type = {3}  {4} planets.\r\n",
         X, Y, Z, Type,
         Planets->Count == 0 ? "?" : Planets->Count.ToString() );
 
+    if( HasWormhole )
+    {
+        scan += "Wormhole to " +
+            ( WormholeTargetId == -1
+                ? "Unknown System"
+                : GameData::GetStarSystem(WormholeTargetId)->PrintLocation() )
+            + "\r\n";
+    }
+
+    bool first = true;
     for each(Planet^ planet in Planets->Values )
     {
+        if( first )
+        {
+            first = false;
+            scan +=
+                "\r\n"
+                "  #  Dia  Grav TC PC MD  LSN  Atmosphere\r\n"
+                " ---------------------------------------------------------------------\r\n";
+        }
+
         String ^plStr = String::Format(
-            "{0,3}{1,5}{2,7:F2}{3,4}{4,6}{5,8:F2}{6,5}  ",
+            "{0,3}{1,5}{2,6:F2}{3,3}{4,3}{5,5:F2}{6,3}  ",
             planet->Number,
             planet->Diameter,
-            planet->Grav,
+            (double)planet->Grav / 100.0,
             planet->TempClass,
             planet->PressClass,
             (double)planet->MiDiff / 100,
@@ -102,20 +208,18 @@ String^ StarSystem::GenerateScan()
         {
             if( planet->Atmosphere[gas] )
             {
-                plStr = String::Concat( plStr,
-                    String::Format(
-                        "{0}{1}({2}%)",
-                        anyGas ? "," : "",
-                        FHStrings::GasToString(static_cast<GasType>(gas)),
-                        planet->Atmosphere[gas] ) );
+                plStr += String::Format(
+                    "{0}{1}({2}%)",
+                    anyGas ? "," : "",
+                    FHStrings::GasToString(static_cast<GasType>(gas)),
+                    planet->Atmosphere[gas] );
                 anyGas = true;
             }
         }
         if( !anyGas )
             plStr = String::Concat(plStr, "No atmosphere");
 
-        plStr = String::Concat(plStr, "\r\n");
-        scan  = String::Concat(scan, plStr);
+        scan += plStr + "\r\n";
     }
 
     return scan;
@@ -139,34 +243,10 @@ String^ StarSystem::PrintScanStatus()
     else                        return s_ScanSelf;
 }
 
-private ref class ColoniesPrintKey : public IComparable
-{
-public:
-    ColoniesPrintKey(Alien ^sp, int plNum)
-        : m_Sp(sp), m_PlNum(plNum)
-    {
-    }
-
-    virtual int CompareTo(Object ^o)
-    {
-        ColoniesPrintKey ^key = (ColoniesPrintKey^)o;
-
-        int n = String::Compare(m_Sp->Name, key->m_Sp->Name);
-        if( n == 0 )
-            return m_PlNum - key->m_PlNum;
-        return n;
-    }
-
-    Alien^  m_Sp;
-    int     m_PlNum;
-};
-
 String^ StarSystem::PrintColoniesAll()
 {
     String ^ret = "";
     Alien ^player = GameData::Player;
-    Alien ^homeSpecies = nullptr;
-    bool homeInhabited = false;
 
     // Player's colonies first
     if( ColoniesOwned->Count == 1 )
@@ -205,11 +285,11 @@ String^ StarSystem::PrintColoniesAll()
     // Alien colonies
     if( ColoniesAlien->Count > 0 )
     {
-        SortedList<ColoniesPrintKey^, Colony^> ^colonies =
-            gcnew SortedList<ColoniesPrintKey^, Colony^>;
+        SortedList<PrintKey^, Colony^> ^colonies =
+            gcnew SortedList<PrintKey^, Colony^>;
         for each( Colony ^colony in ColoniesAlien )
             colonies->Add(
-                gcnew ColoniesPrintKey(colony->Owner, colony->PlanetNum),
+                gcnew PrintKey(colony->Owner, colony->PlanetNum, colony->Name),
                 colony);
 
         Alien ^lastAlien = nullptr;

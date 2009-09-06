@@ -69,7 +69,7 @@ public:
 
     // -------- IGridDataSrc ----------------------------
     virtual Alien^      GetAlienForBgColor() override   { return Master; }
-    virtual String^     GetTooltipText() override       { return GenerateScan(); }
+    virtual String^     GetTooltipText() override;
 
     virtual StarSystem^ GetFilterSystem() override      { return this; }
     virtual StarSystem^ GetFilterLocation(int %pl) override { pl = -1; return this; }
