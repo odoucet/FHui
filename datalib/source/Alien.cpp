@@ -17,17 +17,16 @@ String^ Alien::PrintHome()
     if( HomeSystem->Planets->ContainsKey(HomePlanet) )
     {
         String ^n = HomeSystem->Planets[HomePlanet]->Name;
-        if( String::IsNullOrEmpty(n) )
-            plName = "-";
-        else
+        if( !String::IsNullOrEmpty(n) )
             plName = String::Format("PL {0}", n);
     }
-    if( plName == nullptr )
-    {
-        plName = "?";
-    }
-    return String::Format( "{0} {1} ({2})",
-        HomeSystem->PrintLocation(), HomePlanet, plName );
+
+    String ^ret = String::Format( "{0} {1}",
+        HomeSystem->PrintLocation(), HomePlanet );
+    if( plName )
+        ret += " (" + plName + ")";
+    return ret;
+
 }
 
 String^ Alien::PrintTechLevels()

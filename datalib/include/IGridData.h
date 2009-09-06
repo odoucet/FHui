@@ -7,6 +7,7 @@ namespace FHUI
 
 ref class Alien;
 ref class StarSystem;
+ref class Colony;
 ref class GameData;
 
 ////////////////////////////////////////////////////////////////
@@ -46,6 +47,7 @@ public interface class IGridFilter
     bool    Filter(IGridDataSrc ^item);
 
     void    SetRefSystem(StarSystem ^system);
+    void    SetRefSystem(Colony ^colony);
 
     void    OnGridSetup();
 

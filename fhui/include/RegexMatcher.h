@@ -16,7 +16,7 @@ public:
     bool        MatchList(String ^s, String ^prefix, String ^exp);
 
     int         GetResultInt(int arg);
-    float       GetResultFloat(int arg);
+    //float       GetResultFloat(int arg);
 
     property array<String^>^ Results { array<String^>^ get() { return m_Results; } }
 
@@ -30,6 +30,7 @@ public:
     initonly Regex^     ExpCmdShipJump;
     initonly Regex^     ExpCmdShipUpg;
     initonly Regex^     ExpCmdShipRec;
+    initonly Regex^     ExpCmdShipWormhole;
     initonly Regex^     ExpCmdPLName;
     initonly Regex^     ExpCmdPLDisband;
     initonly Regex^     ExpCmdSPNeutral;

@@ -27,6 +27,7 @@ public:
         Capacity = 0;
         IsPirate = false;
         m_Cargo = gcnew array<int>(INV_MAX){0};
+        DidWormholeJump = false;
     }
 
     // -------- IComparable -----------------------------
@@ -110,6 +111,7 @@ public:
     property int            WarTonnage;
     property int            OriginalCost;
     property int            EUToComplete;
+    property bool           DidWormholeJump;
 
     property int            Size {
         int get() { return m_Size; }

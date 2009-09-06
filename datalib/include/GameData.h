@@ -18,22 +18,23 @@ public ref class GameData
 public:
     GameData();
 
-    String^         GetSummary()                        { return m_CurrentTurnData->GetSummary(); }
-    int             GetCarriedEU()                      { return m_CurrentTurnData->GetCarriedEU(); }
+    static String^         GetSummary()                        { return m_CurrentTurnData->GetSummary(); }
+    static int             GetCarriedEU()                      { return m_CurrentTurnData->GetCarriedEU(); }
 
-    int             GetFleetCost()                      { return m_CurrentTurnData->GetFleetCost(); }
-    int             GetFleetPercentCost()               { return m_CurrentTurnData->GetFleetPercentCost(); }
-    Alien^          GetAlien(String ^sp)                { return m_CurrentTurnData->GetAlien(sp); }
-    StarSystem^     GetStarSystem(int x, int y, int z)  { return m_CurrentTurnData->GetStarSystem(x,y,z); }
-    StarSystem^     GetStarSystem(String ^name)         { return m_CurrentTurnData->GetStarSystem(name); }
-    Colony^         GetColony(String ^name)             { return m_CurrentTurnData->GetColony(name); }
-    Ship^           GetShip(String ^name)               { return m_CurrentTurnData->GetShip(name); }
+    static int             GetFleetCost()                      { return m_CurrentTurnData->GetFleetCost(); }
+    static int             GetFleetPercentCost()               { return m_CurrentTurnData->GetFleetPercentCost(); }
+    static Alien^          GetAlien(String ^sp)                { return m_CurrentTurnData->GetAlien(sp); }
+    static StarSystem^     GetStarSystem(int id)               { return m_CurrentTurnData->GetStarSystem(id); }
+    static StarSystem^     GetStarSystem(int x, int y, int z)  { return m_CurrentTurnData->GetStarSystem(x, y, z); }
+    static StarSystem^     GetStarSystem(String ^name)         { return m_CurrentTurnData->GetStarSystem(name); }
+    static Colony^         GetColony(String ^name)             { return m_CurrentTurnData->GetColony(name); }
+    static Ship^           GetShip(String ^name)               { return m_CurrentTurnData->GetShip(name); }
 
-    IList<Alien^>^          GetAliens()                 { return m_CurrentTurnData->GetAliens(); }
-    IList<StarSystem^>^     GetStarSystems()            { return m_CurrentTurnData->GetStarSystems(); }
-    IList<PlanetName^>^     GetPlanetNames()            { return m_CurrentTurnData->GetPlanetNames(); }
-    IList<Ship^>^           GetShips()                  { return m_CurrentTurnData->GetShips(); }
-    IList<Colony^>^         GetColonies()               { return m_CurrentTurnData->GetColonies(); }
+    static IList<Alien^>^          GetAliens()          { return m_CurrentTurnData->GetAliens(); }
+    static IList<StarSystem^>^     GetStarSystems()     { return m_CurrentTurnData->GetStarSystems(); }
+    static IList<PlanetName^>^     GetPlanetNames()     { return m_CurrentTurnData->GetPlanetNames(); }
+    static IList<Ship^>^           GetShips()           { return m_CurrentTurnData->GetShips(); }
+    static IList<Colony^>^         GetColonies()        { return m_CurrentTurnData->GetColonies(); }
 
     void            Update();
     void            SetTechLevel(Alien ^sp, TechType, int, int);
@@ -47,6 +48,7 @@ public:
     Colony^         AddColony(Alien ^sp, String ^name, StarSystem ^system, int plNum);
     void            AddPlanetName(StarSystem ^system, int pl, String ^name);
     Ship^           AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);
+    void            AddWormholeJump(String ^shipName, int fromSystemId);
 
     void            SetSpecies(String ^sp);
     void            SetAtmosphereReq(GasType gas, int, int);

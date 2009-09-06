@@ -174,20 +174,22 @@ void CommandManager::LoadCommands()
                         m_RM->GetResultInt(4)),
                     m_RM->GetResultInt(5) );
         }
-        /*
-        // WORMHOLE TODO
         else if( m_RM->Match(line, m_RM->ExpCmdShipWormhole) )
         {
-            m_GameData->GetShip(m_RM->Results[1])->Command =
+            Ship ^ship = m_GameData->GetShip(m_RM->Results[1]);
+            if( !ship->System->HasWormhole )
+                throw gcnew FHUIParsingException("Invalid ship wormhole command (no wormhole in system)!");
+            ship->Command =
                 gcnew Ship::Order(
                     Ship::OrderType::Wormhole,
-                    m_GameData->GetStarSystem(
-                        m_RM->GetResultInt(2),
-                        m_RM->GetResultInt(3),
-                        m_RM->GetResultInt(4)),
-                    m_RM->GetResultInt(5) );
+                    nullptr,
+                    m_RM->GetResultInt(2) );
+            if( ship->System->WormholeTargetId != -1 )
+                ship->Command->JumpTarget = GameData::GetStarSystem(ship->System->WormholeTargetId);
+            if( ship->Command->PlanetNum != -1 &&
+                ship->System->Planets->ContainsKey( ship->Command->PlanetNum ) == false )
+                throw gcnew FHUIParsingException("Invalid ship wormhole command (invalid planet for orbiting)!");
         }
-        */
         else if( m_RM->Match(line, m_RM->ExpCmdShipUpg) )
         {
             m_GameData->GetShip(m_RM->Results[1])->Command =
@@ -533,7 +535,8 @@ void CommandManager::GenerateJumps()
             else if( ship->Command->Type == Ship::OrderType::Wormhole )
             {
                 String ^order = "  Wormhole " + ship->PrintClassWithName();
-                if( ship->Command->JumpTarget->Planets->ContainsKey( ship->Command->PlanetNum ) )
+                if( ship->Command->JumpTarget &&
+                    ship->Command->JumpTarget->Planets->ContainsKey( ship->Command->PlanetNum ) )
                 {
                     Planet ^pl = ship->Command->JumpTarget->Planets[ ship->Command->PlanetNum ];
                     if( String::IsNullOrEmpty(pl->Name) )
@@ -545,7 +548,20 @@ void CommandManager::GenerateJumps()
                         order += ", PL " + pl->Name;
                     }
                 }
-                order += " ; Distance: " + ship->System->CalcDistance( ship->System->WormholeTarget ).ToString("F1");
+                order += " ; Distance: ";
+                if( ship->System->WormholeTargetId == -1 )
+                    order += "unknown";
+                else
+                {
+                    StarSystem ^target = GameData::GetStarSystem(ship->System->WormholeTargetId);
+                    order += Calculators::Distance(
+                        ship->System->X,
+                        ship->System->Y,
+                        ship->System->Z,
+                        target->X,
+                        target->Y,
+                        target->Z).ToString("F1");
+                }
                 m_OrderList->Add( order );
             }
         }

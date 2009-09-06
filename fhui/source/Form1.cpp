@@ -144,7 +144,7 @@ void Form1::InitRefLists()
     // -- ref systems xyz:
     m_RefListSystemsXYZ->Add( GridFilter::s_CaptionXYZ );
     for each( StarSystem ^system in m_GameData->GetStarSystems() )
-        m_RefListSystemsXYZ->Add( system->PrintLocationAligned() );
+        m_RefListSystemsXYZ->Add( system->PrintLocation() );
 
     // -- home systems:
     m_RefListHomes->Add( GridFilter::s_CaptionHome );
@@ -415,6 +415,12 @@ void Form1::DisplayTurn()
             GameData::Player->Name,
             GameData::CurrentTurn,
             BuildInfo::Version );
+
+        // Show report for selected turn
+        if( RepModeReports->Checked )
+        {
+            RepTurnNr->Text = "Turn " + turn.ToString();
+        }
 
         MapSetup();
         UpdateTabs();
@@ -702,8 +708,7 @@ ToolStripMenuItem^ Form1::CreateCustomMenuItem(
 
 String^ Form1::GridPrintDistance(StarSystem ^from, StarSystem ^to, int gv, int age)
 {
-    if( from->HasWormhole &&
-        from->WormholeTarget == to )
+    if( from->IsWormholeTarget(to) )
     {
         return "Wormhole";
     }
@@ -738,8 +743,7 @@ void Form1::SystemsInitControls()
     c.Dist     = ADD_COLUMN("Distance",     "Distance to ref system and mishap chance [%]", String, Ascending, Distance);
     c.Visited  = ADD_COLUMN("Vis",          "Last turn you visited this system", int, Descending, Default);
     c.Scan     = ADD_COLUMN("Scan",         "System scan source",   String,     Ascending,  Default);
-    // WORMHOLE TODO
-    //c.Wormhole = ADD_COLUMN("WH",           "Wormhole target",      String,     Ascending,  Default);
+    c.Wormhole = ADD_COLUMN("WH",           "Wormhole target",      String,     Ascending,  Default);
     c.Colonies = ADD_COLUMN("Colonies",     "Summary of colonies and named planets", String, Ascending,  Default);
 
     for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
@@ -835,15 +839,12 @@ void Form1::SystemsSetup()
         }
         cells[c.Dist]->Value        = GridPrintDistance(system, SystemsGrid->Filter->RefSystem, gv, age);
         cells[c.Scan]->Value        = system->PrintScanStatus();
-        /*
-        // WORMHOLE TODO
         if( system->HasWormhole )
             cells[c.Wormhole]->Value= system->PrintWormholeTarget();
-        */
         if( system->LastVisited != -1 )
             cells[c.Visited]->Value = system->LastVisited;
-        cells[c.Colonies]->Value    = system->PrintColonies( -1, GameData::Player );
-        cells[c.Notes]->Value       = system->Comment;
+        cells[c.Colonies]->Value    = system->PrintColoniesAll();
+        cells[c.Notes]->Value       = system->PrintComment();
 
         //SystemsGrid->Columns[colColonies->Ordinal]->DefaultCellStyle->WrapMode = DataGridViewTriState::True;
 
@@ -1049,7 +1050,7 @@ void Form1::PlanetsSetup()
             if( system->LastVisited != -1 )
                 cells[c.Visited]->Value = system->LastVisited;
             cells[c.Scan]->Value    = system->PrintScanStatus();
-            cells[c.Colonies]->Value= system->PrintColonies( planet->Number, GameData::Player );
+            cells[c.Colonies]->Value= system->PrintColonies( planet->Number );
 
             if( (planet->System->HomeSpecies != nullptr) )
             {
@@ -1171,15 +1172,24 @@ void Form1::PlanetsMenuShowColonies(Object^, EventArgs^)
 
 void Form1::PlanetsMenuSelectRef(Object^, EventArgs^)
 {
+    if( !String::IsNullOrEmpty(m_PlanetsMenuRef->Name) )
+    {
+        for each( Colony ^colony in m_GameData->GetColonies() )
+            if( colony->Owner == GameData::Player &&
+                colony->Name == m_PlanetsMenuRef->Name )
+            {
+                PlanetsGrid->Filter->SetRefSystem(colony);
+                return;
+            }
+    }
+
     PlanetsGrid->Filter->SetRefSystem(m_PlanetsMenuRef->System);
 }
 
 void Form1::PlanetsMenuAddNameStart(Object^, EventArgs^)
 {
     PlanetsGrid->ClearSelection();
-    PlanetsGrid->CurrentCell = PlanetsGrid[
-        PlanetsGrid->Columns["Name"]->Index,
-        m_PlanetsMenuRefRow];
+    PlanetsGrid->CurrentCell = PlanetsGrid[m_PlanetsColumns.Name, m_PlanetsMenuRefRow];
     PlanetsGrid->ReadOnly = false;
     PlanetsGrid->BeginEdit(true);
 }
@@ -1548,7 +1558,7 @@ void Form1::ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowInde
 
 void Form1::ColoniesMenuSelectRef(Object^, EventArgs ^e)
 {
-    ColoniesRefColony->Text = m_ColoniesMenuRef->PrintRefListEntry();
+    ColoniesGrid->Filter->SetRefSystem(m_ColoniesMenuRef);
 }
 
 void Form1::ColoniesMenuProdOrderAdjust(int adjustment)
@@ -1809,20 +1819,28 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
                 ship->Command->Type == Ship::OrderType::Recycle )
                 menuItem->Checked = true;
             menu->Items->Add( menuItem );
+        }
 
-            if( ship->System->HasWormhole )
-            {
-                menuItem = CreateCustomMenuItem(
-                    "Enter Wormhole: " + ship->System->PrintWormholeTarget(),
-                    gcnew ShipOrderData(
-                        ship,
-                        gcnew Ship::Order(Ship::OrderType::Wormhole) ),
-                     handler );
-                if( ship->Command &&
-                    ship->Command->Type == Ship::OrderType::Wormhole )
-                    menuItem->Checked = true;
-                menu->Items->Add( menuItem );
-            }
+        if( ship->System->HasWormhole )
+        {
+            StarSystem ^target = ship->System->WormholeTargetId == -1
+                ? nullptr
+                : m_GameData->GetStarSystem(ship->System->WormholeTargetId);
+
+            EventHandler1Arg<ShipOrderData^> ^handler =
+                gcnew EventHandler1Arg<ShipOrderData^>(this, &Form1::ShipsMenuOrderSet);
+            ToolStripMenuItem ^menuItem = CreateCustomMenuItem(
+                "Enter Wormhole to " + ship->System->PrintWormholeTarget(),
+                gcnew ShipOrderData(
+                    ship,
+                    gcnew Ship::Order(Ship::OrderType::Wormhole, target) ),
+                 handler );
+
+            if( ship->Command &&
+                ship->Command->Type == Ship::OrderType::Wormhole )
+                menuItem->Checked = true;
+
+            menu->Items->Add( menuItem );
         }
 
         if( ship->CanJump )
@@ -1906,7 +1924,7 @@ ToolStripMenuItem^ Form1::ShipsMenuCreateJumpItem(
 
     String ^itemText;
     Ship::OrderType order = Ship::OrderType::Jump;
-    if( ship->System->WormholeTarget == system )
+    if( ship->System->IsWormholeTarget(system) )
     {
         order = Ship::OrderType::Wormhole;
         itemText = String::Format("{0}   (Wormhole)  From {1}",

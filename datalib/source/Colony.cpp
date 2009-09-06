@@ -33,6 +33,22 @@ String^ Colony::PrintBalance()
         return "Balanced";
 }
 
+String^ Colony::PrintSize()
+{
+    if( EconomicBase == -1 )
+    {
+        return "?";
+    }
+    else if ( EconomicBase % 10 )
+    {
+        return String::Format("{0}.{1}", EconomicBase / 10, EconomicBase % 10);
+    }
+    else
+    {
+        return (EconomicBase / 10).ToString();
+    }
+}
+
 void Colony::CalculateBalance(bool MiMaBalanced)
 {
     if( EconomicBase <= 0 ||

@@ -19,6 +19,7 @@ RegexMatcher::RegexMatcher()
     ExpCmdSPEnemy   = gcnew Regex("^Enemy SP ([^,;]+)$");
     ExpCmdSPTeach   = gcnew Regex("^Teach ([A-Z]{2}) (\\d+) SP ([^,;]+)$");
     ExpCmdBuiShipyard = gcnew Regex("^build shipyard$");
+    ExpCmdShipWormhole= gcnew Regex("^SHIP ([A-Z0-9]+) ([^,;]+) Wormhole\\s+([0-9-]+)$");
 }
 
 int RegexMatcher::GetResultInt(int arg)
@@ -26,12 +27,12 @@ int RegexMatcher::GetResultInt(int arg)
     return int::Parse(m_Results[arg]);
 }
 
-float RegexMatcher::GetResultFloat(int arg)
-{
-    return Single::Parse(
-        m_Results[arg],
-        Globalization::CultureInfo::InvariantCulture );
-}
+//float RegexMatcher::GetResultFloat(int arg)
+//{
+//    return Single::Parse(
+//        m_Results[arg],
+//        Globalization::CultureInfo::InvariantCulture );
+//}
 
 bool RegexMatcher::Match(String ^%s, String ^exp)
 {

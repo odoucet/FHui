@@ -229,7 +229,17 @@ bool Report::Parse(String ^s)
         break;
 
     case PHASE_ORDERS_JUMP:
-        if( Regex("^Production orders:").Match(s)->Success )
+        //if( m_RM->Match(s, "^TR1 ([^,;]+) will jump via natural wormhole at\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\.$") )
+        if( m_RM->Match(s, "^[A-Za-z0-9]+\\s+([^,;]+) will jump via natural wormhole at\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\.$") )
+        {
+            m_GameData->AddWormholeJump(
+                m_RM->Results[0],
+                GameData::GetSystemId(
+                    m_RM->GetResultInt(1),
+                    m_RM->GetResultInt(2),
+                    m_RM->GetResultInt(3) ) );
+        }
+        else if( Regex("^Production orders:").Match(s)->Success )
             m_Phase = PHASE_ORDERS_PROD;
         break;
 
@@ -418,16 +428,12 @@ bool Report::MatchSystemScanStart(String ^s)
 
 void Report::MatchPlanetScan(String ^s)
 {
-    /*
-    // WORMHOLE TODO
     if( m_RM->Match(s, "^This star system is the terminus of a natural wormhole\\.$") )
     {
         m_ScanSystem->HasWormhole = true;
     }
-    */
-
     //                          0:plNum   1:dia    2:gv            3:tc       4:pc    5:mining diff
-    if( m_RM->Match(s, "^(\\d+)\\s+(\\d+)\\s+(\\d+)\\.(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\.(\\d+)\\s+") )
+    else if( m_RM->Match(s, "^(\\d+)\\s+(\\d+)\\s+(\\d+)\\.(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\.(\\d+)\\s+") )
     {
         int plNum = m_RM->GetResultInt(0);
         Planet ^planet = gcnew Planet(

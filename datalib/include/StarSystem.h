@@ -24,6 +24,7 @@ public:
         MinLSN = 99999;
         MinLSNAvail = 99999;
         HasWormhole = false;
+        WormholeTargetId = -1;
         Master = nullptr;
         m_Ships = gcnew List<Ship^>;
         m_ShipsOwned = gcnew List<Ship^>;
@@ -46,6 +47,7 @@ public:
         MinLSN = src->MinLSN;
         MinLSNAvail = src->MinLSNAvail;
         HasWormhole = src->HasWormhole;
+        WormholeTargetId = src->WormholeTargetId;
         IsVoid = src->IsVoid;
 
         Master = nullptr;
@@ -86,6 +88,7 @@ public:
     int         GetId();
 
     bool        IsExplored() { return TurnScanned != -1; }
+    bool        IsWormholeTarget(StarSystem ^system)    { return HasWormhole ? system->GetId() == WormholeTargetId : false; }
 
     String^     GenerateScan();
     void        UpdateMaster();
@@ -94,10 +97,12 @@ public:
     void        AddColony(Colony^);
 
     String^         PrintLocation() { return String::Format("{0} {1} {2}", X, Y, Z); }
-    String^         PrintWormholeTarget() { return HasWormhole ? (WormholeTarget ? WormholeTarget->PrintLocation() : "???") : nullptr; }
+    String^         PrintWormholeTarget();
     String^         PrintLocationAligned() { return String::Format("{0,2} {1,2} {2,2}", X, Y, Z); }
     String^         PrintScanStatus();
-    String^         PrintColonies(int planetNum, Alien ^player);   // -1 for all colonies in system
+    String^         PrintColoniesAll();
+    String^         PrintColonies(int planetNum);
+    String^         PrintComment();
     List<String^>^  PrintAliens();
 
     property int            X;
@@ -105,12 +110,13 @@ public:
     property int            Z;
     property String^        Type;
     property String^        Comment;
+    property String^        CommentHome;    // comment about destroyed home planet
     property int            TurnScanned;
     property int            LastVisited;
     property int            MinLSN;
     property int            MinLSNAvail;
     property bool           HasWormhole;
-    property StarSystem^    WormholeTarget;
+    property int            WormholeTargetId;
 
     property Alien^         HomeSpecies;
     property Alien^         Master;

@@ -33,36 +33,32 @@ void StarSystem::AddColony(Colony^ colony)
 
 double StarSystem::CalcDistance(StarSystem ^s)
 {
-    return s == WormholeTarget
+    return IsWormholeTarget(s)
         ? 0
         : Calculators::Distance(X, Y, Z, s->X, s->Y, s->Z);
 }
 
 double StarSystem::CalcMishap(StarSystem ^s, int gv, int age)
 {
-    return s == WormholeTarget
+    return IsWormholeTarget(s)
         ? 0
         : Calculators::Mishap(X, Y, Z, s->X, s->Y, s->Z, gv, age);
 }
 
 double StarSystem::CalcDistance(int x, int y, int z)
 {
-    return (WormholeTarget &&
-            x == WormholeTarget->X &&
-            y == WormholeTarget->Y &&
-            z == WormholeTarget->Z )
-        ? 0
-        : Calculators::Distance(X, Y, Z, x, y, z);
+    if( HasWormhole && GameData::GetSystemId(x, y, z) == WormholeTargetId )
+        return 0;
+
+    return Calculators::Distance(X, Y, Z, x, y, z);
 }
 
 double StarSystem::CalcMishap(int x, int y, int z, int gv, int age)
 {
-    return (WormholeTarget &&
-            x == WormholeTarget->X &&
-            y == WormholeTarget->Y &&
-            z == WormholeTarget->Z )
-        ? 0
-        : Calculators::Mishap(X, Y, Z, x, y, z, gv, age);
+    if( HasWormhole && GameData::GetSystemId(x, y, z) == WormholeTargetId )
+        return 0;
+
+    return Calculators::Mishap(X, Y, Z, x, y, z, gv, age);
 }
 
 Int32 StarSystem::CompareTo( Object^ obj )
@@ -125,6 +121,17 @@ String^ StarSystem::GenerateScan()
     return scan;
 }
 
+String^ StarSystem::PrintWormholeTarget()
+{
+    if( HasWormhole )
+    {
+        if( WormholeTargetId != -1 )
+            return GameData::GetStarSystem(WormholeTargetId)->PrintLocation();
+        return "Unknown System";
+    }
+    return nullptr;
+}
+
 String^ StarSystem::PrintScanStatus()
 {
     if( TurnScanned == -1 )     return s_ScanNone;
@@ -132,91 +139,184 @@ String^ StarSystem::PrintScanStatus()
     else                        return s_ScanSelf;
 }
 
-String^ StarSystem::PrintColonies(int planetNum, Alien ^player)
+private ref class ColoniesPrintKey : public IComparable
+{
+public:
+    ColoniesPrintKey(Alien ^sp, int plNum)
+        : m_Sp(sp), m_PlNum(plNum)
+    {
+    }
+
+    virtual int CompareTo(Object ^o)
+    {
+        ColoniesPrintKey ^key = (ColoniesPrintKey^)o;
+
+        int n = String::Compare(m_Sp->Name, key->m_Sp->Name);
+        if( n == 0 )
+            return m_PlNum - key->m_PlNum;
+        return n;
+    }
+
+    Alien^  m_Sp;
+    int     m_PlNum;
+};
+
+String^ StarSystem::PrintColoniesAll()
 {
     String ^ret = "";
+    Alien ^player = GameData::Player;
+    Alien ^homeSpecies = nullptr;
+    bool homeInhabited = false;
 
-    for each( Colony ^colony in m_Colonies )
+    // Player's colonies first
+    if( ColoniesOwned->Count == 1 )
     {
-        if( planetNum != -1 &&
-            colony->PlanetNum != planetNum )
-            continue;
+        Colony ^colony = ColoniesOwned[0];
+        ret += String::Format(", PL {0} [{1}]",
+            colony->Name, colony->PrintSize() );
+    }
+    else if( ColoniesOwned->Count > 1 )
+    {
+        SortedList<int, Colony^> ^colonies = gcnew SortedList<int, Colony^>;
+        for each( Colony ^colony in ColoniesOwned )
+            colonies->Add(colony->PlanetNum, colony);
 
-        if( String::IsNullOrEmpty(ret) == false )
-            ret += ", ";
+        ret += String::Format(", {0} [", player->Name);
+        bool firstColony = true;
+        for each( Colony ^colony in colonies->Values )
+        {
+            ret += String::Format("{0}{1}{2}:{3}",
+                firstColony ? "" : " ",
+                colony->PlanetType == PLANET_HOME ? "(HOME)" : "",
+                colony->PlanetNum,
+                colony->PrintSize() );
+
+            firstColony = false;
+        }
+        ret += "]";
+    }
+    else if( ColoniesOwned->Count == 0 )
+    {   // No colonies owned, print named planet if any...
+        for each( Planet ^planet in Planets->Values )
+            if( !String::IsNullOrEmpty(planet->Name) )
+                ret += ", PL " + planet->Name;
     }
 
-    for each( Colony ^colony in m_Colonies )
+    // Alien colonies
+    if( ColoniesAlien->Count > 0 )
     {
-        if( planetNum != -1 &&
-            colony->PlanetNum != planetNum )
-            continue;
+        SortedList<ColoniesPrintKey^, Colony^> ^colonies =
+            gcnew SortedList<ColoniesPrintKey^, Colony^>;
+        for each( Colony ^colony in ColoniesAlien )
+            colonies->Add(
+                gcnew ColoniesPrintKey(colony->Owner, colony->PlanetNum),
+                colony);
 
-        String ^entry = "";
-        String ^size;
-        if( colony->EconomicBase == -1 )
+        Alien ^lastAlien = nullptr;
+        bool firstColony = true;
+        for each( Colony ^colony in colonies->Values )
         {
-            size = "?";
-        }
-        else if ( colony->EconomicBase % 10 )
-        {
-            size = String::Format("{0}.{1}", colony->EconomicBase / 10, colony->EconomicBase % 10);
-        }
-        else
-        {
-            size = (colony->EconomicBase / 10).ToString();
-        }
-
-        if( colony->Owner == player )
-        {
-            // Put player colony first, by name
-            if( planetNum == -1 )
+            if( colony->Owner != lastAlien )
             {
-                entry += ("#" + colony->PlanetNum.ToString() + " ");
+                ret += String::Format("{0}, {1} [",
+                    lastAlien != nullptr ? "]" : "",
+                    colony->Owner->Name);
+                lastAlien = colony->Owner;
+                firstColony = true;
             }
 
-            entry += String::Format("PL {0}[{1}]", colony->Name, size );
+            ret += String::Format("{0}{1}{2}:{3}",
+                firstColony ? "" : " ",
+                colony->PlanetType == PLANET_HOME ? "(HOME)" : "",
+                colony->PlanetNum,
+                colony->PrintSize() );
 
-            if( String::IsNullOrEmpty(ret) )
-            {
-                ret = entry;
-            }
-            else
-            {
-                ret = entry + ", " + ret;
-            }
+            firstColony = false;
         }
-        else
-        {
-            // Then list alien colonies by species name
+        ret += "]";
+    }
 
-            if( String::IsNullOrEmpty(ret) == false )
-                ret += ", ";
-            if( planetNum == -1 )
-                ret += ("#" + colony->PlanetNum.ToString() + " ");
-            ret += String::Format( "{0}{1}[{2}]",
-                colony->PlanetType == PLANET_HOME ? "(HOME) " : "",
+    if( ret->Length > 0 && ret[0] == ',' )
+        return ret->Substring(2);
+    return ret;
+}
+
+String^ StarSystem::PrintColonies(int planetNum)
+{
+    String ^ret = "";
+    Alien ^player = GameData::Player;
+    Alien ^homeSpecies = nullptr;
+    bool homeInhabited = false;
+
+    // Check if this is a home system for someone
+    for each( Alien ^alien in GameData::GetAliens() )
+    {
+        if( alien->HomeSystem == this &&
+            alien->HomePlanet == planetNum )
+        {
+            homeSpecies = alien;
+            break;
+        }
+    }
+
+    // Player's colony first
+    if( ColoniesOwned->Count > 0 )
+    {
+        for each( Colony ^colony in ColoniesOwned )
+        {
+            if( colony->PlanetNum != planetNum )
+                continue;
+
+            ret += String::Format(", {0}PL {1} [{2}]",
+                colony->PlanetType == PLANET_HOME ? "(HOME)" : "",
+                colony->Name,
+                colony->PrintSize() );
+
+            if( colony->PlanetType == PLANET_HOME )
+                homeInhabited = true;
+        }
+    }
+
+    // Alien colonies
+    if( ColoniesAlien->Count > 0 )
+    {
+        for each( Colony ^colony in ColoniesAlien )
+        {
+            if( colony->PlanetNum != planetNum )
+                continue;
+
+            ret += String::Format(", {0}{1} [{2}]",
                 colony->Owner->Name,
-                size );
+                colony->PlanetType == PLANET_HOME ? "(HOME)" : "",
+                colony->PrintSize() );
+
+            if( colony->PlanetType == PLANET_HOME )
+                homeInhabited = true;
         }
     }
 
-    for each (Planet^ planet in Planets->Values )
+    // Check if home is inhabited, if not add special comment
+    if( homeSpecies && !homeInhabited )
     {
-        if ( ( planet->NumColonies == 0 ) &&
-             ( String::IsNullOrEmpty( planet->Name ) == false ) )
-        {
-            // Planet has no colonies, list name if any.
-            if( String::IsNullOrEmpty(ret) == false )
-                ret += ", ";
+        ret += ", Home of SP " + homeSpecies->Name;
+    }
 
-            if( planetNum == -1 )
-            {
-                ret += ("#" + planet->Number.ToString() + " ");
-            }
+    if( ret->Length > 0 && ret[0] == ',' )
+        return ret->Substring(2);
+    return ret;
+}
 
-            ret += "PL " + planet->Name;
-        }
+String^ StarSystem::PrintComment()
+{
+    String ^ret = nullptr;
+    if( Comment )
+        ret = Comment;
+    if( CommentHome )
+    {
+        if( ret )
+            ret = CommentHome + "; " + ret;
+        else
+            ret = CommentHome;
     }
 
     return ret;

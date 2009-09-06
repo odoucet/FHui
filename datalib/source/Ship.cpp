@@ -267,11 +267,7 @@ String^ Ship::Order::PrintNumeric()
             JumpTarget->Z,
             PlanetNum );
     if( Type == OrderType::Wormhole )
-        return String::Format("Wormhole to {0} {1} {2} {3}",
-            JumpTarget->X,
-            JumpTarget->Y,
-            JumpTarget->Z,
-            PlanetNum );
+        return "Wormhole " + PlanetNum.ToString();
 
     return Print();
 }
@@ -294,7 +290,9 @@ String^ Ship::Order::PrintJumpDestination()
         }
         return JumpTarget->PrintLocation() + " " + PlanetNum.ToString();
     }
-    return JumpTarget->PrintLocation();
+    if( JumpTarget )
+        return JumpTarget->PrintLocation();
+    return "Unknown System";
 }
 
 } // end namespace FHUI

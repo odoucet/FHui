@@ -435,6 +435,15 @@ void GridFilter::SetRefSystem(StarSystem ^system)
     }
 }
 
+void GridFilter::SetRefSystem(Colony ^colony)
+{
+    if( colony->System != RefSystem &&
+        CtrlRefColony != nullptr )
+    {
+        CtrlRefColony->Text = colony->PrintRefListEntry();
+    }
+}
+
 Ship^ GridFilter::GetShipFromRefList(ComboBox ^combo)
 {
     String ^ref = combo->Text;

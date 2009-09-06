@@ -98,6 +98,7 @@ public:
     String^         PrintInventory();
     String^         PrintRefListEntry();
     String^         PrintBalance();
+    String^         PrintSize();
 
     void            CalculateBalance(bool MiMaBalanced);
     int             GetMaxProductionBudget();

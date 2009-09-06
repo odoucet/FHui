@@ -58,6 +58,7 @@ public:
     virtual bool    Filter(IGridDataSrc ^item);
 
     virtual void    SetRefSystem(StarSystem ^system);
+    virtual void    SetRefSystem(Colony ^colony);
 
     Label           ^CtrlRef;
     ComboBox        ^CtrlRefHome;

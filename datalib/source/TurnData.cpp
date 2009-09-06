@@ -18,6 +18,7 @@ TurnData::TurnData(int turn)
     , m_Colonies(gcnew SortedList<String^, Colony^>)
     , m_PlanetNames(gcnew SortedList<String^, PlanetName^>)
     , m_Ships(gcnew SortedList<String^, Ship^>)
+    , m_WormholeJumps(gcnew List<WormholeJump^>)
 {
 }
 
@@ -265,14 +266,15 @@ List<Colony^>^ TurnData::GetColonies(StarSystem ^sys, Alien ^sp)
 
 void TurnData::SetSpecies(String ^sp)
 {
-    if( GameData::Player == nullptr )
-    {
-        AddAlien(sp)->Relation = SP_PLAYER;
-    }
-    else if( String::Compare(GameData::Player->Name, sp) != 0 )
+    Alien ^alien = GameData::Player;
+    if( String::Compare(GameData::Player->Name, sp) != 0 )
     {
         throw gcnew FHUIDataIntegrityException(
             String::Format("Reports for different species: {0} and {1}", GameData::Player->Name, sp) );
+    }
+    else
+    {
+        alien->Relation = SP_PLAYER;
     }
 }
 
@@ -307,13 +309,24 @@ void TurnData::SetFleetCost(int cost, int percent)
     m_FleetCostPercent = percent;
 }
 
+StarSystem^ TurnData::GetStarSystem(int id)
+{
+    if ( m_Systems->ContainsKey( id ) )
+    {
+        return m_Systems[ id ];
+    }
+
+    throw gcnew FHUIDataIntegrityException(
+        "Trying to access unknown star system: id=" + id.ToString() );
+}
+
 StarSystem^ TurnData::GetStarSystem(int x, int y, int z)
 {
-    if ( m_Systems->ContainsKey( GameData::GetSystemId(x,y,z) ) )
+    try
     {
-        return m_Systems[ GameData::GetSystemId(x,y,z) ];
+        return GetStarSystem( GameData::GetSystemId(x, y, z) );
     }
-    else
+    catch( FHUIDataIntegrityException^ )
     {
         throw gcnew FHUIDataIntegrityException(
             String::Format("Trying to access unknown star system: {0} {1} {2}", x, y, z) );
@@ -444,6 +457,19 @@ void TurnData::UpdateShips()
     m_ShipsByTonnage = gcnew List<Ship^>;
     m_ShipsByTonnage->AddRange(m_Ships->Values);
     m_ShipsByTonnage->Sort( gcnew Ship::WarTonnageComparer );
+
+    // Update wormhole targets
+    for each( WormholeJump ^jump in m_WormholeJumps )
+    {
+        Ship ^ship = GetShip(jump->A);
+        StarSystem ^from = GetStarSystem(jump->B);
+        // Add wormhole link
+        from->HasWormhole = true;
+        from->WormholeTargetId = ship->System->GetId();
+        // Also add back link
+        ship->System->HasWormhole = true;
+        ship->System->WormholeTargetId = jump->B;
+    }
 }
 
 void TurnData::UpdateAliens()
@@ -480,8 +506,6 @@ void TurnData::UpdateSystems()
             planet->NumColonies = 0;
             planet->NumColoniesOwned = 0;
 
-            // Update min LSN and num colonies
-            minLSN = Math::Min(planet->LSN, minLSN);
             bool available = true;
             for each( Colony^ colony in system->Colonies )
             {
@@ -490,22 +514,26 @@ void TurnData::UpdateSystems()
                     ++planet->NumColonies;
                     if( colony->Owner == GameData::Player )
                         ++planet->NumColoniesOwned;
-                    available = false;
+
+                    if( colony->EconomicBase > 0 )
+                        available = false;
 
                     // Update planet info with colony info, if there is any difference
                     // Helps with MD changed via mining or when there is no system scan
-                    if ( colony->Owner == GameData::Player &&
-                         colony->EconomicBase > 0 )
+                    if ( colony->Owner == GameData::Player )
                     {
-                        colony->CalculateBalance(false);
+                        if( colony->EconomicBase > 0 )
+                            colony->CalculateBalance(false);
 
                         planet->MiDiff = colony->MiDiff;
                         planet->LSN = colony->LSN;
                     }
-
-                    break;
                 }
             }
+
+            // Update min LSN and num colonies
+            minLSN = Math::Min(planet->LSN, minLSN);
+
             if( available )
                 minLSNAvail = Math::Min(planet->LSN, minLSNAvail);
         }
@@ -548,6 +576,16 @@ void TurnData::LinkPlanetNames()
 
 void TurnData::UpdateHomeWorlds()
 {
+    for each( Alien ^alien in GetAliens() )
+    {
+        if( alien->HomeSystem )
+        {
+            alien->HomeSystem->CommentHome = String::Format("HOME of SP {0} [#{1}]",
+                alien->Name,
+                alien->HomePlanet);
+        }
+    }
+
     for each( Colony ^colony in GetColonies() )
     {
         if( colony->PlanetType == PLANET_HOME )
@@ -620,6 +658,11 @@ Ship^ TurnData::AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, S
         DeleteAlienColonies(system);
     }
     return ship;
+}
+
+void TurnData::AddWormholeJump(String ^shipName, int fromSystemId)
+{
+    m_WormholeJumps->Add( gcnew WormholeJump(shipName, fromSystemId) );
 }
 
 void TurnData::DeleteAlienColonies(StarSystem^ system)

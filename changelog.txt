@@ -9,6 +9,10 @@ FHUI build ??
 * [P] Reload buton works again.
 * [P] Fixed alien TC/PC display on Aliens tab.
 * [P] Names of disbanded planets were not removed.
+* [P] Fixed LSN update read from colony report.
+* Fixed adding names to planets.
++ [P] Colonies printing on Systems and Planets tabs modified to better work
+      with multiple colonies in single system/planet.
 
 FHUI build 168
 * Status for older turns is shown correctly.

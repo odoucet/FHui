@@ -30,6 +30,7 @@ public:
     int             GetFleetCost();
     int             GetFleetPercentCost();
     Alien^          GetAlien(String ^sp);
+    StarSystem^     GetStarSystem(int id);
     StarSystem^     GetStarSystem(int x, int y, int z);
     StarSystem^     GetStarSystem(String ^name);
     Colony^         GetColony(String ^name);
@@ -58,6 +59,7 @@ public:
     Colony^         AddColony(Alien ^sp, String ^name, StarSystem ^system, int plNum);
     void            AddPlanetName(StarSystem ^system, int pl, String ^name);
     Ship^           AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);
+    void            AddWormholeJump(String ^shipName, int fromSystemId);
 
 protected:
 
@@ -89,12 +91,15 @@ protected:
     int                 m_TurnEUProduced;
     int                 m_FleetCost;
     int                 m_FleetCostPercent; // * 100
-    SortedList<int, StarSystem^>       ^m_Systems;
-    SortedList<String^, Alien^>        ^m_Aliens;
-    SortedList<String^, Colony^>       ^m_Colonies;
-    SortedList<String^, PlanetName^>   ^m_PlanetNames;
-    SortedList<String^, Ship^>         ^m_Ships;
-    List<Ship^>                        ^m_ShipsByTonnage;
+    SortedList<int, StarSystem^>^       m_Systems;
+    SortedList<String^, Alien^>^        m_Aliens;
+    SortedList<String^, Colony^>^       m_Colonies;
+    SortedList<String^, PlanetName^>^   m_PlanetNames;
+    SortedList<String^, Ship^>^         m_Ships;
+    List<Ship^>^                        m_ShipsByTonnage;
+
+    typedef Pair<String^, int> WormholeJump;
+    List<WormholeJump^>^                m_WormholeJumps;
 
     initonly int        m_Turn;
 };

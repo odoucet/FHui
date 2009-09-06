@@ -178,6 +178,11 @@ Ship^ GameData::AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, S
     return m_CurrentTurnData->AddShip(sp, type, name, subLight, system);
 }
 
+void GameData::AddWormholeJump(String ^shipName, int fromSystemId)
+{
+    m_CurrentTurnData->AddWormholeJump(shipName, fromSystemId);
+}
+
 void GameData::SetAtmosphereReq(GasType gas, int reqMin, int reqMax)
 {
     AtmosphericReq ^atm = Player->AtmReq;
