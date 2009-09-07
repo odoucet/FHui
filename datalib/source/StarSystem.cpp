@@ -107,14 +107,40 @@ int StarSystem::CompareLocation(StarSystem ^sys)
                       return Z - sys->Z;
 }
 
-String^ StarSystem::GetTooltipText()
+bool StarSystem::IsWormholeTarget(StarSystem ^system)
 {
-    String ^tooltip = GenerateScan();
+    return HasWormhole ? system->GetId() == WormholeTargetId : false;
+}
+
+StarSystem^ StarSystem::GetWormholeTarget()
+{
+    if( HasWormhole && WormholeTargetId != -1 )
+        return GameData::GetStarSystem(WormholeTargetId);
+    return nullptr;
+}
+
+void StarSystem::UpdateTooltip()
+{
+    GenerateScan();
+    GenerateColoniesInfo();
+    GenerateShipsInfo();
+
+    m_Tooltip = m_TooltipScan;
+    if( !String::IsNullOrEmpty(m_TooltipColonies) )
+        m_Tooltip += "\r\nColonies:\r\n" + m_TooltipColonies;
+    if( !String::IsNullOrEmpty(m_TooltipShips) )
+        m_Tooltip += "\r\nShips:\r\n" + m_TooltipShips;
+}
+
+String^ StarSystem::GenerateColoniesInfo()
+{
+    if( m_TooltipColonies )
+        return m_TooltipColonies;
+
+    m_TooltipColonies = "";
 
     if( Colonies->Count )
     {
-        tooltip += "\r\nColonies:\r\n";
-
         SortedList<PrintKey^, Colony^> ^colonies =
             gcnew SortedList<PrintKey^, Colony^>;
         for each( Colony ^colony in Colonies )
@@ -125,7 +151,7 @@ String^ StarSystem::GetTooltipText()
         Alien ^player = GameData::Player;
         for each( Colony ^colony in colonies->Values )
         {
-            tooltip += String::Format("#{0} {1} {2}{3}, size {4}{5}\r\n",
+            m_TooltipColonies += String::Format("#{0} {1} {2}{3}, size {4}{5}\r\n",
                 colony->PlanetNum,
                 colony->Owner->Name,
                 FHStrings::PlTypeToString(colony->PlanetType),
@@ -135,9 +161,18 @@ String^ StarSystem::GetTooltipText()
         }
     }
 
+    return m_TooltipColonies;
+}
+
+String^ StarSystem::GenerateShipsInfo()
+{
+    if( m_TooltipShips )
+        return m_TooltipShips;
+
+    m_TooltipShips = "";
+
     if( Ships->Count )
     {
-        tooltip += "\r\nShips:\r\n";
 
         SortedList<PrintKey^, Ship^> ^ships =
             gcnew SortedList<PrintKey^, Ship^>;
@@ -154,7 +189,7 @@ String^ StarSystem::GetTooltipText()
                 continue;
 
             String^ inv = ship->PrintCargo();
-            tooltip += String::Format("{0} {1} {2}{3}{4}\r\n",
+            m_TooltipShips += String::Format("{0} {1} {2}{3}{4}\r\n",
                 ship->Owner->Name,
                 ship->PrintClassWithName(),
                 ship->Type == SHIP_BAS ? String::Format("({0}k)", ship->Size / 1000) : "",
@@ -163,11 +198,14 @@ String^ StarSystem::GetTooltipText()
         }
     }
 
-    return tooltip;
+    return m_TooltipShips;
 }
 
 String^ StarSystem::GenerateScan()
 {
+    if( m_TooltipScan )
+        return m_TooltipScan;
+
     String ^scan = String::Format(
         "Coordinates: x = {0}  y = {1}  z = {2}  stellar type = {3}  {4} planets.\r\n",
         X, Y, Z, Type,
@@ -222,7 +260,8 @@ String^ StarSystem::GenerateScan()
         scan += plStr + "\r\n";
     }
 
-    return scan;
+    m_TooltipScan = scan;
+    return m_TooltipScan;
 }
 
 String^ StarSystem::PrintWormholeTarget()
@@ -230,7 +269,7 @@ String^ StarSystem::PrintWormholeTarget()
     if( HasWormhole )
     {
         if( WormholeTargetId != -1 )
-            return GameData::GetStarSystem(WormholeTargetId)->PrintLocation();
+            return GetWormholeTarget()->PrintLocation();
         return "Unknown System";
     }
     return nullptr;

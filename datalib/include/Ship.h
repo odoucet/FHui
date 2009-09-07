@@ -41,6 +41,7 @@ public:
     virtual Alien^      GetFilterOwner() override       { return Owner; }
     virtual SPRelType   GetFilterRelType() override     { return Owner->GetFilterRelType(); }
     virtual ShipType    GetFilterShipType() override    { return Type; }
+    virtual String^     GetTooltipText() override       { return System->GetTooltipText(); }
     // -------- IComparers ------------------------------
     ref class TypeTonnageLocationComparer : public IComparer<Ship^>
     {

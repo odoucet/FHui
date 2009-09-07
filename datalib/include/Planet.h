@@ -66,6 +66,7 @@ public:
     virtual Alien^      GetFilterOwner() override       { return Master; }
     virtual int         GetFilterLSN() override         { return LSN; }
     virtual int         GetFilterNumColonies() override { return NumColonies; }
+    virtual String^     GetTooltipText() override;
     // --------------------------------------------------
 
     int         CalculateLSN();

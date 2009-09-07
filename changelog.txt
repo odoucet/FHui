@@ -13,6 +13,8 @@ FHUI build ??
 * Fixed adding names to planets.
 + [P] Colonies printing on Systems and Planets tabs modified to better work
       with multiple colonies in single system/planet.
++ Wormholes support.
++ Improved tooltips on Systems tab, also available on Planets, Colonies and Ships tabs.
 
 FHUI build 168
 * Status for older turns is shown correctly.

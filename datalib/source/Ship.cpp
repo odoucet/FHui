@@ -97,21 +97,26 @@ String^ Ship::PrintLocation()
             }
         }
 
-        if( System->Planets->ContainsKey(PlanetNum) )
+        if( PlanetNum != -1 )
         {
-            // Still check the planet name, it may be a named planet not yet colonized
-            Planet ^planet = System->Planets[PlanetNum];
-            if( String::IsNullOrEmpty(planet->Name) )
+            if( System->Planets->ContainsKey(PlanetNum) )
             {
-                if( nearColony )
-                    location = String::Format("[{0}]", nearColony);
+                // Still check the planet name, it may be a named planet not yet colonized
+                Planet ^planet = System->Planets[PlanetNum];
+                if( String::IsNullOrEmpty(planet->Name) )
+                {
+                    if( nearColony )
+                        location = String::Format("[{0}]", nearColony);
+                    else
+                        location = String::Format("[{0} {1}]", System->PrintLocation(), PlanetNum);
+                }
                 else
-                    location = String::Format("[{0} {1}]", System->PrintLocation(), PlanetNum);
+                {
+                    location = "PL " + planet->Name;
+                }
             }
             else
-            {
-                location = "PL " + planet->Name;
-            }
+                location = String::Format("[{0} {1}]", System->PrintLocation(), PlanetNum);
         }
         else
         {

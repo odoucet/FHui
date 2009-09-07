@@ -1,9 +1,15 @@
 #include "StdAfx.h"
 #include "GameData.h"
 #include "Alien.h"
+#include "StarSystem.h"
 
 namespace FHUI
 {
+
+String^ Planet::GetTooltipText()
+{
+    return System->GetTooltipText();
+}
 
 int Planet::CalculateLSN()
 {

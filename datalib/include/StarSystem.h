@@ -69,7 +69,7 @@ public:
 
     // -------- IGridDataSrc ----------------------------
     virtual Alien^      GetAlienForBgColor() override   { return Master; }
-    virtual String^     GetTooltipText() override;
+    virtual String^     GetTooltipText() override       { return m_Tooltip; }
 
     virtual StarSystem^ GetFilterSystem() override      { return this; }
     virtual StarSystem^ GetFilterLocation(int %pl) override { pl = -1; return this; }
@@ -78,23 +78,25 @@ public:
     virtual int         GetFilterNumColonies() override { return m_Colonies->Count; }
     // --------------------------------------------------
 
-    double      CalcDistance(StarSystem ^s);
-    double      CalcMishap(StarSystem ^s, int gv, int age);
-    double      CalcDistance(int x, int y, int z);
-    double      CalcMishap(int x, int y, int z, int gv, int age);
+    double          CalcDistance(StarSystem ^s);
+    double          CalcMishap(StarSystem ^s, int gv, int age);
+    double          CalcDistance(int x, int y, int z);
+    double          CalcMishap(int x, int y, int z, int gv, int age);
 
-    int         CompareLocation(StarSystem ^sys);
+    int             CompareLocation(StarSystem ^sys);
 
-    int         GetId();
+    int             GetId();
 
-    bool        IsExplored() { return TurnScanned != -1; }
-    bool        IsWormholeTarget(StarSystem ^system)    { return HasWormhole ? system->GetId() == WormholeTargetId : false; }
+    bool            IsExplored() { return TurnScanned != -1; }
 
-    String^     GenerateScan();
-    void        UpdateMaster();
+    bool            IsWormholeTarget(StarSystem ^system);
+    StarSystem^     GetWormholeTarget();
 
-    void        AddShip(Ship^);
-    void        AddColony(Colony^);
+    void            UpdateMaster();
+    void            UpdateTooltip();
+
+    void            AddShip(Ship^);
+    void            AddColony(Colony^);
 
     String^         PrintLocation() { return String::Format("{0} {1} {2}", X, Y, Z); }
     String^         PrintWormholeTarget();
@@ -104,6 +106,10 @@ public:
     String^         PrintColonies(int planetNum);
     String^         PrintComment();
     List<String^>^  PrintAliens();
+
+    String^         GenerateScan();
+    String^         GenerateColoniesInfo();
+    String^         GenerateShipsInfo();
 
     property int            X;
     property int            Y;
@@ -132,6 +138,11 @@ public:
     property SortedList<int, Planet^>^ Planets;
 
 protected:
+
+    String^                 m_Tooltip;
+    String^                 m_TooltipScan;
+    String^                 m_TooltipColonies;
+    String^                 m_TooltipShips;
 
     List<Ship^>^            m_Ships;
     List<Ship^>^            m_ShipsOwned;

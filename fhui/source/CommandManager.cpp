@@ -182,10 +182,8 @@ void CommandManager::LoadCommands()
             ship->Command =
                 gcnew Ship::Order(
                     Ship::OrderType::Wormhole,
-                    nullptr,
+                    ship->System->GetWormholeTarget(),
                     m_RM->GetResultInt(2) );
-            if( ship->System->WormholeTargetId != -1 )
-                ship->Command->JumpTarget = GameData::GetStarSystem(ship->System->WormholeTargetId);
             if( ship->Command->PlanetNum != -1 &&
                 ship->System->Planets->ContainsKey( ship->Command->PlanetNum ) == false )
                 throw gcnew FHUIParsingException("Invalid ship wormhole command (invalid planet for orbiting)!");
@@ -553,7 +551,7 @@ void CommandManager::GenerateJumps()
                     order += "unknown";
                 else
                 {
-                    StarSystem ^target = GameData::GetStarSystem(ship->System->WormholeTargetId);
+                    StarSystem ^target = ship->System->GetWormholeTarget();
                     order += Calculators::Distance(
                         ship->System->X,
                         ship->System->Y,

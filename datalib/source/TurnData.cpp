@@ -497,6 +497,9 @@ void TurnData::UpdateSystems()
 
     for each( StarSystem ^system in GetStarSystems() )
     {
+        // Update tooltips
+        system->UpdateTooltip();
+
         // Calculate LSN
         int minLSN = 99999;
         int minLSNAvail = 99999;

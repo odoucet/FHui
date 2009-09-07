@@ -1823,17 +1823,13 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
 
         if( ship->System->HasWormhole )
         {
-            StarSystem ^target = ship->System->WormholeTargetId == -1
-                ? nullptr
-                : m_GameData->GetStarSystem(ship->System->WormholeTargetId);
-
             EventHandler1Arg<ShipOrderData^> ^handler =
                 gcnew EventHandler1Arg<ShipOrderData^>(this, &Form1::ShipsMenuOrderSet);
             ToolStripMenuItem ^menuItem = CreateCustomMenuItem(
                 "Enter Wormhole to " + ship->System->PrintWormholeTarget(),
                 gcnew ShipOrderData(
                     ship,
-                    gcnew Ship::Order(Ship::OrderType::Wormhole, target) ),
+                    gcnew Ship::Order(Ship::OrderType::Wormhole, ship->System->GetWormholeTarget()) ),
                  handler );
 
             if( ship->Command &&
