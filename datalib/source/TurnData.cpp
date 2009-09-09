@@ -320,11 +320,23 @@ StarSystem^ TurnData::GetStarSystem(int id)
         "Trying to access unknown star system: id=" + id.ToString() );
 }
 
-StarSystem^ TurnData::GetStarSystem(int x, int y, int z)
+StarSystem^ TurnData::GetStarSystem(int x, int y, int z, bool allowVoid)
 {
     try
     {
-        return GetStarSystem( GameData::GetSystemId(x, y, z) );
+        if( allowVoid )
+        {
+            int id = GameData::GetSystemId(x, y, z);
+            if ( m_Systems->ContainsKey( id ) )
+                return m_Systems[ id ];
+
+
+            StarSystem ^system = AddStarSystem(x, y, z, "void", "");
+            system->IsVoid = true;
+            return system;
+        }
+        else
+            return GetStarSystem( GameData::GetSystemId(x, y, z) );
     }
     catch( FHUIDataIntegrityException^ )
     {

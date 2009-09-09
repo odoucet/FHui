@@ -415,7 +415,7 @@ bool Report::MatchSystemScanStart(String ^s)
         m_ScanY = m_RM->GetResultInt(1);
         m_ScanZ = m_RM->GetResultInt(2);
         m_ScanHasPlanets = false;
-        m_ScanSystem = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ);
+        m_ScanSystem = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ, false);
 
         // Set the home system
         if( m_ScanAlien )
@@ -437,7 +437,7 @@ void Report::MatchPlanetScan(String ^s)
     {
         int plNum = m_RM->GetResultInt(0);
         Planet ^planet = gcnew Planet(
-            m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ),
+            m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ, false),
             plNum,
             m_RM->GetResultInt(1),
             m_RM->GetResultInt(2) * 100 + m_RM->GetResultInt(3),
@@ -548,7 +548,8 @@ void Report::MatchColonyScan(String ^s)
             StarSystem ^system = m_GameData->GetStarSystem(
                 m_RM->GetResultInt(1),
                 m_RM->GetResultInt(2),
-                m_RM->GetResultInt(3) );
+                m_RM->GetResultInt(3),
+                false );
 
             int plNum = m_RM->GetResultInt(4);
  
@@ -805,17 +806,10 @@ void Report::MatchShipScan(String ^s, bool bColony)
             system = m_ScanColony->System;
         else
         {
-            try
-            {
-                system = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ);
-            }
-            catch( FHUIDataIntegrityException^ )
-            {   // When reading other ships and planets,
-                // ship may be outside of any system just in deep, empty space
-                // add this location temporarily to star system list
-                system = m_GameData->AddStarSystem(m_ScanX, m_ScanY, m_ScanZ, "empty", "");
-                system->IsVoid = true;
-            }
+            // When reading other ships and planets,
+            // ship may be outside of any system just in deep, empty space
+            // add this location temporarily to star system list
+            system = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ, true);
         }
         system->LastVisited = m_Turn;
 
@@ -950,7 +944,7 @@ void Report::MatchOtherPlanetsShipsScan(String ^s)
         m_ScanY = m_RM->GetResultInt(1);
         m_ScanZ = m_RM->GetResultInt(2);
 
-        StarSystem^ system = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ);
+        StarSystem^ system = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ, false);
 
         int plNum = m_RM->GetResultInt(3);
         String^ plName = m_RM->Results[4];
@@ -1018,7 +1012,7 @@ void Report::MatchAliensReport(String ^s)
     {
         if( m_RM->Match(s, "^([^,;]+)\\s+\\(pl #(\\d+)\\)\\s+SP\\s+([^,;]+)\\s*$") )
         {
-            StarSystem ^system = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ);
+            StarSystem ^system = m_GameData->GetStarSystem(m_ScanX, m_ScanY, m_ScanZ, false);
             String ^name = m_RM->Results[0];
             int plNum    = m_RM->GetResultInt(1);
             Alien ^sp    = m_GameData->AddAlien(m_RM->Results[2]);

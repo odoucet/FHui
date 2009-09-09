@@ -31,7 +31,7 @@ public:
     int             GetFleetPercentCost();
     Alien^          GetAlien(String ^sp);
     StarSystem^     GetStarSystem(int id);
-    StarSystem^     GetStarSystem(int x, int y, int z);
+    StarSystem^     GetStarSystem(int x, int y, int z, bool allowVoid);
     StarSystem^     GetStarSystem(String ^name);
     Colony^         GetColony(String ^name);
     Ship^           GetShip(String ^name);

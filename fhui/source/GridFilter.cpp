@@ -276,17 +276,8 @@ void GridFilter::SetRefText()
         int y = int::Parse(m->Groups[2]->ToString());
         int z = int::Parse(m->Groups[3]->ToString());
 
-        StarSystem ^system = nullptr;
-
-        try
-        {
-            system = GameData->GetStarSystem(x, y, z);
-        }
-        catch( FHUIDataIntegrityException^ )
-        {
-            // reference location may be outside of any system just in deep, empty space
-            system = gcnew StarSystem(x, y, z, "deep space");
-        }
+        // Allow void systems - user may enter any coords
+        StarSystem ^system = GameData->GetStarSystem(x, y, z, true);
 
         if( RefSystem == system )
             return;
@@ -321,7 +312,7 @@ void GridFilter::SetRefXYZ()
         int y = int::Parse(m->Groups[2]->ToString());
         int z = int::Parse(m->Groups[3]->ToString());
 
-        StarSystem ^system = GameData->GetStarSystem(x, y, z);
+        StarSystem ^system = GameData->GetStarSystem(x, y, z, false);
 
         if( RefSystem == system )
             return;

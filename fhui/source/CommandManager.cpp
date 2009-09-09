@@ -171,7 +171,8 @@ void CommandManager::LoadCommands()
                     m_GameData->GetStarSystem(
                         m_RM->GetResultInt(2),
                         m_RM->GetResultInt(3),
-                        m_RM->GetResultInt(4)),
+                        m_RM->GetResultInt(4),
+                        false),
                     m_RM->GetResultInt(5) );
         }
         else if( m_RM->Match(line, m_RM->ExpCmdShipWormhole) )
@@ -203,7 +204,8 @@ void CommandManager::LoadCommands()
             StarSystem ^system = m_GameData->GetStarSystem(
                 m_RM->GetResultInt(0),
                 m_RM->GetResultInt(1),
-                m_RM->GetResultInt(2));
+                m_RM->GetResultInt(2),
+                false);
             Planet ^planet = system->Planets[ m_RM->GetResultInt(3) ];
             String ^name = m_RM->Results[4];
             AddCommandDontSave( gcnew CmdPlanetName(system, planet->Number, name) );

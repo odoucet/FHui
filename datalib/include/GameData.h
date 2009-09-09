@@ -25,7 +25,7 @@ public:
     static int             GetFleetPercentCost()               { return m_CurrentTurnData->GetFleetPercentCost(); }
     static Alien^          GetAlien(String ^sp)                { return m_CurrentTurnData->GetAlien(sp); }
     static StarSystem^     GetStarSystem(int id)               { return m_CurrentTurnData->GetStarSystem(id); }
-    static StarSystem^     GetStarSystem(int x, int y, int z)  { return m_CurrentTurnData->GetStarSystem(x, y, z); }
+    static StarSystem^     GetStarSystem(int x, int y, int z, bool allowVoid)  { return m_CurrentTurnData->GetStarSystem(x, y, z, allowVoid); }
     static StarSystem^     GetStarSystem(String ^name)         { return m_CurrentTurnData->GetStarSystem(name); }
     static Colony^         GetColony(String ^name)             { return m_CurrentTurnData->GetColony(name); }
     static Ship^           GetShip(String ^name)               { return m_CurrentTurnData->GetShip(name); }

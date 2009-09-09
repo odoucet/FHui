@@ -94,7 +94,8 @@ void GameData::InitTurn()
             StarSystem^ home = m_CurrentTurnData->GetStarSystem(
                 srcAlien->HomeSystem->X,
                 srcAlien->HomeSystem->Y,
-                srcAlien->HomeSystem->Z );
+                srcAlien->HomeSystem->Z,
+                false );
             m_CurrentTurnData->AddAlien( gcnew Alien(home, srcAlien) );
         }
     }
@@ -106,7 +107,8 @@ void GameData::InitTurn()
             StarSystem^ system = m_CurrentTurnData->GetStarSystem(
                 srcColony->System->X,
                 srcColony->System->Y,
-                srcColony->System->Z );
+                srcColony->System->Z,
+                false );
             Alien^ owner = m_CurrentTurnData->GetAlien( srcColony->Owner->Name );
             m_CurrentTurnData->AddColony( gcnew Colony( system, owner, srcColony) );
         }
