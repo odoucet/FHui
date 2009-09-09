@@ -461,14 +461,22 @@ void TurnData::UpdateShips()
     // Update wormhole targets
     for each( WormholeJump ^jump in m_WormholeJumps )
     {
-        Ship ^ship = GetShip(jump->A);
-        StarSystem ^from = GetStarSystem(jump->B);
-        // Add wormhole link
-        from->HasWormhole = true;
-        from->WormholeTargetId = ship->System->GetId();
-        // Also add back link
-        ship->System->HasWormhole = true;
-        ship->System->WormholeTargetId = jump->B;
+        try
+        {
+            Ship ^ship = GetShip(jump->A);
+            StarSystem ^from = GetStarSystem(jump->B);
+            // Add wormhole link
+            from->HasWormhole = true;
+            from->WormholeTargetId = ship->System->GetId();
+            // Also add back link
+            ship->System->HasWormhole = true;
+            ship->System->WormholeTargetId = jump->B;
+        }
+        catch ( KeyNotFoundException^ )
+        {
+            // Assume that the ship was intercepted
+            // and ignore this jump attempt
+        }
     }
 }
 
