@@ -79,6 +79,9 @@ namespace FHUI {
         void        TechLevelsChanged();
 
         String^     GetDataDir(String ^suffix);
+        void        SaveUISettings();
+        void        SaveUIGrid(List<String^> ^settings, DblBufDGV ^grid, String ^tab);
+        void        LoadUISettings();
 
         // -- Data grids misc
         void        UpdateAllGrids();
@@ -518,7 +521,7 @@ private: System::Windows::Forms::CheckBox^  MapEnLSN;
 private: System::Windows::Forms::CheckBox^  MapEnDist;
 
 
-private: System::Windows::Forms::TextBox^  Summary;
+private: System::Windows::Forms::RichTextBox^  Summary;
 private: System::Windows::Forms::Button^  TurnReloadBtn;
 
 private: System::Windows::Forms::ComboBox^  TurnSelect;
@@ -611,6 +614,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             System::Windows::Forms::Label^  label39;
             System::Windows::Forms::Label^  label38;
             System::Windows::Forms::GroupBox^  groupBox4;
+            System::Windows::Forms::Label^  label31;
             System::Windows::Forms::Label^  label32;
             System::Windows::Forms::Label^  label30;
             System::Windows::Forms::Label^  label29;
@@ -624,10 +628,9 @@ private: System::Windows::Forms::Label^  SystemsRef;
             System::Windows::Forms::Label^  label7;
             System::Windows::Forms::Label^  label5;
             System::Windows::Forms::Label^  label6;
-            System::Windows::Forms::Label^  label31;
             this->TurnReloadBtn = (gcnew System::Windows::Forms::Button());
             this->TurnSelect = (gcnew System::Windows::Forms::ComboBox());
-            this->Summary = (gcnew System::Windows::Forms::TextBox());
+            this->Summary = (gcnew System::Windows::Forms::RichTextBox());
             this->TechBI = (gcnew System::Windows::Forms::NumericUpDown());
             this->TechMI = (gcnew System::Windows::Forms::NumericUpDown());
             this->TechResetTaught = (gcnew System::Windows::Forms::Button());
@@ -737,6 +740,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->UtilResInfoGuided = (gcnew System::Windows::Forms::Label());
             this->UtilResTo = (gcnew System::Windows::Forms::NumericUpDown());
             this->UtilResFrom = (gcnew System::Windows::Forms::NumericUpDown());
+            this->UtilTrInfoCost = (gcnew System::Windows::Forms::Label());
             this->UtilTrInfoMA = (gcnew System::Windows::Forms::Label());
             this->UtilTrInfoMaint = (gcnew System::Windows::Forms::Label());
             this->UtilTRInfoCap = (gcnew System::Windows::Forms::Label());
@@ -766,7 +770,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->textBox1 = (gcnew System::Windows::Forms::TextBox());
             this->comboBox2 = (gcnew System::Windows::Forms::ComboBox());
             this->BtnTooltip = (gcnew System::Windows::Forms::ToolTip(this->components));
-            this->UtilTrInfoCost = (gcnew System::Windows::Forms::Label());
             TopSplitCont = (gcnew System::Windows::Forms::SplitContainer());
             splitContainer7 = (gcnew System::Windows::Forms::SplitContainer());
             label25 = (gcnew System::Windows::Forms::Label());
@@ -804,6 +807,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             label39 = (gcnew System::Windows::Forms::Label());
             label38 = (gcnew System::Windows::Forms::Label());
             groupBox4 = (gcnew System::Windows::Forms::GroupBox());
+            label31 = (gcnew System::Windows::Forms::Label());
             label32 = (gcnew System::Windows::Forms::Label());
             label30 = (gcnew System::Windows::Forms::Label());
             label29 = (gcnew System::Windows::Forms::Label());
@@ -817,7 +821,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             label7 = (gcnew System::Windows::Forms::Label());
             label5 = (gcnew System::Windows::Forms::Label());
             label6 = (gcnew System::Windows::Forms::Label());
-            label31 = (gcnew System::Windows::Forms::Label());
             TopSplitCont->Panel1->SuspendLayout();
             TopSplitCont->Panel2->SuspendLayout();
             TopSplitCont->SuspendLayout();
@@ -980,14 +983,12 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->Summary->Font = (gcnew System::Drawing::Font(L"Courier New", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(238)));
             this->Summary->Location = System::Drawing::Point(0, 0);
-            this->Summary->Multiline = true;
             this->Summary->Name = L"Summary";
             this->Summary->ReadOnly = true;
             this->Summary->Size = System::Drawing::Size(226, 567);
             this->Summary->TabIndex = 3;
+            this->Summary->Text = L"";
             this->Summary->WordWrap = false;
-            this->Summary->TextChanged += gcnew System::EventHandler(this, &Form1::Summary_TextChanged);
-            this->Summary->ClientSizeChanged += gcnew System::EventHandler(this, &Form1::Summary_TextChanged);
             // 
             // TechBI
             // 
@@ -2955,6 +2956,24 @@ private: System::Windows::Forms::Label^  SystemsRef;
             groupBox4->TabStop = false;
             groupBox4->Text = L"Transports";
             // 
+            // UtilTrInfoCost
+            // 
+            this->UtilTrInfoCost->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
+            this->UtilTrInfoCost->Location = System::Drawing::Point(569, 19);
+            this->UtilTrInfoCost->Name = L"UtilTrInfoCost";
+            this->UtilTrInfoCost->Size = System::Drawing::Size(49, 20);
+            this->UtilTrInfoCost->TabIndex = 2;
+            this->UtilTrInfoCost->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            // 
+            // label31
+            // 
+            label31->AutoSize = true;
+            label31->Location = System::Drawing::Point(510, 23);
+            label31->Name = L"label31";
+            label31->Size = System::Drawing::Size(56, 13);
+            label31->TabIndex = 1;
+            label31->Text = L"Build cost:";
+            // 
             // UtilTrInfoMA
             // 
             this->UtilTrInfoMA->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
@@ -3058,6 +3077,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->panel1->Name = L"panel1";
             this->panel1->Size = System::Drawing::Size(200, 535);
             this->panel1->TabIndex = 0;
+            this->panel1->Visible = false;
             // 
             // MapLSNVal
             // 
@@ -3385,24 +3405,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->comboBox2->Size = System::Drawing::Size(147, 21);
             this->comboBox2->TabIndex = 1;
             // 
-            // label31
-            // 
-            label31->AutoSize = true;
-            label31->Location = System::Drawing::Point(510, 23);
-            label31->Name = L"label31";
-            label31->Size = System::Drawing::Size(56, 13);
-            label31->TabIndex = 1;
-            label31->Text = L"Build cost:";
-            // 
-            // UtilTrInfoCost
-            // 
-            this->UtilTrInfoCost->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-            this->UtilTrInfoCost->Location = System::Drawing::Point(569, 19);
-            this->UtilTrInfoCost->Name = L"UtilTrInfoCost";
-            this->UtilTrInfoCost->Size = System::Drawing::Size(49, 20);
-            this->UtilTrInfoCost->TabIndex = 2;
-            this->UtilTrInfoCost->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            // 
             // Form1
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -3418,7 +3420,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             TopSplitCont->ResumeLayout(false);
             splitContainer7->Panel1->ResumeLayout(false);
             splitContainer7->Panel2->ResumeLayout(false);
-            splitContainer7->Panel2->PerformLayout();
             splitContainer7->ResumeLayout(false);
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechBI))->EndInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechMI))->EndInit();
@@ -3641,7 +3642,10 @@ private: System::Void PlanetsGrid_CellEndEdit(System::Object^  sender, System::W
          }
 private: System::Void Grid_ColumnHeaderMouseClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
              if( e->Button == Windows::Forms::MouseButtons::Left )
-                 safe_cast<DblBufDGV^>(sender)->Sorter->SetSortColumn( e->ColumnIndex );
+             {
+                 safe_cast<DblBufDGV^>(sender)->Sorter->SortColumn = e->ColumnIndex;
+                 SaveUISettings();
+             }
              else
                  ColumnsFilterMenu( safe_cast<DataGridView^>(sender), e );
          }
@@ -3652,33 +3656,10 @@ private: System::Void Util_ValueChanged(System::Object^  sender, System::EventAr
              UtilUpdateAll();
          }
 private: System::Void ColoniesGroupByOwner_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
-             ColoniesGrid->Sorter->SetGroupBySpecies( safe_cast<CheckBox^>(sender)->Checked );
+             ColoniesGrid->Sorter->GroupBySpecies = safe_cast<CheckBox^>(sender)->Checked;
          }
 private: System::Void ShipsGroupByOwner_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
-             ShipsGrid->Sorter->SetGroupBySpecies( safe_cast<CheckBox^>(sender)->Checked );
-         }
-// Called on Summary TextChanged and ClientSizeChanged to update
-// display of scrollbars depending on displayed text and window sizes
-private: System::Void Summary_TextChanged(System::Object^  sender, System::EventArgs^  e) {
-             static bool busy = false;
-             if( busy ) return;
-             busy = true;
-
-             TextBox ^tb = safe_cast<TextBox^>(sender);
-             System::Drawing::Size ts = TextRenderer::MeasureText(tb->Text, tb->Font);
-             bool hsb = tb->ClientSize.Height < ts.Height + Convert::ToInt32(tb->Font->Size);
-             bool vsb = tb->ClientSize.Width < ts.Width;
-
-             if( hsb && vsb )
-                 tb->ScrollBars = ScrollBars::Both;
-             else if( !hsb && !vsb )
-                 tb->ScrollBars = ScrollBars::None;
-             else if( hsb && !vsb )
-                 tb->ScrollBars = ScrollBars::Vertical;
-             else if( !hsb && vsb )
-                 tb->ScrollBars = ScrollBars::Horizontal;
-
-             busy = false;
+             ShipsGrid->Sorter->GroupBySpecies = safe_cast<CheckBox^>(sender)->Checked;
          }
 };
 

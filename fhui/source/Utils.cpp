@@ -9,6 +9,162 @@ using namespace System::IO;
 namespace FHUI
 {
 
+////////////////////////////////////////////////////////////////
+
+void Form1::SaveUISettings()
+{
+    String ^path = GetDataDir("fhui.ini");
+
+    // Create stream
+    StreamWriter ^sw = File::CreateText( path );
+
+    // Header
+    sw->WriteLine("; FHUI generated file. Please don't edit.");
+
+    List<String^>^ settings = gcnew List<String^>;
+
+    SaveUIGrid(settings, SystemsGrid, "Systems");
+    SaveUIGrid(settings, PlanetsGrid, "Planets");
+    SaveUIGrid(settings, ColoniesGrid, "Colonies");
+    SaveUIGrid(settings, ShipsGrid, "Ships");
+    SaveUIGrid(settings, AliensGrid, "Aliens");
+
+    // Write to stream
+    for each( String ^entry in settings )
+    {
+        sw->WriteLine(entry);
+    }
+    sw->Close();
+}
+
+void Form1::SaveUIGrid(List<String^> ^settings, DblBufDGV ^grid, String ^tab)
+{
+    settings->Add("");
+    settings->Add("TAB " + tab);
+    for each( DataGridViewColumn ^column in grid->Columns )
+    {
+        if( column->Index == 0 )
+            continue;
+
+        String ^entry = String::Format("{0}{1}{2}",
+            grid->Sorter->SortColumn == column->Index
+                ? (grid->Sorter->SortColumnOrder == SortOrder::Ascending ? "*^" : "*v")
+                : "",
+            column->Visible ? "+" : "-",
+            column->HeaderText );
+
+        settings->Add( entry );
+    }
+    settings->Add("END");
+}
+
+void Form1::LoadUISettings()
+{
+    // Open file
+    StreamReader ^sr;
+    String ^path = GetDataDir("fhui.ini");
+
+    try 
+    {
+        sr = File::OpenText( path );
+    }
+    catch( DirectoryNotFoundException^ )
+    {
+        return;
+    }
+    catch( FileNotFoundException^ )
+    {
+        return;
+    }
+
+    String ^line;
+    DblBufDGV ^grid;
+    int sortIndex;
+    bool sortAscending;
+
+    while( (line = sr->ReadLine()) != nullptr ) 
+    {
+        line = line->Trim();
+        if( String::IsNullOrEmpty(line) ||
+            line[0] == ';' )
+            continue;
+
+        if( line == "END" )
+        {
+            if( grid && sortIndex != -1 )
+            {
+                grid->Sorter->SortColumn = sortIndex;
+                if( sortAscending && grid->Sorter->SortColumnOrder != SortOrder::Ascending )
+                    grid->Sorter->SortColumn = sortIndex;
+                else if( !sortAscending && grid->Sorter->SortColumnOrder == SortOrder::Ascending )
+                    grid->Sorter->SortColumn = sortIndex;
+            }
+
+            grid = nullptr;
+            continue;
+        }
+
+        if( grid == nullptr )
+        {
+            if( line->Length < 5 ||
+                line->Substring(0, 4) != "TAB " )
+                continue;
+            String ^tab = line->Substring(4)->Trim();
+            if( tab == "Systems" )
+                grid = SystemsGrid;
+            else if( tab == "Planets" )
+                grid = PlanetsGrid;
+            else if( tab == "Colonies" )
+                grid = ColoniesGrid;
+            else if( tab == "Ships" )
+                grid = ShipsGrid;
+            else if( tab == "Aliens" )
+                grid = AliensGrid;
+            sortIndex = -1;
+            sortAscending = true;
+            continue;
+        }
+
+        bool sort = false;
+        if( line[0] == L'*' )
+        {
+            sort = true;
+            line = line->Substring(1);
+            if( String::IsNullOrEmpty(line) )
+                continue;
+            if( line[0] == L'^' )
+                sortAscending = true;
+            else
+                sortAscending = false;
+            line = line->Substring(1);
+            if( String::IsNullOrEmpty(line) )
+                continue;
+        }
+        bool visible = line[0] == L'+';
+        line = line->Substring(1);
+        if( String::IsNullOrEmpty(line) )
+            continue;
+
+        int index = -1;
+        for each( DataGridViewColumn ^column in grid->Columns )
+        {
+            if( column->HeaderText == line )
+            {
+                index = column->Index;
+                break;
+            }
+        }
+        if( index != -1 )
+        {
+            if( sort )
+                sortIndex = index;
+            grid->Columns[index]->Visible = visible;
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////
+
 void Form1::UtilTabSelected()
 {
     UtilProdPenaltyLS->Value = GameData::Player->TechLevelsAssumed[TECH_LS];

@@ -15,6 +15,9 @@ FHUI build ??
       with multiple colonies in single system/planet.
 + Wormholes support.
 + Improved tooltips on Systems tab, also available on Planets, Colonies and Ships tabs.
++ Save user interface settings: visible/hidden columns and sort order per
+  Systems thru Aliens tabs. Settings are saved in file fhui.ini. Remove this file
+  to restore all default settings.
 
 FHUI build 168
 * Status for older turns is shown correctly.

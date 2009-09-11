@@ -37,6 +37,7 @@ void Form1::MapSetup()
 
 void Form1::MapDraw()
 {
+    return;
     try
     {
         Graphics ^g = Graphics::FromHwnd( TabMap->Handle );

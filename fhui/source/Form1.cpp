@@ -67,6 +67,8 @@ void Form1::InitControls()
     ColoniesInitControls();
     ShipsInitControls();
     AliensInitControls();
+
+    LoadUISettings();
 }
 
 void Form1::InitPlugins()
@@ -204,14 +206,14 @@ void Form1::UpdateTabs()
                 this,
                 "MAP is under construction and is not functional yet...",
                 "Map tab alert",
-                MessageBoxButtons::OKCancel,
+                MessageBoxButtons::OK/*Cancel*/,
                 MessageBoxIcon::Question,
                 MessageBoxDefaultButton::Button2);
-            if( result == System::Windows::Forms::DialogResult::OK )
-            {
-                MapDraw();
-            }
-            else
+            //if( result == System::Windows::Forms::DialogResult::OK )
+            //{
+            //    MapDraw();
+            //}
+            //else
             {
                 MenuTabs->SelectedTab = MenuTabs->TabPages[0];
             }
@@ -568,7 +570,7 @@ void Form1::ApplyDataAndFormat(
     {
         if( sorter )
         {
-            sorter->SetSortColumn( sortBy );
+            sorter->SortColumn = sortBy;
         }
         else
             grid->Sort( grid->Columns[sortBy], sortDir );
@@ -607,6 +609,8 @@ void Form1::ColumnsFilterMenu(DataGridView ^grid, DataGridViewCellMouseEventArgs
 void Form1::ColoniesFilterOnOff(ColumnsFilterData ^data)
 {
     data->A->Columns[data->B]->Visible = !data->A->Columns[data->B]->Visible;
+
+    SaveUISettings();
 }
 
 Color Form1::GetAlienColor(Alien ^sp)
@@ -1371,7 +1375,7 @@ void Form1::ColoniesUpdateControls()
     ColoniesRefColony->DataSource   = m_RefListColonies;
     ColoniesRefShip->DataSource     = m_RefListShips;
 
-    ColoniesGrid->Sorter->SetGroupBySpecies( ColoniesGroupByOwner->Checked );
+    ColoniesGrid->Sorter->GroupBySpecies = ColoniesGroupByOwner->Checked;
 
     // Enable grid update
     ColoniesGrid->Filter->EnableUpdates = true;
@@ -1682,7 +1686,7 @@ void Form1::ShipsUpdateControls()
     ShipsRefColony->DataSource   = m_RefListColonies;
     ShipsRefShip->DataSource     = m_RefListShips;
 
-    ShipsGrid->Sorter->SetGroupBySpecies( ColoniesGroupByOwner->Checked );
+    ShipsGrid->Sorter->GroupBySpecies = ColoniesGroupByOwner->Checked;
 
     // Enable grid update
     ShipsGrid->Filter->EnableUpdates = true;

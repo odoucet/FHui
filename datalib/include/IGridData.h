@@ -30,9 +30,10 @@ public interface class IGridDataSrc
 
 public interface class IGridSorter : public System::Collections::IComparer
 {
-    void    SetSortColumn(int index);
-    void    SetGroupBySpecies(bool doGroup);
-    void    SetRefSystem(StarSystem ^refSystem);
+    property int            SortColumn;
+    property System::Windows::Forms::SortOrder SortColumnOrder;
+    property bool           GroupBySpecies;
+    property StarSystem^    RefSystem;
 
     int     AddColumn(String ^title, String ^description, Type ^type, Windows::Forms::SortOrder defaultSortOrder);
 };

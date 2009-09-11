@@ -35,7 +35,7 @@ public:
         {
             m_RefSystem = sys;
             if( Sorter )
-                Sorter->SetRefSystem(sys);
+                Sorter->RefSystem = sys;
         }
         StarSystem^ get()           { return m_RefSystem; }
     }

@@ -12,9 +12,26 @@ namespace FHUI
 ref class GridSorterBase abstract : public IGridSorter
 {
 public:
-    virtual void    SetSortColumn(int index);
-    virtual void    SetGroupBySpecies(bool doGroup);
-    virtual void    SetRefSystem(StarSystem ^refSystem);
+    virtual property int            SortColumn
+    {
+        int get() { return m_SortColumn; }
+        void set(int i) { SetSortColumn(i); }
+    }
+    virtual property SortOrder      SortColumnOrder
+    {
+        SortOrder get() { return m_SortOrder; }
+        void set(SortOrder o) { m_SortOrder = o; }
+    }
+    virtual property bool           GroupBySpecies
+    {
+        bool get() { return m_GroupBySpecies; }
+        void set(bool g) { SetGroupBySpecies(g); }
+    }
+    virtual property StarSystem^    RefSystem
+    {
+        StarSystem^ get() { return m_RefSystem; }
+        void set(StarSystem ^s) { SetRefSystem(s); }
+    }
 
     virtual int     Compare( Object^ o1, Object^ o2 );
 
@@ -33,6 +50,10 @@ public:
 
 protected:
     GridSorterBase(DataGridView ^grid);
+
+    virtual void    SetSortColumn(int index);
+    virtual void    SetGroupBySpecies(bool doGroup);
+    virtual void    SetRefSystem(StarSystem ^refSystem);
 
     virtual void    StoreDefaultSortOrder(int index, SortOrder defaultSortOrder);
 
