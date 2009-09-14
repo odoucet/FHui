@@ -48,18 +48,18 @@ public:
         }
     }
 
-    static void GenerateTemplate(System::Windows::Forms::RichTextBox^);
-    void LoadCommands();
-    void SaveCommands();
-    void DeleteCommands();
-    static List<ICommand^>^ GetCommands() { return m_CommandData[m_CurrentTurn]->Commands; }
-    void AddCommand(ICommand ^cmd);
-    void AddCommandDontSave(ICommand ^cmd);
-    void DelCommand(ICommand ^cmd);
+    void        GenerateTemplate(System::Windows::Forms::RichTextBox^);
+    void        LoadCommands();
+    void        SaveCommands();
+    void        DeleteCommands();
+    List<ICommand^>^ GetCommands() { return m_CommandData[m_CurrentTurn]->Commands; }
+    void        AddCommand(ICommand ^cmd);
+    void        AddCommandDontSave(ICommand ^cmd);
+    void        DelCommand(ICommand ^cmd);
 
-    static List<String^>^ PrintSystemStatus(StarSystem^ system, bool listIncomplete);
+    List<String^>^ PrintSystemStatus(StarSystem^ system, bool listIncomplete);
 
-    static property bool AutoEnabled
+    property bool AutoEnabled
     {
         bool get() { return m_CommandData[m_CurrentTurn]->AutoEnabled; };
         void set(bool v) { m_CommandData[m_CurrentTurn]->AutoEnabled = v; };
@@ -69,35 +69,35 @@ public:
     void        SetAutoOrderJumps(Ship^, String^);
     void        SetAutoOrderProduction(Colony^, String^, int);
 
-    static List<String^>^  GetAutoOrdersPreDeparture(StarSystem^);
-    static List<String^>^  GetAutoOrdersJumps(Ship^);
-    static List<Pair<String^, int>^>^  GetAutoOrdersProduction(Colony^);
+    List<String^>^  GetAutoOrdersPreDeparture(StarSystem^);
+    List<String^>^  GetAutoOrdersJumps(Ship^);
+    List<Pair<String^, int>^>^  GetAutoOrdersProduction(Colony^);
 
 private:
 
     void        SortCommands();
 
-    static void GenerateCombat();
-    static void GeneratePreDeparture();
-    static void GenerateJumps();
-    static void GenerateProduction();
-    static void GeneratePostArrival();
-    static void GenerateStrikes();
+    void        GenerateCombat();
+    void        GeneratePreDeparture();
+    void        GenerateJumps();
+    void        GenerateProduction();
+    void        GeneratePostArrival();
+    void        GenerateStrikes();
 
-    static void GenerateCombatInfo(StarSystem^);
-    static void GeneratePreDepartureInfo(StarSystem^);
-    static void GenerateJumpInfo(Ship^);
-    static void GenerateScanOrders();
-    static void GenerateProductionRecycle(Colony ^colony, BudgetTracker ^budget);
-    static void GenerateProductionUpgrade(Colony ^colony, BudgetTracker ^budget);
+    void        GenerateCombatInfo(StarSystem^);
+    void        GeneratePreDepartureInfo(StarSystem^);
+    void        GenerateJumpInfo(Ship^);
+    void        GenerateScanOrders();
+    void        GenerateProductionRecycle(Colony ^colony, BudgetTracker ^budget);
+    void        GenerateProductionUpgrade(Colony ^colony, BudgetTracker ^budget);
 
-    static List<String^>^           m_OrderList;
-    static String^                  m_Path;
-    static GameData^                m_GameData;
-    RegexMatcher^                   m_RM;
+    List<String^>^          m_OrderList;
+    String^                 m_Path;
+    GameData^               m_GameData;
+    RegexMatcher^           m_RM;
 
-    static int m_CurrentTurn;
-    static SortedList<int, TurnCommands^>^ m_CommandData;
+    int m_CurrentTurn;
+    SortedList<int, TurnCommands^>^ m_CommandData;
 };
 
 } // end namespace FHUI
