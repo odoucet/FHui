@@ -649,6 +649,7 @@ void TurnData::UpdateColonies()
         {
             colony->ProductionOrder = ++order;
             colony->CanProduce = false;
+            colony->ProductionReset();
         }
 
     // Colony planets
@@ -657,6 +658,7 @@ void TurnData::UpdateColonies()
         {
             colony->ProductionOrder = ++order;
             colony->CanProduce = true;
+            colony->ProductionReset();
         }
 
     // Home planet
@@ -665,6 +667,7 @@ void TurnData::UpdateColonies()
         {
             colony->ProductionOrder = ++order;
             colony->CanProduce = true;
+            colony->ProductionReset();
         }
 
     GameData::Player->SortColoniesByProdOrder();

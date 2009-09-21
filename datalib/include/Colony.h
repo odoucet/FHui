@@ -7,6 +7,7 @@ namespace FHUI
 
 ref class Planet;
 ref class StarSystem;
+interface class ICommandProd;
 
 // ---------------------------------------------------
 // Colony
@@ -145,6 +146,23 @@ public:
             return false;
         }
     }
+
+    // ---- Production / budget tracking ----
+    ref class Resources
+    {
+    public:
+        int             EU;
+        int             CU;
+        array<int>^     Inventory;
+    };
+
+    void            ProductionReset();
+
+    property Resources^             Res;
+    property List<ICommandProd^>^   Orders;
+
+protected:
+    Resources^          m_Resources;
 };
 
 } // end namespace FHUI

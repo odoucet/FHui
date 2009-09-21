@@ -39,23 +39,21 @@ private ref class CommandManager
 public:
     CommandManager(GameData^, String^);
 
-    void SelectTurn(int turn)
-    {
-        m_CurrentTurn = turn;
-        if ( ! m_CommandData->ContainsKey(turn) )
-        {
-            m_CommandData[turn] = gcnew TurnCommands;
-        }
-    }
-
+    void        SelectTurn(int turn);
     void        GenerateTemplate(System::Windows::Forms::RichTextBox^);
+
     void        LoadCommands();
     void        SaveCommands();
     void        DeleteCommands();
-    List<ICommand^>^ GetCommands() { return m_CommandData[m_CurrentTurn]->Commands; }
+
     void        AddCommand(ICommand ^cmd);
-    void        AddCommandDontSave(ICommand ^cmd);
     void        DelCommand(ICommand ^cmd);
+    List<ICommand^>^ GetCommands() { return m_CommandData[m_CurrentTurn]->Commands; }
+
+    // For production commands
+    void        AddCommand(Colony^, ICommandProd ^cmd);
+    void        DelCommand(Colony^, ICommandProd ^cmd);
+    List<ICommandProd^>^ GetCommands(Colony ^colony) { return colony->Orders; }
 
     List<String^>^ PrintSystemStatus(StarSystem^ system, bool listIncomplete);
 
@@ -75,6 +73,7 @@ public:
 
 private:
 
+    void        AddCommandDontSave(ICommand ^cmd);
     void        SortCommands();
 
     void        GenerateCombat();
@@ -96,7 +95,7 @@ private:
     GameData^               m_GameData;
     RegexMatcher^           m_RM;
 
-    int m_CurrentTurn;
+    int                     m_CurrentTurn;
     SortedList<int, TurnCommands^>^ m_CommandData;
 };
 

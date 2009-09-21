@@ -1242,19 +1242,13 @@ void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
 {
     if( m_PlanetsMenuRef->NameIsNew )
     {   // Remove Name command
-        for each( ICommand ^iCmd in m_CommandMgr->GetCommands() )
-        {
-            if( iCmd->GetType() == CommandType::Name )
-            {
-                CmdPlanetName ^cmd = safe_cast<CmdPlanetName^>(iCmd);
-                if( cmd->m_System == m_PlanetsMenuRef->System &&
-                    cmd->m_PlanetNum == m_PlanetsMenuRef->Number )
-                {
-                    m_CommandMgr->DelCommand(iCmd);
-                    break;
-                }
-            }
-        }
+        CmdPlanetName ^cmdDup = gcnew CmdPlanetName(
+            m_PlanetsMenuRef->System,
+            m_PlanetsMenuRef->Number,
+            m_PlanetsMenuRef->Name);
+
+        m_CommandMgr->DelCommand( cmdDup );
+        //m_PlanetsMenuRef->NameIsDisband = false;
     }
     else
     {   // Add Disband command
@@ -1269,20 +1263,11 @@ void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
 void Form1::PlanetsMenuRemoveNameCancel(Object^, EventArgs^)
 {
     // Remove Disband command
-    for each( ICommand ^iCmd in m_CommandMgr->GetCommands() )
-    {
-        if( iCmd->GetType() == CommandType::Disband )
-        {
-            CmdDisband ^cmd = safe_cast<CmdDisband^>(iCmd);
-            if( cmd->m_Name == m_PlanetsMenuRef->Name )
-            {
-                m_CommandMgr->DelCommand(iCmd);
-                m_PlanetsMenuRef->NameIsDisband = false;
-                PlanetsGrid->Filter->Update();
-                return;
-            }
-        }
-    }
+    m_CommandMgr->DelCommand(
+        gcnew CmdDisband( m_PlanetsMenuRef->Name ) );
+
+    m_PlanetsMenuRef->NameIsDisband = false;
+    PlanetsGrid->Filter->Update();
 }
 
 ////////////////////////////////////////////////////////////////
@@ -2205,19 +2190,6 @@ void Form1::AliensMenuTeach(TeachData ^data)
     TechType tech = (TechType)data->B;
     int level = data->C;
 
-    for each( ICommand ^iCmd in m_CommandMgr->GetCommands() )
-    {
-        if( iCmd->GetType() == CommandType::Teach )
-        {
-            CmdTeach ^cmd = safe_cast<CmdTeach^>(iCmd);
-            if( cmd->m_Alien == alien &&
-                cmd->m_Tech == tech )
-            {   // Cmd already exists
-                return;
-            }
-        }
-    }
-
     m_CommandMgr->AddCommand( gcnew CmdTeach(alien, tech, level) );
 
     alien->TeachOrders |= 1 << tech;
@@ -2228,28 +2200,15 @@ void Form1::AliensMenuTeachAll(Object^, EventArgs^)
 {
     AliensGrid->Filter->EnableUpdates = false;
 
-    TeachData ^data = gcnew TeachData(m_AliensMenuRef, TECH_MI, GameData::Player->TechLevels[TECH_MI]);
-    AliensMenuTeach(data);
-
-    data->B = TECH_MA;
-    data->C = GameData::Player->TechLevels[TECH_MA];
-    AliensMenuTeach(data);
-
-    data->B = TECH_ML;
-    data->C = GameData::Player->TechLevels[TECH_ML];
-    AliensMenuTeach(data);
-
-    data->B = TECH_GV;
-    data->C = GameData::Player->TechLevels[TECH_GV];
-    AliensMenuTeach(data);
-
-    data->B = TECH_LS;
-    data->C = GameData::Player->TechLevels[TECH_LS];
-    AliensMenuTeach(data);
-
-    data->B = TECH_BI;
-    data->C = GameData::Player->TechLevels[TECH_BI];
-    AliensMenuTeach(data);
+    for( int i = (int)TECH_MI; i < TECH_MAX; ++i )
+    {
+        TechType tech = (TechType)i;
+        TeachData ^data = gcnew TeachData(
+            m_AliensMenuRef,
+            tech,
+            GameData::Player->TechLevels[tech]);
+        AliensMenuTeach(data);
+    }
 
     AliensGrid->Filter->EnableUpdates = true;
     AliensGrid->Filter->Update();
@@ -2257,29 +2216,15 @@ void Form1::AliensMenuTeachAll(Object^, EventArgs^)
 
 void Form1::AliensMenuTeachCancel(Object^, EventArgs^)
 {
-    bool removed = false;
-    bool removedAny = false;
-    do
+    for( int i = (int)TECH_MI; i < TECH_MAX; ++i )
     {
-        removed = false;
-        for each( ICommand ^iCmd in m_CommandMgr->GetCommands() )
-        {
-            if( iCmd->GetType() == CommandType::Teach )
-            {
-                CmdTeach ^cmd = safe_cast<CmdTeach^>(iCmd);
-                if( cmd->m_Alien == m_AliensMenuRef )
-                {
-                    removed = removedAny = true;
-                    m_CommandMgr->DelCommand(iCmd);
-                    break;
-                }
-            }
-        }
-    } while( removed );
-    
-    if( removedAny )
-    {
-        m_CommandMgr->SaveCommands();
+        TechType tech = (TechType)i;
+
+        m_CommandMgr->DelCommand(
+            gcnew CmdTeach(
+                m_AliensMenuRef,
+                tech,
+                GameData::Player->TechLevels[tech]) );
     }
 
     m_AliensMenuRef->TeachOrders = 0;

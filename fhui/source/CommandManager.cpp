@@ -10,14 +10,7 @@ using namespace System::IO;
 namespace FHUI
 {
 
-CommandManager::CommandManager(GameData^ gd, String^ path)
-    : m_RM(gcnew RegexMatcher)
-{
-    m_GameData = gd;
-    m_Path = path;
-    m_OrderList = gcnew List<String^>;
-    m_CommandData = gcnew SortedList<int, TurnCommands^>;
-}
+// ---------------------------------------------------------
 
 private ref class CommandComparer : public IComparer<ICommand^>
 {
@@ -28,6 +21,30 @@ public:
     }
 };
 
+// ---------------------------------------------------------
+
+CommandManager::CommandManager(GameData^ gd, String^ path)
+    : m_RM(gcnew RegexMatcher)
+{
+    m_GameData = gd;
+    m_Path = path;
+    m_OrderList = gcnew List<String^>;
+    m_CommandData = gcnew SortedList<int, TurnCommands^>;
+}
+
+// ---------------------------------------------------------
+
+void CommandManager::SelectTurn(int turn)
+{
+    m_CurrentTurn = turn;
+    if ( ! m_CommandData->ContainsKey(turn) )
+    {
+        m_CommandData[turn] = gcnew TurnCommands;
+    }
+}
+
+// ---------------------------------------------------------
+
 void CommandManager::SortCommands()
 {
     m_CommandData[m_CurrentTurn]->Commands->Sort( gcnew CommandComparer );
@@ -35,6 +52,9 @@ void CommandManager::SortCommands()
 
 void CommandManager::AddCommand(ICommand ^cmd)
 {
+    if( cmd->GetType() == CommandType::Production )
+        throw gcnew FHUIDataImplException("AddCommand: Wrong interface for production command!");
+
     m_CommandData[m_CurrentTurn]->Commands->Add(cmd);
     SortCommands();
     SaveCommands();
@@ -48,8 +68,39 @@ void CommandManager::AddCommandDontSave(ICommand ^cmd)
 
 void CommandManager::DelCommand(ICommand ^cmd)
 {
-    m_CommandData[m_CurrentTurn]->Commands->Remove(cmd);
+    if( cmd->GetType() == CommandType::Production )
+        throw gcnew FHUIDataImplException("DelCommand: Wrong interface for production command!");
+
+    for each( ICommand ^iCmd in m_CommandData[m_CurrentTurn]->Commands )
+    {
+        if( iCmd == cmd ||
+            iCmd->CompareTo(cmd) == 0 )
+        {
+            m_CommandData[m_CurrentTurn]->Commands->Remove(iCmd);
+            SaveCommands();
+            return;
+        }
+    }
+}
+
+void CommandManager::AddCommand(Colony ^colony, ICommandProd ^cmd)
+{
+    colony->Orders->Add(cmd);
     SaveCommands();
+}
+
+void CommandManager::DelCommand(Colony ^colony, ICommandProd ^cmd)
+{
+    for each( ICommandProd ^iCmd in colony->Orders )
+    {
+        if( iCmd == cmd ||
+            iCmd->CompareTo(cmd) == 0 )
+        {
+            colony->Orders->Remove(iCmd);
+            SaveCommands();
+            return;
+        }
+    }
 }
 
 void CommandManager::DeleteCommands()
@@ -102,7 +153,7 @@ void CommandManager::SaveCommands()
     // -- Commands
     for each( ICommand ^cmd in GetCommands() )
     {
-        cmd->Print( commandList );
+        commandList->Add( cmd->Print() );
     }
 
     // Write to stream
@@ -112,6 +163,8 @@ void CommandManager::SaveCommands()
     }
     sw->Close();
 }
+
+// ---------------------------------------------------------
 
 void CommandManager::LoadCommands()
 {
@@ -287,8 +340,10 @@ void CommandManager::GenerateTemplate(System::Windows::Forms::RichTextBox^ targe
     GeneratePostArrival();
     GenerateStrikes();
 
-    target->Font = gcnew System::Drawing::Font("Courier New", 8, FontStyle::Regular);
+    if( target == nullptr )
+        return;
 
+    target->Font = gcnew System::Drawing::Font("Courier New", 8, FontStyle::Regular);
     target->Lines = m_OrderList->ToArray();
 
     // Primitive orders coloring
@@ -337,7 +392,7 @@ void CommandManager::GenerateCombat()
     {
         if( cmd->GetPhase() == CommandPhase::Combat )
         {
-            cmd->Print(m_OrderList);
+            m_OrderList->Add( cmd->Print() );
         }
     }
 
@@ -454,7 +509,7 @@ void CommandManager::GeneratePreDeparture()
     for each( ICommand ^cmd in GetCommands() )
     {
         if( cmd->GetPhase() == CommandPhase::PreDeparture )
-            cmd->Print(m_OrderList);
+            m_OrderList->Add( cmd->Print() );
     }
 
     for each ( StarSystem^ system in m_GameData->GetStarSystems() )
@@ -805,7 +860,7 @@ void CommandManager::GeneratePostArrival()
     for each( ICommand ^cmd in GetCommands() )
     {
         if( cmd->GetPhase() == CommandPhase::PostArrival )
-            cmd->Print(m_OrderList);
+            m_OrderList->Add( cmd->Print() );
     }
 
     if ( AutoEnabled )
@@ -845,7 +900,7 @@ void CommandManager::GenerateStrikes()
     for each( ICommand ^cmd in GetCommands() )
     {
         if( cmd->GetPhase() == CommandPhase::Strike )
-            cmd->Print(m_OrderList);
+            m_OrderList->Add( cmd->Print() );
     }
 
     m_OrderList->Add("END");

@@ -93,4 +93,16 @@ int Colony::GetMaxProductionBudget()
     }
 }
 
+void Colony::ProductionReset()
+{
+    Res = gcnew Resources;
+    Orders = gcnew List<ICommandProd^>;
+
+    Res->EU = 0;
+    Res->CU = AvailPop;
+    Res->Inventory = gcnew array<int>(INV_MAX){0};
+    for( int i = 0; i < INV_MAX; ++i )
+        Res->Inventory[i] = Inventory[i];
+}
+
 } // end namespace FHUI
