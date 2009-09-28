@@ -96,10 +96,11 @@ int Colony::GetMaxProductionBudget()
 void Colony::ProductionReset()
 {
     Res = gcnew Resources;
-    Orders = gcnew List<ICommandProd^>;
+    OrdersText = gcnew List<String^>;
 
-    Res->EU = 0;
-    Res->CU = AvailPop;
+    Res->TotalEU = 0;
+    Res->AvailEU = 0;
+    Res->AvailCU = AvailPop;
     Res->Inventory = gcnew array<int>(INV_MAX){0};
     for( int i = 0; i < INV_MAX; ++i )
         Res->Inventory[i] = Inventory[i];

@@ -5,6 +5,14 @@ Minor changes are listed only if originally requested by player
 + New features
 [P] denotes player requested features
 
+FHUI build ?
++ New Production context menu for owned colonies (on Colonies tab).
++ New column '$' on Colonies tab, shows budget calculation per colony
+  after applying orders template, accounts auto and UI generated commands.
++ Production (PR), Production Order (#) and Budget ($) columns on Colonies
+  tab show production orders for owned colonies instead of system scan.
++ Supported production commands: Hide, Shipyard, Research.
+
 FHUI build 178
 * [P] Reload buton works again.
 * [P] Fixed alien TC/PC display on Aliens tab.

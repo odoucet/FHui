@@ -29,31 +29,40 @@ public enum class CommandType
     Name,
     AlienRelation,  // Enemy/Neutral/Ally
     Teach,
-    Production      // All production commands
+    // Production commands:
+    Hide,
+    Shipyard,
+    Research,
 };
 
 public interface class ICommand : public IComparable
 {
     CommandPhase    GetPhase();
-    CommandType     GetType();
+    CommandType     GetCmdType();
+
+    // EU/CU/Inventory modifiers to budget / colony inventory
+    // POSITIVE value mean:
+    //  - EU SPENT (negative modifier to budget)
+    //  + CU TRANSFERRED TO colony from transport ship or other colony
+    //  + Inventory moved TRANSFERRED TO colony from transport ship or other colony
+    int             GetEUCost();
+    int             GetCUMod();
+    int             GetInvMod(InventoryType);
 
     String^         Print();
 };
 
-public interface class ICommandProd : public ICommand
-{
-    int             GetEUCost();
-    int             GetCUCost();
-};
-
 ////////////////////////////////////////////////////////////
 
-template<CommandPhase Phase, CommandType Type>
+template<CommandPhase Phase, CommandType CmdType>
 public ref class CmdBase abstract : public ICommand
 {
 public:
-    virtual CommandPhase    GetPhase()  { return Phase; }
-    virtual CommandType     GetType()   { return Type; }
+    virtual CommandPhase    GetPhase()                  { return Phase; }
+    virtual CommandType     GetCmdType()                { return CmdType; }
+    virtual int             GetEUCost()                 { return 0; }
+    virtual int             GetCUMod()                  { return 0; }
+    virtual int             GetInvMod(InventoryType)    { return 0; }
 
     virtual String^         Print() abstract;
 
@@ -65,7 +74,7 @@ public:
 
         int n = (int)GetPhase() - (int)cmd->GetPhase();
         if( n == 0 )
-            n = (int)GetType() - (int)cmd->GetType();
+            n = (int)GetCmdType() - (int)cmd->GetCmdType();
         if( n == 0 )
         {
             String ^o1 = Print();
@@ -76,17 +85,15 @@ public:
     }
 };
 
+template<CommandType CmdType>
 public ref class CmdProdBase abstract
-    : public ICommandProd
-    , public CmdBase<CommandPhase::Production, CommandType::Production>
+    : public CmdBase<CommandPhase::Production, CmdType>
 {
-public:
-    virtual int             GetEUCost()         { return 0; }
-    virtual int             GetCUCost()         { return 0; }
 };
 
 ////////////////////////////////////////////////////////////
 
+// Disband
 public ref class CmdDisband
     : public CmdBase<CommandPhase::PreDeparture, CommandType::Disband>
 {
@@ -100,6 +107,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
+// Name
 public ref class CmdPlanetName
     : public CmdBase<CommandPhase::PreDeparture, CommandType::Name>
 {
@@ -119,6 +127,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
+// Ally / Neutral / Enemy
 public ref class CmdAlienRelation
     : public CmdBase<CommandPhase::PreDeparture, CommandType::AlienRelation>
 {
@@ -136,6 +145,7 @@ public:
 
 ////////////////////////////////////////////////////////////
 
+// Teach
 public ref class CmdTeach
     : public CmdBase<CommandPhase::PostArrival, CommandType::Teach>
 {
@@ -156,11 +166,44 @@ public:
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
-public ref class IProdCmdShipyard : public CmdProdBase
+// Hide
+public ref class IProdCmdHide : public CmdProdBase<CommandType::Hide>
+{
+public:
+    IProdCmdHide(Colony ^colony) : m_Colony(colony) {}
+
+    virtual int     GetEUCost() override    { return Calculators::ColonyHideCost(m_Colony); }
+    virtual String^ Print() override        { return "Hide"; } 
+
+    Colony^     m_Colony;
+};
+
+////////////////////////////////////////////////////////////
+
+// Shipyard
+public ref class IProdCmdShipyard : public CmdProdBase<CommandType::Shipyard>
 {
 public:
     virtual int     GetEUCost() override    { return Calculators::ShipyardCost(GameData::Player->TechLevels[TECH_MA]); }
     virtual String^ Print() override        { return "Shipyard"; } 
+};
+
+////////////////////////////////////////////////////////////
+
+// Research
+public ref class IProdCmdResearch : public CmdProdBase<CommandType::Research>
+{
+public:
+    IProdCmdResearch(TechType tech, int amount)
+        : m_Tech(tech), m_Amount(amount) {}
+
+    virtual int     GetEUCost() override    { return m_Amount; }
+    virtual String^ Print() override        { return String::Format("Research {0} {1}",
+                                                    m_Amount,
+                                                    FHStrings::TechToString(m_Tech) ); }
+
+    TechType    m_Tech;
+    int         m_Amount;
 };
 
 ////////////////////////////////////////////////////////////

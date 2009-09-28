@@ -113,4 +113,9 @@ int Calculators::TransportCapacity(int size)
     return (10 + size / 2) * size;
 }
 
+int Calculators::ColonyHideCost(Colony ^colony)
+{
+    return colony->EconomicBase;
+}
+
 } // end namespace FHUI

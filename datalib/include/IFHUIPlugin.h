@@ -16,7 +16,7 @@ ref class Ship;
 ref class GameData;
 interface class IGridFilter;
 interface class IGridSorter;
-
+interface class ICommand;
 ref class BudgetTracker;
 
 // ---------------------------------------------------------
@@ -73,23 +73,25 @@ public:
 public ref class BudgetTracker
 {
 public:
-    BudgetTracker(List<String^> ^orders, int euCarried);
+    BudgetTracker(List<String^>^ orders, int euCarried);
 
-    void        SetColony(Colony^);
+    void        SetColony(Colony ^colony);
 
-    void        Recycle(int eu);
-    void        Spend(int eu);
-    void        UsePopulation(int pop);
+    void        EvalOrder(ICommand ^cmd);
 
-    int         GetAvailPopulation()    { return m_PopAvail; }
+    void        UpdateEU(int eu);
+    void        UpdateCU(int pop);
+    void        UpdateInventory(InventoryType it, int mod);
+
     int         GetAvailBudget()        { return Math::Min(m_BudgetAvail, m_BudgetTotal); }
     int         GetTotalBudget()        { return m_BudgetTotal; }
 
 protected:
     List<String^>^  m_Orders;
+    List<String^>^  m_OrdersGlobal;
+    Colony^         m_Colony;
     int             m_BudgetTotal;
     int             m_BudgetAvail;
-    int             m_PopAvail;
 };
 
 // ---------------------------------------------------------

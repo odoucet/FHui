@@ -9,6 +9,8 @@
 #include "PluginManager.h"
 #include "CommandManager.h"
 
+#include "CmdResearch.h"
+
 using namespace System::IO;
 using namespace System::Text::RegularExpressions;
 using namespace System::Reflection;
@@ -108,7 +110,6 @@ void Form1::InitData()
     m_ReportParser  = gcnew ReportParser(m_GameData, m_CommandMgr, GetDataDir("galaxy_list.txt"), GetDataDir("reports"));
 
     m_ReportParser->ScanReports();
-    m_CommandMgr->LoadCommands();
 
     if( m_ReportParser->Reports->Count > 0 )
     {
@@ -646,7 +647,8 @@ void Form1::SetGridBgAndTooltip(DataGridView ^grid)
             Color bgColor = GetAlienColor( iDataSrc->GetAlienForBgColor() );
             for each( DataGridViewCell ^cell in row->Cells )
             {
-                cell->ToolTipText = tooltip;
+                if( String::IsNullOrEmpty(cell->ToolTipText) )
+                    cell->ToolTipText = tooltip;
                 cell->Style->BackColor = bgColor;
             }
         }
@@ -693,6 +695,9 @@ void Form1::ShowGridContextMenu(DataGridView^ grid, DataGridViewCellMouseEventAr
         ShipsFillMenu(menu, e->RowIndex);
     else if( grid == AliensGrid )
         AliensFillMenu(menu, e->RowIndex);
+
+    // Remember if menu respawn needed
+    m_LastMenuEventArg = e;
 
     // Show menu
     Rectangle r = grid->GetCellDisplayRectangle(e->ColumnIndex, e->RowIndex, false);
@@ -1290,15 +1295,16 @@ void Form1::ColoniesInitControls()
     c.Location  = ADD_COLUMN("Loc",         "X Y Z #Planet location",       String, Ascending,  Location);
     c.Size      = ADD_COLUMN("Size",        "Colony economic base",         double, Descending, Default);
     c.Prod      = ADD_COLUMN("PR",          "Production",                   int,    Descending, Default);
+    c.ProdOrder = ADD_COLUMN("#",           "Production order for orders template", int, Ascending, Default);
+    c.Budget    = ADD_COLUMN("$",           "Budget after production orders",int,   Descending, Default);
     c.Shipyards = ADD_COLUMN("SY",          "Shipyards",                    int,    Descending, Default);
     c.MD        = ADD_COLUMN("MD",          "Mining Difficulty",            double, Ascending,  Default);
     c.Grav      = ADD_COLUMN("Grav",        "Gravitation",                  double, Ascending,  Default);
     c.LSN       = ADD_COLUMN("LSN",         "LSN",                          int,    Ascending,  Default);
-    c.Balance   = ADD_COLUMN("Balance",     "IU/AU balance",                String, Descending, Default);
+    c.Balance   = ADD_COLUMN("IU/AU",       "IU/AU balance",                String, Descending, Default);
     c.Pop       = ADD_COLUMN("Pop",         "Available population",         int,    Descending, Default);
     c.Dist      = ADD_COLUMN("Distance",    "Distance to ref system and mishap chance [%]", String, Ascending, Distance);
     c.Inventory = ADD_COLUMN("Inventory",   "Planetary inventory",          String, Ascending, Default);
-    c.ProdOrder = ADD_COLUMN("#",           "Production order for orders template", int, Ascending, Default);
     c.ProdPerc  = ADD_COLUMN("Eff",         "Production effectiveness",     int,    Descending, Default);
     c.Seen      = ADD_COLUMN("Seen",        "Last seen turn",               int,    Descending, Default);
 
@@ -1368,6 +1374,8 @@ void Form1::ColoniesUpdateControls()
 
 void Form1::ColoniesSetup()
 {
+    m_CommandMgr->GenerateTemplate(nullptr);
+
     ColoniesGrid->FullUpdateBegin();
 
     ColoniesColumns %c = m_ColoniesColumns;
@@ -1410,6 +1418,9 @@ void Form1::ColoniesSetup()
 
             cells[c.Prod]->Value    = prodCalculated;
             cells[c.ProdOrder]->Value = colony->ProductionOrder;
+            cells[c.Budget]->Value  = colony->Res->TotalEU;
+            if( colony->Res->TotalEU < 0 )
+                cells[c.Budget]->Style->ForeColor = Color::Red;
             cells[c.ProdPerc]->Value= 100 - colony->ProdPenalty;
             cells[c.Pop]->Value     = colony->AvailPop;
 
@@ -1419,6 +1430,19 @@ void Form1::ColoniesSetup()
                 colony->CalculateBalance(ColoniesGrid->Filter->MiMaBalanced);
                 cells[c.Balance]->Value = colony->PrintBalance();
             }
+
+            String ^prodOrders = "";
+            if( colony->Orders->Count > 0 )
+            {
+                for each( ICommand ^cmd in colony->Orders )
+                    prodOrders += m_CommandMgr->PrintCommandWithInfo(cmd) + "\r\n";
+            }
+            else
+                prodOrders = "< No production orders >";
+
+            cells[c.Prod]->ToolTipText      = prodOrders;
+            cells[c.ProdOrder]->ToolTipText = prodOrders;
+            cells[c.Budget]->ToolTipText    = prodOrders;
         }
         else
         {
@@ -1496,42 +1520,31 @@ void Form1::ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowInde
     {
         menu->Items->Add( gcnew ToolStripSeparator );
 
+        if( colony->CanProduce )
+            menu->Items->Add( ColoniesFillMenuProduction() );
+
         // Production order adjustment
+        ToolStripMenuItem ^prodOrder = gcnew ToolStripMenuItem("Prod. Order:");
         if( colony->ProductionOrder > 0 )
         {
-            menu->Items->Add( CreateCustomMenuItem(
+            prodOrder->DropDownItems->Add( CreateCustomMenuItem(
                 "Prod. Order: First",
                 -1000000,
                 gcnew EventHandler1Arg<int>(this, &Form1::ColoniesMenuProdOrderAdjust) ) );
-            menu->Items->Add( CreateCustomMenuItem(
+            prodOrder->DropDownItems->Add( CreateCustomMenuItem(
                 "Prod. Order: 1 Up",
                 -1,
                 gcnew EventHandler1Arg<int>(this, &Form1::ColoniesMenuProdOrderAdjust) ) );
         }
-        menu->Items->Add( CreateCustomMenuItem(
+        prodOrder->DropDownItems->Add( CreateCustomMenuItem(
             "Prod. Order: 1 Down",
             1,
             gcnew EventHandler1Arg<int>(this, &Form1::ColoniesMenuProdOrderAdjust) ) );
-        menu->Items->Add( CreateCustomMenuItem(
+        prodOrder->DropDownItems->Add( CreateCustomMenuItem(
             "Prod. Order: Last",
             1000000,
             gcnew EventHandler1Arg<int>(this, &Form1::ColoniesMenuProdOrderAdjust) ) );
-
-        if( colony->CanProduce )
-        {
-            // Shipyard
-            if( colony->GetMaxProductionBudget() > Calculators::ShipyardCost( GameData::Player->TechLevels[TECH_MA] ) )
-            {
-                menu->Items->Add( gcnew ToolStripSeparator );
-                ToolStripMenuItem ^item = gcnew ToolStripMenuItem(
-                    "Build Shipyard",
-                    nullptr,
-                    gcnew EventHandler(this, &Form1::ColoniesMenuProdShipyard));
-                if( colony->OrderBuildShipyard )
-                    item->Checked = true;
-                menu->Items->Add( item );
-            }
-        }
+        menu->Items->Add( prodOrder );
     }
 
     // Ship jumps to this colony
@@ -1543,6 +1556,111 @@ void Form1::ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowInde
         menu->Items->Add( gcnew ToolStripSeparator );
         menu->Items->Add( jumpMenu );
     }
+}
+
+ToolStripMenuItem^ Form1::ColoniesFillMenuProduction()
+{
+    ToolStripMenuItem ^prodMenu = gcnew ToolStripMenuItem("Production:");
+
+    if( m_ColoniesMenuRef->Orders->Count > 0 )
+    {
+        for each( ICommand ^cmd in m_ColoniesMenuRef->Orders )
+        {
+            prodMenu->DropDownItems->Add(
+                ColoniesFillMenuProductionOptions(cmd) );
+        }
+    }
+    else
+        prodMenu->DropDownItems->Add( "< No production orders >" );
+
+    prodMenu->DropDownItems->Add( gcnew ToolStripSeparator );
+    prodMenu->DropDownItems->Add( ColoniesFillMenuProductionNew() );
+
+    if( m_ColoniesMenuRef->Orders->Count > 0 )
+    {
+        prodMenu->DropDownItems->Add( gcnew ToolStripSeparator );
+        prodMenu->DropDownItems->Add( CreateCustomMenuItem(
+            "Clear All",
+            static_cast<ICommand^>(nullptr),
+            gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuProdCommandDel) ) );
+    }
+
+    return prodMenu;
+}
+
+ToolStripMenuItem^ Form1::ColoniesFillMenuProductionNew()
+{
+    Colony ^colony = m_ColoniesMenuRef;
+    ToolStripMenuItem ^menu = gcnew ToolStripMenuItem("Add:");
+
+    bool bShipyard = true;
+    bool bHide = true;
+
+    // Exclude commands that can't or shouldn't be duplicated
+    for each( ICommand ^cmd in colony->Orders )
+    {
+        switch( cmd->GetCmdType() )
+        {
+        case CommandType::Shipyard:     bShipyard = false; break;
+        case CommandType::Hide:         bHide = false; break;
+        default:
+            break;
+        }
+    }
+
+    // Hide
+    if( bHide )
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem(
+            "Hide Colony",
+            static_cast<ICommand^>(gcnew IProdCmdHide(colony)),
+            gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuProdCommandAdd) ) );
+    }
+    // Shipyard
+    if( bShipyard &&
+        colony->GetMaxProductionBudget() > Calculators::ShipyardCost( GameData::Player->TechLevels[TECH_MA] ) )
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem(
+            "Build Shipyard",
+            static_cast<ICommand^>(gcnew IProdCmdShipyard),
+            gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuProdCommandAdd) ) );
+    }
+    // Research
+    menu->DropDownItems->Add(
+        "Research...",
+        nullptr,
+        gcnew EventHandler(this, &Form1::ColoniesMenuProdCommandAddResearch) );
+
+    return menu;
+}
+
+ToolStripMenuItem^ Form1::ColoniesFillMenuProductionOptions(ICommand ^cmd)
+{
+    ToolStripMenuItem ^menu = gcnew ToolStripMenuItem( m_CommandMgr->PrintCommandWithInfo(cmd) );
+
+    if( cmd != m_ColoniesMenuRef->Orders[0] )
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem(
+            "Move up",
+            cmd,
+            gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuProdCommandMoveUp) ) );
+    }
+    if( cmd != m_ColoniesMenuRef->Orders[m_ColoniesMenuRef->Orders->Count - 1] )
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem(
+            "Move down",
+            cmd,
+            gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuProdCommandMoveDown) ) );
+    }
+
+    // Cancel order
+    menu->DropDownItems->Add( gcnew ToolStripSeparator );
+    menu->DropDownItems->Add( CreateCustomMenuItem(
+        "Cancel",
+        cmd,
+        gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuProdCommandDel) ) );
+
+    return menu;
 }
 
 void Form1::ColoniesMenuSelectRef(Object^, EventArgs ^e)
@@ -1582,10 +1700,71 @@ void Form1::ColoniesMenuProdOrderAdjust(int adjustment)
     m_CommandMgr->SaveCommands();
 }
 
-void Form1::ColoniesMenuProdShipyard(Object^, EventArgs^)
+void Form1::ColoniesMenuProdCommandAdd(ICommand ^cmd)
 {
-    m_ColoniesMenuRef->OrderBuildShipyard = !m_ColoniesMenuRef->OrderBuildShipyard;
-    m_CommandMgr->SaveCommands();
+    m_CommandMgr->AddCommand(m_ColoniesMenuRef, cmd);
+    ColoniesGrid->Filter->Update();
+    ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
+}
+
+void Form1::ColoniesMenuProdCommandAddResearch(Object^, EventArgs^)
+{
+    CmdResearch ^dlg = gcnew CmdResearch;
+    if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
+    {
+        for( int i = 0; i < TECH_MAX; ++i )
+        {
+            TechType tech = static_cast<TechType>(i);
+            int res = dlg->GetAmount(tech);
+            if( res != -1 )
+            {
+                ColoniesMenuProdCommandAdd(
+                    gcnew IProdCmdResearch(tech, res) );
+            }
+        }
+    }
+
+    delete dlg;
+}
+
+void Form1::ColoniesMenuProdCommandDel(ICommand ^cmd)
+{
+    if( cmd )
+    {
+        m_CommandMgr->DelCommand(m_ColoniesMenuRef, cmd);
+        if( m_ColoniesMenuRef->Orders->Count > 0 )
+            ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
+    }
+    else
+    {
+        m_ColoniesMenuRef->Orders->Clear();
+        m_CommandMgr->SaveCommands();
+    }
+    ColoniesGrid->Filter->Update();
+}
+
+void Form1::ColoniesMenuProdCommandMoveUp(ICommand ^cmd)
+{
+    int i = m_ColoniesMenuRef->Orders->IndexOf(cmd);
+    if( i > 0 )
+    {
+        m_ColoniesMenuRef->Orders->RemoveAt(i);
+        m_ColoniesMenuRef->Orders->Insert(i - 1, cmd);
+        m_CommandMgr->SaveCommands();
+    }
+    ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
+}
+
+void Form1::ColoniesMenuProdCommandMoveDown(ICommand ^cmd)
+{
+    int i = m_ColoniesMenuRef->Orders->IndexOf(cmd);
+    if( i < ( m_ColoniesMenuRef->Orders->Count - 1) )
+    {
+        m_ColoniesMenuRef->Orders->RemoveAt(i);
+        m_ColoniesMenuRef->Orders->Add(cmd);
+        m_CommandMgr->SaveCommands();
+    }
+    ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
 }
 
 ////////////////////////////////////////////////////////////////
@@ -2241,7 +2420,7 @@ void Form1::AliensMenuSetRelation(AlienRelationData ^data)
     // Modify existing relation command
     for each( ICommand ^iCmd in m_CommandMgr->GetCommands() )
     {
-        if( iCmd->GetType() == CommandType::AlienRelation )
+        if( iCmd->GetCmdType() == CommandType::AlienRelation )
         {
             CmdAlienRelation ^cmd = safe_cast<CmdAlienRelation^>(iCmd);
             if( cmd->m_Alien == alien )

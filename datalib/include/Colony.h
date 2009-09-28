@@ -7,7 +7,7 @@ namespace FHUI
 
 ref class Planet;
 ref class StarSystem;
-interface class ICommandProd;
+interface class ICommand;
 
 // ---------------------------------------------------
 // Colony
@@ -38,10 +38,10 @@ public:
         Shipyards = -1;
         LastSeen = -1;
         Inventory = gcnew array<int>(INV_MAX){0};
-        OrderBuildShipyard = false;
         Hidden = false;
         UnderSiege = false;
         Shared = false;
+        Orders = gcnew List<ICommand^>;
     }
     // --- copy constructor - does not perform full copy !!! ---
     Colony(StarSystem ^system, Alien^ owner, Colony^ src)
@@ -69,10 +69,10 @@ public:
         LastSeen = src->LastSeen;
         Inventory = gcnew array<int>(INV_MAX){0};
         src->Inventory->CopyTo(Inventory, 0);
-        OrderBuildShipyard = false;
         Hidden = false;
         UnderSiege = false;
         Shared = false;
+        Orders = gcnew List<ICommand^>;
     }
     // -------- IComparable -----------------------------
     virtual Int32 CompareTo( Object^ obj );
@@ -128,7 +128,6 @@ public:
     int             LastSeen;
     int             ProductionOrder;
     bool            CanProduce;
-    bool            OrderBuildShipyard;
     bool            Hidden;
     bool            UnderSiege;
     bool            Shared;
@@ -151,15 +150,17 @@ public:
     ref class Resources
     {
     public:
-        int             EU;
-        int             CU;
+        int             TotalEU;
+        int             AvailEU;
+        int             AvailCU;
         array<int>^     Inventory;
     };
 
     void            ProductionReset();
 
-    property Resources^             Res;
-    property List<ICommandProd^>^   Orders;
+    property List<ICommand^>^   Orders;     // Production orders
+    property Resources^         Res;        // Resource tracking for orders template
+    property List<String^>^     OrdersText; // Production orders generated for orders template
 
 protected:
     Resources^          m_Resources;

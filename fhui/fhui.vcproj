@@ -97,7 +97,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy changelog to build output dir."
-				CommandLine="copy $(SolutionDir)\changelog.txt &quot;$(TargetDir)&quot;"
+				CommandLine="copy $(SolutionDir)\changelog.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy $(SolutionDir)\readme.txt &quot;$(TargetDir)&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -179,7 +179,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy changelog to build output dir."
-				CommandLine="copy $(SolutionDir)\changelog.txt &quot;$(TargetDir)&quot;"
+				CommandLine="copy $(SolutionDir)\changelog.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy $(SolutionDir)\readme.txt &quot;$(TargetDir)&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -261,7 +261,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy changelog to build output dir."
-				CommandLine="copy $(SolutionDir)\changelog.txt &quot;$(TargetDir)&quot;"
+				CommandLine="copy $(SolutionDir)\changelog.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy $(SolutionDir)\readme.txt &quot;$(TargetDir)&quot;"
 			/>
 		</Configuration>
 	</Configurations>
@@ -319,6 +319,10 @@
 				</File>
 				<File
 					RelativePath=".\source\BuildInfo.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\CmdResearch.cpp"
 					>
 				</File>
 				<File
@@ -418,6 +422,15 @@
 					>
 				</File>
 				<File
+					RelativePath=".\include\CmdResearch.h"
+					FileType="3"
+					>
+					<File
+						RelativePath=".\include\CmdResearch.resx"
+						>
+					</File>
+				</File>
+				<File
 					RelativePath=".\include\CommandManager.h"
 					>
 				</File>
@@ -494,6 +507,10 @@
 		</Filter>
 		<File
 			RelativePath="..\changelog.txt"
+			>
+		</File>
+		<File
+			RelativePath="..\ReadMe.txt"
 			>
 		</File>
 	</Files>

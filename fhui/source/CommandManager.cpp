@@ -17,7 +17,7 @@ private ref class CommandComparer : public IComparer<ICommand^>
 public:
     virtual int Compare(ICommand ^c1, ICommand ^c2)
     {
-        return (int)c1->GetType() - (int)c2->GetType();
+        return (int)c1->GetCmdType() - (int)c2->GetCmdType();
     }
 };
 
@@ -45,6 +45,31 @@ void CommandManager::SelectTurn(int turn)
 
 // ---------------------------------------------------------
 
+String^ CommandManager::PrintCommandWithInfo(ICommand ^cmd)
+{
+    int eu = cmd->GetEUCost();
+    String ^ret = String::Format("{0}  ; {1}{2} EU",
+        cmd->Print(),
+        eu > 0 ? "-" : "+",
+        eu );
+
+    int cu = cmd->GetCUMod();
+    if( cu != 0 )
+        ret += ", " + cu.ToString("+#0;-#0;") + " CU";
+
+    for( int i = 0; i < INV_MAX; ++i )
+    {
+        InventoryType it = static_cast<InventoryType>(i);
+        int invMod = cmd->GetInvMod(it);
+        if( invMod != 0 )
+            ret += ", " + invMod.ToString() + " " + FHStrings::InvToString(it);
+    }
+
+    return ret;
+}
+
+// ---------------------------------------------------------
+
 void CommandManager::SortCommands()
 {
     m_CommandData[m_CurrentTurn]->Commands->Sort( gcnew CommandComparer );
@@ -52,7 +77,7 @@ void CommandManager::SortCommands()
 
 void CommandManager::AddCommand(ICommand ^cmd)
 {
-    if( cmd->GetType() == CommandType::Production )
+    if( cmd->GetPhase() == CommandPhase::Production )
         throw gcnew FHUIDataImplException("AddCommand: Wrong interface for production command!");
 
     m_CommandData[m_CurrentTurn]->Commands->Add(cmd);
@@ -68,7 +93,7 @@ void CommandManager::AddCommandDontSave(ICommand ^cmd)
 
 void CommandManager::DelCommand(ICommand ^cmd)
 {
-    if( cmd->GetType() == CommandType::Production )
+    if( cmd->GetPhase() == CommandPhase::Production )
         throw gcnew FHUIDataImplException("DelCommand: Wrong interface for production command!");
 
     for each( ICommand ^iCmd in m_CommandData[m_CurrentTurn]->Commands )
@@ -83,15 +108,15 @@ void CommandManager::DelCommand(ICommand ^cmd)
     }
 }
 
-void CommandManager::AddCommand(Colony ^colony, ICommandProd ^cmd)
+void CommandManager::AddCommand(Colony ^colony, ICommand ^cmd)
 {
     colony->Orders->Add(cmd);
     SaveCommands();
 }
 
-void CommandManager::DelCommand(Colony ^colony, ICommandProd ^cmd)
+void CommandManager::DelCommand(Colony ^colony, ICommand ^cmd)
 {
-    for each( ICommandProd ^iCmd in colony->Orders )
+    for each( ICommand ^iCmd in colony->Orders )
     {
         if( iCmd == cmd ||
             iCmd->CompareTo(cmd) == 0 )
@@ -134,10 +159,9 @@ void CommandManager::SaveCommands()
     for each( Colony ^colony in GameData::Player->Colonies )
     {
         commandList->Add( "COLONY " + colony->Name );
-        if( colony->OrderBuildShipyard )
-        {
-            commandList->Add("  build shipyard");
-        }
+        for each( ICommand ^cmd in colony->Orders )
+            commandList->Add( cmd->Print() );
+        commandList->Add( "END_COLONY" );
     }
 
     // -- Ships
@@ -168,8 +192,6 @@ void CommandManager::SaveCommands()
 
 void CommandManager::LoadCommands()
 {
-    Colony^ refColony = nullptr;
-
     // Open file
     StreamReader ^sr;
     try 
@@ -186,6 +208,7 @@ void CommandManager::LoadCommands()
     }
 
     String ^line;
+    Colony^ refColony = nullptr;
     int colonyProdOrder = 1;
     while( (line = sr->ReadLine()) != nullptr ) 
     {
@@ -194,6 +217,11 @@ void CommandManager::LoadCommands()
             line[0] == ';' )
             continue;
 
+        if( refColony )
+        {
+            if( LoadCommandsColony(line, refColony) )
+                continue;
+        }
         if( m_RM->Match(line, m_RM->ExpCmdColony) )
         {
             Colony ^colony = m_GameData->GetColony(m_RM->Results[0]);
@@ -205,16 +233,12 @@ void CommandManager::LoadCommands()
             else
                 throw gcnew FHUIParsingException("Inconsistent commands template (colony production order)!");
         }
-        else if( m_RM->Match(line, m_RM->ExpCmdBuiShipyard) )
+        else if( line == "END_COLONY" )
         {
             if( refColony )
-            {
-                refColony->OrderBuildShipyard = true;
-            }
+                refColony = nullptr;
             else
-            {
-                throw gcnew FHUIParsingException("Inconsistent commands template (shipyard)!");
-            }
+                throw gcnew FHUIParsingException("Inconsistent commands template (END_COLONY)!");
         }
         else if( m_RM->Match(line, m_RM->ExpCmdShipJump) )
         {
@@ -326,12 +350,39 @@ void CommandManager::LoadCommands()
     }
 }
 
+bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
+{
+    if( line == "Shipyard" )
+    {
+        colony->Orders->Add( gcnew IProdCmdShipyard );
+        return true;
+    }
+    if( line == "Hide" )
+    {
+        colony->Orders->Add( gcnew IProdCmdHide(colony) );
+        return true;
+    }
+
+    if( m_RM->Match(line, m_RM->ExpCmdResearch) )
+    {
+        int amount = m_RM->GetResultInt(0);
+        TechType tech = FHStrings::TechFromString(m_RM->Results[1]);
+
+        colony->Orders->Add( gcnew IProdCmdResearch(tech, amount) );
+        return true;
+   }
+
+    return false;
+}
+
 ////////////////////////////////////////////////////////////////
 // Order Template
 
 void CommandManager::GenerateTemplate(System::Windows::Forms::RichTextBox^ target)
 {
     m_OrderList->Clear();
+
+    m_Budget = gcnew BudgetTracker(m_OrderList, m_GameData->GetCarriedEU());
 
     GenerateCombat();
     GeneratePreDeparture();
@@ -367,16 +418,6 @@ void CommandManager::GenerateTemplate(System::Windows::Forms::RichTextBox^ targe
         {   // comments
             target->Select(start, s->Length + 1);
             target->SelectionColor = Color::Green;
-        }
-        else if( s->IndexOf("[A]") != -1 )
-        {   // UI generated
-            target->Select(start, s->Length + 1);
-            target->SelectionColor = Color::FromArgb(0xFF800080);
-        }
-        else if( s->IndexOf("[A+]") != -1 )
-        {   // plugin generated
-            target->Select(start, s->Length + 1);
-            target->SelectionColor = Color::Blue;
         }
         
         start += s->Length + 1;
@@ -666,9 +707,7 @@ void CommandManager::GenerateJumpInfo(Ship^ ship)
 void CommandManager::GenerateProduction()
 {
     m_OrderList->Add("START PRODUCTION");
-
-    BudgetTracker ^budget = gcnew BudgetTracker(m_OrderList, m_GameData->GetCarriedEU());
-    m_OrderList->Add("  ; +" + budget->GetTotalBudget().ToString() + " EUs carried" );
+    m_OrderList->Add("  ; +" + m_Budget->GetTotalBudget().ToString() + " EUs carried" );
 
     // Mark ships for upgrade
     for each( Ship ^ship in GameData::Player->Ships )
@@ -687,33 +726,37 @@ void CommandManager::GenerateProduction()
     // Generate production template for each colony
     for each( Colony ^colony in GameData::Player->Colonies )
     {
-        if ( (colony->EconomicBase <= 0) && (colony->HasInventory == false) )
+        if ( (colony->EconomicBase <= 0) &&
+             (colony->HasInventory == false) )
             continue;
 
+        // Section header
         m_OrderList->Add("");
         m_OrderList->Add("  PRODUCTION PL " + colony->Name);
-
         m_OrderList->AddRange( PrintSystemStatus(colony->System, true) );
 
-        int euCarried = budget->GetTotalBudget();
-        budget->SetColony(colony);
+        // Set budget tracker for this colony
+        m_Budget->SetColony(colony);
+        List<String^> ^orders = colony->OrdersText;
 
         // Production summary
+        int euCarried = m_Budget->GetTotalBudget();
         String ^prodSummary = String::Format("  ; {0} +{1} = {2}",
-            colony->EUAvail, euCarried, budget->GetTotalBudget());
+            colony->EUAvail, euCarried, m_Budget->GetTotalBudget());
         if( colony->PlanetType == PLANET_COLONY )
-            prodSummary += "  max=" + budget->GetAvailBudget().ToString();
-        m_OrderList->Add( prodSummary );
+            prodSummary += "  max=" + m_Budget->GetAvailBudget().ToString();
+        orders->Add( prodSummary );
 
         // First RECYCLE all ships
-        GenerateProductionRecycle(colony, budget);
+        GenerateProductionRecycle(colony);
 
         // Launch plugin actions
-        int prePluginNum = m_OrderList->Count;
+        int prePluginNum = orders->Count;
         for each( IOrdersPlugin ^plugin in PluginManager::OrderPlugins )
-            plugin->GenerateProduction(m_OrderList, colony, budget);
-        bool useAuto = m_OrderList->Count == prePluginNum;
+            plugin->GenerateProduction(orders, colony, m_Budget);
+        bool useAuto = orders->Count == prePluginNum;
 
+        // Add auto orders
         List<Pair<String^, int>^>^ autoOrders = GetAutoOrdersProduction( colony );
         if ( autoOrders )
         {
@@ -722,40 +765,34 @@ void CommandManager::GenerateProduction()
                 prefix += "; ";
             for each (Pair<String^, int>^ order in autoOrders )
             {
-                m_OrderList->Add( prefix + order->A + String::Format(" ; AUTO (cost {0})", order->B) );
-                if (order->B > 0) 
-                {
-                    budget->Spend(order->B);
-                }
-                else
-                {
-                    budget->Recycle(-order->B);
-                }
+                orders->Add( prefix + order->A + String::Format(" ; AUTO (cost {0})", order->B) );
+                m_Budget->UpdateEU(order->B);
             }
         }
 
-        // Build SHIPYARD
-        if( colony->OrderBuildShipyard )
+        // Production orders
+        for each( ICommand ^cmd in colony->Orders )
         {
-            int cost = Calculators::ShipyardCost( GameData::Player->TechLevels[TECH_MA] );
-            m_OrderList->Add( "    Shipyard  ; [A]  -" + cost.ToString() );
-            budget->Spend(cost);
+            orders->Add( PrintCommandWithInfo(cmd) );
+            m_Budget->EvalOrder( cmd );
         }
 
         // Now try to CONTINUE or UPGRADE ships here
-        GenerateProductionUpgrade(colony, budget);
+        GenerateProductionUpgrade(colony);
 
         // Automatic spendings summary
         if( colony->PlanetType == PLANET_COLONY )
         {
-            m_OrderList->Add( String::Format("    ; -- EU to use: {0} (total {1})",
-                budget->GetAvailBudget(),
-                budget->GetTotalBudget() ) );
+            orders->Add( String::Format("    ; -- EU to use: {0} (total {1})",
+                m_Budget->GetAvailBudget(),
+                m_Budget->GetTotalBudget() ) );
         }
         else if( colony->PlanetType == PLANET_HOME )
         {
-            m_OrderList->Add( String::Format("    ; -- EU to use: {0}", budget->GetAvailBudget() ) );
+            orders->Add( String::Format("    ; -- EU to use: {0}", m_Budget->GetAvailBudget() ) );
         }
+
+        m_OrderList->AddRange(orders);
     }
 
     m_OrderList->Add("");
@@ -763,7 +800,7 @@ void CommandManager::GenerateProduction()
     m_OrderList->Add("");
 }
 
-void CommandManager::GenerateProductionRecycle(Colony ^colony, BudgetTracker ^budget)
+void CommandManager::GenerateProductionRecycle(Colony ^colony)
 {
     if( colony->CanProduce == false )
         return;
@@ -781,10 +818,10 @@ void CommandManager::GenerateProductionRecycle(Colony ^colony, BudgetTracker ^bu
                 continue;
 
             int value = ship->GetRecycleValue();
-            m_OrderList->Add( String::Format("    Recycle {0}  ; [A] +{1} EU",
+            colony->OrdersText->Add( String::Format("    Recycle {0}  ; +{1} EU",
                 ship->PrintClassWithName(),
                 value) );
-            budget->Recycle(value);
+            m_Budget->UpdateEU(-value);
 
             // Mark the recycle was done on this planet.
             ship->Command->PlanetNum = colony->PlanetNum;
@@ -792,7 +829,7 @@ void CommandManager::GenerateProductionRecycle(Colony ^colony, BudgetTracker ^bu
     }
 }
 
-void CommandManager::GenerateProductionUpgrade(Colony ^colony, BudgetTracker ^budget)
+void CommandManager::GenerateProductionUpgrade(Colony ^colony)
 {
     if( colony->CanProduce == false )
         return;
@@ -806,10 +843,10 @@ void CommandManager::GenerateProductionUpgrade(Colony ^colony, BudgetTracker ^bu
             if( ship->Command == nullptr ||
                 ship->Command->Type != Ship::OrderType::Recycle )
             {
-                m_OrderList->Add( String::Format("    Continue {0}  ; [A] -{1} EU",
+                colony->OrdersText->Add( String::Format("    Continue {0}  ; -{1} EU",
                     ship->PrintClassWithName(),
                     ship->EUToComplete) );
-                budget->Spend(ship->EUToComplete);
+                m_Budget->UpdateEU(ship->EUToComplete);
                 continue;
             }
         }
@@ -823,7 +860,7 @@ void CommandManager::GenerateProductionUpgrade(Colony ^colony, BudgetTracker ^bu
             // Does this colony has budget for upgrade?
             // If budget exceeded search for another colony
             // that could handle the upgrade.
-            if( value > budget->GetAvailBudget() )
+            if( value > m_Budget->GetAvailBudget() )
             {
                 for each( Colony ^otherCol in colony->System->ColoniesOwned )
                 {
@@ -840,10 +877,10 @@ void CommandManager::GenerateProductionUpgrade(Colony ^colony, BudgetTracker ^bu
             // colony able to do the upgrade found, add the command.
             if( doUpgrade )
             {
-                m_OrderList->Add( String::Format("    Upgrade {0}  ; [A] -{1} EU",
+                colony->OrdersText->Add( String::Format("    Upgrade {0}  ; -{1} EU",
                     ship->PrintClassWithName(),
                     value) );
-                budget->Spend(value);
+                m_Budget->UpdateEU(value);
 
                 // Mark the upgrade was done on this planet.
                 ship->Command->PlanetNum = colony->PlanetNum;

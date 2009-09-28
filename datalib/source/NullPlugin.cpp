@@ -2,6 +2,7 @@
 #include "IFHUIPlugin.h"
 #include "Enums.h"
 #include "GameData.h"
+#include "Commands.h"
 
 using namespace System;
 using namespace System::Data;
@@ -22,28 +23,58 @@ protected:
 
 // ---------------------------------------------------------
 
-BudgetTracker::BudgetTracker(List<String^> ^orders, int euCarried)
+BudgetTracker::BudgetTracker(List<String^>^ orders, int euCarried)
     : m_Orders(orders)
+    , m_OrdersGlobal(orders)
     , m_BudgetTotal(euCarried)
 {
 }
 
 void BudgetTracker::SetColony(Colony ^colony)
 {
-    m_PopAvail = colony->AvailPop;
-    m_BudgetTotal += colony->EUAvail;
-    m_BudgetAvail = colony->GetMaxProductionBudget();
+    m_Colony = colony;
+
+    if( m_Colony )
+    {
+        m_BudgetTotal += colony->EUAvail;
+        m_BudgetAvail = colony->GetMaxProductionBudget();
+
+        m_Colony->ProductionReset();
+        m_Colony->Res->TotalEU = m_BudgetTotal;
+        m_Colony->Res->AvailEU = m_BudgetAvail;
+
+        m_Orders = m_Colony->OrdersText;
+    }
+    else
+    {
+        m_BudgetAvail = 0;
+        m_Orders = m_OrdersGlobal;
+    }
 }
 
-void BudgetTracker::Recycle(int eu)
+void BudgetTracker::EvalOrder(ICommand ^cmd)
 {
-    m_BudgetTotal += eu;
+    // Track budget
+    UpdateEU( cmd->GetEUCost() );
+
+    // Track CU
+    UpdateCU( cmd->GetCUMod() );
+
+    // Track Inventory
+    for( int i = 0; i < INV_MAX; ++i )
+    {
+        InventoryType it = static_cast<InventoryType>(i);
+        UpdateInventory( it, cmd->GetInvMod(it) );
+    }
 }
 
-void BudgetTracker::Spend(int eu)
+void BudgetTracker::UpdateEU(int eu)
 {
     m_BudgetAvail -= eu;
     m_BudgetTotal -= eu;
+
+    m_Colony->Res->TotalEU = m_BudgetTotal;
+    m_Colony->Res->AvailEU = m_BudgetAvail;
 
     if( m_BudgetAvail < 0 )
         m_Orders->Add( String::Format("; !!!!!! Production limit exceeded by {0} !!!!!!", -m_BudgetAvail) );
@@ -52,13 +83,26 @@ void BudgetTracker::Spend(int eu)
         m_Orders->Add( String::Format("; !!!!!! BUDGET EXCEEDED by {0} !!!!!!", -m_BudgetTotal) );
 }
 
-void BudgetTracker::UsePopulation(int pop)
+void BudgetTracker::UpdateCU(int pop)
 {
-    m_PopAvail -= pop;
-    if( m_PopAvail < 0 )
+    m_Colony->Res->AvailCU += pop;
+    if( m_Colony->Res->AvailCU < 0 )
     {
-        m_Orders->Add( String::Format("; !!!!!! NOT ENOUGH CU Available ({0} left) !!!!!!", m_PopAvail + pop) );
-        m_PopAvail = 0;
+        m_Orders->Add( String::Format("; !!!!!! NOT ENOUGH CU Available ({0} left) !!!!!!", m_Colony->Res->AvailCU - pop) );
+        m_Colony->Res->AvailCU = 0;
+    }
+}
+
+void BudgetTracker::UpdateInventory(InventoryType it, int mod)
+{
+    m_Colony->Res->Inventory[it] += mod;
+    if( m_Colony->Res->Inventory[it] < 0 )
+    {
+        m_Orders->Add( String::Format(
+            "; !!!!!! NOT ENOUGH Inventory Available ({0} {1} left) !!!!!!",
+            m_Colony->Res->Inventory[it] - mod,
+            FHStrings::InvToString(it) ) );
+        m_Colony->Res->Inventory[it] = 0;
     }
 }
 

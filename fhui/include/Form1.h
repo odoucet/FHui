@@ -141,6 +141,7 @@ namespace FHUI {
         bool               ^m_bGridUpdateEnabled;
 
         System::Windows::Forms::ToolTip^    m_GridToolTip;
+        DataGridViewCellMouseEventArgs^     m_LastMenuEventArg;
 
         // ==================================================
         // --- SYSTEMS ---
@@ -217,9 +218,16 @@ namespace FHUI {
         void        ColoniesSetup();
         void        ColoniesSetRef( int rowIndex );
         void        ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
+        ToolStripMenuItem^  ColoniesFillMenuProduction();
+        ToolStripMenuItem^  ColoniesFillMenuProductionNew();
+        ToolStripMenuItem^  ColoniesFillMenuProductionOptions(ICommand ^cmd);
         void        ColoniesMenuSelectRef(Object^, EventArgs^);
         void        ColoniesMenuProdOrderAdjust(int adjustment);
-        void        ColoniesMenuProdShipyard(Object^, EventArgs^);
+        void        ColoniesMenuProdCommandAdd(ICommand ^cmd);
+        void        ColoniesMenuProdCommandDel(ICommand ^cmd);
+        void        ColoniesMenuProdCommandMoveUp(ICommand ^cmd);
+        void        ColoniesMenuProdCommandMoveDown(ICommand ^cmd);
+        void        ColoniesMenuProdCommandAddResearch(Object^, EventArgs^);
 
         value struct ColoniesColumns
         {
@@ -241,6 +249,7 @@ namespace FHUI {
             int Dist;
             int Inventory;
             int ProdOrder;
+            int Budget;
             int Notes;
         };
 

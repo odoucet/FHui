@@ -40,22 +40,23 @@ public:
     CommandManager(GameData^, String^);
 
     void        SelectTurn(int turn);
-    void        GenerateTemplate(System::Windows::Forms::RichTextBox^);
 
     void        LoadCommands();
     void        SaveCommands();
     void        DeleteCommands();
+
+    String^     PrintCommandWithInfo(ICommand ^cmd);
 
     void        AddCommand(ICommand ^cmd);
     void        DelCommand(ICommand ^cmd);
     List<ICommand^>^ GetCommands() { return m_CommandData[m_CurrentTurn]->Commands; }
 
     // For production commands
-    void        AddCommand(Colony^, ICommandProd ^cmd);
-    void        DelCommand(Colony^, ICommandProd ^cmd);
-    List<ICommandProd^>^ GetCommands(Colony ^colony) { return colony->Orders; }
+    void        AddCommand(Colony ^colony, ICommand ^cmd);
+    void        DelCommand(Colony ^colony, ICommand ^cmd);
+    List<ICommand^>^ GetCommands(Colony ^colony) { return colony->Orders; }
 
-    List<String^>^ PrintSystemStatus(StarSystem^ system, bool listIncomplete);
+    void        GenerateTemplate(System::Windows::Forms::RichTextBox^);
 
     property bool AutoEnabled
     {
@@ -72,7 +73,7 @@ public:
     List<Pair<String^, int>^>^  GetAutoOrdersProduction(Colony^);
 
 private:
-
+    bool        LoadCommandsColony(String ^line, Colony ^colony);
     void        AddCommandDontSave(ICommand ^cmd);
     void        SortCommands();
 
@@ -83,14 +84,17 @@ private:
     void        GeneratePostArrival();
     void        GenerateStrikes();
 
+    List<String^>^ PrintSystemStatus(StarSystem^ system, bool listIncomplete);
+
     void        GenerateCombatInfo(StarSystem^);
     void        GeneratePreDepartureInfo(StarSystem^);
     void        GenerateJumpInfo(Ship^);
     void        GenerateScanOrders();
-    void        GenerateProductionRecycle(Colony ^colony, BudgetTracker ^budget);
-    void        GenerateProductionUpgrade(Colony ^colony, BudgetTracker ^budget);
+    void        GenerateProductionRecycle(Colony ^colony);
+    void        GenerateProductionUpgrade(Colony ^colony);
 
     List<String^>^          m_OrderList;
+    BudgetTracker^          m_Budget;
     String^                 m_Path;
     GameData^               m_GameData;
     RegexMatcher^           m_RM;

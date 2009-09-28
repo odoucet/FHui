@@ -18,6 +18,7 @@ public:
 
     static int      ResearchCost(int startLevel, int endLevel, bool guided);
     static int      ShipyardCost(int maTechLevel);
+    static int      ColonyHideCost(Colony ^colony);
 
     static int      TransportCapacity(int size);
     static int      ColonyProduction(Colony^, int mi, int ma, int ls, int fleetPercentCost);
