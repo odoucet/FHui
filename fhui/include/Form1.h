@@ -228,6 +228,8 @@ namespace FHUI {
         void        ColoniesMenuProdCommandMoveUp(ICommand ^cmd);
         void        ColoniesMenuProdCommandMoveDown(ICommand ^cmd);
         void        ColoniesMenuProdCommandAddResearch(Object^, EventArgs^);
+        void        ColoniesMenuProdCommandAddBuildIuAu(Object^, EventArgs^);
+        void        ColoniesMenuProdCommandAddBuildShip(Object^, EventArgs^);
 
         value struct ColoniesColumns
         {
@@ -981,6 +983,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TurnSelect->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->TurnSelect->FormattingEnabled = true;
             this->TurnSelect->Location = System::Drawing::Point(78, 0);
+            this->TurnSelect->MaxDropDownItems = 20;
             this->TurnSelect->Name = L"TurnSelect";
             this->TurnSelect->Size = System::Drawing::Size(145, 21);
             this->TurnSelect->TabIndex = 0;

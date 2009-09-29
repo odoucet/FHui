@@ -354,12 +354,12 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
 {
     if( line == "Shipyard" )
     {
-        colony->Orders->Add( gcnew IProdCmdShipyard );
+        colony->Orders->Add( gcnew ProdCmdShipyard );
         return true;
     }
     if( line == "Hide" )
     {
-        colony->Orders->Add( gcnew IProdCmdHide(colony) );
+        colony->Orders->Add( gcnew ProdCmdHide(colony) );
         return true;
     }
 
@@ -368,7 +368,14 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
         int amount = m_RM->GetResultInt(0);
         TechType tech = FHStrings::TechFromString(m_RM->Results[1]);
 
-        colony->Orders->Add( gcnew IProdCmdResearch(tech, amount) );
+        colony->Orders->Add( gcnew ProdCmdResearch(tech, amount) );
+        return true;
+   }
+
+    if( m_RM->Match(line, m_RM->ExpCmdBuildIUAU) )
+    {
+        int amount = m_RM->GetResultInt(0);
+        colony->Orders->Add( gcnew ProdCmdBuildIUAU(amount, m_RM->Results[1]) );
         return true;
    }
 
@@ -773,7 +780,7 @@ void CommandManager::GenerateProduction()
         // Production orders
         for each( ICommand ^cmd in colony->Orders )
         {
-            orders->Add( PrintCommandWithInfo(cmd) );
+            orders->Add( "    " + PrintCommandWithInfo(cmd) );
             m_Budget->EvalOrder( cmd );
         }
 

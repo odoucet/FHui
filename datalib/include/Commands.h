@@ -33,6 +33,8 @@ public enum class CommandType
     Hide,
     Shipyard,
     Research,
+    BuildIuAu,
+    BuildShip,
 };
 
 public interface class ICommand : public IComparable
@@ -167,10 +169,10 @@ public:
 ////////////////////////////////////////////////////////////
 
 // Hide
-public ref class IProdCmdHide : public CmdProdBase<CommandType::Hide>
+public ref class ProdCmdHide : public CmdProdBase<CommandType::Hide>
 {
 public:
-    IProdCmdHide(Colony ^colony) : m_Colony(colony) {}
+    ProdCmdHide(Colony ^colony) : m_Colony(colony) {}
 
     virtual int     GetEUCost() override    { return Calculators::ColonyHideCost(m_Colony); }
     virtual String^ Print() override        { return "Hide"; } 
@@ -181,7 +183,7 @@ public:
 ////////////////////////////////////////////////////////////
 
 // Shipyard
-public ref class IProdCmdShipyard : public CmdProdBase<CommandType::Shipyard>
+public ref class ProdCmdShipyard : public CmdProdBase<CommandType::Shipyard>
 {
 public:
     virtual int     GetEUCost() override    { return Calculators::ShipyardCost(GameData::Player->TechLevels[TECH_MA]); }
@@ -191,10 +193,10 @@ public:
 ////////////////////////////////////////////////////////////
 
 // Research
-public ref class IProdCmdResearch : public CmdProdBase<CommandType::Research>
+public ref class ProdCmdResearch : public CmdProdBase<CommandType::Research>
 {
 public:
-    IProdCmdResearch(TechType tech, int amount)
+    ProdCmdResearch(TechType tech, int amount)
         : m_Tech(tech), m_Amount(amount) {}
 
     virtual int     GetEUCost() override    { return m_Amount; }
@@ -204,6 +206,23 @@ public:
 
     TechType    m_Tech;
     int         m_Amount;
+};
+
+////////////////////////////////////////////////////////////
+
+// Build IU/AU
+public ref class ProdCmdBuildIUAU : public CmdProdBase<CommandType::BuildIuAu>
+{
+public:
+    ProdCmdBuildIUAU(int amount, String ^unit)
+        : m_Amount(amount), m_Unit(unit) {}
+
+    virtual int     GetEUCost() override    { return m_Amount; }
+    virtual int     GetCUMod() override     { return -m_Amount; }
+    virtual String^ Print() override        { return String::Format("Build {0} {1}", m_Amount, m_Unit); }
+
+    int         m_Amount;
+    String^     m_Unit;
 };
 
 ////////////////////////////////////////////////////////////

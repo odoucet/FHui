@@ -10,6 +10,8 @@
 #include "CommandManager.h"
 
 #include "CmdResearch.h"
+#include "CmdBuildShip.h"
+#include "CmdBuildIuAu.h"
 
 using namespace System::IO;
 using namespace System::Text::RegularExpressions;
@@ -1296,7 +1298,7 @@ void Form1::ColoniesInitControls()
     c.Size      = ADD_COLUMN("Size",        "Colony economic base",         double, Descending, Default);
     c.Prod      = ADD_COLUMN("PR",          "Production",                   int,    Descending, Default);
     c.ProdOrder = ADD_COLUMN("#",           "Production order for orders template", int, Ascending, Default);
-    c.Budget    = ADD_COLUMN("$",           "Budget after production orders",int,   Descending, Default);
+    c.Budget    = ADD_COLUMN("$",           "Budget after production orders",String,Descending, Default);
     c.Shipyards = ADD_COLUMN("SY",          "Shipyards",                    int,    Descending, Default);
     c.MD        = ADD_COLUMN("MD",          "Mining Difficulty",            double, Ascending,  Default);
     c.Grav      = ADD_COLUMN("Grav",        "Gravitation",                  double, Ascending,  Default);
@@ -1418,9 +1420,6 @@ void Form1::ColoniesSetup()
 
             cells[c.Prod]->Value    = prodCalculated;
             cells[c.ProdOrder]->Value = colony->ProductionOrder;
-            cells[c.Budget]->Value  = colony->Res->TotalEU;
-            if( colony->Res->TotalEU < 0 )
-                cells[c.Budget]->Style->ForeColor = Color::Red;
             cells[c.ProdPerc]->Value= 100 - colony->ProdPenalty;
             cells[c.Pop]->Value     = colony->AvailPop;
 
@@ -1432,13 +1431,28 @@ void Form1::ColoniesSetup()
             }
 
             String ^prodOrders = "";
+            int prodSum = 0;
             if( colony->Orders->Count > 0 )
             {
                 for each( ICommand ^cmd in colony->Orders )
+                {
                     prodOrders += m_CommandMgr->PrintCommandWithInfo(cmd) + "\r\n";
+                    prodSum += cmd->GetEUCost();
+                }
+                if( colony->Res->AvailEU < 0 )
+                {
+                    prodOrders += "!!! BUDGET EXCEEDED !!!";
+                    cells[c.Prod]->Style->ForeColor = Color::Red;
+                }
             }
             else
                 prodOrders = "< No production orders >";
+
+            cells[c.Budget]->Value  = prodSum != 0
+                ? String::Format("{0} ({1}{2})", colony->Res->TotalEU, prodSum < 0 ? "+" : "", -prodSum)
+                :  colony->Res->TotalEU.ToString();
+            if( colony->Res->TotalEU < 0 )
+                cells[c.Budget]->Style->ForeColor = Color::Red;
 
             cells[c.Prod]->ToolTipText      = prodOrders;
             cells[c.ProdOrder]->ToolTipText = prodOrders;
@@ -1580,7 +1594,7 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuProduction()
     {
         prodMenu->DropDownItems->Add( gcnew ToolStripSeparator );
         prodMenu->DropDownItems->Add( CreateCustomMenuItem(
-            "Clear All",
+            "Cancel All",
             static_cast<ICommand^>(nullptr),
             gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuProdCommandDel) ) );
     }
@@ -1613,23 +1627,33 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuProductionNew()
     {
         menu->DropDownItems->Add( CreateCustomMenuItem(
             "Hide Colony",
-            static_cast<ICommand^>(gcnew IProdCmdHide(colony)),
+            static_cast<ICommand^>(gcnew ProdCmdHide(colony)),
             gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuProdCommandAdd) ) );
     }
+    // Build IU/AU
+    menu->DropDownItems->Add(
+        "Build IU/AU...",
+        nullptr,
+        gcnew EventHandler(this, &Form1::ColoniesMenuProdCommandAddBuildIuAu) );
+    // Research
+    menu->DropDownItems->Add(
+        "Research...",
+        nullptr,
+        gcnew EventHandler(this, &Form1::ColoniesMenuProdCommandAddResearch) );
+    // Build Ship
+    menu->DropDownItems->Add(
+        "Build Ship...",
+        nullptr,
+        gcnew EventHandler(this, &Form1::ColoniesMenuProdCommandAddBuildShip) );
     // Shipyard
     if( bShipyard &&
         colony->GetMaxProductionBudget() > Calculators::ShipyardCost( GameData::Player->TechLevels[TECH_MA] ) )
     {
         menu->DropDownItems->Add( CreateCustomMenuItem(
             "Build Shipyard",
-            static_cast<ICommand^>(gcnew IProdCmdShipyard),
+            static_cast<ICommand^>(gcnew ProdCmdShipyard),
             gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuProdCommandAdd) ) );
     }
-    // Research
-    menu->DropDownItems->Add(
-        "Research...",
-        nullptr,
-        gcnew EventHandler(this, &Form1::ColoniesMenuProdCommandAddResearch) );
 
     return menu;
 }
@@ -1709,22 +1733,51 @@ void Form1::ColoniesMenuProdCommandAdd(ICommand ^cmd)
 
 void Form1::ColoniesMenuProdCommandAddResearch(Object^, EventArgs^)
 {
-    CmdResearch ^dlg = gcnew CmdResearch;
+    CmdResearch ^dlg = gcnew CmdResearch( m_ColoniesMenuRef->Res->AvailEU );
     if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
     {
         for( int i = 0; i < TECH_MAX; ++i )
         {
             TechType tech = static_cast<TechType>(i);
             int res = dlg->GetAmount(tech);
-            if( res != -1 )
+            if( res > 0 )
             {
                 ColoniesMenuProdCommandAdd(
-                    gcnew IProdCmdResearch(tech, res) );
+                    gcnew ProdCmdResearch(tech, res) );
             }
         }
     }
 
     delete dlg;
+}
+
+void Form1::ColoniesMenuProdCommandAddBuildIuAu(Object^, EventArgs^)
+{
+    CmdBuildIuAu ^dlg = gcnew CmdBuildIuAu(
+        m_ColoniesMenuRef->Res->AvailCU,
+        m_ColoniesMenuRef->Res->AvailEU );
+    if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
+    {
+        int iu = dlg->GetIUAmount();
+        if( iu > 0 )
+        {
+            ColoniesMenuProdCommandAdd(
+                gcnew ProdCmdBuildIUAU(iu, "IU") );
+        }
+
+        int au = dlg->GetAUAmount();
+        if( au > 0 )
+        {
+            ColoniesMenuProdCommandAdd(
+                gcnew ProdCmdBuildIUAU(au, "AU") );
+        }
+    }
+
+    delete dlg;
+}
+
+void Form1::ColoniesMenuProdCommandAddBuildShip(Object^, EventArgs^)
+{
 }
 
 void Form1::ColoniesMenuProdCommandDel(ICommand ^cmd)

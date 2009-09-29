@@ -69,26 +69,25 @@ void CmdResearch::UpdateAmount()
 {
     Decimal d = 0;
     for( int i = 0; i < TECH_MAX; ++i )
-        d += m_Groups[i].Amount->Value;
+    {
+        Decimal v = m_Groups[i].Amount->Value;
+        m_Groups[i].En->Checked = (v > Decimal::Zero);
+        d += v;
+    }
 
     AmountTotal->Text = d.ToString();
+    AmountTotal->ForeColor = d > m_AvailEU ? Color::Red : Color::Black;
 }
 
 void CmdResearch::UpdateEnable(Object ^sender)
 {
     for( int i = 0; i < TECH_MAX; ++i )
     {
-        if( sender == m_Groups[i].En )
+        if( m_Groups[i].En == sender )
         {
-            bool en = m_Groups[i].En->Checked;
-
-            m_Groups[i].Amount->Enabled  = en;
-            m_Groups[i].CalcAvg->Enabled = en;
-            m_Groups[i].CalcGtd->Enabled = en;
-            m_Groups[i].CalcGui->Enabled = en;
-            m_Groups[i].LvlFrom->Enabled = en;
-            m_Groups[i].LvlTo->Enabled   = en;
-
+            if( m_Groups[i].Amount->Value > Decimal::Zero )
+                m_Groups[i].Amount->Value = Decimal::Zero;
+            m_Groups[i].En->Checked = false;
             break;
         }
     }

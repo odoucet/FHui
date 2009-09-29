@@ -20,6 +20,7 @@ RegexMatcher::RegexMatcher()
     ExpCmdSPTeach   = gcnew Regex("^Teach ([A-Z]{2}) (\\d+) SP ([^,;]+)$");
     ExpCmdShipWormhole= gcnew Regex("^SHIP ([A-Z0-9]+) ([^,;]+) Wormhole\\s+([0-9-]+)$");
     ExpCmdResearch  = gcnew Regex("^Research (\\d+) ([A-Z]{2})$");
+    ExpCmdBuildIUAU = gcnew Regex("^Build (\\d+) ([IA]U)$");
 }
 
 int RegexMatcher::GetResultInt(int arg)

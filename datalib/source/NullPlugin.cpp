@@ -77,10 +77,10 @@ void BudgetTracker::UpdateEU(int eu)
     m_Colony->Res->AvailEU = m_BudgetAvail;
 
     if( m_BudgetAvail < 0 )
-        m_Orders->Add( String::Format("; !!!!!! Production limit exceeded by {0} !!!!!!", -m_BudgetAvail) );
+        AddComment( String::Format("; !!!!!! Production limit exceeded by {0} !!!!!!", -m_BudgetAvail) );
 
     if( m_BudgetTotal < 0 )
-        m_Orders->Add( String::Format("; !!!!!! BUDGET EXCEEDED by {0} !!!!!!", -m_BudgetTotal) );
+        AddComment( String::Format("; !!!!!! BUDGET EXCEEDED by {0} !!!!!!", -m_BudgetTotal) );
 }
 
 void BudgetTracker::UpdateCU(int pop)
@@ -88,7 +88,7 @@ void BudgetTracker::UpdateCU(int pop)
     m_Colony->Res->AvailCU += pop;
     if( m_Colony->Res->AvailCU < 0 )
     {
-        m_Orders->Add( String::Format("; !!!!!! NOT ENOUGH CU Available ({0} left) !!!!!!", m_Colony->Res->AvailCU - pop) );
+        AddComment( String::Format("; !!!!!! NOT ENOUGH CU Available ({0} left) !!!!!!", m_Colony->Res->AvailCU - pop) );
         m_Colony->Res->AvailCU = 0;
     }
 }
@@ -98,12 +98,17 @@ void BudgetTracker::UpdateInventory(InventoryType it, int mod)
     m_Colony->Res->Inventory[it] += mod;
     if( m_Colony->Res->Inventory[it] < 0 )
     {
-        m_Orders->Add( String::Format(
+        AddComment( String::Format(
             "; !!!!!! NOT ENOUGH Inventory Available ({0} {1} left) !!!!!!",
             m_Colony->Res->Inventory[it] - mod,
             FHStrings::InvToString(it) ) );
         m_Colony->Res->Inventory[it] = 0;
     }
+}
+
+void BudgetTracker::AddComment(String ^comment)
+{
+    m_Orders->Add( "    " + comment );
 }
 
 // ---------------------------------------------------------

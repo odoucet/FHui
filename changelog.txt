@@ -6,6 +6,10 @@ Minor changes are listed only if originally requested by player
 [P] denotes player requested features
 
 FHUI build ?
+* Research command dialog fixed to not allow research with budget 0.
+  While this is a valid command, it is not supported by FHUI.
+
+FHUI build 181
 + New Production context menu for owned colonies (on Colonies tab).
 + New column '$' on Colonies tab, shows budget calculation per colony
   after applying orders template, accounts auto and UI generated commands.

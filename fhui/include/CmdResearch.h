@@ -24,9 +24,13 @@ namespace FHUI
 	public ref class CmdResearch : public System::Windows::Forms::Form
 	{
 	public:
-		CmdResearch(void)
+		CmdResearch(int availEU)
 		{
 			InitializeComponent();
+
+            m_AvailEU = availEU;
+            AvailEU->Text = availEU.ToString();
+
             InitGroups();
 		}
 
@@ -51,6 +55,8 @@ namespace FHUI
         void    UpdateAmount();
         void    Calc(Object ^sender);
 
+
+        int     m_AvailEU;
 
         value struct Group
         {
@@ -111,6 +117,8 @@ private: System::Windows::Forms::NumericUpDown^  CalcLvlToBI;
 private: System::Windows::Forms::Button^  CalcAvgBI;
 private: System::Windows::Forms::Button^  CalcGtdBI;
 private: System::Windows::Forms::Button^  CalcGuiBI;
+    private: System::Windows::Forms::Label^  AvailEU;
+
     private: System::ComponentModel::IContainer^  components;
 
 	private:
@@ -133,6 +141,7 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             System::Windows::Forms::Label^  label5;
             System::Windows::Forms::Label^  label6;
             System::Windows::Forms::Label^  label31;
+            System::Windows::Forms::Label^  label4;
             this->AmountMI = (gcnew System::Windows::Forms::NumericUpDown());
             this->AmountMA = (gcnew System::Windows::Forms::NumericUpDown());
             this->AmountML = (gcnew System::Windows::Forms::NumericUpDown());
@@ -179,12 +188,14 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             this->CalcAvgBI = (gcnew System::Windows::Forms::Button());
             this->CalcGtdBI = (gcnew System::Windows::Forms::Button());
             this->CalcGuiBI = (gcnew System::Windows::Forms::Button());
+            this->AvailEU = (gcnew System::Windows::Forms::Label());
             label1 = (gcnew System::Windows::Forms::Label());
             label2 = (gcnew System::Windows::Forms::Label());
             label3 = (gcnew System::Windows::Forms::Label());
             label5 = (gcnew System::Windows::Forms::Label());
             label6 = (gcnew System::Windows::Forms::Label());
             label31 = (gcnew System::Windows::Forms::Label());
+            label4 = (gcnew System::Windows::Forms::Label());
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->AmountMI))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->AmountMA))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->AmountML))->BeginInit();
@@ -259,9 +270,17 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             label31->TabIndex = 0;
             label31->Text = L"Total:";
             // 
+            // label4
+            // 
+            label4->AutoSize = true;
+            label4->Location = System::Drawing::Point(195, 192);
+            label4->Name = L"label4";
+            label4->Size = System::Drawing::Size(44, 13);
+            label4->TabIndex = 0;
+            label4->Text = L"Budget:";
+            // 
             // AmountMI
             // 
-            this->AmountMI->Enabled = false;
             this->AmountMI->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {10, 0, 0, 0});
             this->AmountMI->Location = System::Drawing::Point(111, 30);
             this->AmountMI->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1000000000, 0, 0, 0});
@@ -273,7 +292,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // AmountMA
             // 
-            this->AmountMA->Enabled = false;
             this->AmountMA->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {10, 0, 0, 0});
             this->AmountMA->Location = System::Drawing::Point(111, 56);
             this->AmountMA->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1000000000, 0, 0, 0});
@@ -285,7 +303,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // AmountML
             // 
-            this->AmountML->Enabled = false;
             this->AmountML->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {10, 0, 0, 0});
             this->AmountML->Location = System::Drawing::Point(111, 82);
             this->AmountML->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1000000000, 0, 0, 0});
@@ -297,7 +314,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // AmountGV
             // 
-            this->AmountGV->Enabled = false;
             this->AmountGV->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {10, 0, 0, 0});
             this->AmountGV->Location = System::Drawing::Point(111, 108);
             this->AmountGV->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1000000000, 0, 0, 0});
@@ -309,7 +325,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // AmountLS
             // 
-            this->AmountLS->Enabled = false;
             this->AmountLS->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {10, 0, 0, 0});
             this->AmountLS->Location = System::Drawing::Point(111, 134);
             this->AmountLS->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1000000000, 0, 0, 0});
@@ -321,7 +336,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // AmountBI
             // 
-            this->AmountBI->Enabled = false;
             this->AmountBI->Increment = System::Decimal(gcnew cli::array< System::Int32 >(4) {10, 0, 0, 0});
             this->AmountBI->Location = System::Drawing::Point(111, 160);
             this->AmountBI->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1000000000, 0, 0, 0});
@@ -349,10 +363,11 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             this->EnMI->Name = L"EnMI";
             this->EnMI->Size = System::Drawing::Size(57, 17);
             this->EnMI->TabIndex = 2;
+            this->EnMI->TabStop = false;
             this->EnMI->Text = L"Mining";
             this->Tooltip->SetToolTip(this->EnMI, L"Enable this research");
             this->EnMI->UseVisualStyleBackColor = true;
-            this->EnMI->CheckedChanged += gcnew System::EventHandler(this, &CmdResearch::En_CheckedChanged);
+            this->EnMI->Click += gcnew System::EventHandler(this, &CmdResearch::En_CheckedChanged);
             // 
             // EnMA
             // 
@@ -361,10 +376,11 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             this->EnMA->Name = L"EnMA";
             this->EnMA->Size = System::Drawing::Size(94, 17);
             this->EnMA->TabIndex = 2;
+            this->EnMA->TabStop = false;
             this->EnMA->Text = L"Manufacturing";
             this->Tooltip->SetToolTip(this->EnMA, L"Enable this research");
             this->EnMA->UseVisualStyleBackColor = true;
-            this->EnMA->CheckedChanged += gcnew System::EventHandler(this, &CmdResearch::En_CheckedChanged);
+            this->EnMA->Click += gcnew System::EventHandler(this, &CmdResearch::En_CheckedChanged);
             // 
             // EnML
             // 
@@ -373,10 +389,11 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             this->EnML->Name = L"EnML";
             this->EnML->Size = System::Drawing::Size(58, 17);
             this->EnML->TabIndex = 2;
+            this->EnML->TabStop = false;
             this->EnML->Text = L"Military";
             this->Tooltip->SetToolTip(this->EnML, L"Enable this research");
             this->EnML->UseVisualStyleBackColor = true;
-            this->EnML->CheckedChanged += gcnew System::EventHandler(this, &CmdResearch::En_CheckedChanged);
+            this->EnML->Click += gcnew System::EventHandler(this, &CmdResearch::En_CheckedChanged);
             // 
             // EnGV
             // 
@@ -385,10 +402,11 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             this->EnGV->Name = L"EnGV";
             this->EnGV->Size = System::Drawing::Size(67, 17);
             this->EnGV->TabIndex = 2;
+            this->EnGV->TabStop = false;
             this->EnGV->Text = L"Gravitics";
             this->Tooltip->SetToolTip(this->EnGV, L"Enable this research");
             this->EnGV->UseVisualStyleBackColor = true;
-            this->EnGV->CheckedChanged += gcnew System::EventHandler(this, &CmdResearch::En_CheckedChanged);
+            this->EnGV->Click += gcnew System::EventHandler(this, &CmdResearch::En_CheckedChanged);
             // 
             // EnLS
             // 
@@ -397,10 +415,11 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             this->EnLS->Name = L"EnLS";
             this->EnLS->Size = System::Drawing::Size(83, 17);
             this->EnLS->TabIndex = 2;
+            this->EnLS->TabStop = false;
             this->EnLS->Text = L"Life Support";
             this->Tooltip->SetToolTip(this->EnLS, L"Enable this research");
             this->EnLS->UseVisualStyleBackColor = true;
-            this->EnLS->CheckedChanged += gcnew System::EventHandler(this, &CmdResearch::En_CheckedChanged);
+            this->EnLS->Click += gcnew System::EventHandler(this, &CmdResearch::En_CheckedChanged);
             // 
             // EnBI
             // 
@@ -409,10 +428,11 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             this->EnBI->Name = L"EnBI";
             this->EnBI->Size = System::Drawing::Size(60, 17);
             this->EnBI->TabIndex = 2;
+            this->EnBI->TabStop = false;
             this->EnBI->Text = L"Biology";
             this->Tooltip->SetToolTip(this->EnBI, L"Enable this research");
             this->EnBI->UseVisualStyleBackColor = true;
-            this->EnBI->CheckedChanged += gcnew System::EventHandler(this, &CmdResearch::En_CheckedChanged);
+            this->EnBI->Click += gcnew System::EventHandler(this, &CmdResearch::En_CheckedChanged);
             // 
             // BtnResearch
             // 
@@ -437,7 +457,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcLvlFromMI
             // 
-            this->CalcLvlFromMI->Enabled = false;
             this->CalcLvlFromMI->Location = System::Drawing::Point(320, 30);
             this->CalcLvlFromMI->Name = L"CalcLvlFromMI";
             this->CalcLvlFromMI->Size = System::Drawing::Size(48, 20);
@@ -446,7 +465,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcLvlToMI
             // 
-            this->CalcLvlToMI->Enabled = false;
             this->CalcLvlToMI->Location = System::Drawing::Point(377, 30);
             this->CalcLvlToMI->Name = L"CalcLvlToMI";
             this->CalcLvlToMI->Size = System::Drawing::Size(48, 20);
@@ -455,7 +473,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcAvgMI
             // 
-            this->CalcAvgMI->Enabled = false;
             this->CalcAvgMI->Location = System::Drawing::Point(195, 28);
             this->CalcAvgMI->Name = L"CalcAvgMI";
             this->CalcAvgMI->Size = System::Drawing::Size(35, 22);
@@ -467,7 +484,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcGtdMI
             // 
-            this->CalcGtdMI->Enabled = false;
             this->CalcGtdMI->Location = System::Drawing::Point(231, 28);
             this->CalcGtdMI->Name = L"CalcGtdMI";
             this->CalcGtdMI->Size = System::Drawing::Size(35, 22);
@@ -479,7 +495,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcGuiMI
             // 
-            this->CalcGuiMI->Enabled = false;
             this->CalcGuiMI->Location = System::Drawing::Point(267, 28);
             this->CalcGuiMI->Name = L"CalcGuiMI";
             this->CalcGuiMI->Size = System::Drawing::Size(35, 22);
@@ -491,7 +506,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcLvlFromMA
             // 
-            this->CalcLvlFromMA->Enabled = false;
             this->CalcLvlFromMA->Location = System::Drawing::Point(320, 55);
             this->CalcLvlFromMA->Name = L"CalcLvlFromMA";
             this->CalcLvlFromMA->Size = System::Drawing::Size(48, 20);
@@ -499,7 +513,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcLvlToMA
             // 
-            this->CalcLvlToMA->Enabled = false;
             this->CalcLvlToMA->Location = System::Drawing::Point(377, 55);
             this->CalcLvlToMA->Name = L"CalcLvlToMA";
             this->CalcLvlToMA->Size = System::Drawing::Size(48, 20);
@@ -507,7 +520,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcAvgMA
             // 
-            this->CalcAvgMA->Enabled = false;
             this->CalcAvgMA->Location = System::Drawing::Point(195, 54);
             this->CalcAvgMA->Name = L"CalcAvgMA";
             this->CalcAvgMA->Size = System::Drawing::Size(35, 22);
@@ -518,7 +530,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcGtdMA
             // 
-            this->CalcGtdMA->Enabled = false;
             this->CalcGtdMA->Location = System::Drawing::Point(231, 54);
             this->CalcGtdMA->Name = L"CalcGtdMA";
             this->CalcGtdMA->Size = System::Drawing::Size(35, 22);
@@ -529,7 +540,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcGuiMA
             // 
-            this->CalcGuiMA->Enabled = false;
             this->CalcGuiMA->Location = System::Drawing::Point(267, 54);
             this->CalcGuiMA->Name = L"CalcGuiMA";
             this->CalcGuiMA->Size = System::Drawing::Size(35, 22);
@@ -540,7 +550,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcLvlFromML
             // 
-            this->CalcLvlFromML->Enabled = false;
             this->CalcLvlFromML->Location = System::Drawing::Point(320, 81);
             this->CalcLvlFromML->Name = L"CalcLvlFromML";
             this->CalcLvlFromML->Size = System::Drawing::Size(48, 20);
@@ -548,7 +557,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcLvlToML
             // 
-            this->CalcLvlToML->Enabled = false;
             this->CalcLvlToML->Location = System::Drawing::Point(377, 81);
             this->CalcLvlToML->Name = L"CalcLvlToML";
             this->CalcLvlToML->Size = System::Drawing::Size(48, 20);
@@ -556,7 +564,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcAvgML
             // 
-            this->CalcAvgML->Enabled = false;
             this->CalcAvgML->Location = System::Drawing::Point(195, 80);
             this->CalcAvgML->Name = L"CalcAvgML";
             this->CalcAvgML->Size = System::Drawing::Size(35, 22);
@@ -567,7 +574,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcGtdML
             // 
-            this->CalcGtdML->Enabled = false;
             this->CalcGtdML->Location = System::Drawing::Point(231, 80);
             this->CalcGtdML->Name = L"CalcGtdML";
             this->CalcGtdML->Size = System::Drawing::Size(35, 22);
@@ -578,7 +584,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcGuiML
             // 
-            this->CalcGuiML->Enabled = false;
             this->CalcGuiML->Location = System::Drawing::Point(267, 80);
             this->CalcGuiML->Name = L"CalcGuiML";
             this->CalcGuiML->Size = System::Drawing::Size(35, 22);
@@ -589,7 +594,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcLvlFromGV
             // 
-            this->CalcLvlFromGV->Enabled = false;
             this->CalcLvlFromGV->Location = System::Drawing::Point(320, 107);
             this->CalcLvlFromGV->Name = L"CalcLvlFromGV";
             this->CalcLvlFromGV->Size = System::Drawing::Size(48, 20);
@@ -597,7 +601,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcLvlToGV
             // 
-            this->CalcLvlToGV->Enabled = false;
             this->CalcLvlToGV->Location = System::Drawing::Point(377, 107);
             this->CalcLvlToGV->Name = L"CalcLvlToGV";
             this->CalcLvlToGV->Size = System::Drawing::Size(48, 20);
@@ -605,7 +608,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcAvgGV
             // 
-            this->CalcAvgGV->Enabled = false;
             this->CalcAvgGV->Location = System::Drawing::Point(195, 106);
             this->CalcAvgGV->Name = L"CalcAvgGV";
             this->CalcAvgGV->Size = System::Drawing::Size(35, 22);
@@ -616,7 +618,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcGtdGV
             // 
-            this->CalcGtdGV->Enabled = false;
             this->CalcGtdGV->Location = System::Drawing::Point(231, 106);
             this->CalcGtdGV->Name = L"CalcGtdGV";
             this->CalcGtdGV->Size = System::Drawing::Size(35, 22);
@@ -627,7 +628,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcGuiGV
             // 
-            this->CalcGuiGV->Enabled = false;
             this->CalcGuiGV->Location = System::Drawing::Point(267, 106);
             this->CalcGuiGV->Name = L"CalcGuiGV";
             this->CalcGuiGV->Size = System::Drawing::Size(35, 22);
@@ -638,7 +638,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcLvlFromLS
             // 
-            this->CalcLvlFromLS->Enabled = false;
             this->CalcLvlFromLS->Location = System::Drawing::Point(320, 133);
             this->CalcLvlFromLS->Name = L"CalcLvlFromLS";
             this->CalcLvlFromLS->Size = System::Drawing::Size(48, 20);
@@ -646,7 +645,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcLvlToLS
             // 
-            this->CalcLvlToLS->Enabled = false;
             this->CalcLvlToLS->Location = System::Drawing::Point(377, 133);
             this->CalcLvlToLS->Name = L"CalcLvlToLS";
             this->CalcLvlToLS->Size = System::Drawing::Size(48, 20);
@@ -654,7 +652,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcAvgLS
             // 
-            this->CalcAvgLS->Enabled = false;
             this->CalcAvgLS->Location = System::Drawing::Point(195, 132);
             this->CalcAvgLS->Name = L"CalcAvgLS";
             this->CalcAvgLS->Size = System::Drawing::Size(35, 22);
@@ -665,7 +662,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcGtdLS
             // 
-            this->CalcGtdLS->Enabled = false;
             this->CalcGtdLS->Location = System::Drawing::Point(231, 132);
             this->CalcGtdLS->Name = L"CalcGtdLS";
             this->CalcGtdLS->Size = System::Drawing::Size(35, 22);
@@ -676,7 +672,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcGuiLS
             // 
-            this->CalcGuiLS->Enabled = false;
             this->CalcGuiLS->Location = System::Drawing::Point(267, 132);
             this->CalcGuiLS->Name = L"CalcGuiLS";
             this->CalcGuiLS->Size = System::Drawing::Size(35, 22);
@@ -687,7 +682,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcLvlFromBI
             // 
-            this->CalcLvlFromBI->Enabled = false;
             this->CalcLvlFromBI->Location = System::Drawing::Point(320, 159);
             this->CalcLvlFromBI->Name = L"CalcLvlFromBI";
             this->CalcLvlFromBI->Size = System::Drawing::Size(48, 20);
@@ -695,7 +689,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcLvlToBI
             // 
-            this->CalcLvlToBI->Enabled = false;
             this->CalcLvlToBI->Location = System::Drawing::Point(377, 159);
             this->CalcLvlToBI->Name = L"CalcLvlToBI";
             this->CalcLvlToBI->Size = System::Drawing::Size(48, 20);
@@ -703,7 +696,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcAvgBI
             // 
-            this->CalcAvgBI->Enabled = false;
             this->CalcAvgBI->Location = System::Drawing::Point(195, 158);
             this->CalcAvgBI->Name = L"CalcAvgBI";
             this->CalcAvgBI->Size = System::Drawing::Size(35, 22);
@@ -714,7 +706,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcGtdBI
             // 
-            this->CalcGtdBI->Enabled = false;
             this->CalcGtdBI->Location = System::Drawing::Point(231, 158);
             this->CalcGtdBI->Name = L"CalcGtdBI";
             this->CalcGtdBI->Size = System::Drawing::Size(35, 22);
@@ -725,7 +716,6 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // CalcGuiBI
             // 
-            this->CalcGuiBI->Enabled = false;
             this->CalcGuiBI->Location = System::Drawing::Point(267, 158);
             this->CalcGuiBI->Name = L"CalcGuiBI";
             this->CalcGuiBI->Size = System::Drawing::Size(35, 22);
@@ -733,6 +723,16 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             this->CalcGuiBI->Text = L"Gui";
             this->CalcGuiBI->UseVisualStyleBackColor = true;
             this->CalcGuiBI->Click += gcnew System::EventHandler(this, &CmdResearch::Calc_Click);
+            // 
+            // AvailEU
+            // 
+            this->AvailEU->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
+            this->AvailEU->Location = System::Drawing::Point(240, 188);
+            this->AvailEU->Name = L"AvailEU";
+            this->AvailEU->Size = System::Drawing::Size(61, 20);
+            this->AvailEU->TabIndex = 0;
+            this->AvailEU->Text = L"0";
+            this->AvailEU->TextAlign = System::Drawing::ContentAlignment::MiddleLeft;
             // 
             // CmdResearch
             // 
@@ -786,12 +786,16 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             this->Controls->Add(label3);
             this->Controls->Add(label6);
             this->Controls->Add(label5);
+            this->Controls->Add(this->AvailEU);
             this->Controls->Add(this->AmountTotal);
+            this->Controls->Add(label4);
             this->Controls->Add(label2);
             this->Controls->Add(label31);
             this->Controls->Add(label1);
+            this->MaximumSize = System::Drawing::Size(458, 287);
+            this->MinimumSize = System::Drawing::Size(458, 287);
             this->Name = L"CmdResearch";
-            this->Text = L"CmdResearch";
+            this->Text = L"Research";
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->AmountMI))->EndInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->AmountMA))->EndInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->AmountML))->EndInit();

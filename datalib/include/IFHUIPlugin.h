@@ -87,6 +87,8 @@ public:
     int         GetTotalBudget()        { return m_BudgetTotal; }
 
 protected:
+    void        BudgetTracker::AddComment(String ^comment);
+
     List<String^>^  m_Orders;
     List<String^>^  m_OrdersGlobal;
     Colony^         m_Colony;

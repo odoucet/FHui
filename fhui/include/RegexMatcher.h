@@ -38,6 +38,7 @@ public:
     initonly Regex^     ExpCmdSPEnemy;
     initonly Regex^     ExpCmdSPTeach;
     initonly Regex^     ExpCmdResearch;
+    initonly Regex^     ExpCmdBuildIUAU;
 };
 
 } // end namespace FHUI

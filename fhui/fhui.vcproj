@@ -97,7 +97,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy changelog to build output dir."
-				CommandLine="copy $(SolutionDir)\changelog.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy $(SolutionDir)\readme.txt &quot;$(TargetDir)&quot;"
+				CommandLine="copy $(SolutionDir)\changelog.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy $(SolutionDir)\readme.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -179,7 +179,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy changelog to build output dir."
-				CommandLine="copy $(SolutionDir)\changelog.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy $(SolutionDir)\readme.txt &quot;$(TargetDir)&quot;"
+				CommandLine="copy $(SolutionDir)\changelog.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy $(SolutionDir)\readme.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -261,7 +261,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy changelog to build output dir."
-				CommandLine="copy $(SolutionDir)\changelog.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy $(SolutionDir)\readme.txt &quot;$(TargetDir)&quot;"
+				CommandLine="copy $(SolutionDir)\changelog.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy $(SolutionDir)\readme.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
@@ -319,6 +319,14 @@
 				</File>
 				<File
 					RelativePath=".\source\BuildInfo.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\CmdBuildIuAu.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\CmdBuildShip.cpp"
 					>
 				</File>
 				<File
@@ -420,6 +428,24 @@
 				<File
 					RelativePath=".\include\BuildInfo.h"
 					>
+				</File>
+				<File
+					RelativePath=".\include\CmdBuildIuAu.h"
+					FileType="3"
+					>
+					<File
+						RelativePath=".\include\CmdBuildIuAu.resx"
+						>
+					</File>
+				</File>
+				<File
+					RelativePath=".\include\CmdBuildShip.h"
+					FileType="3"
+					>
+					<File
+						RelativePath=".\include\CmdBuildShip.resx"
+						>
+					</File>
 				</File>
 				<File
 					RelativePath=".\include\CmdResearch.h"
