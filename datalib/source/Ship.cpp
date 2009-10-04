@@ -190,31 +190,8 @@ void Ship::CalculateCapacity()
 
 void Ship::SetupTonnage()
 {
-    switch( Type )
-    {
-    case SHIP_BAS:  Tonnage = Size; break;
-    case SHIP_TR:   Tonnage = Size * 10000; break;
-    case SHIP_PB:   Tonnage = 10000;  break;
-    case SHIP_CT:   Tonnage = 20000;  break;
-    case SHIP_ES:   Tonnage = 50000;  break;
-    case SHIP_FF:   Tonnage = 100000; break;
-    case SHIP_DD:   Tonnage = 150000; break;
-    case SHIP_CL:   Tonnage = 200000; break;
-    case SHIP_CS:   Tonnage = 250000; break;
-    case SHIP_CA:   Tonnage = 300000; break;
-    case SHIP_CC:   Tonnage = 350000; break;
-    case SHIP_BC:   Tonnage = 400000; break;
-    case SHIP_BS:   Tonnage = 450000; break;
-    case SHIP_DN:   Tonnage = 500000; break;
-    case SHIP_SD:   Tonnage = 550000; break;
-    case SHIP_BM:   Tonnage = 600000; break;
-    case SHIP_BW:   Tonnage = 650000; break;
-    case SHIP_BR:   Tonnage = 700000; break;
-    }
-
-    OriginalCost = Tonnage / 100;
-    if( SubLight )
-        OriginalCost = (3 * OriginalCost) / 4;
+    Tonnage = Calculators::ShipTonnage(Type, Size);
+    OriginalCost = Calculators::ShipBuildCost(Type, Size, SubLight);
 
     if( Type == SHIP_TR )
         WarTonnage = Tonnage / 10;
@@ -235,15 +212,6 @@ int Ship::GetRecycleValue()
         return (OriginalCost - EUToComplete) / 2;
 
     return Calculators::ShipRecycleValue(Age, OriginalCost);
-}
-
-int Ship::GetMaintenanceCost()
-{
-    if( Type == SHIP_BAS )
-        return OriginalCost / 10;
-    if( Type == SHIP_TR )
-        return OriginalCost / 25;
-    return OriginalCost / 5;
 }
 
 String^ Ship::Order::Print()

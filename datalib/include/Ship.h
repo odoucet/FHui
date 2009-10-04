@@ -91,7 +91,6 @@ public:
     String^         PrintCargo();
     String^         PrintRefListEntry();
 
-    int             GetMaintenanceCost();
     int             GetUpgradeCost();
     int             GetRecycleValue();
 

@@ -227,4 +227,26 @@ public:
 
 ////////////////////////////////////////////////////////////
 
+// Build Ship
+public ref class ProdCmdBuildShip : public CmdProdBase<CommandType::BuildShip>
+{
+public:
+    ProdCmdBuildShip(ShipType type, int size, bool sublight, String ^name)
+        : m_Type(type), m_Size(size), m_Sublight(sublight), m_Name(name) {}
+
+    virtual int     GetEUCost() override    { return Calculators::ShipBuildCost(m_Type, m_Size, m_Sublight); }
+    virtual String^ Print() override        { return String::Format("Build {0}{1}{2} {3}",
+                                                    FHStrings::ShipToString(m_Type),
+                                                    m_Type == SHIP_TR ? m_Size.ToString() : "",
+                                                    m_Sublight ? "S" : "",
+                                                    m_Name ); }
+
+    ShipType    m_Type;
+    int         m_Size;
+    bool        m_Sublight;
+    String^     m_Name;
+};
+
+////////////////////////////////////////////////////////////
+
 } // end namespace FHUI

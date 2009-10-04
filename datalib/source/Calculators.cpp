@@ -26,6 +26,80 @@ double Calculators::Mishap(int xFrom, int yFrom, int zFrom, int xTo, int yTo, in
     return (dist * dist) / gv + (age * 2.0);
 }
 
+int Calculators::ShipTonnage(ShipType type, int size)
+{
+    switch( type )
+    {
+    case SHIP_BAS:  return size;
+    case SHIP_TR:   return size * 10000;
+    case SHIP_PB:   return 10000;
+    case SHIP_CT:   return 20000;
+    case SHIP_ES:   return 50000;
+    case SHIP_FF:   return 100000;
+    case SHIP_DD:   return 150000;
+    case SHIP_CL:   return 200000;
+    case SHIP_CS:   return 250000;
+    case SHIP_CA:   return 300000;
+    case SHIP_CC:   return 350000;
+    case SHIP_BC:   return 400000;
+    case SHIP_BS:   return 450000;
+    case SHIP_DN:   return 500000;
+    case SHIP_SD:   return 550000;
+    case SHIP_BM:   return 600000;
+    case SHIP_BW:   return 650000;
+    case SHIP_BR:   return 700000;
+    default:
+        return 0;
+    }
+}
+
+int Calculators::ShipMARequired(ShipType type, int size)
+{
+    switch( type )
+    {
+    case SHIP_BAS:  return size / 10000;
+    case SHIP_TR:   return size * 2;
+    case SHIP_PB:   return 2;
+    case SHIP_CT:   return 4;
+    case SHIP_ES:   return 10;
+    case SHIP_FF:   return 20;
+    case SHIP_DD:   return 30;
+    case SHIP_CL:   return 40;
+    case SHIP_CS:   return 50;
+    case SHIP_CA:   return 60;
+    case SHIP_CC:   return 70;
+    case SHIP_BC:   return 80;
+    case SHIP_BS:   return 90;
+    case SHIP_DN:   return 100;
+    case SHIP_SD:   return 110;
+    case SHIP_BM:   return 120;
+    case SHIP_BW:   return 130;
+    case SHIP_BR:   return 140;
+    default:
+        return 0;
+    }
+}
+
+int Calculators::ShipBuildCost(ShipType type, int size, bool sublight)
+{
+    int cost = ShipTonnage(type, size) / 100;
+    if( sublight )
+        cost = (3 * cost) / 4;
+    return cost;
+}
+
+int Calculators::ShipMaintenanceCost(ShipType type, int size, bool sublight)
+{
+    int buildCost = ShipBuildCost(type, size, sublight);
+
+    if( type == SHIP_BAS )
+        return buildCost / 10;
+    if( type == SHIP_TR )
+        return buildCost / 25;
+    return buildCost / 5;
+
+}
+
 int Calculators::ShipUpgradeCost(int age, int originalCost)
 {
     return age * originalCost / 40;

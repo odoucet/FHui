@@ -439,11 +439,11 @@
 					</File>
 				</File>
 				<File
-					RelativePath=".\include\CmdBuildShip.h"
+					RelativePath=".\include\CmdBuildShips.h"
 					FileType="3"
 					>
 					<File
-						RelativePath=".\include\CmdBuildShip.resx"
+						RelativePath=".\include\CmdBuildShips.resx"
 						>
 					</File>
 				</File>

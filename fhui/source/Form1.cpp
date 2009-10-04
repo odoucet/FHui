@@ -10,7 +10,7 @@
 #include "CommandManager.h"
 
 #include "CmdResearch.h"
-#include "CmdBuildShip.h"
+#include "CmdBuildShips.h"
 #include "CmdBuildIuAu.h"
 
 using namespace System::IO;
@@ -1778,6 +1778,15 @@ void Form1::ColoniesMenuProdCommandAddBuildIuAu(Object^, EventArgs^)
 
 void Form1::ColoniesMenuProdCommandAddBuildShip(Object^, EventArgs^)
 {
+    CmdBuildShips ^dlg = gcnew CmdBuildShips(
+        m_ColoniesMenuRef->Res->AvailEU,
+        GameData::Player->TechLevels[TECH_MA] );
+    if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
+    {
+        ColoniesMenuProdCommandAdd( dlg->CreateCommand() );
+    }
+
+    delete dlg;
 }
 
 void Form1::ColoniesMenuProdCommandDel(ICommand ^cmd)
@@ -1941,7 +1950,7 @@ void Form1::ShipsSetup()
         if( sp == ship->Owner )
         {
             cells[c.Cargo]->Value   = ship->PrintCargo();
-            cells[c.Maint]->Value   = ship->GetMaintenanceCost() * discount;
+            cells[c.Maint]->Value   = Calculators::ShipMaintenanceCost(ship->Type, ship->Size, ship->SubLight) * discount;
             cells[c.UpgCost]->Value = ship->GetUpgradeCost();
             cells[c.RecVal]->Value  = ship->GetRecycleValue();
             if( ship->Command )

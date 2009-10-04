@@ -12,6 +12,10 @@ public:
     static double   Distance(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo);
     static double   Mishap(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo, int gv, int age);
 
+    static int      ShipTonnage(ShipType type, int size);
+    static int      ShipMARequired(ShipType type, int size);
+    static int      ShipBuildCost(ShipType type, int size, bool sublight);
+    static int      ShipMaintenanceCost(ShipType type, int size, bool sublight);
     static int      ShipUpgradeCost(int age, int originalCost);
     static int      ShipRecycleValue(int age, int originalCost);
     static double   ShipMaintenanceDiscount(int mlLevel);

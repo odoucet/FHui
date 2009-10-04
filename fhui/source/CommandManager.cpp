@@ -377,7 +377,26 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
         int amount = m_RM->GetResultInt(0);
         colony->Orders->Add( gcnew ProdCmdBuildIUAU(amount, m_RM->Results[1]) );
         return true;
-   }
+    }
+
+    if( m_RM->Match(line, m_RM->ExpCmdBuildShip) )
+    {
+        colony->Orders->Add( gcnew ProdCmdBuildShip(
+            FHStrings::ShipFromString(m_RM->Results[0]),
+            0,
+            String::IsNullOrEmpty(m_RM->Results[1]) == false,
+            m_RM->Results[2] ) );
+        return true;
+    }
+    if( m_RM->Match(line, m_RM->ExpCmdBuildShipTR) )
+    {
+        colony->Orders->Add( gcnew ProdCmdBuildShip(
+            SHIP_TR,
+            m_RM->GetResultInt(0),
+            String::IsNullOrEmpty(m_RM->Results[1]) == false,
+            m_RM->Results[2] ) );
+        return true;
+    }
 
     return false;
 }

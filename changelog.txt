@@ -5,9 +5,12 @@ Minor changes are listed only if originally requested by player
 + New features
 [P] denotes player requested features
 
-FHUI build ?
+FHUI build 183
 * Research command dialog fixed to not allow research with budget 0.
   While this is a valid command, it is not supported by FHUI.
+* Fixed bug in orders generator budget for home system.
++ Build IU/AU production command added.
++ Build Ship production command added.
 
 FHUI build 181
 + New Production context menu for owned colonies (on Colonies tab).

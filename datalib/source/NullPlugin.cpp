@@ -37,7 +37,7 @@ void BudgetTracker::SetColony(Colony ^colony)
     if( m_Colony )
     {
         m_BudgetTotal += colony->EUAvail;
-        m_BudgetAvail = colony->GetMaxProductionBudget();
+        m_BudgetAvail = Math::Min(m_BudgetTotal, colony->GetMaxProductionBudget());
 
         m_Colony->ProductionReset();
         m_Colony->Res->TotalEU = m_BudgetTotal;
