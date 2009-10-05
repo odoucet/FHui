@@ -28,6 +28,7 @@ namespace FHUI {
             InitAvailResources(availPop, availEU);
 		}
 
+        int     GetCUAmount();
         int     GetIUAmount();
         int     GetAUAmount();
 
@@ -55,6 +56,7 @@ namespace FHUI {
     private: System::Windows::Forms::Label^  TotalCost;
     private: System::Windows::Forms::Button^  BtnBuild;
     private: System::Windows::Forms::Button^  BtnCancel;
+    private: System::Windows::Forms::NumericUpDown^  CUAmount;
     private: System::Windows::Forms::Label^  AvailEU;
 
 	private:
@@ -75,6 +77,7 @@ namespace FHUI {
             System::Windows::Forms::Label^  label2;
             System::Windows::Forms::Label^  label1;
             System::Windows::Forms::Label^  label5;
+            System::Windows::Forms::Label^  label6;
             this->AvailPop = (gcnew System::Windows::Forms::Label());
             this->IUAmount = (gcnew System::Windows::Forms::NumericUpDown());
             this->AUAmount = (gcnew System::Windows::Forms::NumericUpDown());
@@ -82,19 +85,22 @@ namespace FHUI {
             this->BtnBuild = (gcnew System::Windows::Forms::Button());
             this->BtnCancel = (gcnew System::Windows::Forms::Button());
             this->AvailEU = (gcnew System::Windows::Forms::Label());
+            this->CUAmount = (gcnew System::Windows::Forms::NumericUpDown());
             label3 = (gcnew System::Windows::Forms::Label());
             label4 = (gcnew System::Windows::Forms::Label());
             label2 = (gcnew System::Windows::Forms::Label());
             label1 = (gcnew System::Windows::Forms::Label());
             label5 = (gcnew System::Windows::Forms::Label());
+            label6 = (gcnew System::Windows::Forms::Label());
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->IUAmount))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->AUAmount))->BeginInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->CUAmount))->BeginInit();
             this->SuspendLayout();
             // 
             // label3
             // 
             label3->AutoSize = true;
-            label3->Location = System::Drawing::Point(12, 82);
+            label3->Location = System::Drawing::Point(12, 105);
             label3->Name = L"label3";
             label3->Size = System::Drawing::Size(51, 13);
             label3->TabIndex = 3;
@@ -103,7 +109,7 @@ namespace FHUI {
             // label4
             // 
             label4->AutoSize = true;
-            label4->Location = System::Drawing::Point(12, 106);
+            label4->Location = System::Drawing::Point(12, 130);
             label4->Name = L"label4";
             label4->Size = System::Drawing::Size(57, 13);
             label4->TabIndex = 4;
@@ -112,7 +118,7 @@ namespace FHUI {
             // label2
             // 
             label2->AutoSize = true;
-            label2->Location = System::Drawing::Point(12, 55);
+            label2->Location = System::Drawing::Point(12, 78);
             label2->Name = L"label2";
             label2->Size = System::Drawing::Size(47, 13);
             label2->TabIndex = 1;
@@ -123,9 +129,9 @@ namespace FHUI {
             label1->AutoSize = true;
             label1->Location = System::Drawing::Point(12, 9);
             label1->Name = L"label1";
-            label1->Size = System::Drawing::Size(71, 13);
+            label1->Size = System::Drawing::Size(106, 13);
             label1->TabIndex = 2;
-            label1->Text = L"Available CU:";
+            label1->Text = L"Available Population:";
             // 
             // label5
             // 
@@ -138,7 +144,7 @@ namespace FHUI {
             // 
             // AvailPop
             // 
-            this->AvailPop->Location = System::Drawing::Point(95, 9);
+            this->AvailPop->Location = System::Drawing::Point(120, 9);
             this->AvailPop->Name = L"AvailPop";
             this->AvailPop->Size = System::Drawing::Size(60, 13);
             this->AvailPop->TabIndex = 5;
@@ -146,7 +152,7 @@ namespace FHUI {
             // 
             // IUAmount
             // 
-            this->IUAmount->Location = System::Drawing::Point(95, 51);
+            this->IUAmount->Location = System::Drawing::Point(95, 74);
             this->IUAmount->Name = L"IUAmount";
             this->IUAmount->Size = System::Drawing::Size(60, 20);
             this->IUAmount->TabIndex = 0;
@@ -154,7 +160,7 @@ namespace FHUI {
             // 
             // AUAmount
             // 
-            this->AUAmount->Location = System::Drawing::Point(95, 78);
+            this->AUAmount->Location = System::Drawing::Point(95, 101);
             this->AUAmount->Name = L"AUAmount";
             this->AUAmount->Size = System::Drawing::Size(60, 20);
             this->AUAmount->TabIndex = 1;
@@ -162,7 +168,7 @@ namespace FHUI {
             // 
             // TotalCost
             // 
-            this->TotalCost->Location = System::Drawing::Point(95, 106);
+            this->TotalCost->Location = System::Drawing::Point(95, 130);
             this->TotalCost->Name = L"TotalCost";
             this->TotalCost->Size = System::Drawing::Size(60, 13);
             this->TotalCost->TabIndex = 5;
@@ -170,7 +176,7 @@ namespace FHUI {
             // 
             // BtnBuild
             // 
-            this->BtnBuild->Location = System::Drawing::Point(12, 132);
+            this->BtnBuild->Location = System::Drawing::Point(13, 156);
             this->BtnBuild->Name = L"BtnBuild";
             this->BtnBuild->Size = System::Drawing::Size(75, 23);
             this->BtnBuild->TabIndex = 2;
@@ -180,7 +186,7 @@ namespace FHUI {
             // 
             // BtnCancel
             // 
-            this->BtnCancel->Location = System::Drawing::Point(93, 132);
+            this->BtnCancel->Location = System::Drawing::Point(94, 156);
             this->BtnCancel->Name = L"BtnCancel";
             this->BtnCancel->Size = System::Drawing::Size(75, 23);
             this->BtnCancel->TabIndex = 3;
@@ -190,26 +196,45 @@ namespace FHUI {
             // 
             // AvailEU
             // 
-            this->AvailEU->Location = System::Drawing::Point(95, 27);
+            this->AvailEU->Location = System::Drawing::Point(120, 27);
             this->AvailEU->Name = L"AvailEU";
             this->AvailEU->Size = System::Drawing::Size(60, 13);
             this->AvailEU->TabIndex = 5;
             this->AvailEU->Text = L"0";
             // 
+            // label6
+            // 
+            label6->AutoSize = true;
+            label6->Location = System::Drawing::Point(12, 52);
+            label6->Name = L"label6";
+            label6->Size = System::Drawing::Size(51, 13);
+            label6->TabIndex = 1;
+            label6->Text = L"Build CU:";
+            // 
+            // CUAmount
+            // 
+            this->CUAmount->Location = System::Drawing::Point(95, 48);
+            this->CUAmount->Name = L"CUAmount";
+            this->CUAmount->Size = System::Drawing::Size(60, 20);
+            this->CUAmount->TabIndex = 0;
+            this->CUAmount->ValueChanged += gcnew System::EventHandler(this, &CmdBuildIuAu::Amount_ValueChanged);
+            // 
             // CmdBuildIuAu
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
             this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-            this->ClientSize = System::Drawing::Size(197, 164);
+            this->ClientSize = System::Drawing::Size(182, 191);
             this->Controls->Add(this->BtnCancel);
             this->Controls->Add(this->BtnBuild);
             this->Controls->Add(this->AUAmount);
+            this->Controls->Add(this->CUAmount);
             this->Controls->Add(this->IUAmount);
             this->Controls->Add(this->TotalCost);
             this->Controls->Add(this->AvailEU);
             this->Controls->Add(this->AvailPop);
             this->Controls->Add(label3);
             this->Controls->Add(label4);
+            this->Controls->Add(label6);
             this->Controls->Add(label5);
             this->Controls->Add(label2);
             this->Controls->Add(label1);
@@ -217,6 +242,7 @@ namespace FHUI {
             this->Text = L"Build IU & AU";
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->IUAmount))->EndInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->AUAmount))->EndInit();
+            (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->CUAmount))->EndInit();
             this->ResumeLayout(false);
             this->PerformLayout();
 

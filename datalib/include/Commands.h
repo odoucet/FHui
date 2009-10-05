@@ -45,10 +45,10 @@ public interface class ICommand : public IComparable
     // EU/CU/Inventory modifiers to budget / colony inventory
     // POSITIVE value mean:
     //  - EU SPENT (negative modifier to budget)
-    //  + CU TRANSFERRED TO colony from transport ship or other colony
+    //  - Population USED for production (negative modifier to budget)
     //  + Inventory moved TRANSFERRED TO colony from transport ship or other colony
     int             GetEUCost();
-    int             GetCUMod();
+    int             GetPopCost();
     int             GetInvMod(InventoryType);
 
     String^         Print();
@@ -63,7 +63,7 @@ public:
     virtual CommandPhase    GetPhase()                  { return Phase; }
     virtual CommandType     GetCmdType()                { return CmdType; }
     virtual int             GetEUCost()                 { return 0; }
-    virtual int             GetCUMod()                  { return 0; }
+    virtual int             GetPopCost()                { return 0; }
     virtual int             GetInvMod(InventoryType)    { return 0; }
 
     virtual String^         Print() abstract;
@@ -218,7 +218,7 @@ public:
         : m_Amount(amount), m_Unit(unit) {}
 
     virtual int     GetEUCost() override    { return m_Amount; }
-    virtual int     GetCUMod() override     { return -m_Amount; }
+    virtual int     GetPopCost() override   { return m_Amount; }
     virtual String^ Print() override        { return String::Format("Build {0} {1}", m_Amount, m_Unit); }
 
     int         m_Amount;

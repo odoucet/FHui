@@ -80,7 +80,7 @@ public:
     void        EvalOrder(ICommand ^cmd);
 
     void        UpdateEU(int eu);
-    void        UpdateCU(int pop);
+    void        UpdatePop(int pop);
     void        UpdateInventory(InventoryType it, int mod);
 
     int         GetAvailBudget()        { return Math::Min(m_BudgetAvail, m_BudgetTotal); }

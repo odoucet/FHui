@@ -53,9 +53,9 @@ String^ CommandManager::PrintCommandWithInfo(ICommand ^cmd)
         eu > 0 ? "-" : "+",
         eu );
 
-    int cu = cmd->GetCUMod();
-    if( cu != 0 )
-        ret += ", " + cu.ToString("+#0;-#0;") + " CU";
+    int pop = cmd->GetPopCost();
+    if( pop != 0 )
+        ret += ", " + pop.ToString("-#0") + " Pop";
 
     for( int i = 0; i < INV_MAX; ++i )
     {

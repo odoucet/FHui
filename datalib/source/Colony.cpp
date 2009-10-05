@@ -100,7 +100,7 @@ void Colony::ProductionReset()
 
     Res->TotalEU = 0;
     Res->AvailEU = 0;
-    Res->AvailCU = AvailPop;
+    Res->AvailPop = AvailPop;
     Res->Inventory = gcnew array<int>(INV_MAX){0};
     for( int i = 0; i < INV_MAX; ++i )
         Res->Inventory[i] = Inventory[i];

@@ -57,8 +57,8 @@ void BudgetTracker::EvalOrder(ICommand ^cmd)
     // Track budget
     UpdateEU( cmd->GetEUCost() );
 
-    // Track CU
-    UpdateCU( cmd->GetCUMod() );
+    // Track Populatiaon
+    UpdatePop( cmd->GetPopCost() );
 
     // Track Inventory
     for( int i = 0; i < INV_MAX; ++i )
@@ -83,13 +83,13 @@ void BudgetTracker::UpdateEU(int eu)
         AddComment( String::Format("; !!!!!! BUDGET EXCEEDED by {0} !!!!!!", -m_BudgetTotal) );
 }
 
-void BudgetTracker::UpdateCU(int pop)
+void BudgetTracker::UpdatePop(int pop)
 {
-    m_Colony->Res->AvailCU += pop;
-    if( m_Colony->Res->AvailCU < 0 )
+    m_Colony->Res->AvailPop -= pop;
+    if( m_Colony->Res->AvailPop < 0 )
     {
-        AddComment( String::Format("; !!!!!! NOT ENOUGH CU Available ({0} left) !!!!!!", m_Colony->Res->AvailCU - pop) );
-        m_Colony->Res->AvailCU = 0;
+        AddComment( String::Format("; !!!!!! NOT ENOUGH CU Available ({0} left) !!!!!!", m_Colony->Res->AvailPop + pop) );
+        m_Colony->Res->AvailPop = 0;
     }
 }
 

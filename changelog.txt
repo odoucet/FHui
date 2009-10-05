@@ -5,6 +5,9 @@ Minor changes are listed only if originally requested by player
 + New features
 [P] denotes player requested features
 
+FHUI build 184
++ Build CU/IU/AU production command implemented as it should be :)
+
 FHUI build 183
 * Research command dialog fixed to not allow research with budget 0.
   While this is a valid command, it is not supported by FHUI.

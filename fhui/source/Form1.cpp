@@ -1630,9 +1630,9 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuProductionNew()
             static_cast<ICommand^>(gcnew ProdCmdHide(colony)),
             gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuProdCommandAdd) ) );
     }
-    // Build IU/AU
+    // Build CU/IU/AU
     menu->DropDownItems->Add(
-        "Build IU/AU...",
+        "Build CU/IU/AU...",
         nullptr,
         gcnew EventHandler(this, &Form1::ColoniesMenuProdCommandAddBuildIuAu) );
     // Research
@@ -1754,10 +1754,17 @@ void Form1::ColoniesMenuProdCommandAddResearch(Object^, EventArgs^)
 void Form1::ColoniesMenuProdCommandAddBuildIuAu(Object^, EventArgs^)
 {
     CmdBuildIuAu ^dlg = gcnew CmdBuildIuAu(
-        m_ColoniesMenuRef->Res->AvailCU,
+        m_ColoniesMenuRef->Res->AvailPop,
         m_ColoniesMenuRef->Res->AvailEU );
     if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
     {
+        int cu = dlg->GetCUAmount();
+        if( cu > 0 )
+        {
+            ColoniesMenuProdCommandAdd(
+                gcnew ProdCmdBuildIUAU(cu, "CU") );
+        }
+
         int iu = dlg->GetIUAmount();
         if( iu > 0 )
         {

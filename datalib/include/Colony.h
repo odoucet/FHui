@@ -152,7 +152,7 @@ public:
     public:
         int             TotalEU;
         int             AvailEU;
-        int             AvailCU;
+        int             AvailPop;
         array<int>^     Inventory;
     };
 

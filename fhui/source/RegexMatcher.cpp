@@ -20,7 +20,7 @@ RegexMatcher::RegexMatcher()
     ExpCmdSPTeach   = gcnew Regex("^Teach ([A-Z]{2}) (\\d+) SP ([^,;]+)$");
     ExpCmdShipWormhole= gcnew Regex("^SHIP ([A-Z0-9]+) ([^,;]+) Wormhole\\s+([0-9-]+)$");
     ExpCmdResearch  = gcnew Regex("^Research (\\d+) ([A-Z]{2})$");
-    ExpCmdBuildIUAU = gcnew Regex("^Build (\\d+) ([IA]U)$");
+    ExpCmdBuildIUAU = gcnew Regex("^Build (\\d+) ([IAC]U)$");
     ExpCmdBuildShipTR = gcnew Regex("^Build TR(\\d+)([Ss]?)\\s+(.+)$");
     ExpCmdBuildShip = gcnew Regex("^Build ([A-Za-z]{2})([Ss]?)\\s+(.+)$");
 }
