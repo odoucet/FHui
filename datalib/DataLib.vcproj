@@ -264,6 +264,11 @@
 			AssemblyName="System.Windows.Forms, Version=2.0.0.0, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL"
 			MinFrameworkVersion="131072"
 		/>
+		<AssemblyReference
+			RelativePath="System.Drawing.dll"
+			AssemblyName="System.Drawing, Version=2.0.0.0, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
+			MinFrameworkVersion="131072"
+		/>
 	</References>
 	<Files>
 		<Filter
@@ -292,6 +297,10 @@
 				</File>
 				<File
 					RelativePath=".\include\Colony.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\CommandManager.h"
 					>
 				</File>
 				<File
@@ -329,6 +338,14 @@
 				</File>
 				<File
 					RelativePath=".\include\Planet.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\PluginManager.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\RegexMatcher.h"
 					>
 				</File>
 				<File
@@ -374,6 +391,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\source\CommandManager.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\source\Commands.cpp"
 					>
 				</File>
@@ -391,6 +412,14 @@
 				</File>
 				<File
 					RelativePath=".\source\Planet.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\PluginManager.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\RegexMatcher.cpp"
 					>
 				</File>
 				<File

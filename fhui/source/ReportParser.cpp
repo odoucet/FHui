@@ -1,8 +1,6 @@
 #include "StdAfx.h"
 #include "Report.h"
-#include "RegexMatcher.h"
 #include "ReportParser.h"
-#include "CommandManager.h"
 
 using namespace System::IO;
 

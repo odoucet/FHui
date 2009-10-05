@@ -6,15 +6,20 @@ using namespace System::Collections::Generic;
 namespace FHUI
 {
 
+ref class GameData;
+ref class Colony;
+ref class Ship;
 ref class RegexMatcher;
+interface class ICommand;
+ref class BudgetTracker;
 
-private value struct OrdersDir
+public value struct OrdersDir
 {
     static initonly String^ Folder   = "orders/FHUI.Data/";
     static initonly String^ Commands = "cmd_t{0}.txt";
 };
 
-private ref class TurnCommands
+public ref class TurnCommands
 {
 public:
     TurnCommands()
@@ -34,7 +39,7 @@ public:
     SortedList<Colony^, List<Pair<String^, int>^>^>^ AutoOrdersProduction;
 };
 
-private ref class CommandManager
+public ref class CommandManager
 {
 public:
     CommandManager(GameData^, String^);
@@ -54,7 +59,7 @@ public:
     // For production commands
     void        AddCommand(Colony ^colony, ICommand ^cmd);
     void        DelCommand(Colony ^colony, ICommand ^cmd);
-    List<ICommand^>^ GetCommands(Colony ^colony) { return colony->Orders; }
+    List<ICommand^>^ GetCommands(Colony ^colony);
 
     void        GenerateTemplate(System::Windows::Forms::RichTextBox^);
 

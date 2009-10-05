@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "PluginManager.h"
+#include "IFHUIPlugin.h"
 
 using namespace System::IO;
 using namespace System::Reflection;

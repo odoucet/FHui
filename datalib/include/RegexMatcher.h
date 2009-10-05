@@ -6,7 +6,7 @@ using namespace System::Text::RegularExpressions;
 namespace FHUI
 {
 
-private ref class RegexMatcher
+public ref class RegexMatcher
 {
 public:
     RegexMatcher();

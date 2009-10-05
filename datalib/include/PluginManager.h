@@ -7,8 +7,11 @@ namespace FHUI
 {
 
 ref class GameData;
+interface class IPluginBase;
+interface class IGridPlugin;
+interface class IOrdersPlugin;
 
-private ref class PluginManager
+public ref class PluginManager
 {
 public:
     PluginManager(GameData^, String^);

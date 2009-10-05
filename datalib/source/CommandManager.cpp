@@ -3,6 +3,9 @@
 #include "RegexMatcher.h"
 #include "CommandManager.h"
 #include "PluginManager.h"
+#include "Commands.h"
+#include "GameData.h"
+#include "IFHUIPlugin.h"
 
 using namespace System::Drawing;
 using namespace System::IO;
@@ -63,6 +66,20 @@ String^ CommandManager::PrintCommandWithInfo(ICommand ^cmd)
         int invMod = cmd->GetInvMod(it);
         if( invMod != 0 )
             ret += ", " + invMod.ToString() + " " + FHStrings::InvToString(it);
+    }
+
+    switch( cmd->Source )
+    {
+    case CommandSource::Auto:
+        ret += " ; [Auto]";
+        break;
+
+    case CommandSource::Plugin:
+        ret += " ; [Plugin]";
+        break;
+
+    default:
+        break;
     }
 
     return ret;
@@ -126,6 +143,11 @@ void CommandManager::DelCommand(Colony ^colony, ICommand ^cmd)
             return;
         }
     }
+}
+
+List<ICommand^>^ CommandManager::GetCommands(Colony ^colony)
+{
+    return colony->Orders;
 }
 
 void CommandManager::DeleteCommands()

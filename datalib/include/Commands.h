@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Enums.h"
+#include "Calculators.h"
+#include "GameData.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -37,10 +39,19 @@ public enum class CommandType
     BuildShip,
 };
 
+public enum class CommandSource
+{
+    GUI,
+    Auto,
+    Plugin
+};
+
 public interface class ICommand : public IComparable
 {
     CommandPhase    GetPhase();
     CommandType     GetCmdType();
+    
+    property CommandSource  Source;
 
     // EU/CU/Inventory modifiers to budget / colony inventory
     // POSITIVE value mean:
@@ -60,8 +71,16 @@ template<CommandPhase Phase, CommandType CmdType>
 public ref class CmdBase abstract : public ICommand
 {
 public:
+    CmdBase()
+    {
+        Source = CommandSource::GUI;
+    }
+
     virtual CommandPhase    GetPhase()                  { return Phase; }
     virtual CommandType     GetCmdType()                { return CmdType; }
+
+    virtual property CommandSource  Source;
+
     virtual int             GetEUCost()                 { return 0; }
     virtual int             GetPopCost()                { return 0; }
     virtual int             GetInvMod(InventoryType)    { return 0; }

@@ -6,8 +6,6 @@
 #include "GridSorter.h"
 
 #include "ReportParser.h"
-#include "PluginManager.h"
-#include "CommandManager.h"
 
 #include "CmdResearch.h"
 #include "CmdBuildShips.h"

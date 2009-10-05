@@ -1,6 +1,4 @@
 #include "StdAfx.h"
-#include "RegexMatcher.h"
-#include "CommandManager.h"
 #include "Report.h"
 
 namespace FHUI
