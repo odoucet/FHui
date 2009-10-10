@@ -420,7 +420,8 @@ void Form1::DisplayTurn()
             BuildInfo::Version );
 
         // Show report for selected turn
-        if( RepModeReports->Checked )
+        if( m_bHadException == false &&
+            RepModeReports->Checked )
         {
             RepTurnNr->Text = "Turn " + turn.ToString();
         }
@@ -1859,7 +1860,8 @@ void Form1::ShipsInitControls()
     c.Maint     = ADD_COLUMN("Maint",       "Maintenance cost",         double, Ascending,  Default);
     c.UpgCost   = ADD_COLUMN("Upg",         "Upgrade cost to age 0",    int,    Ascending,  Default);
     c.RecVal    = ADD_COLUMN("Rec",         "Recycle value",            int,    Descending, Default);
-    c.Order     = ADD_COLUMN("Order",       "Order",                    String, Ascending,  Default);
+    c.JumpTarget= ADD_COLUMN("Jump",        "Jump target",              String, Ascending,  Default);
+    c.Commands  = ADD_COLUMN("Cmds",        "Ship commands",            String, Ascending,  Default);
 
     for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
         plugin->AddColumns(GridType::Ships, sorter);
@@ -1958,10 +1960,15 @@ void Form1::ShipsSetup()
             cells[c.Maint]->Value   = Calculators::ShipMaintenanceCost(ship->Type, ship->Size, ship->SubLight) * discount;
             cells[c.UpgCost]->Value = ship->GetUpgradeCost();
             cells[c.RecVal]->Value  = ship->GetRecycleValue();
-            if( ship->Command )
-                cells[c.Order]->Value = ship->Command->Print();
-            else if( ship->EUToComplete )
-                cells[c.Order]->Value = ship->EUToComplete.ToString() + " EU to complete";
+
+            ICommand ^cmd = ship->GetJumpCommand();
+            if( cmd )
+                cells[c.JumpTarget]->Value  = cmd->PrintForUI();
+            cells[c.Commands]->Value        = ship->PrintCmdSummary();
+            cells[c.Commands]->ToolTipText  = ship->PrintCmdDetails();
+
+            if( ship->EUToComplete )
+                cells[c.Commands]->Value    = ship->EUToComplete.ToString() + " EU to complete";
         }
 
         for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
@@ -2024,51 +2031,45 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
 
         if( prodOrderPossible )
         {
-            EventHandler1Arg<ShipOrderData^> ^handler =
-                gcnew EventHandler1Arg<ShipOrderData^>(this, &Form1::ShipsMenuOrderSet);
+            EventHandler1Arg<ShipCommandData^> ^handler =
+                gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuOrderSet);
             ToolStripMenuItem ^menuItem;
 
             if( ship->EUToComplete == 0 )
             {
-                menuItem = CreateCustomMenuItem(
+                menuItem = CreateCustomMenuItem<ShipCommandData^>(
                     "Upgrade",
-                    gcnew ShipOrderData(
-                        ship,
-                        gcnew Ship::Order(Ship::OrderType::Upgrade) ),
-                     handler );
-                if( ship->Command &&
-                    ship->Command->Type == Ship::OrderType::Upgrade )
+                    gcnew ShipCommandData(ship, gcnew ShipCmdUpgrade(ship)),
+                    handler );
+                if( ship->GetProdCommand() &&
+                    ship->GetProdCommand()->GetCmdType() == CommandType::Upgrade )
                 {
                     menuItem->Checked = true;
                 }
                 menu->Items->Add( menuItem );
             }
 
-            menuItem = CreateCustomMenuItem(
+            menuItem = CreateCustomMenuItem<ShipCommandData^>(
                 "Recycle",
-                gcnew ShipOrderData(
-                    ship,
-                    gcnew Ship::Order(Ship::OrderType::Recycle) ),
-                 handler );
-            if( ship->Command &&
-                ship->Command->Type == Ship::OrderType::Recycle )
+                gcnew ShipCommandData(ship, gcnew ShipCmdRecycle(ship)),
+                handler );
+            if( ship->GetProdCommand() &&
+                ship->GetProdCommand()->GetCmdType() == CommandType::Recycle )
                 menuItem->Checked = true;
             menu->Items->Add( menuItem );
         }
 
         if( ship->System->HasWormhole )
         {
-            EventHandler1Arg<ShipOrderData^> ^handler =
-                gcnew EventHandler1Arg<ShipOrderData^>(this, &Form1::ShipsMenuOrderSet);
-            ToolStripMenuItem ^menuItem = CreateCustomMenuItem(
+            EventHandler1Arg<ShipCommandData^> ^handler =
+                gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuOrderSet);
+            ToolStripMenuItem ^menuItem = CreateCustomMenuItem<ShipCommandData^>(
                 "Enter Wormhole to " + ship->System->PrintWormholeTarget(),
-                gcnew ShipOrderData(
-                    ship,
-                    gcnew Ship::Order(Ship::OrderType::Wormhole, ship->System->GetWormholeTarget()) ),
-                 handler );
+                gcnew ShipCommandData(ship, gcnew ShipCmdWormhole(ship, ship->System->GetWormholeTarget(), -1)),
+                handler );
 
-            if( ship->Command &&
-                ship->Command->Type == Ship::OrderType::Wormhole )
+            if( ship->GetJumpCommand() &&
+                ship->GetJumpCommand()->GetCmdType() == CommandType::Wormhole )
                 menuItem->Checked = true;
 
             menu->Items->Add( menuItem );
@@ -2079,8 +2080,8 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
             ToolStripMenuItem ^jumpMenu = gcnew ToolStripMenuItem("Jump to:");
             bool anyJump = false;
 
-            if( ship->Command &&
-                ship->Command->Type == Ship::OrderType::Jump )
+            if( ship->GetJumpCommand() &&
+                ship->GetJumpCommand()->GetCmdType() == CommandType::Jump )
                 jumpMenu->Checked = true;
 
             // Jump to ref system
@@ -2135,12 +2136,20 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
         }
 
         // If ship already has command, add option to cancel it.
-        if( ship->Command )
+        if( ship->Commands->Count )
         {
-            menu->Items->Add( CreateCustomMenuItem<ShipOrderData^>(
-                "Cancel Command",
-                gcnew ShipOrderData(ship, nullptr),
-                gcnew EventHandler1Arg<ShipOrderData^>(this, &Form1::ShipsMenuOrderSet) ) );
+            menu->Items->Add( gcnew ToolStripSeparator );
+            ToolStripMenuItem ^cancelMenu = gcnew ToolStripMenuItem("Cancel order:");
+
+            for each( ICommand ^cmd in ship->Commands )
+            {
+                cancelMenu->DropDownItems->Add( CreateCustomMenuItem<ICommand^>(
+                    cmd->PrintForUI(),
+                    cmd,
+                    gcnew EventHandler1Arg<ICommand^>(this, &Form1::ShipsMenuOrderCancel) ) );
+            }
+
+            menu->Items->Add( cancelMenu );
         }
     }
 }
@@ -2154,13 +2163,13 @@ ToolStripMenuItem^ Form1::ShipsMenuCreateJumpItem(
         ship->Age );
 
     String ^itemText;
-    Ship::OrderType order = Ship::OrderType::Jump;
+    ICommand ^cmd;
     if( ship->System->IsWormholeTarget(system) )
     {
-        order = Ship::OrderType::Wormhole;
         itemText = String::Format("{0}   (Wormhole)  From {1}",
             text,
             ship->PrintLocation() );
+        cmd = gcnew ShipCmdWormhole(ship, system, planetNum);
     }
     else
     {
@@ -2169,21 +2178,13 @@ ToolStripMenuItem^ Form1::ShipsMenuCreateJumpItem(
             mishap,
             ship->Cargo[INV_FS],
             ship->PrintLocation() );
+        cmd = gcnew ShipCmdJump(ship, system, planetNum);
     }
 
-    ToolStripMenuItem ^menuItem = CreateCustomMenuItem(
+    ToolStripMenuItem ^menuItem = CreateCustomMenuItem<ShipCommandData^>(
         itemText,
-        gcnew ShipOrderData(ship, gcnew Ship::Order(order, system, planetNum)),
-        gcnew EventHandler1Arg<ShipOrderData^>(this, &Form1::ShipsMenuOrderSet) );
-
-    // Add checkbox
-    if( ship->Command &&
-        ship->Command->Type == order &&
-        ship->Command->JumpTarget == system &&
-        ship->Command->PlanetNum == planetNum )
-    {
-        menuItem->Checked = true;
-    }
+        gcnew ShipCommandData(ship, cmd),
+        gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuOrderSet) );
 
     return menuItem;
 }
@@ -2225,9 +2226,16 @@ void Form1::ShipsMenuSelectRef(Object^, EventArgs ^e)
         ShipsGrid->Filter->SetRefSystem(m_ShipsMenuRef->System);
 }
 
-void Form1::ShipsMenuOrderSet(ShipOrderData ^data)
+void Form1::ShipsMenuOrderSet(ShipCommandData ^data)
 {
-    data->A->Command = data->B;
+    data->A->AddCommand( data->B );
+    ShipsGrid->Filter->Update();
+    m_CommandMgr->SaveCommands();
+}
+
+void Form1::ShipsMenuOrderCancel(ICommand ^cmd)
+{
+    m_ShipsMenuRef->Commands->Remove( cmd );
     ShipsGrid->Filter->Update();
     m_CommandMgr->SaveCommands();
 }

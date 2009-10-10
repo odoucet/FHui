@@ -1092,12 +1092,38 @@ void Report::MatchOrdersTemplate(String ^s)
     }
 
     // JUMP
-    if( m_RM->Match(s, "^Jump\\s+(\\S+)\\s+([^,]+),.+$") )
+    if( m_RM->Match(s, "^Jump\\s+(\\S+)\\s+([^,]+),\\s+(.+)$") )
     {
         Ship^ ship = m_GameData->GetShip(m_RM->Results[1]);  
         if ( ship )
         {
-            m_CommandMgr->SetAutoOrderJumps( ship, line );
+            String ^target = m_RM->Results[2];
+            ICommand ^cmd = nullptr;
+            if( target->Length > 2 &&
+                target->Substring(0, 3) == "???" )
+            {
+                cmd = gcnew ShipCmdJump(ship, nullptr, -1);
+            }
+            else if( m_RM->Match(target, "(\\d+)\\s+(\\d+)\\s+(\\d+)") )
+            {
+                StarSystem ^jumpTarget = GameData::GetStarSystem(
+                    m_RM->GetResultInt(0),
+                    m_RM->GetResultInt(1),
+                    m_RM->GetResultInt(2),
+                    true );
+                cmd = gcnew ShipCmdJump(ship, jumpTarget, -1);
+            }
+            else if( m_RM->Match(target, "PL\\s+([^,]+)") )
+            {
+                Planet ^planet = GameData::GetPlanetByName(m_RM->Results[0]);
+                if( planet )
+                    cmd = gcnew ShipCmdJump(ship, planet->System, planet->Number);
+            }
+            if( cmd )
+            {
+                cmd->Origin = CommandOrigin::Auto;
+                ship->AddCommand( cmd );
+            }
             return;
         }
         throw gcnew FHUIParsingException(

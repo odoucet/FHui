@@ -3,6 +3,7 @@
 #include "Enums.h"
 #include "Calculators.h"
 #include "GameData.h"
+#include "StarSystem.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -31,6 +32,11 @@ public enum class CommandType
     Name,
     AlienRelation,  // Enemy/Neutral/Ally
     Teach,
+    // Ship commands:
+    Upgrade,
+    Recycle,
+    Jump,
+    Wormhole,
     // Production commands:
     Hide,
     Shipyard,
@@ -39,7 +45,7 @@ public enum class CommandType
     BuildShip,
 };
 
-public enum class CommandSource
+public enum class CommandOrigin
 {
     GUI,
     Auto,
@@ -51,7 +57,7 @@ public interface class ICommand : public IComparable
     CommandPhase    GetPhase();
     CommandType     GetCmdType();
     
-    property CommandSource  Source;
+    property CommandOrigin  Origin;
 
     // EU/CU/Inventory modifiers to budget / colony inventory
     // POSITIVE value mean:
@@ -63,6 +69,8 @@ public interface class ICommand : public IComparable
     int             GetInvMod(InventoryType);
 
     String^         Print();
+    String^         PrintForUI();
+    String^         PrintOriginSuffix();
 };
 
 ////////////////////////////////////////////////////////////
@@ -73,19 +81,20 @@ public ref class CmdBase abstract : public ICommand
 public:
     CmdBase()
     {
-        Source = CommandSource::GUI;
+        Origin = CommandOrigin::GUI;
     }
 
     virtual CommandPhase    GetPhase()                  { return Phase; }
     virtual CommandType     GetCmdType()                { return CmdType; }
 
-    virtual property CommandSource  Source;
+    virtual property CommandOrigin  Origin;
 
     virtual int             GetEUCost()                 { return 0; }
     virtual int             GetPopCost()                { return 0; }
     virtual int             GetInvMod(InventoryType)    { return 0; }
 
     virtual String^         Print() abstract;
+    virtual String^         PrintForUI()                { return Print(); }
 
     virtual int CompareTo(Object ^obj)
     {
@@ -104,12 +113,87 @@ public:
         }
         return n;
     }
+
+    virtual String^ PrintOriginSuffix()
+    {
+        switch( Origin )
+        {
+        case CommandOrigin::Auto:       return " ; [Auto]"; 
+        case CommandOrigin::Plugin:     return " ; [Plugin]";
+        default:
+            return "";
+        }
+    }
 };
 
 template<CommandType CmdType>
 public ref class CmdProdBase abstract
     : public CmdBase<CommandPhase::Production, CmdType>
 {
+};
+
+////////////////////////////////////////////////////////////
+
+// Upgrade
+public ref class ShipCmdUpgrade : public CmdProdBase<CommandType::Upgrade>
+{
+public:
+    ShipCmdUpgrade(Ship ^ship) : m_Ship(ship) {}
+
+    virtual int     GetEUCost() override    { return Calculators::ShipUpgradeCost(m_Ship->Age, m_Ship->OriginalCost); }
+    virtual String^ Print() override        { return "Upgrade " + m_Ship->PrintClassWithName(); }
+    virtual String^ PrintForUI() override   { return "Upgrade"; }
+
+    Ship^   m_Ship;
+};
+
+// Recycle
+public ref class ShipCmdRecycle : public CmdProdBase<CommandType::Recycle>
+{
+public:
+    ShipCmdRecycle(Ship ^ship) : m_Ship(ship) {}
+
+    virtual int     GetEUCost() override    { return -m_Ship->GetRecycleValue(); }
+    virtual String^ Print() override        { return "Recycle " + m_Ship->PrintClassWithName(); }
+    virtual String^ PrintForUI() override   { return "Recycle"; }
+
+    Ship^   m_Ship;
+};
+
+// Jump
+public ref class ShipCmdJump
+    : public CmdBase<CommandPhase::Jump, CommandType::Jump>
+{
+public:
+    ShipCmdJump(Ship ^ship, StarSystem ^target, int planetNum)
+        : m_Ship(ship), m_JumpTarget(target), m_PlanetNum(planetNum)
+    {}
+
+    virtual String^ Print() override;
+    virtual String^ PrintForUI() override   { return "Jump to " + m_Ship->PrintJumpDestination(); }
+
+    Ship^       m_Ship;
+    StarSystem^ m_JumpTarget;
+    int         m_PlanetNum;
+};
+
+// Wormhole
+public ref class ShipCmdWormhole
+    : public CmdBase<CommandPhase::Jump, CommandType::Wormhole>
+{
+public:
+    ShipCmdWormhole(Ship ^ship, StarSystem ^target, int planetNum)
+        : m_Ship(ship), m_JumpTarget(target), m_PlanetNum(planetNum)
+    {}
+
+    virtual String^ Print() override        { return String::Format("Wormhole {0}, {1}",
+                                                        m_Ship->PrintClassWithName(),
+                                                        m_PlanetNum ); }
+    virtual String^ PrintForUI() override   { return "Wormhole to " + m_Ship->PrintJumpDestination(); }
+
+    Ship^       m_Ship;
+    StarSystem^ m_JumpTarget;
+    int         m_PlanetNum;
 };
 
 ////////////////////////////////////////////////////////////

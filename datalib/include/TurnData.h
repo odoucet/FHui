@@ -41,6 +41,7 @@ public:
     IList<PlanetName^>^     GetPlanetNames()                    { return m_PlanetNames->Values; }
     IList<Ship^>^           GetShips()                          { return m_ShipsByTonnage; }
     IList<Colony^>^         GetColonies()                       { return m_Colonies->Values; }
+    Planet^                 GetPlanetByName(String ^name);
 
     // ------------------------------------------
     void            Update();

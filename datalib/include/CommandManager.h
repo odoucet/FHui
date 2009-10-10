@@ -26,7 +26,6 @@ public:
         : Commands(gcnew List<ICommand^>)
         , AutoEnabled(false)
         , AutoOrdersPreDeparture(gcnew SortedList<StarSystem^, List<String^>^>)
-        , AutoOrdersJumps(gcnew SortedList<Ship^, List<String^>^>)
         , AutoOrdersProduction(gcnew SortedList<Colony^, List<Pair<String^, int>^>^>)
     {
     }
@@ -35,7 +34,6 @@ public:
 
     bool                                             AutoEnabled;
     SortedList<StarSystem^, List<String^>^>^         AutoOrdersPreDeparture;
-    SortedList<Ship^, List<String^>^>^               AutoOrdersJumps;
     SortedList<Colony^, List<Pair<String^, int>^>^>^ AutoOrdersProduction;
 };
 
@@ -70,15 +68,14 @@ public:
     }
 
     void        SetAutoOrderPreDeparture(StarSystem^, String^);
-    void        SetAutoOrderJumps(Ship^, String^);
     void        SetAutoOrderProduction(Colony^, String^, int);
 
     List<String^>^  GetAutoOrdersPreDeparture(StarSystem^);
-    List<String^>^  GetAutoOrdersJumps(Ship^);
     List<Pair<String^, int>^>^  GetAutoOrdersProduction(Colony^);
 
 private:
     bool        LoadCommandsColony(String ^line, Colony ^colony);
+    bool        LoadCommandsShip(String ^line, Ship ^ship);
     void        AddCommandDontSave(ICommand ^cmd);
     void        SortCommands();
 

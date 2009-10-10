@@ -717,4 +717,22 @@ void TurnData::DeleteAlienColonies(StarSystem^ system)
     } while( bRemoved );
 }
 
+Planet^ TurnData::GetPlanetByName(String ^name)
+{
+    if ( m_Colonies->ContainsKey( name->ToLower() ) )
+    {
+        Colony ^colony = m_Colonies[name->ToLower()];
+        return colony->System->Planets[colony->PlanetNum - 1];
+    }
+    else if ( m_PlanetNames->ContainsKey( name->ToLower() ) )
+    {
+        PlanetName ^plName = m_PlanetNames[name->ToLower()];
+        return plName->System->Planets[ plName->PlanetNum - 1];
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
 } // end namespace FHUI

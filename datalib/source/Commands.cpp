@@ -9,6 +9,22 @@ namespace FHUI
 {
 
 ////////////////////////////////////////////////////////////////
+// ShipCmdJump
+
+String^ ShipCmdJump::Print()
+{
+    if( m_JumpTarget == nullptr )
+        return String::Format("Jump {0}, 0 0 0 -1",
+            m_Ship->PrintClassWithName() );
+
+    return String::Format("Jump {0}, {1} {2} {3} {4}",
+        m_Ship->PrintClassWithName(),
+        m_JumpTarget->X,
+        m_JumpTarget->Y,
+        m_JumpTarget->Z,
+        m_PlanetNum ); }
+
+////////////////////////////////////////////////////////////////
 // Name
 
 String^ CmdPlanetName::Print()

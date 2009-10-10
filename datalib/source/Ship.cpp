@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "GameData.h"
+#include "Commands.h"
 
 namespace FHUI
 {
@@ -214,44 +215,43 @@ int Ship::GetRecycleValue()
     return Calculators::ShipRecycleValue(Age, OriginalCost);
 }
 
-String^ Ship::Order::Print()
+String^ Ship::PrintJumpDestination()
 {
-    switch( Type )
+    ICommand ^cmdJump = GetJumpCommand();
+    if( cmdJump == nullptr )
+        return nullptr;
+
+    StarSystem ^jumpTarget = nullptr;
+    int planetNum = -1;
+
+    switch( cmdJump->GetCmdType() )
     {
-    case OrderType::Jump:
-        return "Jump to " + PrintJumpDestination();
-    case OrderType::Upgrade:
-        return "Upgrade";
-    case OrderType::Recycle:
-        return "Recycle";
-    case OrderType::Wormhole:
-        return "Wormhole to " + PrintJumpDestination();
+    case CommandType::Jump:
+        {
+            ShipCmdJump ^cmd = safe_cast<ShipCmdJump^>(cmdJump);
+            jumpTarget = cmd->m_JumpTarget;
+            planetNum = cmd->m_PlanetNum;
+            if( jumpTarget == nullptr && planetNum == -1 )
+                return "???";
+        }
+        break;
+
+    case CommandType::Wormhole:
+        {
+            ShipCmdWormhole ^cmd = safe_cast<ShipCmdWormhole^>(cmdJump);
+            planetNum = cmd->m_PlanetNum;
+        }
+        break;
+
+    default:
+        return nullptr;
     }
 
-    return "Invalid command";
-}
-
-String^ Ship::Order::PrintNumeric()
-{
-    if( Type == OrderType::Jump )
-        return String::Format("Jump to {0} {1} {2} {3}",
-            JumpTarget->X,
-            JumpTarget->Y,
-            JumpTarget->Z,
-            PlanetNum );
-    if( Type == OrderType::Wormhole )
-        return "Wormhole " + PlanetNum.ToString();
-
-    return Print();
-}
-
-String^ Ship::Order::PrintJumpDestination()
-{
-    if( PlanetNum != -1 )
+    if( planetNum != -1 )
     {
-        if( JumpTarget->Planets->ContainsKey(PlanetNum) )
+        if( jumpTarget->Planets->ContainsKey(planetNum) )
         {
-            Planet ^planet = JumpTarget->Planets[PlanetNum];
+            Planet ^planet = jumpTarget->Planets[planetNum];
             if( String::IsNullOrEmpty(planet->Name) )
             {
                 return planet->PrintLocation();
@@ -261,11 +261,85 @@ String^ Ship::Order::PrintJumpDestination()
                 return "PL " + planet->Name;
             }
         }
-        return JumpTarget->PrintLocation() + " " + PlanetNum.ToString();
+        return jumpTarget->PrintLocation() + " " + planetNum.ToString();
     }
-    if( JumpTarget )
-        return JumpTarget->PrintLocation();
+    if( jumpTarget )
+        return jumpTarget->PrintLocation();
     return "Unknown System";
+}
+
+ICommand^ Ship::GetJumpCommand()
+{
+    for each( ICommand ^cmd in Commands )
+    {
+        if( cmd->GetPhase() == CommandPhase::Jump )
+            return cmd;
+    }
+    return nullptr;
+}
+
+ICommand^ Ship::GetProdCommand()
+{
+    for each( ICommand ^cmd in Commands )
+    {
+        if( cmd->GetPhase() == CommandPhase::Production )
+            return cmd;
+    }
+    return nullptr;
+}
+
+String^ Ship::PrintCmdSummary()
+{
+    int cnt = 0;
+    ICommand ^lastCmd = nullptr;
+
+    for each( ICommand ^cmd in Commands )
+    {
+        if( cmd->GetPhase() == CommandPhase::Jump )
+            continue;
+        ++cnt;
+        lastCmd = cmd;
+    }
+
+    if( cnt == 0 )
+        return nullptr;
+    else if( cnt == 1 )
+        return lastCmd->PrintForUI();
+    else
+        return String::Format("{0} commands", cnt);
+}
+
+String^ Ship::PrintCmdDetails()
+{
+    String ^ret = "";
+
+    for each( ICommand ^cmd in Commands )
+    {
+        if( cmd->GetPhase() == CommandPhase::Jump )
+            continue;
+
+        ret += cmd->PrintForUI() + "\r\n";
+    }
+
+    return ret;
+}
+
+void Ship::AddCommand(ICommand ^cmd)
+{
+    if( cmd->GetPhase() == CommandPhase::Jump ||
+        cmd->GetPhase() == CommandPhase::Production )
+    {   // Remove old one
+        for each( ICommand ^cmdIter in Commands )
+        {
+            if( cmdIter->GetPhase() == cmd->GetPhase() )
+            {
+                Commands->Remove( cmdIter );
+                break;
+            }
+        }
+    }
+
+    Commands->Add(cmd);
 }
 
 } // end namespace FHUI

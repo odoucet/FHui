@@ -267,8 +267,9 @@ namespace FHUI {
         void        ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
         void        ShipsMenuSelectRef(Object^, EventArgs^);
 
-        typedef Pair<Ship^, Ship::Order^> ShipOrderData;
-        void        ShipsMenuOrderSet(ShipOrderData ^data);
+        typedef Pair<Ship^, ICommand^>  ShipCommandData;
+        void        ShipsMenuOrderSet(ShipCommandData ^data);
+        void        ShipsMenuOrderCancel(ICommand ^cmd);
 
         ToolStripMenuItem^ ShipsMenuAddJumpsHere(
                         StarSystem ^system, int planetNum );
@@ -290,7 +291,8 @@ namespace FHUI {
             int Maint;
             int UpgCost;
             int RecVal;
-            int Order;
+            int JumpTarget;
+            int Commands;
         };
 
         Ship               ^m_ShipsMenuRef;

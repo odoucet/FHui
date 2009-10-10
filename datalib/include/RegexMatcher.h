@@ -27,6 +27,7 @@ public:
     // --------------------------
     // Commands
     initonly Regex^     ExpCmdColony;
+    initonly Regex^     ExpCmdShip;
     initonly Regex^     ExpCmdShipJump;
     initonly Regex^     ExpCmdShipUpg;
     initonly Regex^     ExpCmdShipRec;
@@ -41,6 +42,11 @@ public:
     initonly Regex^     ExpCmdBuildIUAU;
     initonly Regex^     ExpCmdBuildShipTR;
     initonly Regex^     ExpCmdBuildShip;
+
+    initonly Regex^     ExpCmdShipJump_Obsolete;
+    initonly Regex^     ExpCmdShipUpg_Obsolete;
+    initonly Regex^     ExpCmdShipRec_Obsolete;
+    initonly Regex^     ExpCmdShipWormhole_Obsolete;
 };
 
 } // end namespace FHUI

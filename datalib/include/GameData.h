@@ -29,6 +29,7 @@ public:
     static StarSystem^     GetStarSystem(String ^name)         { return m_CurrentTurnData->GetStarSystem(name); }
     static Colony^         GetColony(String ^name)             { return m_CurrentTurnData->GetColony(name); }
     static Ship^           GetShip(String ^name)               { return m_CurrentTurnData->GetShip(name); }
+    static Planet^         GetPlanetByName(String ^name)       { return m_CurrentTurnData->GetPlanetByName(name); }
 
     static IList<Alien^>^          GetAliens()          { return m_CurrentTurnData->GetAliens(); }
     static IList<StarSystem^>^     GetStarSystems()     { return m_CurrentTurnData->GetStarSystems(); }

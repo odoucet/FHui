@@ -58,7 +58,7 @@ String^ CommandManager::PrintCommandWithInfo(ICommand ^cmd)
 
     int pop = cmd->GetPopCost();
     if( pop != 0 )
-        ret += ", " + pop.ToString("-#0") + " Pop";
+        ret += ", " + pop.ToString("-#0;+#0;") + " Pop";
 
     for( int i = 0; i < INV_MAX; ++i )
     {
@@ -68,21 +68,7 @@ String^ CommandManager::PrintCommandWithInfo(ICommand ^cmd)
             ret += ", " + invMod.ToString() + " " + FHStrings::InvToString(it);
     }
 
-    switch( cmd->Source )
-    {
-    case CommandSource::Auto:
-        ret += " ; [Auto]";
-        break;
-
-    case CommandSource::Plugin:
-        ret += " ; [Plugin]";
-        break;
-
-    default:
-        break;
-    }
-
-    return ret;
+    return ret + cmd->PrintOriginSuffix();
 }
 
 // ---------------------------------------------------------
@@ -182,24 +168,33 @@ void CommandManager::SaveCommands()
     {
         commandList->Add( "COLONY " + colony->Name );
         for each( ICommand ^cmd in colony->Orders )
-            commandList->Add( cmd->Print() );
+        {
+            if( cmd->Origin == CommandOrigin::GUI )
+                commandList->Add( cmd->Print() );
+        }
         commandList->Add( "END_COLONY" );
     }
 
     // -- Ships
     for each( Ship ^ship in GameData::Player->Ships )
     {
-        if( ship->Command )
+        if( ship->Commands->Count == 0 )
+            continue;
+
+        commandList->Add( "SHIP " + ship->Name );
+        for each( ICommand ^cmd in ship->Commands )
         {
-            commandList->Add( String::Format("SHIP {0} {1}",
-                ship->PrintClassWithName(),
-                ship->Command->PrintNumeric()) );
+            if( cmd->Origin == CommandOrigin::GUI )
+                commandList->Add( cmd->Print() );
         }
+        commandList->Add( "END_SHIP" );
     }
+
     // -- Commands
     for each( ICommand ^cmd in GetCommands() )
     {
-        commandList->Add( cmd->Print() );
+        if( cmd->Origin == CommandOrigin::GUI )
+            commandList->Add( cmd->Print() );
     }
 
     // Write to stream
@@ -231,6 +226,7 @@ void CommandManager::LoadCommands()
 
     String ^line;
     Colony^ refColony = nullptr;
+    Ship^ refShip = nullptr;
     int colonyProdOrder = 1;
     while( (line = sr->ReadLine()) != nullptr ) 
     {
@@ -244,6 +240,12 @@ void CommandManager::LoadCommands()
             if( LoadCommandsColony(line, refColony) )
                 continue;
         }
+        if( refShip )
+        {
+            if( LoadCommandsShip(line, refShip) )
+                continue;
+        }
+
         if( m_RM->Match(line, m_RM->ExpCmdColony) )
         {
             Colony ^colony = m_GameData->GetColony(m_RM->Results[0]);
@@ -262,41 +264,56 @@ void CommandManager::LoadCommands()
             else
                 throw gcnew FHUIParsingException("Inconsistent commands template (END_COLONY)!");
         }
-        else if( m_RM->Match(line, m_RM->ExpCmdShipJump) )
+    // --- obsolete ship commands ---
+        else if( m_RM->Match(line, m_RM->ExpCmdShipJump_Obsolete) )
         {
-            m_GameData->GetShip(m_RM->Results[1])->Command =
-                gcnew Ship::Order(
-                    Ship::OrderType::Jump,
-                    m_GameData->GetStarSystem(
-                        m_RM->GetResultInt(2),
-                        m_RM->GetResultInt(3),
-                        m_RM->GetResultInt(4),
-                        false),
-                    m_RM->GetResultInt(5) );
+            Ship ^ship = m_GameData->GetShip(m_RM->Results[0]);
+            int x = m_RM->GetResultInt(1);
+            int y = m_RM->GetResultInt(2);
+            int z = m_RM->GetResultInt(3);
+            int p = m_RM->GetResultInt(4);
+            StarSystem ^target = nullptr;
+            if( x != 0 || y != 0 || z != 0 )
+                target = m_GameData->GetStarSystem(x, y, z, false);
+            ship->AddCommand( gcnew ShipCmdJump(ship, target, p) );
         }
-        else if( m_RM->Match(line, m_RM->ExpCmdShipWormhole) )
+        else if( m_RM->Match(line, m_RM->ExpCmdShipWormhole_Obsolete) )
         {
-            Ship ^ship = m_GameData->GetShip(m_RM->Results[1]);
+            Ship ^ship = m_GameData->GetShip(m_RM->Results[0]);
             if( !ship->System->HasWormhole )
                 throw gcnew FHUIParsingException("Invalid ship wormhole command (no wormhole in system)!");
-            ship->Command =
-                gcnew Ship::Order(
-                    Ship::OrderType::Wormhole,
-                    ship->System->GetWormholeTarget(),
-                    m_RM->GetResultInt(2) );
-            if( ship->Command->PlanetNum != -1 &&
-                ship->System->Planets->ContainsKey( ship->Command->PlanetNum ) == false )
+            int p = m_RM->GetResultInt(1);
+            ship->AddCommand(
+                gcnew ShipCmdWormhole(ship, ship->System->GetWormholeTarget(), p) );
+            if( p != -1 &&
+                ship->System->Planets->ContainsKey( p ) == false )
                 throw gcnew FHUIParsingException("Invalid ship wormhole command (invalid planet for orbiting)!");
         }
-        else if( m_RM->Match(line, m_RM->ExpCmdShipUpg) )
+        else if( m_RM->Match(line, m_RM->ExpCmdShipUpg_Obsolete) )
         {
-            m_GameData->GetShip(m_RM->Results[1])->Command =
-                gcnew Ship::Order( Ship::OrderType::Upgrade );
+            Ship ^ship = m_GameData->GetShip(m_RM->Results[0]);
+            ship->AddCommand( gcnew ShipCmdUpgrade(ship) );
         }
-        else if( m_RM->Match(line, m_RM->ExpCmdShipRec) )
+        else if( m_RM->Match(line, m_RM->ExpCmdShipRec_Obsolete) )
         {
-            m_GameData->GetShip(m_RM->Results[1])->Command =
-                gcnew Ship::Order( Ship::OrderType::Recycle );
+            Ship ^ship = m_GameData->GetShip(m_RM->Results[0]);
+            ship->AddCommand( gcnew ShipCmdRecycle(ship) );
+        }
+    // --- end obsolete ship commands ---
+        else if( m_RM->Match(line, m_RM->ExpCmdShip) )
+        {
+            Ship ^ship = m_GameData->GetShip(m_RM->Results[0]);
+            if( ship->Owner == GameData::Player )
+                refShip = ship;
+            else
+                throw gcnew FHUIParsingException("Inconsistent commands template (ships)!");
+        }
+        else if( line == "END_SHIP" )
+        {
+            if( refShip )
+                refShip = nullptr;
+            else
+                throw gcnew FHUIParsingException("Inconsistent commands template (END_SHIP)!");
         }
         else if( m_RM->Match(line, m_RM->ExpCmdPLName) )
         {
@@ -417,6 +434,50 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
             m_RM->GetResultInt(0),
             String::IsNullOrEmpty(m_RM->Results[1]) == false,
             m_RM->Results[2] ) );
+        return true;
+    }
+
+    return false;
+}
+
+bool CommandManager::LoadCommandsShip(String ^line, Ship ^ship)
+{
+    // Jump
+    if( m_RM->Match(line, m_RM->ExpCmdShipJump) )
+    {
+        int x = m_RM->GetResultInt(0);
+        int y = m_RM->GetResultInt(1);
+        int z = m_RM->GetResultInt(2);
+        int p = m_RM->GetResultInt(3);
+        StarSystem ^target = nullptr;
+        if( x != 0 || y != 0 || z != 0 )
+            target = m_GameData->GetStarSystem(x, y, z, false);
+        ship->AddCommand( gcnew ShipCmdJump(ship, target, p) );
+        return true;
+    }
+    // Wormhole
+    if( m_RM->Match(line, m_RM->ExpCmdShipWormhole) )
+    {
+        if( !ship->System->HasWormhole )
+            throw gcnew FHUIParsingException("Invalid ship wormhole command (no wormhole in system)!");
+        int p = m_RM->GetResultInt(0);
+        ship->AddCommand(
+            gcnew ShipCmdWormhole(ship, ship->System->GetWormholeTarget(), p) );
+        if( p != -1 &&
+            ship->System->Planets->ContainsKey( p ) == false )
+            throw gcnew FHUIParsingException("Invalid ship wormhole command (invalid planet for orbiting)!");
+        return true;
+    }
+    // Upgrade
+    if( m_RM->Match(line, m_RM->ExpCmdShipUpg) )
+    {
+        ship->AddCommand( gcnew ShipCmdUpgrade(ship) );
+        return true;
+    }
+    // Recycle
+    if( m_RM->Match(line, m_RM->ExpCmdShipRec) )
+    {
+        ship->AddCommand( gcnew ShipCmdRecycle(ship) );
         return true;
     }
 
@@ -662,30 +723,45 @@ void CommandManager::GenerateJumps()
             plugin->GenerateJumps(m_OrderList, ship);
         }
 
-        if( ship->Command )
+        ICommand ^jumpCmd = ship->GetJumpCommand();
+        if( jumpCmd )
         {
-            if( ship->Command->Type == Ship::OrderType::Jump )
+            if( jumpCmd->GetCmdType() == CommandType::Jump )
             {
-                m_OrderList->Add( String::Format("  Jump {0}, {1}  ; [{2}] -> [{3}]; Mishap: {4:F2}%",
-                    ship->PrintClassWithName(),
-                    ship->Command->PrintJumpDestination(),
-                    ship->System->PrintLocation(),
-                    ship->Command->JumpTarget->PrintLocation(),
-                    ship->System->CalcMishap(
-                        ship->Command->JumpTarget,
-                        ship->Owner->TechLevelsAssumed[TECH_GV],
-                        ship->Age) ) );
+                StarSystem ^jumpTarget = safe_cast<ShipCmdJump^>(jumpCmd)->m_JumpTarget;
+                if( jumpTarget )
+                {
+                    m_OrderList->Add( String::Format("  Jump {0}, {1}  ; [{2}] -> [{3}]; Mishap: {4:F2}%{5}",
+                        ship->PrintClassWithName(),
+                        ship->PrintJumpDestination(),
+                        ship->System->PrintLocation(),
+                        jumpTarget->PrintLocation(),
+                        ship->System->CalcMishap(
+                            jumpTarget,
+                            ship->Owner->TechLevelsAssumed[TECH_GV],
+                            ship->Age),
+                        jumpCmd->PrintOriginSuffix() ) );
+                }
+                else
+                {
+                    m_OrderList->Add( String::Format("  Jump {0}, ??? {1}",
+                        ship->PrintClassWithName(),
+                        jumpCmd->PrintOriginSuffix() ) );
+                }
             }
-            else if( ship->Command->Type == Ship::OrderType::Wormhole )
+            else if( jumpCmd->GetCmdType() == CommandType::Wormhole )
             {
                 String ^order = "  Wormhole " + ship->PrintClassWithName();
-                if( ship->Command->JumpTarget &&
-                    ship->Command->JumpTarget->Planets->ContainsKey( ship->Command->PlanetNum ) )
+                StarSystem ^jumpTarget = safe_cast<ShipCmdWormhole^>(jumpCmd)->m_JumpTarget;
+                int planetNum = safe_cast<ShipCmdWormhole^>(jumpCmd)->m_PlanetNum;
+
+                if( jumpTarget &&
+                    jumpTarget->Planets->ContainsKey( planetNum ) )
                 {
-                    Planet ^pl = ship->Command->JumpTarget->Planets[ ship->Command->PlanetNum ];
+                    Planet ^pl = jumpTarget->Planets[ planetNum ];
                     if( String::IsNullOrEmpty(pl->Name) )
                     {
-                        order += ", " + ship->Command->PlanetNum.ToString();
+                        order += ", " + planetNum.ToString();
                     }
                     else
                     {
@@ -708,29 +784,8 @@ void CommandManager::GenerateJumps()
                 }
                 m_OrderList->Add( order );
             }
-        }
-
-        String ^prefix = "  ";
-        bool commentOutAuto = false;
-        // Comment out auto jumps, if UI or plugin jumps were added
-        if( m_OrderList->Count > prevLines )
-        {
-            commentOutAuto = true;
-            prefix += "; ";
-        }
-
-        List<String^>^ autoOrders = GetAutoOrdersJumps( ship );
-        if ( autoOrders )
-        {
-            for each (String^ line in autoOrders )
-            {
-                // If auto is to be commented out, and auto target is "???",
-                // completely skip this order
-                if( commentOutAuto && line->IndexOf("???") != -1 )
-                    continue;
-
-                m_OrderList->Add( prefix + line + " ; AUTO" );
-            }
+            else
+                throw gcnew FHUIDataImplException("Not supported ship jump command: " + ((int)jumpCmd->GetCmdType()).ToString());
         }
     }
 
@@ -760,11 +815,9 @@ void CommandManager::GenerateProduction()
     // Mark ships for upgrade
     for each( Ship ^ship in GameData::Player->Ships )
     {
-        if( ship->Command != nullptr &&
-            (   ship->Command->Type == Ship::OrderType::Upgrade ||
-                ship->Command->Type == Ship::OrderType::Recycle ) )
+        if( ship->GetProdCommand() != nullptr )
         {
-            ship->Command->PlanetNum = -1;
+            ship->CommandProdPlanet = -1;
         }
     }
 
@@ -855,9 +908,11 @@ void CommandManager::GenerateProductionRecycle(Colony ^colony)
 
     for each( Ship ^ship in colony->System->ShipsOwned )
     {
-        if( ship->Command != nullptr &&
-            ship->Command->Type == Ship::OrderType::Recycle &&
-            ship->Command->PlanetNum == -1 )    // not yet done
+        ICommand ^prodCmd = ship->GetProdCommand();
+
+        if( prodCmd != nullptr &&
+            prodCmd->GetCmdType() == CommandType::Recycle &&
+            ship->CommandProdPlanet == -1 )    // not yet done
         {
             // If ship is incomplete,
             // add recycle command on planet where it is under construction.
@@ -865,14 +920,11 @@ void CommandManager::GenerateProductionRecycle(Colony ^colony)
                 ship->PlanetNum != colony->PlanetNum )
                 continue;
 
-            int value = ship->GetRecycleValue();
-            colony->OrdersText->Add( String::Format("    Recycle {0}  ; +{1} EU",
-                ship->PrintClassWithName(),
-                value) );
-            m_Budget->UpdateEU(-value);
+            colony->OrdersText->Add( this->PrintCommandWithInfo( prodCmd ) );
+            m_Budget->EvalOrder( prodCmd );
 
             // Mark the recycle was done on this planet.
-            ship->Command->PlanetNum = colony->PlanetNum;
+            ship->CommandProdPlanet = colony->PlanetNum;
         }
     }
 }
@@ -884,12 +936,14 @@ void CommandManager::GenerateProductionUpgrade(Colony ^colony)
 
     for each( Ship ^ship in colony->System->ShipsOwned )
     {
+        ICommand ^prodCmd = ship->GetProdCommand();
+
         if( ship->EUToComplete > 0 &&
             ship->PlanetNum == colony->PlanetNum )
         {
             // Continue ship if no recycle order issued
-            if( ship->Command == nullptr ||
-                ship->Command->Type != Ship::OrderType::Recycle )
+            if( prodCmd == nullptr ||
+                prodCmd->GetCmdType() != CommandType::Recycle )
             {
                 colony->OrdersText->Add( String::Format("    Continue {0}  ; -{1} EU",
                     ship->PrintClassWithName(),
@@ -899,9 +953,9 @@ void CommandManager::GenerateProductionUpgrade(Colony ^colony)
             }
         }
 
-        if( ship->Command != nullptr &&
-            ship->Command->Type == Ship::OrderType::Upgrade &&
-            ship->Command->PlanetNum == -1 )    // not yet done
+        if( prodCmd != nullptr &&
+            prodCmd->GetCmdType() == CommandType::Upgrade &&
+            ship->CommandProdPlanet == -1 )    // not yet done
         {
             int value = Calculators::ShipUpgradeCost(ship->Age, ship->OriginalCost);
             bool doUpgrade = true;
@@ -925,13 +979,11 @@ void CommandManager::GenerateProductionUpgrade(Colony ^colony)
             // colony able to do the upgrade found, add the command.
             if( doUpgrade )
             {
-                colony->OrdersText->Add( String::Format("    Upgrade {0}  ; -{1} EU",
-                    ship->PrintClassWithName(),
-                    value) );
-                m_Budget->UpdateEU(value);
+                colony->OrdersText->Add( PrintCommandWithInfo( prodCmd ) );
+                m_Budget->EvalOrder( prodCmd );
 
                 // Mark the upgrade was done on this planet.
-                ship->Command->PlanetNum = colony->PlanetNum;
+                ship->CommandProdPlanet = colony->PlanetNum;
             }
         }
     }
@@ -1001,15 +1053,6 @@ void CommandManager::SetAutoOrderPreDeparture(StarSystem^ system, String^ line)
     m_CommandData[m_CurrentTurn]->AutoOrdersPreDeparture[system]->Add(line);
 }
 
-void CommandManager::SetAutoOrderJumps(Ship^ ship, String^ line)
-{
-    if( !m_CommandData[m_CurrentTurn]->AutoOrdersJumps->ContainsKey( ship ) )
-    {
-        m_CommandData[m_CurrentTurn]->AutoOrdersJumps->Add(ship, gcnew List<String^>);
-    }
-    m_CommandData[m_CurrentTurn]->AutoOrdersJumps[ship]->Add(line);
-}
-
 void CommandManager::SetAutoOrderProduction(Colony^ colony, String^ line, int cost)
 {
     if( !m_CommandData[m_CurrentTurn]->AutoOrdersProduction->ContainsKey( colony ) )
@@ -1024,15 +1067,6 @@ List<String^>^ CommandManager::GetAutoOrdersPreDeparture(StarSystem^ system)
     if ( m_CommandData[m_CurrentTurn]->AutoOrdersPreDeparture->ContainsKey( system ) )
     {
         return m_CommandData[m_CurrentTurn]->AutoOrdersPreDeparture[system];
-    }
-    return nullptr;
-}
-
-List<String^>^ CommandManager::GetAutoOrdersJumps(Ship^ ship)
-{
-    if ( m_CommandData[m_CurrentTurn]->AutoOrdersJumps->ContainsKey( ship ) )
-    {
-        return m_CommandData[m_CurrentTurn]->AutoOrdersJumps[ship];
     }
     return nullptr;
 }

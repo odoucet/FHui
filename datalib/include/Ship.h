@@ -6,6 +6,8 @@
 namespace FHUI
 {
 
+interface class ICommand;
+
 // ---------------------------------------------------
 // Ship or starbase
 public ref class Ship : public GridDataSrcBase, public IComparable
@@ -28,6 +30,7 @@ public:
         IsPirate = false;
         m_Cargo = gcnew array<int>(INV_MAX){0};
         DidWormholeJump = false;
+        Commands = gcnew List<ICommand^>;
     }
 
     // -------- IComparable -----------------------------
@@ -124,40 +127,17 @@ public:
     }
 
     // ---- Ship orders ----
-    enum class OrderType
-    {
-        Jump, Upgrade, Recycle, Wormhole
-    };
+    List<ICommand^>^        Commands;
+    int                     CommandProdPlanet;
 
-    ref class Order
-    {
-    public:
-        Order(OrderType type)
-            : Type(type)
-            , JumpTarget(nullptr)
-            , PlanetNum(-1)
-        {}
-        Order(OrderType type, StarSystem ^system)
-            : Type(type)
-            , JumpTarget(system)
-            , PlanetNum(-1)
-        {}
-        Order(OrderType type, StarSystem ^system, int plNum)
-            : Type(type)
-            , JumpTarget(system)
-            , PlanetNum(plNum)
-        {}
+    void            AddCommand(ICommand ^cmd);
 
-        String^     Print();
-        String^     PrintNumeric();
-        String^     PrintJumpDestination();
+    String^         PrintJumpDestination();
+    ICommand^       GetJumpCommand();
+    ICommand^       GetProdCommand();
 
-        OrderType   Type;
-        StarSystem^ JumpTarget;
-        int         PlanetNum;
-    };
-
-    property Order^ Command;
+    String^         PrintCmdSummary();
+    String^         PrintCmdDetails();
 
 protected:
     void            SetupTonnage();

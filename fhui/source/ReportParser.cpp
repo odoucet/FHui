@@ -80,7 +80,18 @@ void ReportParser::ScanReports()
 
         LoadReport( m_RepFiles[currTurn] );
         m_GameData->Update();
-        m_CommandMgr->LoadCommands();
+        try
+        {
+            m_CommandMgr->LoadCommands();
+        }
+        catch( FHUIParsingException ^ex )
+        {
+            throw gcnew FHUIParsingException(
+                String::Format("Error occured while parsing FHUI orders: turn {0}\r\nError description:\r\n  {1}",
+                    currTurn,
+                    ex->Message),
+                ex );
+        }
     }
 }
 
