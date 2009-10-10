@@ -19,6 +19,12 @@ int main(array<System::String ^> ^args)
         if( args[i]->ToLower() == "-dir" && i < (args->Length - 1) )
         {
             dataDir = args[i + 1];
+            if( dataDir->EndsWith("\"") )
+            {
+                // TODO: Prevent a crash when invoked as: fhui.exe -dir "C:\My Dir\"
+                // dataDir->Remove(dataDir->Length - 1);
+                // dataDir->TrimEnd(String("\"").ToCharArray());
+            }
             continue;
         }
         if( args[i]->ToLower() == "-public" )

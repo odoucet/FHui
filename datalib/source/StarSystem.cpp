@@ -306,8 +306,8 @@ String^ StarSystem::PrintColoniesAll()
         {
             ret += String::Format("{0}{1}{2}:{3}",
                 firstColony ? "" : " ",
-                colony->PlanetType == PLANET_HOME ? "(HOME)" : "",
                 colony->PlanetNum,
+                colony->PlanetType == PLANET_HOME ? "(HOME)" : "",
                 colony->PrintSize() );
 
             firstColony = false;

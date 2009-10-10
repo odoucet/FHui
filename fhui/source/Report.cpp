@@ -592,6 +592,7 @@ void Report::MatchColonyScan(String ^s)
         if( m_RM->Match(s, "^This mining colony will generate (\\d+) - (\\d+) = \\d+ economic units this turn\\.") )
         {
             m_ScanColony->MaBase = 0;
+            m_ScanColony->Shipyards = 0;
             m_ScanColony->EUProd  = m_RM->GetResultInt(0);
             m_ScanColony->EUFleet = m_RM->GetResultInt(1);
             m_GameData->AddTurnProducedEU( m_ScanColony->EUProd );
@@ -602,6 +603,7 @@ void Report::MatchColonyScan(String ^s)
         if( m_RM->Match(s, "^This resort colony will generate (\\d+) - (\\d+) = \\d+ economic units this turn\\.") )
         {
             m_ScanColony->MiBase = 0;
+            m_ScanColony->Shipyards = 0;
             m_ScanColony->EUProd  = m_RM->GetResultInt(0);
             m_ScanColony->EUFleet = m_RM->GetResultInt(1);
             m_GameData->AddTurnProducedEU( m_ScanColony->EUProd );

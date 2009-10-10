@@ -359,7 +359,7 @@ String^ Form1::GetDataDir(String ^suffix)
 {
     String ^ret = suffix;
     if( !String::IsNullOrEmpty(DataDir) )
-        ret = DataDir + "/" + ret;
+        ret = DataDir + "\\" + ret;
     return ret;
 }
 

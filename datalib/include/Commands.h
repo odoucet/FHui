@@ -318,13 +318,20 @@ public ref class ProdCmdBuildIUAU : public CmdProdBase<CommandType::BuildIuAu>
 {
 public:
     ProdCmdBuildIUAU(int amount, String ^unit)
-        : m_Amount(amount), m_Unit(unit) {}
+        : m_Amount(amount), m_PopCost(0), m_Unit(unit)
+    {
+        if ( unit == "CU")
+        {
+            m_PopCost = amount;
+        }
+    }
 
     virtual int     GetEUCost() override    { return m_Amount; }
-    virtual int     GetPopCost() override   { return m_Amount; }
+    virtual int     GetPopCost() override   { return m_PopCost; }
     virtual String^ Print() override        { return String::Format("Build {0} {1}", m_Amount, m_Unit); }
 
     int         m_Amount;
+    int         m_PopCost;
     String^     m_Unit;
 };
 
