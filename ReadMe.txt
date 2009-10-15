@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------------
    Far Horizons User Interface
-     Contact : jdukat+fhui@gmail.com
+     Contact : jdukat+fhui@gmail.com, rozenfeld.piotr+fhui@gmail.com
      WIKI    : http://www.cetnerowski.com/farhorizons/pmwiki/pmwiki.php/FHUI/FHUI
      License : Freeware
 -------------------------------------------------------------------------------------

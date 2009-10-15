@@ -21,9 +21,8 @@ int main(array<System::String ^> ^args)
             dataDir = args[i + 1];
             if( dataDir->EndsWith("\"") )
             {
-                // TODO: Prevent a crash when invoked as: fhui.exe -dir "C:\My Dir\"
-                // dataDir->Remove(dataDir->Length - 1);
-                // dataDir->TrimEnd(String("\"").ToCharArray());
+                // Prevent a crash when invoked as: fhui.exe -dir "C:\My Dir\"
+                dataDir = dataDir->TrimEnd(String("\"").ToCharArray());
             }
             continue;
         }
