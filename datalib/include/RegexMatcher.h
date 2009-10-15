@@ -32,6 +32,7 @@ public:
     initonly Regex^     ExpCmdShipUpg;
     initonly Regex^     ExpCmdShipRec;
     initonly Regex^     ExpCmdShipWormhole;
+    initonly Regex^     ExpCmdShipUnload;
     initonly Regex^     ExpCmdPLName;
     initonly Regex^     ExpCmdPLDisband;
     initonly Regex^     ExpCmdSPNeutral;
@@ -39,6 +40,8 @@ public:
     initonly Regex^     ExpCmdSPEnemy;
     initonly Regex^     ExpCmdSPTeach;
     initonly Regex^     ExpCmdResearch;
+    initonly Regex^     ExpCmdRecycle;
+    initonly Regex^     ExpCmdInstall;
     initonly Regex^     ExpCmdBuildIUAU;
     initonly Regex^     ExpCmdBuildShipTR;
     initonly Regex^     ExpCmdBuildShip;

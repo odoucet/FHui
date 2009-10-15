@@ -38,10 +38,13 @@ public:
         Shipyards = -1;
         LastSeen = -1;
         Inventory = gcnew array<int>(INV_MAX){0};
+        RMProduced = 0;
+        RMUsed = 0;
         Hidden = false;
         UnderSiege = false;
         Shared = false;
         Orders = gcnew List<ICommand^>;
+        OrdersNonProd = gcnew List<ICommand^>;
     }
     // --- copy constructor - does not perform full copy !!! ---
     Colony(StarSystem ^system, Alien^ owner, Colony^ src)
@@ -69,10 +72,13 @@ public:
         LastSeen = src->LastSeen;
         Inventory = gcnew array<int>(INV_MAX){0};
         src->Inventory->CopyTo(Inventory, 0);
+        RMProduced = 0;
+        RMUsed = 0;
         Hidden = false;
         UnderSiege = false;
         Shared = false;
         Orders = gcnew List<ICommand^>;
+        OrdersNonProd = gcnew List<ICommand^>;
     }
     // -------- IComparable -----------------------------
     virtual Int32 CompareTo( Object^ obj );
@@ -146,6 +152,9 @@ public:
         }
     }
 
+    int             RMProduced;
+    int             RMUsed;
+
     // ---- Production / budget tracking ----
     ref class Resources
     {
@@ -158,9 +167,10 @@ public:
 
     void            ProductionReset();
 
-    property List<ICommand^>^   Orders;     // Production orders
-    property Resources^         Res;        // Resource tracking for orders template
-    property List<String^>^     OrdersText; // Production orders generated for orders template
+    property List<ICommand^>^   Orders;         // Production orders
+    property List<ICommand^>^   OrdersNonProd;  // Non-production orders
+    property Resources^         Res;            // Resource tracking for orders template
+    property List<String^>^     OrdersText;     // Production orders generated for orders template
 
 protected:
     Resources^          m_Resources;

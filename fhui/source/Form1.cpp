@@ -1765,21 +1765,21 @@ void Form1::ColoniesMenuProdCommandAddBuildIuAu(Object^, EventArgs^)
         if( cu > 0 )
         {
             ColoniesMenuProdCommandAdd(
-                gcnew ProdCmdBuildIUAU(cu, "CU") );
+                gcnew ProdCmdBuildIUAU(cu, INV_CU) );
         }
 
         int iu = dlg->GetIUAmount();
         if( iu > 0 )
         {
             ColoniesMenuProdCommandAdd(
-                gcnew ProdCmdBuildIUAU(iu, "IU") );
+                gcnew ProdCmdBuildIUAU(iu, INV_IU) );
         }
 
         int au = dlg->GetAUAmount();
         if( au > 0 )
         {
             ColoniesMenuProdCommandAdd(
-                gcnew ProdCmdBuildIUAU(au, "AU") );
+                gcnew ProdCmdBuildIUAU(au, INV_AU) );
         }
     }
 

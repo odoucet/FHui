@@ -110,6 +110,66 @@ int Calculators::ShipRecycleValue(int age, int originalCost)
     return (3 * originalCost * (60 - age)) / 200;
 }
 
+int Calculators::InventoryBuildCost(InventoryType inv)
+{
+    switch( inv )
+    {
+    case INV_CU:
+    case INV_IU:    
+    case INV_AU:
+    case INV_PD:    return 1;
+    case INV_SU:    return 110;
+    case INV_FD:    return 50;
+    case INV_FS:    return 25;
+    case INV_DR:    return 50;
+    case INV_FM:    return 100;
+    case INV_FJ:    return 125;
+    case INV_GW:    return 1000;
+    case INV_GT:    return 500;
+    case INV_JP:    return 100;
+    case INV_TP:    return 50000 / GameData::Player->TechLevels[TECH_BI];
+    case INV_GU1:
+    case INV_GU2:   
+    case INV_GU3:
+    case INV_GU4:
+    case INV_GU5:
+    case INV_GU6:
+    case INV_GU7:
+    case INV_GU8:
+    case INV_GU9:   return 250 * (1 + ((int)inv - (int)INV_GU1));
+    case INV_SG1:
+    case INV_SG2:
+    case INV_SG3:
+    case INV_SG4:
+    case INV_SG5:
+    case INV_SG6:
+    case INV_SG7:
+    case INV_SG8:
+    case INV_SG9:   return 250 * (1 + ((int)inv - (int)INV_SG1));
+    default:
+        throw gcnew FHUIDataImplException("Invalid inventory for build value calculation: " + ((int)inv).ToString());
+    }
+}
+
+int Calculators::RecycleValue(InventoryType inv, int amount)
+{
+    switch( inv )
+    {
+    case INV_RM:    return amount / 5;
+    case INV_IU:
+    case INV_AU:    return 0;   // can't recycle iu/au
+    default:
+        return (amount * InventoryBuildCost(inv)) / 2;
+    }
+}
+
+int Calculators::RecycleValuePop(InventoryType inv, int amount)
+{
+    if( inv == INV_CU || inv == INV_PD )
+        return amount;
+    return 0;
+}
+
 double Calculators::ShipMaintenanceDiscount(int mlLevel)
 {
     return (100.0 - (mlLevel / 2)) / 100.0;

@@ -3,6 +3,8 @@
 using namespace System;
 using namespace System::Collections::Generic;
 
+#include "Commands.h"
+
 namespace FHUI
 {
 
@@ -10,7 +12,6 @@ ref class GameData;
 ref class Colony;
 ref class Ship;
 ref class RegexMatcher;
-interface class ICommand;
 ref class BudgetTracker;
 
 public value struct OrdersDir
@@ -51,6 +52,7 @@ public:
     String^     PrintCommandWithInfo(ICommand ^cmd);
 
     void        AddCommand(ICommand ^cmd);
+    void        AddCommandDontSave(ICommand ^cmd);
     void        DelCommand(ICommand ^cmd);
     List<ICommand^>^ GetCommands() { return m_CommandData[m_CurrentTurn]->Commands; }
 
@@ -76,8 +78,10 @@ public:
 private:
     bool        LoadCommandsColony(String ^line, Colony ^colony);
     bool        LoadCommandsShip(String ^line, Ship ^ship);
-    void        AddCommandDontSave(ICommand ^cmd);
     void        SortCommands();
+
+    ICommand^   CmdSetOrigin(ICommand ^cmd);
+    String^     PrintCommandToFile(ICommand ^cmd);
 
     void        GenerateCombat();
     void        GeneratePreDeparture();
@@ -100,6 +104,8 @@ private:
     String^                 m_Path;
     GameData^               m_GameData;
     RegexMatcher^           m_RM;
+
+    CommandOrigin           m_CmdOrigin;
 
     int                     m_CurrentTurn;
     SortedList<int, TurnCommands^>^ m_CommandData;

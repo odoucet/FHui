@@ -582,6 +582,10 @@ void Report::MatchColonyScan(String ^s)
     case PLANET_COLONY:
         if( m_RM->Match(s, "^Total available for spending this turn = (\\d+) - (\\d+) = \\d+") )
         {
+            m_ScanColony->Inventory[INV_RM] += (m_ScanColony->RMProduced - m_ScanColony->RMUsed);
+            if( m_ScanColony->Inventory[INV_RM] < 0 )
+                m_ScanColony->Inventory[INV_RM] = 0;
+
             m_ScanColony->EUProd  = m_RM->GetResultInt(0);
             m_ScanColony->EUFleet = m_RM->GetResultInt(1);
             m_GameData->AddTurnProducedEU( m_ScanColony->EUProd );
@@ -638,6 +642,10 @@ void Report::MatchColonyScan(String ^s)
         m_ScanColony->MiBase = m_RM->GetResultInt(0) * 10 + m_RM->GetResultInt(1);
         m_ScanColony->MiDiff = m_RM->GetResultInt(2) * 100 + m_RM->GetResultInt(3);
     }
+    else if( m_RM->Match(s, "^(\\d+) raw material units will be produced this turn\\.$") )
+    {
+        m_ScanColony->RMProduced = m_RM->GetResultInt(0);
+    }
     else if( m_RM->Match(s, "^Raw Material Units \\(RM,C1\\) carried over from last turn = (\\d+)") )
     {
         m_ScanColony->Inventory[INV_RM] = m_RM->GetResultInt(0);
@@ -645,6 +653,10 @@ void Report::MatchColonyScan(String ^s)
     else if( m_RM->Match(s, "^Manufacturing base = (\\d+)\\.(\\d+) \\(") )
     {
         m_ScanColony->MaBase = m_RM->GetResultInt(0) * 10 + m_RM->GetResultInt(1);
+    }
+    else if( m_RM->Match(s, "^Production capacity this turn will be (\\d+)\\.$") )
+    {
+        m_ScanColony->RMUsed = m_RM->GetResultInt(0);
     }
     else if( m_RM->Match(s, "^Shipyard capacity = (\\d+)") )
     {
@@ -1068,12 +1080,32 @@ void Report::MatchOrdersTemplate(String ^s)
     String^ line = s->Replace("\t", " ");
 
     // INSTALL
-    if( m_RM->Match(s, "^Install\\s+\\d+\\s+\\S+\\s+PL\\s+([^,]+)$") )
+    if( m_RM->Match(s, "^Install\\s+(\\d+)\\s+([IAia]Uu)\\s+PL\\s+([^,]+)$") )
     {
-        StarSystem^ system = m_GameData->GetStarSystem(m_RM->Results[0]);  
-        if ( system )
+        Planet ^planet = m_GameData->GetPlanetByName(m_RM->Results[2]);  
+        if ( planet )
         {
-            m_CommandMgr->SetAutoOrderPreDeparture( system, line );
+            // Planet found, but we need the colony
+            Colony ^colony;
+            for each( Colony ^iCol in m_GameData->Player->Colonies )
+            {
+                if( iCol->Planet == planet )
+                {
+                    colony = iCol;
+                    break;
+                }
+            }
+            if( colony == nullptr )
+            {   // No colony, colonizing new planet...
+                colony = m_GameData->AddColony(m_GameData->Player, planet->Name, planet->System, planet->Number);
+            }
+
+            ICommand ^cmd = gcnew CmdInstall(
+                m_RM->GetResultInt(0),
+                m_RM->Results[1],
+                colony );
+            cmd->Origin = CommandOrigin::Auto;
+            colony->OrdersNonProd->Add( cmd );
             return;
         }
         throw gcnew FHUIParsingException(
@@ -1081,12 +1113,14 @@ void Report::MatchOrdersTemplate(String ^s)
     }
 
     // UNLOAD
-    if( m_RM->Match(s, "^Unload\\s+(\\S+)\\s+([^,]+)$") )
+    if( m_RM->Match(s, "^Unload\\s+(\\w+)\\s+([^,]+)$") )
     {
         Ship^ ship = m_GameData->GetShip(m_RM->Results[1]);  
         if ( ship )
         {
-            m_CommandMgr->SetAutoOrderPreDeparture( ship->System, line );
+            ICommand ^cmd = gcnew ShipCmdUnload(ship);
+            cmd->Origin = CommandOrigin::Auto;
+            ship->AddCommand( cmd );
             return;
         }
         throw gcnew FHUIParsingException(
@@ -1094,9 +1128,9 @@ void Report::MatchOrdersTemplate(String ^s)
     }
 
     // JUMP
-    if( m_RM->Match(s, "^Jump\\s+(\\S+)\\s+([^,]+),\\s+(.+)$") )
+    if( m_RM->Match(s, "^Jump\\s+(\\w+)\\s+([^,]+),\\s+(.+)$") )
     {
-        Ship^ ship = m_GameData->GetShip(m_RM->Results[1]);  
+        Ship^ ship = m_GameData->GetShip(m_RM->Results[1]);
         if ( ship )
         {
             String ^target = m_RM->Results[2];
@@ -1180,16 +1214,21 @@ void Report::MatchOrdersTemplate(String ^s)
     }
 
     // RECYCLE
-    if( m_RM->Match(s, "^Recycle\\s+(\\d+)\\s+RM$") )
+    if( m_RM->Match(s, "^Recycle\\s+(\\d+)\\s+(\\w+)$") )
     {
-        m_CommandMgr->SetAutoOrderProduction( 
-            m_ColonyProduction, line, -m_RM->GetResultInt(0)/5 );
+        ICommand ^cmd = gcnew ProdCmdRecycle(
+            FHStrings::InvFromString( m_RM->Results[1] ),
+            m_RM->GetResultInt(0) );
+        m_ColonyProduction->Orders->Add( cmd );
+        cmd->Origin = CommandOrigin::Auto;
         return;
     } 
     if( m_RM->Match(s, "^Recycle\\s+\\S+\\s+([^,]+)$") )
     {
-        m_CommandMgr->SetAutoOrderProduction(
-            m_ColonyProduction, line, -m_GameData->GetShip(m_RM->Results[0])->GetRecycleValue() );
+        Ship ^ship = m_GameData->GetShip(m_RM->Results[0]);
+        ICommand ^cmd = gcnew ShipCmdRecycle( ship );
+        cmd->Origin = CommandOrigin::Auto;
+        ship->AddCommand( cmd );
         return;
     }
 

@@ -31,18 +31,23 @@ public enum class CommandType
     Disband,
     Name,
     AlienRelation,  // Enemy/Neutral/Ally
+    Install,
     Teach,
+    Auto,
     // Ship commands:
     Upgrade,
-    Recycle,
+    RecycleShip,
     Jump,
     Wormhole,
+    Scan,
+    Unload,
     // Production commands:
     Hide,
     Shipyard,
     Research,
     BuildIuAu,
     BuildShip,
+    Recycle,
 };
 
 public enum class CommandOrigin
@@ -58,6 +63,9 @@ public interface class ICommand : public IComparable
     CommandType     GetCmdType();
     
     property CommandOrigin  Origin;
+    property bool           UsageMarker;
+
+    StarSystem^     GetRefSystem();
 
     // EU/CU/Inventory modifiers to budget / colony inventory
     // POSITIVE value mean:
@@ -82,12 +90,16 @@ public:
     CmdBase()
     {
         Origin = CommandOrigin::GUI;
+        UsageMarker = false;
     }
 
     virtual CommandPhase    GetPhase()                  { return Phase; }
     virtual CommandType     GetCmdType()                { return CmdType; }
 
     virtual property CommandOrigin  Origin;
+    virtual property bool           UsageMarker;
+
+    virtual StarSystem^     GetRefSystem()              { return nullptr; }
 
     virtual int             GetEUCost()                 { return 0; }
     virtual int             GetPopCost()                { return 0; }
@@ -148,7 +160,7 @@ public:
 };
 
 // Recycle
-public ref class ShipCmdRecycle : public CmdProdBase<CommandType::Recycle>
+public ref class ShipCmdRecycle : public CmdProdBase<CommandType::RecycleShip>
 {
 public:
     ShipCmdRecycle(Ship ^ship) : m_Ship(ship) {}
@@ -156,6 +168,30 @@ public:
     virtual int     GetEUCost() override    { return -m_Ship->GetRecycleValue(); }
     virtual String^ Print() override        { return "Recycle " + m_Ship->PrintClassWithName(); }
     virtual String^ PrintForUI() override   { return "Recycle"; }
+
+    Ship^   m_Ship;
+};
+
+// Unload
+public ref class ShipCmdUnload : public CmdBase<CommandPhase::PreDeparture, CommandType::Unload>
+{
+public:
+    ShipCmdUnload(Ship ^ship) : m_Ship(ship) {}
+
+    virtual String^ Print() override        { return "Unload " + m_Ship->PrintClassWithName(); }
+    virtual String^ PrintForUI() override   { return "Unload"; }
+
+    Ship^   m_Ship;
+};
+
+// Scan
+public ref class ShipCmdScan : public CmdBase<CommandPhase::PostArrival, CommandType::Scan>
+{
+public:
+    ShipCmdScan(Ship ^ship) : m_Ship(ship) {}
+
+    virtual String^ Print() override        { return "Scan " + m_Ship->PrintClassWithName(); }
+    virtual String^ PrintForUI() override   { return "Scan"; }
 
     Ship^   m_Ship;
 };
@@ -232,6 +268,26 @@ public:
 
 ////////////////////////////////////////////////////////////
 
+// Install
+public ref class CmdInstall
+    : public CmdBase<CommandPhase::PreDeparture, CommandType::Install>
+{
+public:
+    CmdInstall(int amount, String ^unit, Colony ^colony)
+        : m_Amount(amount), m_Unit(unit), m_Colony(colony)
+    {}
+
+    virtual StarSystem^ GetRefSystem() override { return m_Colony->System; }
+
+    virtual String^ Print() override    { return String::Format("Install {0} {1}, {2}", m_Amount, m_Unit, m_Colony->Name); }
+
+    int             m_Amount;
+    String^         m_Unit;
+    Colony^         m_Colony;
+};
+
+////////////////////////////////////////////////////////////
+
 // Ally / Neutral / Enemy
 public ref class CmdAlienRelation
     : public CmdBase<CommandPhase::PreDeparture, CommandType::AlienRelation>
@@ -266,6 +322,16 @@ public:
     Alien^          m_Alien;
     TechType        m_Tech;
     int             m_Level;
+};
+
+////////////////////////////////////////////////////////////
+
+// Auto
+public ref class CmdAuto
+    : public CmdBase<CommandPhase::PostArrival, CommandType::Auto>
+{
+public:
+    virtual String^ Print() override    { return "Auto"; }
 };
 
 ////////////////////////////////////////////////////////////
@@ -313,14 +379,14 @@ public:
 
 ////////////////////////////////////////////////////////////
 
-// Build IU/AU
+// Build CU/IU/AU
 public ref class ProdCmdBuildIUAU : public CmdProdBase<CommandType::BuildIuAu>
 {
 public:
-    ProdCmdBuildIUAU(int amount, String ^unit)
+    ProdCmdBuildIUAU(int amount, InventoryType unit)
         : m_Amount(amount), m_PopCost(0), m_Unit(unit)
     {
-        if ( unit == "CU")
+        if ( unit == INV_CU )
         {
             m_PopCost = amount;
         }
@@ -328,11 +394,13 @@ public:
 
     virtual int     GetEUCost() override    { return m_Amount; }
     virtual int     GetPopCost() override   { return m_PopCost; }
-    virtual String^ Print() override        { return String::Format("Build {0} {1}", m_Amount, m_Unit); }
+    virtual int     GetInvMod(InventoryType i) override { return i == m_Unit ? m_Amount : 0; }
 
-    int         m_Amount;
-    int         m_PopCost;
-    String^     m_Unit;
+    virtual String^ Print() override        { return String::Format("Build {0} {1}", m_Amount, FHStrings::InvToString(m_Unit)); }
+
+    int             m_Amount;
+    int             m_PopCost;
+    InventoryType   m_Unit;
 };
 
 ////////////////////////////////////////////////////////////
@@ -355,6 +423,27 @@ public:
     int         m_Size;
     bool        m_Sublight;
     String^     m_Name;
+};
+
+////////////////////////////////////////////////////////////
+
+// Recycle
+public ref class ProdCmdRecycle : public CmdProdBase<CommandType::Recycle>
+{
+public:
+    ProdCmdRecycle(InventoryType type, int amount)
+        : m_Type(type), m_Amount(amount) {}
+
+    virtual int     GetEUCost() override    { return -Calculators::RecycleValue(m_Type, m_Amount); }
+    virtual int     GetPopCost() override   { return -Calculators::RecycleValuePop(m_Type, m_Amount); }
+    virtual int     GetInvMod(InventoryType i) override { return i == m_Type ? -m_Amount : 0; }
+
+    virtual String^ Print() override        { return String::Format("Recycle {0} {1}",
+                                                    m_Amount,
+                                                    FHStrings::InvToString(m_Type) ); }
+
+    InventoryType   m_Type;
+    int             m_Amount;
 };
 
 ////////////////////////////////////////////////////////////

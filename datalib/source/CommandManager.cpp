@@ -51,21 +51,18 @@ void CommandManager::SelectTurn(int turn)
 String^ CommandManager::PrintCommandWithInfo(ICommand ^cmd)
 {
     int eu = cmd->GetEUCost();
-    String ^ret = String::Format("{0}  ; {1}{2} EU",
-        cmd->Print(),
-        eu > 0 ? "-" : "+",
-        eu );
+    String ^ret = String::Format("{0}  ; {1}{2} EU", cmd->Print(), eu > 0 ? "" : "+", -eu);
 
     int pop = cmd->GetPopCost();
     if( pop != 0 )
-        ret += ", " + pop.ToString("-#0;+#0;") + " Pop";
+        ret += String::Format(", {0}{1} Pop", pop > 0 ? "" : "+", -pop );
 
     for( int i = 0; i < INV_MAX; ++i )
     {
         InventoryType it = static_cast<InventoryType>(i);
         int invMod = cmd->GetInvMod(it);
         if( invMod != 0 )
-            ret += ", " + invMod.ToString() + " " + FHStrings::InvToString(it);
+            ret += String::Format(", {0}{1} {2}", invMod > 0 ? "+" : "", invMod, FHStrings::InvToString(it));
     }
 
     return ret + cmd->PrintOriginSuffix();
@@ -144,6 +141,19 @@ void CommandManager::DeleteCommands()
         fileInfo->Delete();
 }
 
+String^ CommandManager::PrintCommandToFile(ICommand ^cmd)
+{
+    switch( cmd->Origin )
+    {
+    case CommandOrigin::Auto:
+        return "[A] " + cmd->Print();
+    case CommandOrigin::Plugin:
+        return "[P] " + cmd->Print();
+    default:
+        return cmd->Print();
+    }
+}
+
 void CommandManager::SaveCommands()
 {
     // Create directory
@@ -169,8 +179,7 @@ void CommandManager::SaveCommands()
         commandList->Add( "COLONY " + colony->Name );
         for each( ICommand ^cmd in colony->Orders )
         {
-            if( cmd->Origin == CommandOrigin::GUI )
-                commandList->Add( cmd->Print() );
+            commandList->Add( PrintCommandToFile(cmd) );
         }
         commandList->Add( "END_COLONY" );
     }
@@ -184,8 +193,7 @@ void CommandManager::SaveCommands()
         commandList->Add( "SHIP " + ship->Name );
         for each( ICommand ^cmd in ship->Commands )
         {
-            if( cmd->Origin == CommandOrigin::GUI )
-                commandList->Add( cmd->Print() );
+            commandList->Add( PrintCommandToFile(cmd) );
         }
         commandList->Add( "END_SHIP" );
     }
@@ -193,8 +201,7 @@ void CommandManager::SaveCommands()
     // -- Commands
     for each( ICommand ^cmd in GetCommands() )
     {
-        if( cmd->Origin == CommandOrigin::GUI )
-            commandList->Add( cmd->Print() );
+        commandList->Add( PrintCommandToFile(cmd) );
     }
 
     // Write to stream
@@ -206,6 +213,12 @@ void CommandManager::SaveCommands()
 }
 
 // ---------------------------------------------------------
+
+ICommand^ CommandManager::CmdSetOrigin(ICommand ^cmd)
+{
+    cmd->Origin = m_CmdOrigin;
+    return cmd;
+}
 
 void CommandManager::LoadCommands()
 {
@@ -234,6 +247,19 @@ void CommandManager::LoadCommands()
         if( String::IsNullOrEmpty(line) ||
             line[0] == ';' )
             continue;
+
+        m_CmdOrigin = CommandOrigin::GUI;
+        if( line->Length > 4 )
+        {
+            String ^prefix = line->Substring(0, 4);
+            if( prefix == "[A] " )
+                m_CmdOrigin = CommandOrigin::Auto;
+            else if( prefix == "[P] " )
+                m_CmdOrigin = CommandOrigin::Plugin;
+
+            if( m_CmdOrigin != CommandOrigin::GUI )
+                line = line->Substring(4);
+        }
 
         if( refColony )
         {
@@ -275,7 +301,7 @@ void CommandManager::LoadCommands()
             StarSystem ^target = nullptr;
             if( x != 0 || y != 0 || z != 0 )
                 target = m_GameData->GetStarSystem(x, y, z, false);
-            ship->AddCommand( gcnew ShipCmdJump(ship, target, p) );
+            ship->AddCommand( CmdSetOrigin(gcnew ShipCmdJump(ship, target, p)) );
         }
         else if( m_RM->Match(line, m_RM->ExpCmdShipWormhole_Obsolete) )
         {
@@ -284,7 +310,7 @@ void CommandManager::LoadCommands()
                 throw gcnew FHUIParsingException("Invalid ship wormhole command (no wormhole in system)!");
             int p = m_RM->GetResultInt(1);
             ship->AddCommand(
-                gcnew ShipCmdWormhole(ship, ship->System->GetWormholeTarget(), p) );
+                CmdSetOrigin(gcnew ShipCmdWormhole(ship, ship->System->GetWormholeTarget(), p)) );
             if( p != -1 &&
                 ship->System->Planets->ContainsKey( p ) == false )
                 throw gcnew FHUIParsingException("Invalid ship wormhole command (invalid planet for orbiting)!");
@@ -292,12 +318,12 @@ void CommandManager::LoadCommands()
         else if( m_RM->Match(line, m_RM->ExpCmdShipUpg_Obsolete) )
         {
             Ship ^ship = m_GameData->GetShip(m_RM->Results[0]);
-            ship->AddCommand( gcnew ShipCmdUpgrade(ship) );
+            ship->AddCommand( CmdSetOrigin(gcnew ShipCmdUpgrade(ship)) );
         }
         else if( m_RM->Match(line, m_RM->ExpCmdShipRec_Obsolete) )
         {
             Ship ^ship = m_GameData->GetShip(m_RM->Results[0]);
-            ship->AddCommand( gcnew ShipCmdRecycle(ship) );
+            ship->AddCommand( CmdSetOrigin(gcnew ShipCmdRecycle(ship)) );
         }
     // --- end obsolete ship commands ---
         else if( m_RM->Match(line, m_RM->ExpCmdShip) )
@@ -324,7 +350,7 @@ void CommandManager::LoadCommands()
                 false);
             Planet ^planet = system->Planets[ m_RM->GetResultInt(3) ];
             String ^name = m_RM->Results[4];
-            AddCommandDontSave( gcnew CmdPlanetName(system, planet->Number, name) );
+            AddCommandDontSave( CmdSetOrigin(gcnew CmdPlanetName(system, planet->Number, name)) );
             planet->AddName(name);
         }
         else if( m_RM->Match(line, m_RM->ExpCmdPLDisband) )
@@ -334,7 +360,7 @@ void CommandManager::LoadCommands()
             {
                 if( pn->Name == name )
                 {
-                    AddCommandDontSave( gcnew CmdDisband(name) );
+                    AddCommandDontSave( CmdSetOrigin(gcnew CmdDisband(name)) );
                     pn->System->Planets[ pn->PlanetNum ]->DelName();
                     break;
                 }
@@ -348,7 +374,7 @@ void CommandManager::LoadCommands()
                 throw gcnew FHUIParsingException("Inconsistent alien relation command (neutral)!");
 
             alien->Relation = SP_NEUTRAL;
-            AddCommandDontSave( gcnew CmdAlienRelation(alien, SP_NEUTRAL) );
+            AddCommandDontSave( CmdSetOrigin(gcnew CmdAlienRelation(alien, SP_NEUTRAL)) );
         }
         else if( m_RM->Match(line, m_RM->ExpCmdSPAlly) )
         {
@@ -358,7 +384,7 @@ void CommandManager::LoadCommands()
                 throw gcnew FHUIParsingException("Inconsistent alien relation command (ally)!");
 
             alien->Relation = SP_ALLY;
-            AddCommandDontSave(gcnew CmdAlienRelation(alien, SP_ALLY));
+            AddCommandDontSave( CmdSetOrigin(gcnew CmdAlienRelation(alien, SP_ALLY)) );
         }
         else if( m_RM->Match(line, m_RM->ExpCmdSPEnemy) )
         {
@@ -368,7 +394,7 @@ void CommandManager::LoadCommands()
                 throw gcnew FHUIParsingException("Inconsistent alien relation command (enemy)!");
 
             alien->Relation = SP_ENEMY;
-            AddCommandDontSave( gcnew CmdAlienRelation(alien, SP_ENEMY) );
+            AddCommandDontSave( CmdSetOrigin(gcnew CmdAlienRelation(alien, SP_ENEMY)) );
         }
         else if( m_RM->Match(line, m_RM->ExpCmdSPTeach) )
         {
@@ -381,7 +407,7 @@ void CommandManager::LoadCommands()
             if( level != GameData::Player->TechLevels[tech] )
                 throw gcnew FHUIParsingException("Inconsistent tech level for Teach command!");
 
-            AddCommandDontSave( gcnew CmdTeach(alien, tech, level) );
+            AddCommandDontSave( CmdSetOrigin(gcnew CmdTeach(alien, tech, level)) );
             alien->TeachOrders |= 1 << tech;
         }
         else
@@ -391,51 +417,82 @@ void CommandManager::LoadCommands()
 
 bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
 {
+    // Shipyard
     if( line == "Shipyard" )
     {
-        colony->Orders->Add( gcnew ProdCmdShipyard );
+        colony->Orders->Add( CmdSetOrigin(gcnew ProdCmdShipyard) );
         return true;
     }
+    // Hide
     if( line == "Hide" )
     {
-        colony->Orders->Add( gcnew ProdCmdHide(colony) );
+        colony->Orders->Add( CmdSetOrigin(gcnew ProdCmdHide(colony)) );
         return true;
     }
 
+    // Research
     if( m_RM->Match(line, m_RM->ExpCmdResearch) )
     {
         int amount = m_RM->GetResultInt(0);
         TechType tech = FHStrings::TechFromString(m_RM->Results[1]);
 
-        colony->Orders->Add( gcnew ProdCmdResearch(tech, amount) );
+        colony->Orders->Add( CmdSetOrigin(gcnew ProdCmdResearch(tech, amount)) );
         return true;
-   }
+    }
 
+    // Build CU/IU/AU
     if( m_RM->Match(line, m_RM->ExpCmdBuildIUAU) )
     {
         int amount = m_RM->GetResultInt(0);
-        colony->Orders->Add( gcnew ProdCmdBuildIUAU(amount, m_RM->Results[1]) );
+        colony->Orders->Add( CmdSetOrigin(
+            gcnew ProdCmdBuildIUAU(
+                amount,
+                FHStrings::InvFromString(m_RM->Results[1]) ) ) );
         return true;
     }
 
+    // Build warship
     if( m_RM->Match(line, m_RM->ExpCmdBuildShip) )
     {
-        colony->Orders->Add( gcnew ProdCmdBuildShip(
+        colony->Orders->Add( CmdSetOrigin(gcnew ProdCmdBuildShip(
             FHStrings::ShipFromString(m_RM->Results[0]),
             0,
             String::IsNullOrEmpty(m_RM->Results[1]) == false,
-            m_RM->Results[2] ) );
+            m_RM->Results[2] )) );
         return true;
     }
+
+    // Build transport ship
     if( m_RM->Match(line, m_RM->ExpCmdBuildShipTR) )
     {
-        colony->Orders->Add( gcnew ProdCmdBuildShip(
+        colony->Orders->Add( CmdSetOrigin(gcnew ProdCmdBuildShip(
             SHIP_TR,
             m_RM->GetResultInt(0),
             String::IsNullOrEmpty(m_RM->Results[1]) == false,
-            m_RM->Results[2] ) );
+            m_RM->Results[2] )) );
         return true;
     }
+
+    // Recycle
+    if( m_RM->Match(line, m_RM->ExpCmdRecycle) )
+    {
+        colony->Orders->Add( CmdSetOrigin(gcnew ProdCmdRecycle(
+            FHStrings::InvFromString( m_RM->Results[1] ),
+            m_RM->GetResultInt(0) ) ) );
+        return true;
+    }
+
+    // Install
+    /*
+    TODO
+    if( m_RM->Match(line, m_RM->ExpCmdInstall) )
+    {
+        colony->Orders->Add( CmdSetOrigin(gcnew ProdCmdInstall(
+            FHStrings::InvFromString( m_RM->Results[1] ),
+            m_RM->GetResultInt(0) ) ) );
+        return true;
+    }
+    */
 
     return false;
 }
@@ -452,7 +509,7 @@ bool CommandManager::LoadCommandsShip(String ^line, Ship ^ship)
         StarSystem ^target = nullptr;
         if( x != 0 || y != 0 || z != 0 )
             target = m_GameData->GetStarSystem(x, y, z, false);
-        ship->AddCommand( gcnew ShipCmdJump(ship, target, p) );
+        ship->AddCommand( CmdSetOrigin(gcnew ShipCmdJump(ship, target, p)) );
         return true;
     }
     // Wormhole
@@ -462,7 +519,7 @@ bool CommandManager::LoadCommandsShip(String ^line, Ship ^ship)
             throw gcnew FHUIParsingException("Invalid ship wormhole command (no wormhole in system)!");
         int p = m_RM->GetResultInt(0);
         ship->AddCommand(
-            gcnew ShipCmdWormhole(ship, ship->System->GetWormholeTarget(), p) );
+            CmdSetOrigin(gcnew ShipCmdWormhole(ship, ship->System->GetWormholeTarget(), p)) );
         if( p != -1 &&
             ship->System->Planets->ContainsKey( p ) == false )
             throw gcnew FHUIParsingException("Invalid ship wormhole command (invalid planet for orbiting)!");
@@ -471,13 +528,19 @@ bool CommandManager::LoadCommandsShip(String ^line, Ship ^ship)
     // Upgrade
     if( m_RM->Match(line, m_RM->ExpCmdShipUpg) )
     {
-        ship->AddCommand( gcnew ShipCmdUpgrade(ship) );
+        ship->AddCommand( CmdSetOrigin(gcnew ShipCmdUpgrade(ship)) );
         return true;
     }
     // Recycle
     if( m_RM->Match(line, m_RM->ExpCmdShipRec) )
     {
-        ship->AddCommand( gcnew ShipCmdRecycle(ship) );
+        ship->AddCommand( CmdSetOrigin(gcnew ShipCmdRecycle(ship)) );
+        return true;
+    }
+    // Unload
+    if( m_RM->Match(line, m_RM->ExpCmdShipUnload) )
+    {
+        ship->AddCommand( CmdSetOrigin(gcnew ShipCmdUnload(ship)) );
         return true;
     }
 

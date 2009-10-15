@@ -18,6 +18,9 @@ public:
     static int      ShipMaintenanceCost(ShipType type, int size, bool sublight);
     static int      ShipUpgradeCost(int age, int originalCost);
     static int      ShipRecycleValue(int age, int originalCost);
+    static int      InventoryBuildCost(InventoryType inv);
+    static int      RecycleValue(InventoryType inv, int amount);
+    static int      RecycleValuePop(InventoryType inv, int amount);
     static double   ShipMaintenanceDiscount(int mlLevel);
 
     static int      ResearchCost(int startLevel, int endLevel, bool guided);

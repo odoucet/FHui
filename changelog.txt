@@ -5,6 +5,9 @@ Minor changes are listed only if originally requested by player
 + New features
 [P] denotes player requested features
 
+FHUI build ?
+* More fixes to CU/IU/AU building.
+
 FHUI build 184
 * [P] Fixed crash when storing inventory on planet #1
       but the planet is not yet colonized.

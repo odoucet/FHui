@@ -21,6 +21,8 @@ RegexMatcher::RegexMatcher()
     ExpCmdSPEnemy   = gcnew Regex("^Enemy SP ([^,;]+)$");
     ExpCmdSPTeach   = gcnew Regex("^Teach ([A-Z]{2}) (\\d+) SP ([^,;]+)$");
     ExpCmdResearch  = gcnew Regex("^Research (\\d+) ([A-Z]{2})$");
+    ExpCmdRecycle   = gcnew Regex("^Recycle (\\d+) (\\w+)$");
+    ExpCmdInstall   = gcnew Regex("^Install (\\d+) ([IA]U), PL ([^,;]+)");
     ExpCmdBuildIUAU = gcnew Regex("^Build (\\d+) ([IAC]U)$");
     ExpCmdBuildShipTR = gcnew Regex("^Build TR(\\d+)([Ss]?)\\s+(.+)$");
     ExpCmdBuildShip = gcnew Regex("^Build ([A-Za-z]{2})([Ss]?)\\s+(.+)$");
@@ -28,6 +30,7 @@ RegexMatcher::RegexMatcher()
     ExpCmdShipWormhole= gcnew Regex("^Wormhole[A-Z0-9]+\\s+[^,;]+,\\s+([0-9-]+)$");
     ExpCmdShipUpg   = gcnew Regex("^Upgrade\\s+[A-Z0-9]+\\s+[^,;]+$");
     ExpCmdShipRec   = gcnew Regex("^Recycle\\s+[A-Z0-9]+\\s+[^,;]+$");
+    ExpCmdShipUnload= gcnew Regex("^Unload\\s+[A-Z0-9]+\\s+[^,;]+$");
 }
 
 int RegexMatcher::GetResultInt(int arg)
