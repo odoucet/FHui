@@ -961,8 +961,8 @@ void Report::MatchOtherPlanetsShipsScan(String ^s)
                 plNum );
 
             colony->PlanetType = PLANET_COLONY;
-            colony->LSN = system->Planets[plNum - 1]->LSN;
-            colony->MiDiff = system->Planets[plNum - 1]->MiDiff;
+            colony->LSN = system->Planets[plNum]->LSN;
+            colony->MiDiff = system->Planets[plNum]->MiDiff;
             colony->MiBase = 0;
             colony->MaBase = 0;
             colony->EconomicEff = 0;

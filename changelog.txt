@@ -6,6 +6,8 @@ Minor changes are listed only if originally requested by player
 [P] denotes player requested features
 
 FHUI build 184
+* [P] Fixed crash when storing inventory on planet #1
+      but the planet is not yet colonized.
 + Build CU/IU/AU production command implemented as it should be :)
 
 FHUI build 183

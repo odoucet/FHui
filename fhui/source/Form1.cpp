@@ -1207,8 +1207,12 @@ void Form1::PlanetsMenuAddNameStart(Object^, EventArgs^)
 void Form1::PlanetsMenuAddName(DataGridViewCellEventArgs ^cell)
 {
     PlanetsGrid->ReadOnly = true;
-    String ^name = PlanetsGrid[cell->ColumnIndex, cell->RowIndex]->Value->ToString();
-    name = name->Trim();
+
+    Object ^value = PlanetsGrid[cell->ColumnIndex, cell->RowIndex]->Value;
+    if( value == nullptr )
+        return;
+
+    String ^name = value->ToString()->Trim();
     if( String::IsNullOrEmpty(name) )
         return;
 
