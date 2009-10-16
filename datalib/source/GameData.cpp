@@ -226,4 +226,27 @@ void GameData::SetAtmospherePoisonous(GasType gas)
     atm->Poisonous[gas] = true;
 }
 
+Colony^ GameData::GetColonyFromPlanet(Planet ^planet, bool allowCreate)
+{
+    for each( Colony ^colony in Player->Colonies )
+        if( colony->Planet == planet )
+            return colony;
+
+    if( allowCreate )
+    {
+        Colony ^colony = AddColony(Player, planet->Name, planet->System, planet->Number);
+
+        colony->PlanetType = PLANET_COLONY;
+        colony->LSN = planet->LSN;
+        colony->MiDiff = planet->MiDiff;
+        colony->MiBase = 0;
+        colony->MaBase = 0;
+        colony->EconomicEff = 0;
+
+        return colony;
+    }
+
+    throw gcnew FHUIDataIntegrityException("Player's colony not found: " + planet->Name);
+}
+
 } // end namespace FHUI

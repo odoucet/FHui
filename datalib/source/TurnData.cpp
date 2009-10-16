@@ -445,7 +445,21 @@ Colony^ TurnData::AddColony(Alien ^sp, String ^name, StarSystem ^system, int plN
 
 void TurnData::AddPlanetName(StarSystem ^system, int pl, String ^name)
 {
-    m_PlanetNames[name->ToLower()] = gcnew PlanetName(system, pl, name);
+    String ^nameKey = name->ToLower();
+    if( m_PlanetNames->ContainsKey(nameKey) )
+    {
+        PlanetName ^plName = m_PlanetNames[nameKey];
+        if( plName->System != system ||
+            plName->PlanetNum != pl ||
+            plName->Name->ToLower() != nameKey )
+        {
+            throw gcnew FHUIDataIntegrityException("Named planet mismatch: " + name);
+        }
+
+        return;
+    }
+
+    m_PlanetNames[nameKey] = gcnew PlanetName(system, pl, name);
 }
 
 void TurnData::Update()
@@ -727,7 +741,12 @@ Planet^ TurnData::GetPlanetByName(String ^name)
     else if ( m_PlanetNames->ContainsKey( name->ToLower() ) )
     {
         PlanetName ^plName = m_PlanetNames[name->ToLower()];
-        return plName->System->Planets[plName->PlanetNum];
+        Planet ^planet = plName->System->Planets[plName->PlanetNum];
+        if( String::IsNullOrEmpty(planet->Name) )
+            planet->Name = plName->Name;
+        else if ( planet->Name->ToLower() != plName->Name->ToLower() )
+            throw gcnew FHUIDataIntegrityException("Planet names conflict: '" + planet->Name + "' and '" + plName->Name + "'!");
+        return planet;
     }
     else
     {

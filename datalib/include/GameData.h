@@ -31,32 +31,36 @@ public:
     static Ship^           GetShip(String ^name)               { return m_CurrentTurnData->GetShip(name); }
     static Planet^         GetPlanetByName(String ^name)       { return m_CurrentTurnData->GetPlanetByName(name); }
 
+    // Returns Player's colony for given planet. If colony doesn't yet exists,
+    // create one if allowed. New colony will be owned by the Player.
+    static Colony^          GetColonyFromPlanet(Planet ^planet, bool allowCreate);
+
     static IList<Alien^>^          GetAliens()          { return m_CurrentTurnData->GetAliens(); }
     static IList<StarSystem^>^     GetStarSystems()     { return m_CurrentTurnData->GetStarSystems(); }
     static IList<PlanetName^>^     GetPlanetNames()     { return m_CurrentTurnData->GetPlanetNames(); }
     static IList<Ship^>^           GetShips()           { return m_CurrentTurnData->GetShips(); }
     static IList<Colony^>^         GetColonies()        { return m_CurrentTurnData->GetColonies(); }
 
-    void            Update();
-    void            SetTechLevel(Alien ^sp, TechType, int, int);
-    void            SetFleetCost(int, int);
-    Alien^          AddAlien(String ^sp);
-    void            SetAlienRelation(String ^sp, SPRelType);
-    StarSystem^     AddStarSystem(int x, int y, int z, String ^type, String ^comment);
-    void            AddPlanetScan(StarSystem ^system, Planet ^planet);
-    void            SetTurnStartEU(int eu);
-    void            AddTurnProducedEU(int eu);
-    Colony^         AddColony(Alien ^sp, String ^name, StarSystem ^system, int plNum);
-    void            AddPlanetName(StarSystem ^system, int pl, String ^name);
-    Ship^           AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);
-    void            AddWormholeJump(String ^shipName, int fromSystemId);
+    static void         Update();
+    static void         SetTechLevel(Alien ^sp, TechType, int, int);
+    static void         SetFleetCost(int, int);
+    static Alien^       AddAlien(String ^sp);
+    static void         SetAlienRelation(String ^sp, SPRelType);
+    static StarSystem^  AddStarSystem(int x, int y, int z, String ^type, String ^comment);
+    static void         AddPlanetScan(StarSystem ^system, Planet ^planet);
+    static void         SetTurnStartEU(int eu);
+    static void         AddTurnProducedEU(int eu);
+    static Colony^      AddColony(Alien ^sp, String ^name, StarSystem ^system, int plNum);
+    static void         AddPlanetName(StarSystem ^system, int pl, String ^name);
+    static Ship^        AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);
+    static void         AddWormholeJump(String ^shipName, int fromSystemId);
 
-    void            SetSpecies(String ^sp);
-    void            SetAtmosphereReq(GasType gas, int, int);
-    void            SetAtmosphereNeutral(GasType gas);
-    void            SetAtmospherePoisonous(GasType gas);
+    static void         SetSpecies(String ^sp);
+    static void         SetAtmosphereReq(GasType gas, int, int);
+    static void         SetAtmosphereNeutral(GasType gas);
+    static void         SetAtmospherePoisonous(GasType gas);
 
-    static int      GetSystemId(int, int, int);
+    static int          GetSystemId(int, int, int);
     static property int CurrentTurn { int get() { return m_CurrentTurn; } }
     static property Alien^ Player
     {

@@ -1435,12 +1435,15 @@ void Form1::ColoniesSetup()
 
             String ^prodOrders = "";
             int prodSum = 0;
-            if( colony->Orders->Count > 0 )
+            if( colony->Commands->Count > 0 )
             {
-                for each( ICommand ^cmd in colony->Orders )
+                for each( ICommand ^cmd in colony->Commands )
                 {
-                    prodOrders += m_CommandMgr->PrintCommandWithInfo(cmd) + "\r\n";
-                    prodSum += cmd->GetEUCost();
+                    if( cmd->GetPhase() == CommandPhase::Production )
+                    {
+                        prodOrders += m_CommandMgr->PrintCommandWithInfo(cmd, 0) + "\r\n";
+                        prodSum += cmd->GetEUCost();
+                    }
                 }
                 if( colony->Res->AvailEU < 0 )
                 {
@@ -1537,10 +1540,13 @@ void Form1::ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowInde
     {
         menu->Items->Add( gcnew ToolStripSeparator );
 
+        menu->Items->Add( ColoniesFillMenuCommands(CommandPhase::PreDeparture) );
         if( colony->CanProduce )
-            menu->Items->Add( ColoniesFillMenuProduction() );
+            menu->Items->Add( ColoniesFillMenuCommands(CommandPhase::Production) );
+        menu->Items->Add( ColoniesFillMenuCommands(CommandPhase::PostArrival) );
 
         // Production order adjustment
+        menu->Items->Add( gcnew ToolStripSeparator );
         ToolStripMenuItem ^prodOrder = gcnew ToolStripMenuItem("Prod. Order:");
         if( colony->ProductionOrder > 0 )
         {
@@ -1575,34 +1581,95 @@ void Form1::ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowInde
     }
 }
 
-ToolStripMenuItem^ Form1::ColoniesFillMenuProduction()
+ToolStripMenuItem^ Form1::ColoniesFillMenuCommands(CommandPhase phase)
 {
-    ToolStripMenuItem ^prodMenu = gcnew ToolStripMenuItem("Production:");
-
-    if( m_ColoniesMenuRef->Orders->Count > 0 )
+    String ^title;
+    switch( phase )
     {
-        for each( ICommand ^cmd in m_ColoniesMenuRef->Orders )
+    case CommandPhase::PreDeparture:
+        title = "Pre-Departure";
+        break;
+
+    case CommandPhase::Production:
+        title = "Production";
+        break;
+
+    case CommandPhase::PostArrival:
+        title = "Post-Arrival";
+        break;
+
+    default:
+        throw gcnew FHUIDataImplException("Unsupported command phase: " + ((int)phase).ToString());
+    }
+
+    ToolStripMenuItem ^prodMenu = gcnew ToolStripMenuItem(title + ":");
+
+    bool anyProdCommand = false;
+    for each( ICommand ^cmd in m_ColoniesMenuRef->Commands )
+    {
+        if( cmd->GetPhase() == phase )
         {
             prodMenu->DropDownItems->Add(
                 ColoniesFillMenuProductionOptions(cmd) );
+            anyProdCommand = true;
         }
     }
-    else
-        prodMenu->DropDownItems->Add( "< No production orders >" );
+    if( !anyProdCommand )
+        prodMenu->DropDownItems->Add( "< No " + title + " orders >" );
 
+    // Add new commands
     prodMenu->DropDownItems->Add( gcnew ToolStripSeparator );
-    prodMenu->DropDownItems->Add( ColoniesFillMenuProductionNew() );
+    switch( phase )
+    {
+    case CommandPhase::PreDeparture:
+        prodMenu->DropDownItems->Add( ColoniesFillMenuPreDepartureNew() );
+        break;
 
-    if( m_ColoniesMenuRef->Orders->Count > 0 )
+    case CommandPhase::Production:
+        prodMenu->DropDownItems->Add( ColoniesFillMenuProductionNew() );
+        break;
+
+    case CommandPhase::PostArrival:
+        prodMenu->DropDownItems->Add( ColoniesFillMenuPostArrivalNew() );
+        break;
+    }
+
+    if( anyProdCommand )
     {
         prodMenu->DropDownItems->Add( gcnew ToolStripSeparator );
         prodMenu->DropDownItems->Add( CreateCustomMenuItem(
             "Cancel All",
             static_cast<ICommand^>(nullptr),
-            gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuProdCommandDel) ) );
+            gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuCommandDel) ) );
     }
 
     return prodMenu;
+}
+
+ToolStripMenuItem^ Form1::ColoniesFillMenuPreDepartureNew()
+{
+    Colony ^colony = m_ColoniesMenuRef;
+    ToolStripMenuItem ^menu = gcnew ToolStripMenuItem("Add:");
+
+    //menu->DropDownItems->Add( CreateCustomMenuItem(
+    //    "Hide Colony",
+    //    static_cast<ICommand^>(gcnew ProdCmdHide(colony)),
+    //    gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuCommandAdd) ) );
+
+    return menu;
+}
+
+ToolStripMenuItem^ Form1::ColoniesFillMenuPostArrivalNew()
+{
+    Colony ^colony = m_ColoniesMenuRef;
+    ToolStripMenuItem ^menu = gcnew ToolStripMenuItem("Add:");
+
+    //menu->DropDownItems->Add( CreateCustomMenuItem(
+    //    "Hide Colony",
+    //    static_cast<ICommand^>(gcnew ProdCmdHide(colony)),
+    //    gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuCommandAdd) ) );
+
+    return menu;
 }
 
 ToolStripMenuItem^ Form1::ColoniesFillMenuProductionNew()
@@ -1614,8 +1681,11 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuProductionNew()
     bool bHide = true;
 
     // Exclude commands that can't or shouldn't be duplicated
-    for each( ICommand ^cmd in colony->Orders )
+    for each( ICommand ^cmd in colony->Commands )
     {
+        if( cmd->GetPhase() != CommandPhase::Production )
+            continue;
+
         switch( cmd->GetCmdType() )
         {
         case CommandType::Shipyard:     bShipyard = false; break;
@@ -1631,7 +1701,7 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuProductionNew()
         menu->DropDownItems->Add( CreateCustomMenuItem(
             "Hide Colony",
             static_cast<ICommand^>(gcnew ProdCmdHide(colony)),
-            gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuProdCommandAdd) ) );
+            gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuCommandAdd) ) );
     }
     // Build CU/IU/AU
     menu->DropDownItems->Add(
@@ -1655,7 +1725,7 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuProductionNew()
         menu->DropDownItems->Add( CreateCustomMenuItem(
             "Build Shipyard",
             static_cast<ICommand^>(gcnew ProdCmdShipyard),
-            gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuProdCommandAdd) ) );
+            gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuCommandAdd) ) );
     }
 
     return menu;
@@ -1663,21 +1733,33 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuProductionNew()
 
 ToolStripMenuItem^ Form1::ColoniesFillMenuProductionOptions(ICommand ^cmd)
 {
-    ToolStripMenuItem ^menu = gcnew ToolStripMenuItem( m_CommandMgr->PrintCommandWithInfo(cmd) );
+    ToolStripMenuItem ^menu = gcnew ToolStripMenuItem( m_CommandMgr->PrintCommandWithInfo(cmd, 0) );
 
-    if( cmd != m_ColoniesMenuRef->Orders[0] )
+    ICommand ^cmdFirst = nullptr;
+    ICommand ^cmdLast = nullptr;
+    for each( ICommand ^iCmd in m_ColoniesMenuRef->Commands )
+    {
+        if( iCmd->GetPhase() == cmd->GetPhase() )
+        {
+            if( cmdFirst == nullptr )
+                cmdFirst = iCmd;
+            cmdLast = iCmd;
+        }
+    }
+
+    if( cmd != cmdFirst )
     {
         menu->DropDownItems->Add( CreateCustomMenuItem(
             "Move up",
             cmd,
-            gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuProdCommandMoveUp) ) );
+            gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuCommandMoveUp) ) );
     }
-    if( cmd != m_ColoniesMenuRef->Orders[m_ColoniesMenuRef->Orders->Count - 1] )
+    if( cmd != cmdLast )
     {
         menu->DropDownItems->Add( CreateCustomMenuItem(
             "Move down",
             cmd,
-            gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuProdCommandMoveDown) ) );
+            gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuCommandMoveDown) ) );
     }
 
     // Cancel order
@@ -1685,7 +1767,7 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuProductionOptions(ICommand ^cmd)
     menu->DropDownItems->Add( CreateCustomMenuItem(
         "Cancel",
         cmd,
-        gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuProdCommandDel) ) );
+        gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuCommandDel) ) );
 
     return menu;
 }
@@ -1727,7 +1809,7 @@ void Form1::ColoniesMenuProdOrderAdjust(int adjustment)
     m_CommandMgr->SaveCommands();
 }
 
-void Form1::ColoniesMenuProdCommandAdd(ICommand ^cmd)
+void Form1::ColoniesMenuCommandAdd(ICommand ^cmd)
 {
     m_CommandMgr->AddCommand(m_ColoniesMenuRef, cmd);
     ColoniesGrid->Filter->Update();
@@ -1745,7 +1827,7 @@ void Form1::ColoniesMenuProdCommandAddResearch(Object^, EventArgs^)
             int res = dlg->GetAmount(tech);
             if( res > 0 )
             {
-                ColoniesMenuProdCommandAdd(
+                ColoniesMenuCommandAdd(
                     gcnew ProdCmdResearch(tech, res) );
             }
         }
@@ -1764,21 +1846,21 @@ void Form1::ColoniesMenuProdCommandAddBuildIuAu(Object^, EventArgs^)
         int cu = dlg->GetCUAmount();
         if( cu > 0 )
         {
-            ColoniesMenuProdCommandAdd(
+            ColoniesMenuCommandAdd(
                 gcnew ProdCmdBuildIUAU(cu, INV_CU) );
         }
 
         int iu = dlg->GetIUAmount();
         if( iu > 0 )
         {
-            ColoniesMenuProdCommandAdd(
+            ColoniesMenuCommandAdd(
                 gcnew ProdCmdBuildIUAU(iu, INV_IU) );
         }
 
         int au = dlg->GetAUAmount();
         if( au > 0 )
         {
-            ColoniesMenuProdCommandAdd(
+            ColoniesMenuCommandAdd(
                 gcnew ProdCmdBuildIUAU(au, INV_AU) );
         }
     }
@@ -1793,47 +1875,64 @@ void Form1::ColoniesMenuProdCommandAddBuildShip(Object^, EventArgs^)
         GameData::Player->TechLevels[TECH_MA] );
     if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
     {
-        ColoniesMenuProdCommandAdd( dlg->CreateCommand() );
+        ColoniesMenuCommandAdd( dlg->CreateCommand() );
     }
 
     delete dlg;
 }
 
-void Form1::ColoniesMenuProdCommandDel(ICommand ^cmd)
+void Form1::ColoniesMenuCommandDel(ICommand ^cmd)
 {
     if( cmd )
     {
         m_CommandMgr->DelCommand(m_ColoniesMenuRef, cmd);
-        if( m_ColoniesMenuRef->Orders->Count > 0 )
+        if( m_ColoniesMenuRef->Commands->Count > 0 )
             ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
     }
     else
     {
-        m_ColoniesMenuRef->Orders->Clear();
+        bool repeat;
+        do
+        {
+            for each( ICommand ^cmd in m_ColoniesMenuRef->Commands )
+                if( cmd->GetPhase() == CommandPhase::Production )
+                {
+                    m_ColoniesMenuRef->Commands->Remove(cmd);
+                    repeat = true;
+                    break;
+                }
+        } while( repeat );
         m_CommandMgr->SaveCommands();
     }
     ColoniesGrid->Filter->Update();
 }
 
-void Form1::ColoniesMenuProdCommandMoveUp(ICommand ^cmd)
+void Form1::ColoniesMenuCommandMoveUp(ICommand ^cmd)
 {
-    int i = m_ColoniesMenuRef->Orders->IndexOf(cmd);
+    int i = m_ColoniesMenuRef->Commands->IndexOf(cmd);
     if( i > 0 )
     {
-        m_ColoniesMenuRef->Orders->RemoveAt(i);
-        m_ColoniesMenuRef->Orders->Insert(i - 1, cmd);
+        int newPos = i - 1;
+        while( newPos && m_ColoniesMenuRef->Commands[newPos]->GetPhase() != cmd->GetPhase() )
+            --newPos;
+        m_ColoniesMenuRef->Commands->RemoveAt(i);
+        m_ColoniesMenuRef->Commands->Insert(newPos, cmd);
         m_CommandMgr->SaveCommands();
     }
     ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
 }
 
-void Form1::ColoniesMenuProdCommandMoveDown(ICommand ^cmd)
+void Form1::ColoniesMenuCommandMoveDown(ICommand ^cmd)
 {
-    int i = m_ColoniesMenuRef->Orders->IndexOf(cmd);
-    if( i < ( m_ColoniesMenuRef->Orders->Count - 1) )
+    int i = m_ColoniesMenuRef->Commands->IndexOf(cmd);
+    if( i < ( m_ColoniesMenuRef->Commands->Count - 1) )
     {
-        m_ColoniesMenuRef->Orders->RemoveAt(i);
-        m_ColoniesMenuRef->Orders->Add(cmd);
+        int newPos = i + 1;
+        while( newPos < m_ColoniesMenuRef->Commands->Count &&
+                m_ColoniesMenuRef->Commands[newPos]->GetPhase() != cmd->GetPhase() )
+            ++newPos;
+        m_ColoniesMenuRef->Commands->RemoveAt(i);
+        m_ColoniesMenuRef->Commands->Insert(newPos, cmd);
         m_CommandMgr->SaveCommands();
     }
     ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
@@ -2033,12 +2132,12 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
             }
         }
 
+        EventHandler1Arg<ShipCommandData^> ^handler =
+            gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuOrderSet);
+        ToolStripMenuItem ^menuItem;
+
         if( prodOrderPossible )
         {
-            EventHandler1Arg<ShipCommandData^> ^handler =
-                gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuOrderSet);
-            ToolStripMenuItem ^menuItem;
-
             if( ship->EUToComplete == 0 )
             {
                 menuItem = CreateCustomMenuItem<ShipCommandData^>(
@@ -2058,10 +2157,25 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
                 gcnew ShipCommandData(ship, gcnew ShipCmdRecycle(ship)),
                 handler );
             if( ship->GetProdCommand() &&
-                ship->GetProdCommand()->GetCmdType() == CommandType::Recycle )
+                ship->GetProdCommand()->GetCmdType() == CommandType::RecycleShip )
                 menuItem->Checked = true;
             menu->Items->Add( menuItem );
         }
+
+        bool bCmdScan = false;
+        for each( ICommand ^cmd in ship->Commands )
+        {
+            if( cmd->GetCmdType() == CommandType::Scan )
+                bCmdScan = true;
+        }
+
+        menuItem = CreateCustomMenuItem<ShipCommandData^>(
+            "Scan",
+            gcnew ShipCommandData(ship, gcnew ShipCmdScan(ship)),
+            handler );
+        if( bCmdScan )
+            menuItem->Checked = true;
+        menu->Items->Add( menuItem );
 
         if( ship->System->HasWormhole )
         {

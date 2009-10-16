@@ -48,21 +48,42 @@ void CommandManager::SelectTurn(int turn)
 
 // ---------------------------------------------------------
 
-String^ CommandManager::PrintCommandWithInfo(ICommand ^cmd)
+String^ CommandManager::PrintCommandWithInfo(ICommand ^cmd, int indent)
 {
+    String ^indentStr = String::Format("{0}0,{1}{2}", "{", indent, "}");
+    String ^ret = String::Format(indentStr + "{1}", "", cmd->Print());
+
+    bool addSemicolon = true;
     int eu = cmd->GetEUCost();
-    String ^ret = String::Format("{0}  ; {1}{2} EU", cmd->Print(), eu > 0 ? "" : "+", -eu);
+    if( eu != 0 )
+    {
+        ret += String::Format("  ; {0}{1} EU", eu > 0 ? "" : "+", -eu);
+        addSemicolon = false;
+    }
 
     int pop = cmd->GetPopCost();
     if( pop != 0 )
-        ret += String::Format(", {0}{1} Pop", pop > 0 ? "" : "+", -pop );
+    {
+        ret += String::Format("{0} {1}{2} Pop",
+            addSemicolon ? "  ;" : ",",
+            pop > 0 ? "" : "+",
+            -pop );
+        addSemicolon = false;
+    }
 
     for( int i = 0; i < INV_MAX; ++i )
     {
         InventoryType it = static_cast<InventoryType>(i);
         int invMod = cmd->GetInvMod(it);
         if( invMod != 0 )
-            ret += String::Format(", {0}{1} {2}", invMod > 0 ? "+" : "", invMod, FHStrings::InvToString(it));
+        {
+            ret += String::Format("{0} {1}{2} {3}",
+                addSemicolon ? "  ;" : ",",
+                invMod > 0 ? "+" : "",
+                invMod,
+                FHStrings::InvToString(it));
+            addSemicolon = false;
+        }
     }
 
     return ret + cmd->PrintOriginSuffix();
@@ -110,18 +131,18 @@ void CommandManager::DelCommand(ICommand ^cmd)
 
 void CommandManager::AddCommand(Colony ^colony, ICommand ^cmd)
 {
-    colony->Orders->Add(cmd);
+    colony->Commands->Add(cmd);
     SaveCommands();
 }
 
 void CommandManager::DelCommand(Colony ^colony, ICommand ^cmd)
 {
-    for each( ICommand ^iCmd in colony->Orders )
+    for each( ICommand ^iCmd in colony->Commands )
     {
         if( iCmd == cmd ||
             iCmd->CompareTo(cmd) == 0 )
         {
-            colony->Orders->Remove(iCmd);
+            colony->Commands->Remove(iCmd);
             SaveCommands();
             return;
         }
@@ -130,7 +151,7 @@ void CommandManager::DelCommand(Colony ^colony, ICommand ^cmd)
 
 List<ICommand^>^ CommandManager::GetCommands(Colony ^colony)
 {
-    return colony->Orders;
+    return colony->Commands;
 }
 
 void CommandManager::DeleteCommands()
@@ -177,7 +198,7 @@ void CommandManager::SaveCommands()
     for each( Colony ^colony in GameData::Player->Colonies )
     {
         commandList->Add( "COLONY " + colony->Name );
-        for each( ICommand ^cmd in colony->Orders )
+        for each( ICommand ^cmd in colony->Commands )
         {
             commandList->Add( PrintCommandToFile(cmd) );
         }
@@ -424,13 +445,13 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
     // Shipyard
     if( line == "Shipyard" )
     {
-        colony->Orders->Add( CmdSetOrigin(gcnew ProdCmdShipyard) );
+        colony->Commands->Add( CmdSetOrigin(gcnew ProdCmdShipyard) );
         return true;
     }
     // Hide
     if( line == "Hide" )
     {
-        colony->Orders->Add( CmdSetOrigin(gcnew ProdCmdHide(colony)) );
+        colony->Commands->Add( CmdSetOrigin(gcnew ProdCmdHide(colony)) );
         return true;
     }
 
@@ -440,7 +461,7 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
         int amount = m_RM->GetResultInt(0);
         TechType tech = FHStrings::TechFromString(m_RM->Results[1]);
 
-        colony->Orders->Add( CmdSetOrigin(gcnew ProdCmdResearch(tech, amount)) );
+        colony->Commands->Add( CmdSetOrigin(gcnew ProdCmdResearch(tech, amount)) );
         return true;
     }
 
@@ -448,7 +469,7 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
     if( m_RM->Match(line, m_RM->ExpCmdBuildIUAU) )
     {
         int amount = m_RM->GetResultInt(0);
-        colony->Orders->Add( CmdSetOrigin(
+        colony->Commands->Add( CmdSetOrigin(
             gcnew ProdCmdBuildIUAU(
                 amount,
                 FHStrings::InvFromString(m_RM->Results[1]) ) ) );
@@ -458,7 +479,7 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
     // Build warship
     if( m_RM->Match(line, m_RM->ExpCmdBuildShip) )
     {
-        colony->Orders->Add( CmdSetOrigin(gcnew ProdCmdBuildShip(
+        colony->Commands->Add( CmdSetOrigin(gcnew ProdCmdBuildShip(
             FHStrings::ShipFromString(m_RM->Results[0]),
             0,
             String::IsNullOrEmpty(m_RM->Results[1]) == false,
@@ -469,7 +490,7 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
     // Build transport ship
     if( m_RM->Match(line, m_RM->ExpCmdBuildShipTR) )
     {
-        colony->Orders->Add( CmdSetOrigin(gcnew ProdCmdBuildShip(
+        colony->Commands->Add( CmdSetOrigin(gcnew ProdCmdBuildShip(
             SHIP_TR,
             m_RM->GetResultInt(0),
             String::IsNullOrEmpty(m_RM->Results[1]) == false,
@@ -480,23 +501,30 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
     // Recycle
     if( m_RM->Match(line, m_RM->ExpCmdRecycle) )
     {
-        colony->Orders->Add( CmdSetOrigin(gcnew ProdCmdRecycle(
+        colony->Commands->Add( CmdSetOrigin(gcnew ProdCmdRecycle(
             FHStrings::InvFromString( m_RM->Results[1] ),
             m_RM->GetResultInt(0) ) ) );
         return true;
     }
 
     // Install
-    /*
-    TODO
     if( m_RM->Match(line, m_RM->ExpCmdInstall) )
     {
-        colony->Orders->Add( CmdSetOrigin(gcnew ProdCmdInstall(
-            FHStrings::InvFromString( m_RM->Results[1] ),
-            m_RM->GetResultInt(0) ) ) );
-        return true;
+        Planet ^planet = m_GameData->GetPlanetByName( m_RM->Results[2] );  
+        if ( planet )
+        {
+            Colony ^colony = GameData::GetColonyFromPlanet(planet, true);
+
+            colony->Commands->Add( CmdSetOrigin(gcnew CmdInstall(
+                m_RM->GetResultInt(0),
+                m_RM->Results[1],
+                colony ) ) );
+
+            return true;
+        }
+        throw gcnew FHUIParsingException(
+            String::Format("INSTALL order for unknown planet: PL {0}", m_RM->Results[0]) );
     }
-    */
 
     return false;
 }
@@ -547,6 +575,12 @@ bool CommandManager::LoadCommandsShip(String ^line, Ship ^ship)
         ship->AddCommand( CmdSetOrigin(gcnew ShipCmdUnload(ship)) );
         return true;
     }
+    // Scan
+    if( m_RM->Match(line, m_RM->ExpCmdShipScan) )
+    {
+        ship->AddCommand( CmdSetOrigin(gcnew ShipCmdScan(ship)) );
+        return true;
+    }
 
     return false;
 }
@@ -554,15 +588,10 @@ bool CommandManager::LoadCommandsShip(String ^line, Ship ^ship)
 void CommandManager::RemoveAutoCommands()
 {
     for each( Colony ^colony in GameData::Player->Colonies )
-    {
-        RemoveAutoCommandsFromList( colony->Orders );
-        RemoveAutoCommandsFromList( colony->OrdersNonProd );
-    }
+        RemoveAutoCommandsFromList( colony->Commands );
 
     for each( Ship ^ship in GameData::Player->Ships )
-    {
         RemoveAutoCommandsFromList( ship->Commands );
-    }
 
     RemoveAutoCommandsFromList( GetCommands() );
 }
@@ -648,7 +677,7 @@ void CommandManager::GenerateCombat()
     {
         if( cmd->GetPhase() == CommandPhase::Combat )
         {
-            m_OrderList->Add( cmd->Print() );
+            m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
         }
     }
 
@@ -765,7 +794,15 @@ void CommandManager::GeneratePreDeparture()
     for each( ICommand ^cmd in GetCommands() )
     {
         if( cmd->GetPhase() == CommandPhase::PreDeparture )
-            m_OrderList->Add( cmd->Print() );
+            m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
+    }
+    for each( Ship ^ship in GameData::Player->Ships )
+    {
+        for each( ICommand ^cmd in ship->Commands )
+        {
+            if( cmd->GetPhase() == CommandPhase::PreDeparture )
+                m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
+        }
     }
 
     for each ( StarSystem^ system in m_GameData->GetStarSystems() )
@@ -786,12 +823,13 @@ void CommandManager::GeneratePreDeparture()
         m_OrderList->Add("");
         GeneratePreDepartureInfo( system );
 
-        List<String^>^ autoOrders = GetAutoOrdersPreDeparture( system );
-        if ( autoOrders )
+        // Print UI commands
+        for each( Colony ^colony in system->ColoniesOwned )
         {
-            for each (String^ line in autoOrders )
+            for each( ICommand ^cmd in colony->Commands )
             {
-                m_OrderList->Add( "  " + line + " ; AUTO" );
+                if( cmd->GetPhase() == CommandPhase::PreDeparture )
+                    m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
             }
         }
 
@@ -933,9 +971,9 @@ void CommandManager::GenerateProduction()
     // Generate production template for each colony
     for each( Colony ^colony in GameData::Player->Colonies )
     {
-        if ( (colony->EconomicBase <= 0) &&
-             (colony->HasInventory == false) )
-            continue;
+        //if ( (colony->EconomicBase <= 0) &&
+        //     (colony->HasInventory == false) )
+        //    continue;
 
         // Section header
         m_OrderList->Add("");
@@ -978,10 +1016,13 @@ void CommandManager::GenerateProduction()
         }
 
         // Production orders
-        for each( ICommand ^cmd in colony->Orders )
+        for each( ICommand ^cmd in colony->Commands )
         {
-            orders->Add( "    " + PrintCommandWithInfo(cmd) );
-            m_Budget->EvalOrder( cmd );
+            if( cmd->GetPhase() == CommandPhase::Production )
+            {
+                orders->Add( PrintCommandWithInfo(cmd, 4) );
+                m_Budget->EvalOrder( cmd );
+            }
         }
 
         // Now try to CONTINUE or UPGRADE ships here
@@ -1026,7 +1067,7 @@ void CommandManager::GenerateProductionRecycle(Colony ^colony)
                 ship->PlanetNum != colony->PlanetNum )
                 continue;
 
-            colony->OrdersText->Add( this->PrintCommandWithInfo( prodCmd ) );
+            colony->OrdersText->Add( PrintCommandWithInfo( prodCmd, 4 ) );
             m_Budget->EvalOrder( prodCmd );
 
             // Mark the recycle was done on this planet.
@@ -1085,7 +1126,7 @@ void CommandManager::GenerateProductionUpgrade(Colony ^colony)
             // colony able to do the upgrade found, add the command.
             if( doUpgrade )
             {
-                colony->OrdersText->Add( PrintCommandWithInfo( prodCmd ) );
+                colony->OrdersText->Add( PrintCommandWithInfo( prodCmd, 4 ) );
                 m_Budget->EvalOrder( prodCmd );
 
                 // Mark the upgrade was done on this planet.
@@ -1103,13 +1144,28 @@ void CommandManager::GeneratePostArrival()
     for each( ICommand ^cmd in GetCommands() )
     {
         if( cmd->GetPhase() == CommandPhase::PostArrival )
-            m_OrderList->Add( cmd->Print() );
+            m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
+    }
+    for each( Ship ^ship in GameData::Player->Ships )
+    {
+        for each( ICommand ^cmd in ship->Commands )
+        {
+            if( cmd->GetPhase() == CommandPhase::PostArrival )
+                m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
+        }
+    }
+    for each( Colony ^colony in GameData::Player->Colonies )
+    {
+        for each( ICommand ^cmd in colony->Commands )
+        {
+            if( cmd->GetPhase() == CommandPhase::PostArrival )
+                m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
+        }
     }
 
     if ( AutoEnabled )
     {
         m_OrderList->Add( "  AUTO" );
-        GenerateScanOrders();
     }
 
     for each( IOrdersPlugin ^plugin in PluginManager::OrderPlugins )
@@ -1122,19 +1178,6 @@ void CommandManager::GeneratePostArrival()
     m_OrderList->Add("");
 }
 
-void CommandManager::GenerateScanOrders()
-{
-    for each( Ship ^ship in GameData::Player->Ships )
-    {
-        if( ship->CanJump &&
-            ship->Type == SHIP_TR &&
-            ship->Size == 1 )
-        {
-            m_OrderList->Add("  Scan " + ship->PrintClassWithName());
-        }
-    }
-}
-
 void CommandManager::GenerateStrikes()
 {
     m_OrderList->Add("START STRIKES");
@@ -1143,20 +1186,11 @@ void CommandManager::GenerateStrikes()
     for each( ICommand ^cmd in GetCommands() )
     {
         if( cmd->GetPhase() == CommandPhase::Strike )
-            m_OrderList->Add( cmd->Print() );
+            m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
     }
 
     m_OrderList->Add("END");
     m_OrderList->Add("");
-}
-
-void CommandManager::SetAutoOrderPreDeparture(StarSystem^ system, String^ line)
-{   
-    if( !m_CommandData[m_CurrentTurn]->AutoOrdersPreDeparture->ContainsKey( system ) )
-    {
-        m_CommandData[m_CurrentTurn]->AutoOrdersPreDeparture->Add(system, gcnew List<String^>);
-    }
-    m_CommandData[m_CurrentTurn]->AutoOrdersPreDeparture[system]->Add(line);
 }
 
 void CommandManager::SetAutoOrderProduction(Colony^ colony, String^ line, int cost)
@@ -1166,15 +1200,6 @@ void CommandManager::SetAutoOrderProduction(Colony^ colony, String^ line, int co
         m_CommandData[m_CurrentTurn]->AutoOrdersProduction->Add(colony, gcnew List<Pair<String^, int>^>);
     }
     m_CommandData[m_CurrentTurn]->AutoOrdersProduction[colony]->Add(gcnew Pair<String^, int>(line, cost));
-}
-
-List<String^>^ CommandManager::GetAutoOrdersPreDeparture(StarSystem^ system)
-{
-    if ( m_CommandData[m_CurrentTurn]->AutoOrdersPreDeparture->ContainsKey( system ) )
-    {
-        return m_CommandData[m_CurrentTurn]->AutoOrdersPreDeparture[system];
-    }
-    return nullptr;
 }
 
 List<Pair<String^, int>^>^ CommandManager::GetAutoOrdersProduction(Colony^ colony)

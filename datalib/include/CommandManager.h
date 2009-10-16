@@ -26,7 +26,6 @@ public:
     TurnCommands()
         : Commands(gcnew List<ICommand^>)
         , AutoEnabled(false)
-        , AutoOrdersPreDeparture(gcnew SortedList<StarSystem^, List<String^>^>)
         , AutoOrdersProduction(gcnew SortedList<Colony^, List<Pair<String^, int>^>^>)
     {
     }
@@ -34,7 +33,6 @@ public:
     List<ICommand^>^                                 Commands;
 
     bool                                             AutoEnabled;
-    SortedList<StarSystem^, List<String^>^>^         AutoOrdersPreDeparture;
     SortedList<Colony^, List<Pair<String^, int>^>^>^ AutoOrdersProduction;
 };
 
@@ -49,7 +47,7 @@ public:
     void        SaveCommands();
     void        DeleteCommands();
 
-    String^     PrintCommandWithInfo(ICommand ^cmd);
+    String^     PrintCommandWithInfo(ICommand ^cmd, int indent);
 
     void        AddCommand(ICommand ^cmd);
     void        AddCommandDontSave(ICommand ^cmd);
@@ -69,10 +67,8 @@ public:
         void set(bool v) { m_CommandData[m_CurrentTurn]->AutoEnabled = v; };
     }
 
-    void        SetAutoOrderPreDeparture(StarSystem^, String^);
     void        SetAutoOrderProduction(Colony^, String^, int);
 
-    List<String^>^  GetAutoOrdersPreDeparture(StarSystem^);
     List<Pair<String^, int>^>^  GetAutoOrdersProduction(Colony^);
 
 private:
@@ -99,7 +95,6 @@ private:
     void        GenerateCombatInfo(StarSystem^);
     void        GeneratePreDepartureInfo(StarSystem^);
     void        GenerateJumpInfo(Ship^);
-    void        GenerateScanOrders();
     void        GenerateProductionRecycle(Colony ^colony);
     void        GenerateProductionUpgrade(Colony ^colony);
 

@@ -339,6 +339,20 @@ void Ship::AddCommand(ICommand ^cmd)
         }
     }
 
+    // Only single scan per phase
+    if( cmd->GetCmdType() == CommandType::Scan )
+    {   // Remove old one
+        for each( ICommand ^cmdIter in Commands )
+        {
+            if( cmdIter->GetPhase() == cmd->GetPhase() &&
+                cmdIter->GetCmdType() == cmd->GetCmdType() )
+            {
+                Commands->Remove( cmdIter );
+                break;
+            }
+        }
+    }
+
     Commands->Add(cmd);
 }
 

@@ -219,7 +219,20 @@ bool Report::Parse(String ^s)
         break;
 
     case PHASE_ORDERS_PRE_DEP:
-        if( Regex("^Jump orders:").Match(s)->Success )
+        if( m_RM->Match(s, "Named PL ([^,;]+) at (\\d+)\\s+(\\d+)\\s+(\\d+), planet #(\\d+)\\.") )
+        {
+            StarSystem^ system = m_GameData->GetStarSystem(
+                m_RM->GetResultInt(1),
+                m_RM->GetResultInt(2),
+                m_RM->GetResultInt(3),
+                false );
+
+            int plNum = m_RM->GetResultInt(4);
+            String^ plName = m_RM->Results[0];
+
+            m_GameData->AddPlanetName( system, plNum, plName);
+        }
+        else if( Regex("^Jump orders:").Match(s)->Success )
             m_Phase = PHASE_ORDERS_JUMP;
         // System scan
         else if( MatchSystemScanStart(s) )
@@ -1080,32 +1093,19 @@ void Report::MatchOrdersTemplate(String ^s)
     String^ line = s->Replace("\t", " ");
 
     // INSTALL
-    if( m_RM->Match(s, "^Install\\s+(\\d+)\\s+([IAia]Uu)\\s+PL\\s+([^,]+)$") )
+    if( m_RM->Match(s, m_RM->ExpCmdInstall) )
     {
         Planet ^planet = m_GameData->GetPlanetByName(m_RM->Results[2]);  
         if ( planet )
         {
-            // Planet found, but we need the colony
-            Colony ^colony;
-            for each( Colony ^iCol in m_GameData->Player->Colonies )
-            {
-                if( iCol->Planet == planet )
-                {
-                    colony = iCol;
-                    break;
-                }
-            }
-            if( colony == nullptr )
-            {   // No colony, colonizing new planet...
-                colony = m_GameData->AddColony(m_GameData->Player, planet->Name, planet->System, planet->Number);
-            }
+            Colony ^colony = GameData::GetColonyFromPlanet(planet, true);
 
             ICommand ^cmd = gcnew CmdInstall(
                 m_RM->GetResultInt(0),
                 m_RM->Results[1],
                 colony );
             cmd->Origin = CommandOrigin::Auto;
-            colony->OrdersNonProd->Add( cmd );
+            colony->Commands->Add( cmd );
             return;
         }
         throw gcnew FHUIParsingException(
@@ -1214,16 +1214,17 @@ void Report::MatchOrdersTemplate(String ^s)
     }
 
     // RECYCLE
-    if( m_RM->Match(s, "^Recycle\\s+(\\d+)\\s+(\\w+)$") )
+    if( m_RM->Match(s, m_RM->ExpCmdRecycle) )
     {
         ICommand ^cmd = gcnew ProdCmdRecycle(
             FHStrings::InvFromString( m_RM->Results[1] ),
             m_RM->GetResultInt(0) );
-        m_ColonyProduction->Orders->Add( cmd );
+        m_ColonyProduction->Commands->Add( cmd );
         cmd->Origin = CommandOrigin::Auto;
         return;
-    } 
-    if( m_RM->Match(s, "^Recycle\\s+\\S+\\s+([^,]+)$") )
+    }
+    // RECYCLE SHIP
+    if( m_RM->Match(s, m_RM->ExpCmdShipRec) )
     {
         Ship ^ship = m_GameData->GetShip(m_RM->Results[0]);
         ICommand ^cmd = gcnew ShipCmdRecycle( ship );
@@ -1238,7 +1239,16 @@ void Report::MatchOrdersTemplate(String ^s)
         m_CommandMgr->AutoEnabled = true;
         return;
     } 
-    // SCAN (ignore) assume it is generated for all scouts
+
+    // SCAN
+    if( m_RM->Match(s, m_RM->ExpCmdShipScan) )
+    {
+        Ship ^ship = m_GameData->GetShip(m_RM->Results[0]);
+        ICommand ^cmd = gcnew ShipCmdScan( ship );
+        cmd->Origin = CommandOrigin::Auto;
+        ship->AddCommand( cmd );
+        return;
+    }
 }
 
 void Report::StartLineAggregate(PhaseType phase, String ^s, int maxLines)

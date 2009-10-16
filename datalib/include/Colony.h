@@ -43,8 +43,7 @@ public:
         Hidden = false;
         UnderSiege = false;
         Shared = false;
-        Orders = gcnew List<ICommand^>;
-        OrdersNonProd = gcnew List<ICommand^>;
+        Commands = gcnew List<ICommand^>;
     }
     // --- copy constructor - does not perform full copy !!! ---
     Colony(StarSystem ^system, Alien^ owner, Colony^ src)
@@ -77,8 +76,7 @@ public:
         Hidden = false;
         UnderSiege = false;
         Shared = false;
-        Orders = gcnew List<ICommand^>;
-        OrdersNonProd = gcnew List<ICommand^>;
+        Commands = gcnew List<ICommand^>;
     }
     // -------- IComparable -----------------------------
     virtual Int32 CompareTo( Object^ obj );
@@ -165,15 +163,11 @@ public:
         array<int>^     Inventory;
     };
 
-    void            ProductionReset();
+    void                ProductionReset();
 
-    property List<ICommand^>^   Orders;         // Production orders
-    property List<ICommand^>^   OrdersNonProd;  // Non-production orders
-    property Resources^         Res;            // Resource tracking for orders template
-    property List<String^>^     OrdersText;     // Production orders generated for orders template
-
-protected:
-    Resources^          m_Resources;
+    List<ICommand^>^    Commands;       // Colony commands
+    Resources^          Res;            // Resource tracking for orders template
+    List<String^>^      OrdersText;     // Production orders generated for orders template
 };
 
 } // end namespace FHUI
