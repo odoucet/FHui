@@ -83,6 +83,10 @@ private:
     ICommand^   CmdSetOrigin(ICommand ^cmd);
     String^     PrintCommandToFile(ICommand ^cmd);
 
+    void        RemoveAutoCommands();
+    void        RemoveAutoCommandsFromList( List<ICommand^> ^orders );
+    void        AddPluginCommands();
+
     void        GenerateCombat();
     void        GeneratePreDeparture();
     void        GenerateJumps();

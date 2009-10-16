@@ -222,6 +222,8 @@ ICommand^ CommandManager::CmdSetOrigin(ICommand ^cmd)
 
 void CommandManager::LoadCommands()
 {
+    AddPluginCommands();
+
     // Open file
     StreamReader ^sr;
     try 
@@ -236,6 +238,8 @@ void CommandManager::LoadCommands()
     {
         return;
     }
+
+    RemoveAutoCommands();
 
     String ^line;
     Colony^ refColony = nullptr;
@@ -545,6 +549,45 @@ bool CommandManager::LoadCommandsShip(String ^line, Ship ^ship)
     }
 
     return false;
+}
+
+void CommandManager::RemoveAutoCommands()
+{
+    for each( Colony ^colony in GameData::Player->Colonies )
+    {
+        RemoveAutoCommandsFromList( colony->Orders );
+        RemoveAutoCommandsFromList( colony->OrdersNonProd );
+    }
+
+    for each( Ship ^ship in GameData::Player->Ships )
+    {
+        RemoveAutoCommandsFromList( ship->Commands );
+    }
+
+    RemoveAutoCommandsFromList( GetCommands() );
+}
+
+void CommandManager::RemoveAutoCommandsFromList( List<ICommand^> ^orders )
+{
+    bool repeat = false;
+    do
+    {
+        repeat = false;
+        for each( ICommand ^cmd in orders )
+        {
+            if( cmd->Origin != CommandOrigin::GUI )
+            {
+                orders->Remove( cmd );
+                repeat = true;
+                break;
+            }
+        }
+    } while ( repeat );
+}
+
+void CommandManager::AddPluginCommands()
+{
+    //TODO...
 }
 
 ////////////////////////////////////////////////////////////////
