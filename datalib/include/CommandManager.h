@@ -61,6 +61,8 @@ public:
 
     void        GenerateTemplate(System::Windows::Forms::RichTextBox^);
 
+    void        RemoveGeneratedCommands(CommandOrigin origin, bool preserveScouting);
+
     property bool AutoEnabled
     {
         bool get() { return m_CommandData[m_CurrentTurn]->AutoEnabled; };
@@ -79,8 +81,7 @@ private:
     ICommand^   CmdSetOrigin(ICommand ^cmd);
     String^     PrintCommandToFile(ICommand ^cmd);
 
-    void        RemoveAutoCommands();
-    void        RemoveAutoCommandsFromList( List<ICommand^> ^orders );
+    void        RemoveGeneratedCommandsFromList( List<ICommand^> ^orders, CommandOrigin origin, bool preserveScouting );
     void        AddPluginCommands();
 
     void        GenerateCombat();

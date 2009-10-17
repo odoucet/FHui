@@ -1544,30 +1544,12 @@ void Form1::ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowInde
         if( colony->CanProduce )
             menu->Items->Add( ColoniesFillMenuCommands(CommandPhase::Production) );
         menu->Items->Add( ColoniesFillMenuCommands(CommandPhase::PostArrival) );
+        menu->Items->Add( ColoniesFillMenuAuto() );
 
         // Production order adjustment
         menu->Items->Add( gcnew ToolStripSeparator );
-        ToolStripMenuItem ^prodOrder = gcnew ToolStripMenuItem("Prod. Order:");
-        if( colony->ProductionOrder > 0 )
-        {
-            prodOrder->DropDownItems->Add( CreateCustomMenuItem(
-                "Prod. Order: First",
-                -1000000,
-                gcnew EventHandler1Arg<int>(this, &Form1::ColoniesMenuProdOrderAdjust) ) );
-            prodOrder->DropDownItems->Add( CreateCustomMenuItem(
-                "Prod. Order: 1 Up",
-                -1,
-                gcnew EventHandler1Arg<int>(this, &Form1::ColoniesMenuProdOrderAdjust) ) );
-        }
-        prodOrder->DropDownItems->Add( CreateCustomMenuItem(
-            "Prod. Order: 1 Down",
-            1,
-            gcnew EventHandler1Arg<int>(this, &Form1::ColoniesMenuProdOrderAdjust) ) );
-        prodOrder->DropDownItems->Add( CreateCustomMenuItem(
-            "Prod. Order: Last",
-            1000000,
-            gcnew EventHandler1Arg<int>(this, &Form1::ColoniesMenuProdOrderAdjust) ) );
-        menu->Items->Add( prodOrder );
+        menu->Items->Add( ColoniesFillMenuProductionOrder() );
+
     }
 
     // Ship jumps to this colony
@@ -1579,6 +1561,58 @@ void Form1::ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowInde
         menu->Items->Add( gcnew ToolStripSeparator );
         menu->Items->Add( jumpMenu );
     }
+}
+
+ToolStripMenuItem^ Form1::ColoniesFillMenuAuto()
+{
+    Colony ^colony = m_ColoniesMenuRef;
+
+    ToolStripMenuItem ^autoMenu = gcnew ToolStripMenuItem("Automation:");
+
+    bool autoEnabled = m_CommandMgr->AutoEnabled;
+    autoMenu->DropDownItems->Add(
+        (autoEnabled ? "Disable" : "Enable") + " AUTO command",
+        nullptr,
+        gcnew EventHandler(this, &Form1::ColoniesMenuAutoToggle) );
+
+    autoMenu->DropDownItems->Add(
+        "Delete all Auto commands",
+        nullptr,
+        gcnew EventHandler(this, &Form1::ColoniesMenuAutoDeleteAll) );
+    autoMenu->DropDownItems->Add(
+        "Delete all non-scouting Auto commands",
+        nullptr,
+        gcnew EventHandler(this, &Form1::ColoniesMenuAutoDeleteAllNonScouting) );
+
+    return autoMenu;
+}
+
+ToolStripMenuItem^ Form1::ColoniesFillMenuProductionOrder()
+{
+    Colony ^colony = m_ColoniesMenuRef;
+
+    ToolStripMenuItem ^prodOrder = gcnew ToolStripMenuItem("Prod. Order:");
+    if( colony->ProductionOrder > 0 )
+    {
+        prodOrder->DropDownItems->Add( CreateCustomMenuItem(
+            "Prod. Order: First",
+            -1000000,
+            gcnew EventHandler1Arg<int>(this, &Form1::ColoniesMenuProdOrderAdjust) ) );
+        prodOrder->DropDownItems->Add( CreateCustomMenuItem(
+            "Prod. Order: 1 Up",
+            -1,
+            gcnew EventHandler1Arg<int>(this, &Form1::ColoniesMenuProdOrderAdjust) ) );
+    }
+    prodOrder->DropDownItems->Add( CreateCustomMenuItem(
+        "Prod. Order: 1 Down",
+        1,
+        gcnew EventHandler1Arg<int>(this, &Form1::ColoniesMenuProdOrderAdjust) ) );
+    prodOrder->DropDownItems->Add( CreateCustomMenuItem(
+        "Prod. Order: Last",
+        1000000,
+        gcnew EventHandler1Arg<int>(this, &Form1::ColoniesMenuProdOrderAdjust) ) );
+
+    return prodOrder;
 }
 
 ToolStripMenuItem^ Form1::ColoniesFillMenuCommands(CommandPhase phase)
@@ -1935,6 +1969,27 @@ void Form1::ColoniesMenuCommandMoveDown(ICommand ^cmd)
         m_ColoniesMenuRef->Commands->Insert(newPos, cmd);
         m_CommandMgr->SaveCommands();
     }
+    ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
+}
+
+void Form1::ColoniesMenuAutoToggle(Object^, EventArgs^)
+{
+    m_CommandMgr->AutoEnabled = ! m_CommandMgr->AutoEnabled;
+}
+
+void Form1::ColoniesMenuAutoDeleteAll(Object^, EventArgs^)
+{
+    m_CommandMgr->RemoveGeneratedCommands(CommandOrigin::Auto, false);
+    m_CommandMgr->SaveCommands();
+    ColoniesGrid->Filter->Update();
+    ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
+}
+
+void Form1::ColoniesMenuAutoDeleteAllNonScouting(Object^, EventArgs^)
+{
+    m_CommandMgr->RemoveGeneratedCommands(CommandOrigin::Auto, true);
+    m_CommandMgr->SaveCommands();
+    ColoniesGrid->Filter->Update();
     ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
 }
 

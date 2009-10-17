@@ -225,6 +225,9 @@ void CommandManager::SaveCommands()
         commandList->Add( PrintCommandToFile(cmd) );
     }
 
+    // Auto
+    commandList->Add( AutoEnabled ? "AUTO" : "NO_AUTO" );
+
     // Write to stream
     for each( String ^cmd in commandList )
     {
@@ -260,7 +263,8 @@ void CommandManager::LoadCommands()
         return;
     }
 
-    RemoveAutoCommands();
+    RemoveGeneratedCommands(CommandOrigin::Auto, false);
+    RemoveGeneratedCommands(CommandOrigin::Plugin, false);
 
     String ^line;
     Colony^ refColony = nullptr;
@@ -366,6 +370,10 @@ void CommandManager::LoadCommands()
             else
                 throw gcnew FHUIParsingException("Inconsistent commands template (END_SHIP)!");
         }
+        else if( line == "AUTO" )
+            AutoEnabled = true;
+        else if( line == "NO_AUTO" )
+            AutoEnabled = false;
         else if( m_RM->Match(line, m_RM->ExpCmdPLName) )
         {
             StarSystem ^system = m_GameData->GetStarSystem(
@@ -585,18 +593,18 @@ bool CommandManager::LoadCommandsShip(String ^line, Ship ^ship)
     return false;
 }
 
-void CommandManager::RemoveAutoCommands()
+void CommandManager::RemoveGeneratedCommands(CommandOrigin origin, bool preserveScouting)
 {
     for each( Colony ^colony in GameData::Player->Colonies )
-        RemoveAutoCommandsFromList( colony->Commands );
+        RemoveGeneratedCommandsFromList( colony->Commands, origin, preserveScouting );
 
     for each( Ship ^ship in GameData::Player->Ships )
-        RemoveAutoCommandsFromList( ship->Commands );
+        RemoveGeneratedCommandsFromList( ship->Commands, origin, preserveScouting );
 
-    RemoveAutoCommandsFromList( GetCommands() );
+    RemoveGeneratedCommandsFromList( GetCommands(), origin, preserveScouting );
 }
 
-void CommandManager::RemoveAutoCommandsFromList( List<ICommand^> ^orders )
+void CommandManager::RemoveGeneratedCommandsFromList(List<ICommand^> ^orders, CommandOrigin origin, bool preserveScouting)
 {
     bool repeat = false;
     do
@@ -604,8 +612,23 @@ void CommandManager::RemoveAutoCommandsFromList( List<ICommand^> ^orders )
         repeat = false;
         for each( ICommand ^cmd in orders )
         {
-            if( cmd->Origin != CommandOrigin::GUI )
+            if( cmd->Origin == origin )
             {
+                if( preserveScouting )
+                {
+                    if( cmd->GetCmdType() == CommandType::Scan )
+                        continue;
+                    if( cmd->GetCmdType() == CommandType::Jump )
+                    {
+                        ShipCmdJump ^jump = safe_cast<ShipCmdJump^>(cmd);
+                        if( jump->m_Ship->Type == SHIP_TR &&
+                            jump->m_Ship->Size == 1 )
+                        {
+                            continue;
+                        }
+                    }
+                }
+
                 orders->Remove( cmd );
                 repeat = true;
                 break;

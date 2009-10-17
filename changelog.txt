@@ -5,7 +5,7 @@ Minor changes are listed only if originally requested by player
 + New features
 [P] denotes player requested features
 
-FHUI build ?
+FHUI build 194
 * More fixes to CU/IU/AU building.
 * [P] Fixed crash when storing inventory on planet #1
       but the planet is not yet colonized.
@@ -13,6 +13,8 @@ FHUI build ?
   cancelled. Develop not supported yet.
 + Changes on Ships tab: Jump and Cmds columns split so you can always quickly
   see ship's jump order and still be able to see other orders.
++ Automation context menu on Colonies tab: lets you toggle Auto command on/off
+  and quickly remove all generated auto commands or just leave scouting automation.
 
 FHUI build 184
 + Build CU/IU/AU production command implemented as it should be :)
