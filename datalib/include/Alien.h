@@ -70,6 +70,8 @@ public:
         TechLevelsTeach   = gcnew array<int>(TECH_MAX){0};
         TechLevelsAssumed = gcnew array<int>(TECH_MAX){0};
         TeachOrders = 0;
+
+        LastMessageTurn = 0;
     }
     // --- copy constructor - does not perform full copy !!! ---
     Alien(StarSystem^ home, Alien^ src)
@@ -92,8 +94,10 @@ public:
         TechLevelsTeach   = gcnew array<int>(TECH_MAX){0};
         TechLevelsAssumed = gcnew array<int>(TECH_MAX){0};
         src->TechLevels->CopyTo(TechLevels, 0);
-
         TeachOrders = 0;
+
+        LastMessage = src->LastMessage;
+        LastMessageTurn = src->LastMessageTurn;
     }
     // -------- IGridDataSrc ----------------------------
     virtual Alien^      GetAlienForBgColor() override   { return this; }
@@ -117,26 +121,29 @@ public:
     String^         PrintHome();
     String^         PrintTechLevels();
 
-    property String^            Name;
-    property String^            GovName;
-    property String^            GovType;
-    property SPRelType          Relation;
-    property SPRelType          RelationOriginal;
-    property int                TurnMet;
-    property String^            Email;
+    String^             Name;
+    String^             GovName;
+    String^             GovType;
+    SPRelType           Relation;
+    SPRelType           RelationOriginal;
+    int                 TurnMet;
+    String^             Email;
 
-    property StarSystem^        HomeSystem;
-    property int                HomePlanet;
-    property AtmosphericReq^    AtmReq;
+    StarSystem^         HomeSystem;
+    int                 HomePlanet;
+    AtmosphericReq^     AtmReq;
 
-    property List<Ship^>^       Ships;
-    property List<Colony^>^     Colonies;
+    List<Ship^>^        Ships;
+    List<Colony^>^      Colonies;
 
-    property int                TechEstimateTurn;
-    property array<int>^        TechLevels;
-    property array<int>^        TechLevelsTeach;
-    property array<int>^        TechLevelsAssumed;
-    property int                TeachOrders;
+    int                 TechEstimateTurn;
+    array<int>^         TechLevels;
+    array<int>^         TechLevelsTeach;
+    array<int>^         TechLevelsAssumed;
+    int                 TeachOrders;
+
+    String^             LastMessage;
+    int                 LastMessageTurn;
 };
 
 } // end namespace FHUI

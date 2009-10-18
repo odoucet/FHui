@@ -86,6 +86,7 @@ private:
     bool            m_ScanHasPlanets;
     StarSystem^     m_ScanSystem;
     Alien^          m_ScanAlien;
+    String^         m_ScanMessage;
     Colony^         m_ScanColony;
     Ship^           m_ScanShip;
     int             m_PirateShipsCnt;

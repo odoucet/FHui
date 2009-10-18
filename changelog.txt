@@ -5,9 +5,11 @@ Minor changes are listed only if originally requested by player
 + New features
 [P] denotes player requested features
 
-FHUI build ?
+FHUI build ??
 * Fixed exception when loading command file with Wormhole order.
 + Message command added in context menu on Aliens tab.
++ Msg column on Aliens tab shows your message and last received message
+  (details in tooltip).
 
 FHUI build 194
 * More fixes to CU/IU/AU building.

@@ -169,6 +169,7 @@ bool Report::Parse(String ^s)
         else if( m_RM->Match(s, "^You received the following message from SP ([^,;]+):") )
         {
             m_ScanAlien = m_GameData->AddAlien(m_RM->Results[0]);
+            m_ScanMessage = "";
             m_Phase = PHASE_MESSAGE;
         }
         // Parsing ends here
@@ -177,12 +178,18 @@ bool Report::Parse(String ^s)
         break;
 
     case PHASE_MESSAGE:
-        if( Regex("^\\*\\*\\* End of Message \\*\\*\\*$").Match(s)->Success )
-            m_Phase = PHASE_GLOBAL;
-        else if( m_RM->Match(s, "([a-zA-Z0-9_.]+@[a-zA-Z0-9_.]+\\.[a-zA-Z0-9_]+)") )
+        if( s == "*** End of Message ***" )
         {
-            m_ScanAlien->Email = m_RM->Results[0];
+            m_ScanAlien->LastMessage = m_ScanMessage;
+            m_ScanAlien->LastMessageTurn = m_GameData->CurrentTurn;
+            m_ScanMessage = nullptr;
             m_Phase = PHASE_GLOBAL;
+        }
+        else
+        {
+            m_ScanMessage += s + "\r\n";
+            if( m_RM->Match(s, "([a-zA-Z0-9_.]+@[a-zA-Z0-9_.]+\\.[a-zA-Z0-9_]+)") )
+                m_ScanAlien->Email = m_RM->Results[0];
         }
         break;
 

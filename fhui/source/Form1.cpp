@@ -2518,16 +2518,39 @@ void Form1::AliensSetup()
         }
 
         // Message
-        for each( ICommand ^cmd in m_CommandMgr->GetCommands() )
+        if( alien != GameData::Player )
         {
-            if( cmd->GetCmdType() == CommandType::Message )
+            String ^msgCell = "";
+            String ^msgToolTip = "";
+            for each( ICommand ^cmd in m_CommandMgr->GetCommands() )
             {
-                CmdMessage ^cmdMsg = safe_cast<CmdMessage^>(cmd);
-                if( cmdMsg->m_Alien == alien )
+                if( cmd->GetCmdType() == CommandType::Message )
                 {
-                    cells[c.Message]->Value = "M";
-                    cells[c.Message]->ToolTipText = cmdMsg->m_Text;
+                    CmdMessage ^cmdMsg = safe_cast<CmdMessage^>(cmd);
+                    if( cmdMsg->m_Alien == alien )
+                    {
+                        msgToolTip = "Message to be sent:\r\n" + cmdMsg->m_Text;
+                        msgCell = "Send";
+                        break;
+                    }
                 }
+            }
+            if( alien->LastMessage )
+            {
+                if( !String::IsNullOrEmpty(msgToolTip) )
+                {
+                    msgToolTip += "\r\n--------------------------------------------------\r\n";
+                    msgCell += "/";
+                }
+                msgToolTip += "Last message received in turn "
+                    + alien->LastMessageTurn.ToString() + ":\r\n";
+                msgToolTip += alien->LastMessage;
+                msgCell += "Recv";
+            }
+            if( !String::IsNullOrEmpty(msgCell) )
+            {
+                cells[c.Message]->Value = msgCell;
+                cells[c.Message]->ToolTipText = msgToolTip;
             }
         }
 
