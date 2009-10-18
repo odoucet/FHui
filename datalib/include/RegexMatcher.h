@@ -40,6 +40,7 @@ public:
     initonly Regex^     ExpCmdSPAlly;
     initonly Regex^     ExpCmdSPEnemy;
     initonly Regex^     ExpCmdSPTeach;
+    initonly Regex^     ExpCmdSPMsg;
     initonly Regex^     ExpCmdResearch;
     initonly Regex^     ExpCmdRecycle;
     initonly Regex^     ExpCmdInstall;

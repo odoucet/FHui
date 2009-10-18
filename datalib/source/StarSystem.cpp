@@ -270,7 +270,7 @@ String^ StarSystem::PrintWormholeTarget()
     {
         if( WormholeTargetId != -1 )
             return GetWormholeTarget()->PrintLocation();
-        return "unknown";
+        return "Unknown";
     }
     return nullptr;
 }

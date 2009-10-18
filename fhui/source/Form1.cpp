@@ -10,6 +10,7 @@
 #include "CmdResearch.h"
 #include "CmdBuildShips.h"
 #include "CmdBuildIuAu.h"
+#include "CmdMessage.h"
 
 using namespace System::IO;
 using namespace System::Text::RegularExpressions;
@@ -2621,6 +2622,20 @@ void Form1::AliensMenuTeach(TeachData ^data)
 
     alien->TeachOrders |= 1 << tech;
     AliensGrid->Filter->Update();
+}
+
+void Form1::AliensMenuMessage(Alien ^alien)
+{
+    CmdMessageDlg ^dlg = gcnew CmdMessageDlg();
+    if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
+    {
+        String ^text = dlg->GetMessage();
+        if( !String::IsNullOrEmpty(text) )
+        {
+            m_CommandMgr->AddCommand( gcnew CmdMessage(alien, text) );
+            AliensGrid->Filter->Update();
+        }
+    }
 }
 
 void Form1::AliensMenuTeachAll(Object^, EventArgs^)

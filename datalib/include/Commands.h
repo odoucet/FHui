@@ -33,6 +33,7 @@ public enum class CommandType
     AlienRelation,  // Enemy/Neutral/Ally
     Install,
     Teach,
+    Message,
     // Ship commands:
     Upgrade,
     RecycleShip,
@@ -304,6 +305,22 @@ public:
 };
 
 ////////////////////////////////////////////////////////////
+
+// Message
+public ref class CmdMessage
+    : public CmdBase<CommandPhase::PreDeparture, CommandType::Message>
+{
+public:
+    CmdMessage(Alien ^alien, String ^text)
+        : m_Alien(alien)
+        , m_Text(text)
+    {}
+
+    virtual String^ Print() override { return String::Format("Message SP {0}\r\n{1}\r\nZzz", m_Alien->Name, m_Text); }
+
+    Alien^          m_Alien;
+    String^         m_Text;
+};
 
 // Teach
 public ref class CmdTeach

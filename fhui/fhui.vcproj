@@ -436,6 +436,15 @@
 					</File>
 				</File>
 				<File
+					RelativePath=".\include\CmdMessage.h"
+					FileType="3"
+					>
+					<File
+						RelativePath=".\include\CmdMessage.resx"
+						>
+					</File>
+				</File>
+				<File
 					RelativePath=".\include\CmdResearch.h"
 					FileType="3"
 					>

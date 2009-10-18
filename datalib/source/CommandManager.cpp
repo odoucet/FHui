@@ -269,6 +269,9 @@ void CommandManager::LoadCommands()
     String ^line;
     Colony^ refColony = nullptr;
     Ship^ refShip = nullptr;
+    String ^messageText = "";
+    Alien ^messageTarget;
+
     int colonyProdOrder = 1;
     while( (line = sr->ReadLine()) != nullptr ) 
     {
@@ -299,6 +302,22 @@ void CommandManager::LoadCommands()
         {
             if( LoadCommandsShip(line, refShip) )
                 continue;
+        }
+        if( messageTarget )
+        {
+            if( line == "Zzz" )
+            {
+                if( messageTarget )
+                {
+                    AddCommandDontSave( CmdSetOrigin( gcnew CmdMessage(messageTarget, messageText) ) );
+                    messageTarget = nullptr;
+                    messageText = "";
+                }
+                else
+                    throw gcnew FHUIParsingException("Message termination without message body!");
+            }
+            else
+                messageText += line + "\r\n";
         }
 
         if( m_RM->Match(line, m_RM->ExpCmdColony) )
@@ -442,6 +461,10 @@ void CommandManager::LoadCommands()
 
             AddCommandDontSave( CmdSetOrigin(gcnew CmdTeach(alien, tech, level)) );
             alien->TeachOrders |= 1 << tech;
+        }
+        else if( m_RM->Match(line, m_RM->ExpCmdSPMsg) )
+        {
+            messageTarget = GameData::GetAlien(m_RM->Results[0]);
         }
         else
             throw gcnew FHUIParsingException("Unrecognized line in commands template: " + line);
@@ -937,7 +960,7 @@ void CommandManager::GenerateJumps()
                 }
                 order += " ; Distance: ";
                 if( ship->System->WormholeTargetId == -1 )
-                    order += "unknown";
+                    order += "Unknown";
                 else
                 {
                     StarSystem ^target = ship->System->GetWormholeTarget();

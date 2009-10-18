@@ -316,6 +316,7 @@ namespace FHUI {
         void        AliensMenuSetRelation(AlienRelationData ^data);
         typedef Triple<Alien^, int, int> TeachData;
         void        AliensMenuTeach(TeachData ^data);
+        void        AliensMenuMessage(Alien ^alien);
         void        AliensMenuTeachAll(Object^, EventArgs^);
         void        AliensMenuTeachCancel(Object^, EventArgs^);
 
