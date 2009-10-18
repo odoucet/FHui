@@ -23,6 +23,7 @@ RegexMatcher::RegexMatcher()
     ExpCmdSPMsg     = gcnew Regex("^Message\\s+SP\\s+([^,;]+)$");
     ExpCmdResearch  = gcnew Regex("^Research\\s+(\\d+)\\s+([A-Z]{2})$");
     ExpCmdRecycle   = gcnew Regex("^Recycle\\s+(\\d+)\\s+(\\w+)$");
+    ExpCmdEstimate  = gcnew Regex("^Estimate\\s+SP\\s+([^,;]+)$");
     ExpCmdInstall   = gcnew Regex("^Install\\s+(\\d+)\\s+([IAia][Uu])\\s*,\\s+PL\\s+([^,;]+)$");
     ExpCmdBuildIUAU = gcnew Regex("^Build\\s+(\\d+)\\s+([IAC]U)$");
     ExpCmdBuildShipTR = gcnew Regex("^Build\\s+TR(\\d+)([Ss]?)\\s+(.+)$");

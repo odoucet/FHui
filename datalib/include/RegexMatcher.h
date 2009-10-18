@@ -43,6 +43,7 @@ public:
     initonly Regex^     ExpCmdSPMsg;
     initonly Regex^     ExpCmdResearch;
     initonly Regex^     ExpCmdRecycle;
+    initonly Regex^     ExpCmdEstimate;
     initonly Regex^     ExpCmdInstall;
     initonly Regex^     ExpCmdBuildIUAU;
     initonly Regex^     ExpCmdBuildShipTR;

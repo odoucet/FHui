@@ -1738,21 +1738,25 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuProductionNew()
             static_cast<ICommand^>(gcnew ProdCmdHide(colony)),
             gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuCommandAdd) ) );
     }
+
     // Build CU/IU/AU
     menu->DropDownItems->Add(
         "Build CU/IU/AU...",
         nullptr,
         gcnew EventHandler(this, &Form1::ColoniesMenuProdCommandAddBuildIuAu) );
+
     // Research
     menu->DropDownItems->Add(
         "Research...",
         nullptr,
         gcnew EventHandler(this, &Form1::ColoniesMenuProdCommandAddResearch) );
+
     // Build Ship
     menu->DropDownItems->Add(
         "Build Ship...",
         nullptr,
         gcnew EventHandler(this, &Form1::ColoniesMenuProdCommandAddBuildShip) );
+
     // Shipyard
     if( bShipyard &&
         colony->GetMaxProductionBudget() > Calculators::ShipyardCost( GameData::Player->TechLevels[TECH_MA] ) )
@@ -1762,6 +1766,26 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuProductionNew()
             static_cast<ICommand^>(gcnew ProdCmdShipyard),
             gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuCommandAdd) ) );
     }
+
+    // Estimate
+    ToolStripMenuItem ^menuEstimate = gcnew ToolStripMenuItem("Estimate:");
+    bool estimateAny = false;
+    for each( Alien ^alien in GameData::GetAliens() )
+    {
+        if( alien->Relation == SP_ALLY ||
+            alien->Relation == SP_NEUTRAL ||
+            alien->Relation == SP_ENEMY )
+        {
+            estimateAny = true;
+
+            menuEstimate->DropDownItems->Add( CreateCustomMenuItem(
+                alien->Name,
+                static_cast<ICommand^>(gcnew ProdCmdEstimate(alien)),
+                gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuCommandAdd) ) );
+        }
+    }
+    if( estimateAny )
+        menu->DropDownItems->Add(menuEstimate);
 
     return menu;
 }

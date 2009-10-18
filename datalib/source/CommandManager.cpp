@@ -548,6 +548,14 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
         return true;
     }
 
+    // Estimate
+    if( m_RM->Match(line, m_RM->ExpCmdEstimate) )
+    {
+        colony->Commands->Add( CmdSetOrigin(gcnew ProdCmdEstimate(
+            GameData::GetAlien(m_RM->Results[0]) ) ) );
+        return true;
+    }
+
     // Install
     if( m_RM->Match(line, m_RM->ExpCmdInstall) )
     {

@@ -48,6 +48,7 @@ public enum class CommandType
     BuildIuAu,
     BuildShip,
     Recycle,
+    Estimate,
 };
 
 public enum class CommandOrigin
@@ -353,6 +354,20 @@ public:
     virtual String^ Print() override        { return "Hide"; } 
 
     Colony^     m_Colony;
+};
+
+////////////////////////////////////////////////////////////
+
+// Estimate
+public ref class ProdCmdEstimate : public CmdProdBase<CommandType::Estimate>
+{
+public:
+    ProdCmdEstimate(Alien ^alien) : m_Alien(alien) {}
+
+    virtual int     GetEUCost() override    { return 25; }
+    virtual String^ Print() override        { return "Estimate SP " + m_Alien->Name; } 
+
+    Alien^      m_Alien;
 };
 
 ////////////////////////////////////////////////////////////
