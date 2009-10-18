@@ -327,6 +327,7 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
             }
             else
                 messageText += line + "\r\n";
+            continue;
         }
 
         if( m_RM->Match(line, m_RM->ExpCmdColony) )

@@ -5,6 +5,10 @@ Minor changes are listed only if originally requested by player
 + New features
 [P] denotes player requested features
 
+FHUI build ?
+* Fixed exception when loading command file with Wormhole order.
++ Message command added in context menu on Aliens tab.
+
 FHUI build 194
 * More fixes to CU/IU/AU building.
 * [P] Fixed crash when storing inventory on planet #1

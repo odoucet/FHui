@@ -23,13 +23,13 @@ namespace FHUI
 	public ref class CmdMessageDlg : public System::Windows::Forms::Form
 	{
 	public:
-		CmdMessageDlg(void)
+		CmdMessageDlg(String ^text)
 		{
 			InitializeComponent();
-			//
-			//TODO: Add the constructor code here
-			//
-		}
+
+            if( text )
+                MsgText->Text = text;
+        }
 
         String^ GetMessage() { return MsgText->Text->TrimEnd(); }
 
@@ -134,8 +134,12 @@ namespace FHUI
         }
 #pragma endregion
     private: System::Void BtnSend_Click(System::Object^  sender, System::EventArgs^  e) {
+                 this->DialogResult = System::Windows::Forms::DialogResult::OK;
+                 Close();
              }
-private: System::Void BtnCancel_Click(System::Object^  sender, System::EventArgs^  e) {
-         }
+    private: System::Void BtnCancel_Click(System::Object^  sender, System::EventArgs^  e) {
+                 this->DialogResult = System::Windows::Forms::DialogResult::Cancel;
+                 Close();
+             }
 };
 }

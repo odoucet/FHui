@@ -311,12 +311,16 @@ namespace FHUI {
         void        AliensUpdateControls();
         void        AliensSetup();
         void        AliensFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
+        void        AliensFillMenuRelations(Windows::Forms::ContextMenuStrip ^menu);
+        void        AliensFillMenuMessage(Windows::Forms::ContextMenuStrip ^menu);
+        void        AliensFillMenuTeach(Windows::Forms::ContextMenuStrip ^menu);
 
         typedef Pair<Alien^, int> AlienRelationData;
         void        AliensMenuSetRelation(AlienRelationData ^data);
         typedef Triple<Alien^, int, int> TeachData;
         void        AliensMenuTeach(TeachData ^data);
-        void        AliensMenuMessage(Alien ^alien);
+        void        AliensMenuMessageCancel(Object^, EventArgs^);
+        void        AliensMenuMessageAdd(Object^, EventArgs^);
         void        AliensMenuTeachAll(Object^, EventArgs^);
         void        AliensMenuTeachCancel(Object^, EventArgs^);
 
@@ -333,6 +337,7 @@ namespace FHUI {
             int TC;
             int PC;
             int Teach;
+            int Message;
             int EMail;
         };
 

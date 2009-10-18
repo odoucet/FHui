@@ -2435,6 +2435,7 @@ void Form1::AliensInitControls()
     c.TechLev   = ADD_COLUMN("Tech Levels", "Estimated technology levels", String, Ascending, Default);
     c.TC        = ADD_COLUMN("TC",          "Temperature class of their home planet", int,  Ascending,  Default);
     c.PC        = ADD_COLUMN("PC",          "Pressure class of their home planet",    int,    Ascending,  Default);
+    c.Message   = ADD_COLUMN("Msg",         "Message",                  String, Ascending,  Default);
     c.Teach     = ADD_COLUMN("Teach",       "Teach orders",             String, Ascending,  Default);
     c.EMail     = ADD_COLUMN("EMail",       "Species email",            String, Ascending,  Default);
 
@@ -2502,6 +2503,7 @@ void Form1::AliensSetup()
         }
         cells[c.EMail]->Value       = alien->Email;
 
+        // Teach orders
         if( alien->TeachOrders )
         {
             String ^teach = "";
@@ -2513,6 +2515,20 @@ void Form1::AliensSetup()
             if( alien->TeachOrders & (1 << TECH_BI) ) teach += ", BI";
             if( !String::IsNullOrEmpty(teach) )
                 cells[c.Teach]->Value = teach->Substring(2);
+        }
+
+        // Message
+        for each( ICommand ^cmd in m_CommandMgr->GetCommands() )
+        {
+            if( cmd->GetCmdType() == CommandType::Message )
+            {
+                CmdMessage ^cmdMsg = safe_cast<CmdMessage^>(cmd);
+                if( cmdMsg->m_Alien == alien )
+                {
+                    cells[c.Message]->Value = "M";
+                    cells[c.Message]->ToolTipText = cmdMsg->m_Text;
+                }
+            }
         }
 
         for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
@@ -2542,64 +2558,170 @@ void Form1::AliensFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
     {
         menu->Items->Add( gcnew ToolStripSeparator );
 
-        ToolStripMenuItem ^teachMenu = gcnew ToolStripMenuItem("Teach");
-        bool teachAny = false;
-
-        if( alien->Relation != SP_NEUTRAL )
-        {   // Declare neutrality
-            ToolStripMenuItem ^menuItem = CreateCustomMenuItem(
-                "Declare Neutral",
-                gcnew AlienRelationData(alien, SP_NEUTRAL),
-                gcnew EventHandler1Arg<AlienRelationData^>(this, &Form1::AliensMenuSetRelation) );
-            menu->Items->Add( menuItem );
-        }
-        if( alien->Relation != SP_ALLY )
-        {   // Declare alliance
-            ToolStripMenuItem ^menuItem = CreateCustomMenuItem(
-                "Declare Ally",
-                gcnew AlienRelationData(alien, SP_ALLY),
-                gcnew EventHandler1Arg<AlienRelationData^>(this, &Form1::AliensMenuSetRelation) );
-            menu->Items->Add( menuItem );
-        }
-        if( alien->Relation != SP_ENEMY )
-        {   // Declare enemy
-            ToolStripMenuItem ^menuItem = CreateCustomMenuItem(
-                "Declare Enemy",
-                gcnew AlienRelationData(alien, SP_ENEMY),
-                gcnew EventHandler1Arg<AlienRelationData^>(this, &Form1::AliensMenuSetRelation) );
-            menu->Items->Add( menuItem );
-        }
-
-        // Teach
-        if( alien->TeachOrders )
-        {
-            teachMenu->DropDownItems->Add( "Cancel ALL",
-                nullptr,
-                gcnew EventHandler(this, &Form1::AliensMenuTeachCancel));
-            teachAny = true;
-        }
-        if( alien->Relation != SP_ENEMY )
-        {
-            if( teachAny )
-                teachMenu->DropDownItems->Add( gcnew ToolStripSeparator );
-
-            teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Mining", TECH_MI) );
-            teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Manufacturing", TECH_MA) );
-            teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Military", TECH_ML) );
-            teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Gravitics", TECH_GV) );
-            teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Life Support", TECH_LS) );
-            teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Biology", TECH_BI) );
-
-            teachMenu->DropDownItems->Add( gcnew ToolStripSeparator );
-            teachMenu->DropDownItems->Add( "Teach ALL",
-                nullptr,
-                gcnew EventHandler(this, &Form1::AliensMenuTeachAll));
-            teachAny = true;
-        }
-
-        if( teachAny )
-            menu->Items->Add( teachMenu );
+        AliensFillMenuRelations(menu);
+        AliensFillMenuMessage(menu);
+        AliensFillMenuTeach(menu);
     }
+}
+
+void Form1::AliensFillMenuRelations(Windows::Forms::ContextMenuStrip ^menu)
+{
+    Alien ^alien = m_AliensMenuRef;
+
+    if( alien->Relation != SP_NEUTRAL )
+    {   // Declare neutrality
+        ToolStripMenuItem ^menuItem = CreateCustomMenuItem(
+            "Declare Neutral",
+            gcnew AlienRelationData(alien, SP_NEUTRAL),
+            gcnew EventHandler1Arg<AlienRelationData^>(this, &Form1::AliensMenuSetRelation) );
+        menu->Items->Add( menuItem );
+    }
+    if( alien->Relation != SP_ALLY )
+    {   // Declare alliance
+        ToolStripMenuItem ^menuItem = CreateCustomMenuItem(
+            "Declare Ally",
+            gcnew AlienRelationData(alien, SP_ALLY),
+            gcnew EventHandler1Arg<AlienRelationData^>(this, &Form1::AliensMenuSetRelation) );
+        menu->Items->Add( menuItem );
+    }
+    if( alien->Relation != SP_ENEMY )
+    {   // Declare enemy
+        ToolStripMenuItem ^menuItem = CreateCustomMenuItem(
+            "Declare Enemy",
+            gcnew AlienRelationData(alien, SP_ENEMY),
+            gcnew EventHandler1Arg<AlienRelationData^>(this, &Form1::AliensMenuSetRelation) );
+        menu->Items->Add( menuItem );
+    }
+}
+
+void Form1::AliensFillMenuMessage(Windows::Forms::ContextMenuStrip ^menu)
+{
+    Alien ^alien = m_AliensMenuRef;
+
+    for each( ICommand ^cmd in m_CommandMgr->GetCommands() )
+    {
+        if( cmd->GetCmdType() == CommandType::Message )
+        {
+            CmdMessage ^cmdMsg = safe_cast<CmdMessage^>(cmd);
+            if( cmdMsg->m_Alien == alien )
+            {
+                ToolStripMenuItem ^msgMenu = gcnew ToolStripMenuItem("Message:");
+
+                msgMenu->DropDownItems->Add( "Cancel",
+                    nullptr,
+                    gcnew EventHandler(this, &Form1::AliensMenuMessageCancel));
+
+                msgMenu->DropDownItems->Add( "Edit",
+                    nullptr,
+                    gcnew EventHandler(this, &Form1::AliensMenuMessageAdd));
+
+                menu->Items->Add(msgMenu);
+
+                return;
+            }
+        }
+    }
+
+    menu->Items->Add( "Send Message...",
+        nullptr,
+        gcnew EventHandler(this, &Form1::AliensMenuMessageAdd) );
+}
+
+void Form1::AliensMenuMessageCancel(Object^, EventArgs^)
+{
+    Alien ^alien = m_AliensMenuRef;
+
+    for each( ICommand ^cmd in m_CommandMgr->GetCommands() )
+    {
+        if( cmd->GetCmdType() == CommandType::Message )
+        {
+            CmdMessage ^cmdMsg = safe_cast<CmdMessage^>(cmd);
+            if( cmdMsg->m_Alien == alien )
+            {
+                m_CommandMgr->DelCommand(cmd);
+                AliensGrid->Filter->Update();
+                return;
+            }
+        }
+    }
+}
+
+void Form1::AliensMenuMessageAdd(Object^, EventArgs^)
+{
+    Alien ^alien = m_AliensMenuRef;
+
+    CmdMessage ^cmdMsg;
+
+    for each( ICommand ^cmd in m_CommandMgr->GetCommands() )
+    {
+        if( cmd->GetCmdType() == CommandType::Message )
+        {
+            cmdMsg = safe_cast<CmdMessage^>(cmd);
+            if( cmdMsg->m_Alien != alien )
+                cmdMsg = nullptr;
+            else
+                break;
+        }
+    }
+
+    CmdMessageDlg ^dlg = gcnew CmdMessageDlg( cmdMsg ? cmdMsg->m_Text : nullptr );
+    if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
+    {
+        String ^text = dlg->GetMessage();
+        if( !String::IsNullOrEmpty(text) )
+        {
+            if( cmdMsg )
+            {
+                cmdMsg->m_Text = text;
+                m_CommandMgr->SaveCommands();
+            }
+            else
+            {
+                m_CommandMgr->AddCommand( gcnew CmdMessage(alien, text) );
+                AliensGrid->Filter->Update();
+            }
+        }
+        else
+            AliensMenuMessageCancel(nullptr, nullptr);
+    }
+}
+
+void Form1::AliensFillMenuTeach(Windows::Forms::ContextMenuStrip ^menu)
+{
+    Alien ^alien = m_AliensMenuRef;
+
+    ToolStripMenuItem ^teachMenu = gcnew ToolStripMenuItem("Teach:");
+    bool teachAny = false;
+
+    // Teach
+    if( alien->TeachOrders )
+    {
+        teachMenu->DropDownItems->Add( "Cancel ALL",
+            nullptr,
+            gcnew EventHandler(this, &Form1::AliensMenuTeachCancel));
+        teachAny = true;
+    }
+    if( alien->Relation != SP_ENEMY )
+    {
+        if( teachAny )
+            teachMenu->DropDownItems->Add( gcnew ToolStripSeparator );
+
+        teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Mining", TECH_MI) );
+        teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Manufacturing", TECH_MA) );
+        teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Military", TECH_ML) );
+        teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Gravitics", TECH_GV) );
+        teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Life Support", TECH_LS) );
+        teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Biology", TECH_BI) );
+
+        teachMenu->DropDownItems->Add( gcnew ToolStripSeparator );
+        teachMenu->DropDownItems->Add( "Teach ALL",
+            nullptr,
+            gcnew EventHandler(this, &Form1::AliensMenuTeachAll));
+        teachAny = true;
+    }
+
+    if( teachAny )
+        menu->Items->Add( teachMenu );
 }
 
 ToolStripMenuItem^ Form1::AliensMenuCreateTeach(String ^text, TechType tech)
@@ -2622,20 +2744,6 @@ void Form1::AliensMenuTeach(TeachData ^data)
 
     alien->TeachOrders |= 1 << tech;
     AliensGrid->Filter->Update();
-}
-
-void Form1::AliensMenuMessage(Alien ^alien)
-{
-    CmdMessageDlg ^dlg = gcnew CmdMessageDlg();
-    if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
-    {
-        String ^text = dlg->GetMessage();
-        if( !String::IsNullOrEmpty(text) )
-        {
-            m_CommandMgr->AddCommand( gcnew CmdMessage(alien, text) );
-            AliensGrid->Filter->Update();
-        }
-    }
 }
 
 void Form1::AliensMenuTeachAll(Object^, EventArgs^)
