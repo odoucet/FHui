@@ -722,12 +722,16 @@ void CommandManager::GenerateTemplate(System::Windows::Forms::RichTextBox^ targe
             target->Select(start, s->Length + 1);
             target->SelectionFont = sectionFont;
         }
-        else if( s->Trim()[0] == ';' )
+        else
         {   // comments
-            target->Select(start, s->Length + 1);
-            target->SelectionColor = Color::Green;
+            int commentStart = s->IndexOf(L';');
+            if( commentStart != -1 )
+            {
+                target->Select(start + commentStart, (s->Length - commentStart) + 1);
+                target->SelectionColor = Color::Green;
+            }
         }
-        
+
         start += s->Length + 1;
     }
 }
