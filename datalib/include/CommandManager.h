@@ -2,6 +2,7 @@
 
 using namespace System;
 using namespace System::Collections::Generic;
+using namespace System::IO;
 
 #include "Commands.h"
 
@@ -74,6 +75,7 @@ public:
     List<Pair<String^, int>^>^  GetAutoOrdersProduction(Colony^);
 
 private:
+    void        LoadCommandsGlobal(StreamReader ^sr);
     bool        LoadCommandsColony(String ^line, Colony ^colony);
     bool        LoadCommandsShip(String ^line, Ship ^ship);
     void        SortCommands();

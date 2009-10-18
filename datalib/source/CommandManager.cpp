@@ -8,7 +8,6 @@
 #include "IFHUIPlugin.h"
 
 using namespace System::Drawing;
-using namespace System::IO;
 
 namespace FHUI
 {
@@ -253,6 +252,11 @@ void CommandManager::LoadCommands()
     try 
     {
         sr = File::OpenText( m_Path + String::Format(OrdersDir::Commands, GameData::CurrentTurn) );
+
+        RemoveGeneratedCommands(CommandOrigin::Auto, false);
+        RemoveGeneratedCommands(CommandOrigin::Plugin, false);
+
+        LoadCommandsGlobal(sr);
     }
     catch( DirectoryNotFoundException^ )
     {
@@ -262,10 +266,15 @@ void CommandManager::LoadCommands()
     {
         return;
     }
+    finally
+    {
+        if( sr )
+            sr->Close();
+    }
+}
 
-    RemoveGeneratedCommands(CommandOrigin::Auto, false);
-    RemoveGeneratedCommands(CommandOrigin::Plugin, false);
-
+void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
+{
     String ^line;
     Colony^ refColony = nullptr;
     Ship^ refShip = nullptr;
