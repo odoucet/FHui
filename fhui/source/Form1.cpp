@@ -1953,13 +1953,16 @@ void Form1::ColoniesMenuCommandDel(ICommand ^cmd)
         bool repeat;
         do
         {
+            repeat = false;
             for each( ICommand ^cmd in m_ColoniesMenuRef->Commands )
+            {
                 if( cmd->GetPhase() == CommandPhase::Production )
                 {
                     m_ColoniesMenuRef->Commands->Remove(cmd);
                     repeat = true;
                     break;
                 }
+            }
         } while( repeat );
         m_CommandMgr->SaveCommands();
     }
