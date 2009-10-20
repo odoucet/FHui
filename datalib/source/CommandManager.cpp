@@ -643,6 +643,11 @@ void CommandManager::RemoveGeneratedCommands(CommandOrigin origin, bool preserve
         RemoveGeneratedCommandsFromList( ship->Commands, origin, preserveScouting );
 
     RemoveGeneratedCommandsFromList( GetCommands(), origin, preserveScouting );
+
+    if( origin == CommandOrigin::Auto )
+    {
+        m_CommandData[m_CurrentTurn]->AutoOrdersProduction->Clear();
+    }
 }
 
 void CommandManager::RemoveGeneratedCommandsFromList(List<ICommand^> ^orders, CommandOrigin origin, bool preserveScouting)
@@ -709,7 +714,7 @@ void CommandManager::GenerateTemplate(System::Windows::Forms::RichTextBox^ targe
     int start = 0;
     System::Drawing::Font ^sectionFont = gcnew System::Drawing::Font("Courier New", 11, FontStyle::Bold);
 
-    for each( String ^s in m_OrderList )
+    for each( String ^s in target->Lines )
     {
         if( s->Length == 0 )
         {
@@ -723,7 +728,20 @@ void CommandManager::GenerateTemplate(System::Windows::Forms::RichTextBox^ targe
             target->SelectionFont = sectionFont;
         }
         else
-        {   // comments
+        {   // Auto
+            if( s->IndexOf("; [Auto]") != -1 )
+            {
+                target->Select(start, s->Length + 1);
+                target->SelectionColor = Color::Navy;
+            }
+            // Plugin
+            if( s->IndexOf("; [Plugin]") != -1 )
+            {
+                target->Select(start, s->Length + 1);
+                target->SelectionColor = Color::Red;
+            }
+
+            // comments
             int commentStart = s->IndexOf(L';');
             if( commentStart != -1 )
             {
@@ -943,7 +961,7 @@ void CommandManager::GenerateJumps()
                 StarSystem ^jumpTarget = safe_cast<ShipCmdJump^>(jumpCmd)->m_JumpTarget;
                 if( jumpTarget )
                 {
-                    m_OrderList->Add( String::Format("  Jump {0}, {1}  ; [{2}] -> [{3}]; Mishap: {4:F2}%{5}",
+                    m_OrderList->Add( String::Format("  Jump {0}, {1}  ; ->[{3}]; Mishap:{4:F2}%{5}",
                         ship->PrintClassWithName(),
                         ship->PrintJumpDestination(),
                         ship->System->PrintLocation(),
@@ -1069,6 +1087,16 @@ void CommandManager::GenerateProduction()
             plugin->GenerateProduction(orders, colony, m_Budget);
         bool useAuto = orders->Count == prePluginNum;
 
+        // Production orders
+        for each( ICommand ^cmd in colony->Commands )
+        {
+            if( cmd->GetPhase() == CommandPhase::Production )
+            {
+                orders->Add( PrintCommandWithInfo(cmd, 4) );
+                m_Budget->EvalOrder( cmd );
+            }
+        }
+
         // Add auto orders
         List<Pair<String^, int>^>^ autoOrders = GetAutoOrdersProduction( colony );
         if ( autoOrders )
@@ -1078,18 +1106,8 @@ void CommandManager::GenerateProduction()
                 prefix += "; ";
             for each (Pair<String^, int>^ order in autoOrders )
             {
-                orders->Add( prefix + order->A + String::Format(" ; AUTO (cost {0})", order->B) );
+                orders->Add( prefix + order->A + String::Format(" ; [Auto] (cost {0})", order->B) );
                 m_Budget->UpdateEU(order->B);
-            }
-        }
-
-        // Production orders
-        for each( ICommand ^cmd in colony->Commands )
-        {
-            if( cmd->GetPhase() == CommandPhase::Production )
-            {
-                orders->Add( PrintCommandWithInfo(cmd, 4) );
-                m_Budget->EvalOrder( cmd );
             }
         }
 

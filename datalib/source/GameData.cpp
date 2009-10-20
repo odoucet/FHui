@@ -228,8 +228,9 @@ void GameData::SetAtmospherePoisonous(GasType gas)
 
 Colony^ GameData::GetColonyFromPlanet(Planet ^planet, bool allowCreate)
 {
-    for each( Colony ^colony in Player->Colonies )
-        if( colony->Planet == planet )
+    for each( Colony ^colony in GetColonies() )
+        if( colony->Planet == planet &&
+            colony->Owner == Player )
             return colony;
 
     if( allowCreate )

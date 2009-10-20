@@ -280,7 +280,7 @@ public:
 
     virtual StarSystem^ GetRefSystem() override { return m_Colony->System; }
 
-    virtual String^ Print() override    { return String::Format("Install {0} {1}, PL {2}", m_Amount, m_Unit, m_Colony->Name); }
+    virtual String^ Print() override    { return String::Format("Install {0} {1} PL {2}", m_Amount, m_Unit, m_Colony->Name); }
 
     int             m_Amount;
     String^         m_Unit;
@@ -309,7 +309,7 @@ public:
 
 // Message
 public ref class CmdMessage
-    : public CmdBase<CommandPhase::PreDeparture, CommandType::Message>
+    : public CmdBase<CommandPhase::PostArrival, CommandType::Message>
 {
 public:
     CmdMessage(Alien ^alien, String ^text)

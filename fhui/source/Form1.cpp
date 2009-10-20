@@ -1017,8 +1017,7 @@ void Form1::PlanetsUpdateControls()
     // Inhibit grid update
     PlanetsGrid->Filter->EnableUpdates  = false;
 
-    PlanetsGrid->Filter->GameData       = m_GameData;
-    PlanetsGrid->Filter->DefaultLSN     = Math::Min(99, GameData::Player->TechLevelsAssumed[TECH_LS]);
+    PlanetsGrid->Filter->GameData   = m_GameData;
 
     PlanetsRefXYZ->DataSource       = m_RefListSystemsXYZ;
     PlanetsRefHome->DataSource      = m_RefListHomes;
@@ -2657,13 +2656,13 @@ void Form1::AliensFillMenuMessage(Windows::Forms::ContextMenuStrip ^menu)
             {
                 ToolStripMenuItem ^msgMenu = gcnew ToolStripMenuItem("Message:");
 
-                msgMenu->DropDownItems->Add( "Cancel",
-                    nullptr,
-                    gcnew EventHandler(this, &Form1::AliensMenuMessageCancel));
-
                 msgMenu->DropDownItems->Add( "Edit",
                     nullptr,
                     gcnew EventHandler(this, &Form1::AliensMenuMessageAdd));
+
+                msgMenu->DropDownItems->Add( "Cancel",
+                    nullptr,
+                    gcnew EventHandler(this, &Form1::AliensMenuMessageCancel));
 
                 menu->Items->Add(msgMenu);
 

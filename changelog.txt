@@ -5,6 +5,19 @@ Minor changes are listed only if originally requested by player
 + New features
 [P] denotes player requested features
 
+FHUI build ??
+* Fixed bug: hang when production orders/cancel all option selected.
+* Fixed support for Install command generated from Auto.
+* Develop Auto command still not fully supported, but it is now
+  removed by 'Delete all Auto commans' option and develops are
+  placed last after the list of other orders.
+  Next FHUI release will fully support Develop command.
++ Changed filters reset on Planets tab to set Max LSN to 99 instead of
+  player's current LS level.
++ Moved Message command to Post-Arrival phase. Application warns you if
+  message contains 'Zzz' line.
++ Auto orders coloured in navy blue color in Orders tab :)
+
 FHUI build 199
 * Fixed exception when loading command file with Wormhole order.
 + Message command added in context menu on Aliens tab.

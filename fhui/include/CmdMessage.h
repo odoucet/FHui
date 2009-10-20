@@ -134,6 +134,21 @@ namespace FHUI
         }
 #pragma endregion
     private: System::Void BtnSend_Click(System::Object^  sender, System::EventArgs^  e) {
+                 for each( String ^line in MsgText->Lines )
+                 {
+                     if( line->Trim()->ToLower() == "zzz" )
+                     {
+                         MessageBox::Show(
+                             this,
+                             "Your message contains 'Zzz' line meaning an end of message.\r\n"
+                             "FHUI will add this tag on its own, so please remove this line.",
+                             "Message Error",
+                             MessageBoxButtons::OK/*Cancel*/,
+                             MessageBoxIcon::Error,
+                             MessageBoxDefaultButton::Button1);
+                         return;
+                     }
+                 }
                  this->DialogResult = System::Windows::Forms::DialogResult::OK;
                  Close();
              }
