@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="fhui"
+	Name="FHUI"
 	ProjectGUID="{4216ED73-322C-4030-BDEB-1580ABE843CF}"
 	RootNamespace="fhui"
 	Keyword="ManagedCProj"
@@ -44,7 +44,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\Include&quot;;&quot;$(SolutionDir)\Include&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\Include&quot;;&quot;$(ProjectDir)\..\Include&quot;"
 				AdditionalUsingDirectories=""
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				RuntimeLibrary="3"
@@ -97,7 +97,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy changelog to build output dir."
-				CommandLine="copy $(SolutionDir)\changelog.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy $(SolutionDir)\readme.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
+				CommandLine="copy $(ProjectDir)\..\changelog.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy $(ProjectDir)\..\readme.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -127,7 +127,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\Include&quot;;&quot;$(SolutionDir)\Include&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\Include&quot;;&quot;$(ProjectDir)\..\Include&quot;"
 				AdditionalUsingDirectories=""
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				RuntimeLibrary="2"
@@ -179,7 +179,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy changelog to build output dir."
-				CommandLine="copy $(SolutionDir)\changelog.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy $(SolutionDir)\readme.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
+				CommandLine="copy $(ProjectDir)\..\changelog.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy $(ProjectDir)\..\readme.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -209,7 +209,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\Include&quot;;&quot;$(SolutionDir)\Include&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\Include&quot;;&quot;$(ProjectDir)\..\Include&quot;"
 				AdditionalUsingDirectories=""
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				RuntimeLibrary="2"
@@ -261,7 +261,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy changelog to build output dir."
-				CommandLine="copy $(SolutionDir)\changelog.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy $(SolutionDir)\readme.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
+				CommandLine="copy $(ProjectDir)\..\changelog.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy $(ProjectDir)\..\readme.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>

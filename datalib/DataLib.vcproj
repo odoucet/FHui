@@ -18,8 +18,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)Binaries\Builds\$(ConfigurationName)"
-			IntermediateDirectory="$(SolutionDir)Binaries\Obj\$(ConfigurationName)\$(ProjectName)"
+			OutputDirectory="$(SolutionDir)\Binaries\Builds\$(ConfigurationName)"
+			IntermediateDirectory="$(SolutionDir)\Binaries\Obj\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			CharacterSet="1"
 			ManagedExtensions="2"
@@ -43,7 +43,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\Include&quot;;&quot;$(SolutionDir)\Include&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\Include&quot;;&quot;$(ProjectDir)\..\Include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
@@ -94,8 +94,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)Binaries\Builds\$(ConfigurationName)"
-			IntermediateDirectory="$(SolutionDir)Binaries\Obj\$(ConfigurationName)\$(ProjectName)"
+			OutputDirectory="$(ProjectDir)\..\Binaries\Builds\$(ConfigurationName)"
+			IntermediateDirectory="$(ProjectDir)\..\Binaries\Obj\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="2"
 			CharacterSet="1"
 			ManagedExtensions="2"
@@ -119,7 +119,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\Include&quot;;&quot;$(SolutionDir)\Include&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\Include&quot;;&quot;$(ProjectDir)\..\Include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
@@ -194,7 +194,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\Include&quot;;&quot;$(SolutionDir)\Include&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\Include&quot;;&quot;$(ProjectDir)\..\Include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
