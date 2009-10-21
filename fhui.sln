@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fhui", "fhui\fhui.vcproj", "{4216ED73-322C-4030-BDEB-1580ABE843CF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B0E1585E-8A10-4F37-8FC4-36C095A53974} = {B0E1585E-8A10-4F37-8FC4-36C095A53974}
+		{8DE8DB71-AE00-49E9-8603-8C021409F142} = {8DE8DB71-AE00-49E9-8603-8C021409F142}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DataLib", "datalib\DataLib.vcproj", "{8DE8DB71-AE00-49E9-8603-8C021409F142}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4216ED73-322C-4030-BDEB-1580ABE843CF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4216ED73-322C-4030-BDEB-1580ABE843CF}.Debug|Win32.Build.0 = Debug|Win32
+		{4216ED73-322C-4030-BDEB-1580ABE843CF}.Release|Win32.ActiveCfg = Release|Win32
+		{4216ED73-322C-4030-BDEB-1580ABE843CF}.Release|Win32.Build.0 = Release|Win32
+		{8DE8DB71-AE00-49E9-8603-8C021409F142}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8DE8DB71-AE00-49E9-8603-8C021409F142}.Debug|Win32.Build.0 = Debug|Win32
+		{8DE8DB71-AE00-49E9-8603-8C021409F142}.Release|Win32.ActiveCfg = Release|Win32
+		{8DE8DB71-AE00-49E9-8603-8C021409F142}.Release|Win32.Build.0 = Release|Win32
+		{B0E1585E-8A10-4F37-8FC4-36C095A53974}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B0E1585E-8A10-4F37-8FC4-36C095A53974}.Debug|Win32.Build.0 = Debug|Win32
+		{B0E1585E-8A10-4F37-8FC4-36C095A53974}.Release|Win32.ActiveCfg = Release|Win32
+		{B0E1585E-8A10-4F37-8FC4-36C095A53974}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
