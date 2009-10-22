@@ -989,6 +989,14 @@ void Form1::SystemsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex
         menu->Items->Add( gcnew ToolStripSeparator );
         menu->Items->Add( jumpMenu );
     }
+
+    // Export selected systems' scans
+    menu->Items->Add(
+        "Export Scans...",
+        nullptr,
+        gcnew EventHandler(this, &Form1::SystemsMenuExportScans));
+    if( SystemsGrid->SelectionMode == System::Windows::Forms::DataGridViewSelectionMode::CellSelect )
+        menu->Items[ menu->Items->Count - 1 ]->Enabled = false;
 }
 
 void Form1::SystemsMenuShowPlanets(Object^, EventArgs^)
@@ -1006,6 +1014,39 @@ void Form1::SystemsMenuShowColonies(Object^, EventArgs^)
 void Form1::SystemsMenuSelectRef(Object^, EventArgs^)
 {
     SystemsGrid->Filter->SetRefSystem(m_SystemsMenuRef);
+}
+
+void Form1::SystemsMenuExportScans(Object^, EventArgs^)
+{
+    List<StarSystem^> ^systems = gcnew List<StarSystem^>;
+
+    for each( DataGridViewRow ^row in SystemsGrid->SelectedRows )
+    {
+        IGridDataSrc ^iDataSrc = safe_cast<IGridDataSrc^>(row->Cells[m_SystemsColumns.Object]->Value);
+        StarSystem ^system = iDataSrc->GetFilterSystem();
+        if( system->TurnScanned >= 0 )
+            systems->Add( system );
+    }
+
+    if( systems->Count == 0 )
+    {
+        MessageBox::Show(
+            this,
+            "No scanned systems selected.",
+            "Export Scans",
+            MessageBoxButtons::OK,
+            MessageBoxIcon::Error);
+        return;
+    }
+
+    //TODO try/catch
+    StreamWriter ^sw = File::CreateText( "scans.txt" );
+
+    for each( StarSystem ^system in systems )
+    {
+        sw->WriteLine( system->GenerateScan() );
+    }
+    sw->Close();
 }
 
 ////////////////////////////////////////////////////////////////

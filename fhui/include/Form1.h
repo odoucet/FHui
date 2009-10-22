@@ -162,6 +162,7 @@ namespace FHUI {
         void        SystemsMenuShowPlanets(Object^, EventArgs^);
         void        SystemsMenuShowColonies(Object^, EventArgs^);
         void        SystemsMenuSelectRef(Object^, EventArgs^);
+        void        SystemsMenuExportScans(Object^, EventArgs^);
 
         value struct SystemsColumns
         {
