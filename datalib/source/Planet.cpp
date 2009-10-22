@@ -11,34 +11,6 @@ String^ Planet::GetTooltipText()
     return System->GetTooltipText();
 }
 
-int Planet::CalculateLSN()
-{
-    AtmosphericReq ^atm = GameData::Player->AtmReq;
-
-    int pc = PressClass == -1 ? 99 : PressClass;
-    int tc = TempClass == -1 ? 99 : TempClass;
-
-    int lsn =
-        3 * Math::Abs(pc - atm->PressClass) +
-        3 * Math::Abs(tc - atm->TempClass);
-
-    for( int i = 0; i < GAS_MAX; ++i )
-    {
-        if( Atmosphere[i] > 0 && atm->Poisonous[i] )
-            lsn += 3;
-    }
-
-    if( Atmosphere[atm->GasRequired] < atm->ReqMin ||
-        Atmosphere[atm->GasRequired] > atm->ReqMax )
-    {
-        lsn += 3;
-    }
-
-    lsn = Math::Min(lsn, 99); 
-
-    return lsn;
-}
-
 String^ Planet::GetNameWithOrders()
 {
     String ^n = Name;

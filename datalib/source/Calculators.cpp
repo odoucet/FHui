@@ -252,4 +252,31 @@ int Calculators::ColonyHideCost(Colony ^colony)
     return colony->EconomicBase;
 }
 
+
+int Calculators::LSN(Planet ^planet, Alien ^alien)
+{
+    AtmosphericReq ^atm = alien->AtmReq;
+
+    int pc = planet->PressClass == -1 ? 99 : planet->PressClass;
+    int tc = planet->TempClass == -1 ? 99 : planet->TempClass;
+
+    int lsn =
+        3 * Math::Abs(pc - atm->PressClass) +
+        3 * Math::Abs(tc - atm->TempClass);
+
+    for( int i = 0; i < GAS_MAX; ++i )
+    {
+        if( planet->Atmosphere[i] > 0 && atm->Poisonous[i] )
+            lsn += 3;
+    }
+
+    if( planet->Atmosphere[atm->GasRequired] < atm->ReqMin ||
+        planet->Atmosphere[atm->GasRequired] > atm->ReqMax )
+    {
+        lsn += 3;
+    }
+
+    return Math::Min(lsn, 99); 
+}
+
 } // end namespace FHUI

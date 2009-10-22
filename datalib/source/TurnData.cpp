@@ -539,7 +539,7 @@ void TurnData::UpdateSystems()
         int minLSNAvail = 99999;
         for each( Planet ^planet in system->Planets->Values )
         {
-            planet->LSN = planet->CalculateLSN();
+            planet->LSN = Calculators::LSN(planet, GameData::Player);
             planet->NumColonies = 0;
             planet->NumColoniesOwned = 0;
 

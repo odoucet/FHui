@@ -172,7 +172,11 @@ bool Report::Parse(String ^s)
             m_ScanMessage = "";
             m_Phase = PHASE_MESSAGE;
         }
-        // Parsing ends here
+        // Intelligence
+        else if( m_RM->Match(s, "^INFO SP ([^,;]+)\\s*;\\s*") )
+        {
+            MatchAlienInfo(s, m_GameData->AddAlien(m_RM->Results[0]));
+        }
         else if( Regex("^ORDER SECTION.").Match(s)->Success )
             m_Phase = PHASE_ORDERS_TEMPLATE;
         break;
@@ -1275,6 +1279,40 @@ String^ Report::FinishLineAggregate(bool resetPhase)
     if( resetPhase )
         m_Phase = m_PhasePreAggregate;
     return ret;
+}
+
+void Report::MatchAlienInfo(String ^s, Alien ^alien)
+{
+    if( m_RM->Match(s, "^Home\\s*:\\s*\\[\\s*(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s*\\]\\s*") )
+    {
+        alien->HomeSystem = m_GameData->GetStarSystem(
+            m_RM->GetResultInt(0),
+            m_RM->GetResultInt(1),
+            m_RM->GetResultInt(2),
+            false );
+        alien->HomePlanet = m_RM->GetResultInt(3);
+    }
+
+    if( m_RM->Match(s, "^Temp:(\\d+)\\s+Press:(\\d+)\\s*") )
+    {
+        alien->AtmReq->TempClass  = m_RM->GetResultInt(0);
+        alien->AtmReq->PressClass = m_RM->GetResultInt(1);
+    }
+
+    if( m_RM->Match(s, "^Atm\\s*:\\s*([A-Za-z0-9]+)\\s+(\\d+)-(\\d+)%\\s*") )
+    {
+        alien->AtmReq->GasRequired = FHStrings::GasFromString( m_RM->Results[0] );
+        alien->AtmReq->ReqMin = m_RM->GetResultInt(1);
+        alien->AtmReq->ReqMax = m_RM->GetResultInt(2);
+    }
+
+    if( m_RM->MatchList(s, "^Poisons:\\s*", "([A-Za-z0-9]+)") )
+    {
+        for( int i = 0; i < m_RM->Results->Length; ++i )
+        {
+            alien->AtmReq->Poisonous[ FHStrings::GasFromString(m_RM->Results[i]) ] = true;
+        }
+    }
 }
 
 } // end namespace FHUI

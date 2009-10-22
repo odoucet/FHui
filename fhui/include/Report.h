@@ -65,6 +65,7 @@ private:
     void            MatchShipScan(String ^s, bool bColony);
     void            MatchAliensReport(String ^s);
     void            MatchOrdersTemplate(String ^s);
+    void            MatchAlienInfo(String ^s, Alien ^alien);
 
     GameData^       m_GameData;
     CommandManager^ m_CommandMgr;

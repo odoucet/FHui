@@ -1016,6 +1016,7 @@ void Form1::PlanetsInitControls()
     c.MD        = ADD_COLUMN("MD",          "Mining difficulty",    double,     Ascending,  Default);
     c.Grav      = ADD_COLUMN("Grav",        "Gravitation",          double,     Ascending,  Default);
     c.LSN       = ADD_COLUMN("LSN",         "LSN",                  int,        Ascending,  Default);
+    c.AlienLSN  = ADD_COLUMN("AlienLSN",    "Alien LSN",            int,        Ascending,  Default);
     c.Dist      = ADD_COLUMN("Distance",    "Distance to ref system and mishap chance [%]", String, Ascending, Distance);
     c.Visited   = ADD_COLUMN("Vis",         "Last turn you visited planet's system", int, Descending, Default);
     c.Scan      = ADD_COLUMN("Scan",        "Planet scan source",   String,     Ascending,  Default);
@@ -1037,6 +1038,7 @@ void Form1::PlanetsInitControls()
     PlanetsGrid->Columns[c.Notes]->DefaultCellStyle->Font    = m_GridFontSmall;
     PlanetsGrid->Columns[c.Scan]->DefaultCellStyle->Font     = m_GridFontSmall;
     PlanetsGrid->Columns[c.Grav]->Visible = false;
+    PlanetsGrid->Columns[c.AlienLSN]->Visible = false;
 
     // Filter setup
     GridFilter ^filter = gcnew GridFilter(PlanetsGrid, m_bGridUpdateEnabled);
@@ -1073,6 +1075,7 @@ void Form1::PlanetsUpdateControls()
     PlanetsGrid->Filter->EnableUpdates  = false;
 
     PlanetsGrid->Filter->GameData   = m_GameData;
+    m_PlanetsAlienLSN               = nullptr;
 
     PlanetsRefXYZ->DataSource       = m_RefListSystemsXYZ;
     PlanetsRefHome->DataSource      = m_RefListHomes;
@@ -1132,6 +1135,9 @@ void Form1::PlanetsSetup()
             {
                 cells[c.Notes]->Value    = planet->Comment;
             }
+
+            if( m_PlanetsAlienLSN )
+                cells[c.AlienLSN]->Value = Calculators::LSN(planet, m_PlanetsAlienLSN);
 
             for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
                 plugin->AddRowData(row, PlanetsGrid->Filter, planet);
@@ -1228,6 +1234,35 @@ void Form1::PlanetsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex
         menu->Items->Add( gcnew ToolStripSeparator );
         menu->Items->Add( jumpMenu );
     }
+
+    menu->Items->Add( PlanetsMenuFillAlienLSN() );
+}
+
+ToolStripMenuItem^ Form1::PlanetsMenuFillAlienLSN()
+{
+    ToolStripMenuItem ^lsnMenu = gcnew ToolStripMenuItem("Show Alien LSN:");
+    bool anyFound = false;
+
+    for each( Alien ^alien in GameData::GetAliens() )
+    {
+        if( alien == GameData::Player ||
+            alien->AtmReq->IsValid() == false )
+            continue;
+
+        lsnMenu->DropDownItems->Add( CreateCustomMenuItem(
+            "SP " + alien->Name,
+            alien,
+            gcnew EventHandler1Arg<Alien^>(this, &Form1::PlanetsMenuShowAlienLSN) ) );
+        anyFound = true;
+    }
+
+    if( !anyFound )
+    {
+        lsnMenu->DropDownItems->Add("< No alien atmospheric data >");
+        lsnMenu->DropDownItems[0]->Enabled = false;
+    }
+
+    return lsnMenu;
 }
 
 void Form1::PlanetsMenuShowColonies(Object^, EventArgs^)
@@ -1332,6 +1367,13 @@ void Form1::PlanetsMenuRemoveNameCancel(Object^, EventArgs^)
         gcnew CmdDisband( m_PlanetsMenuRef->Name ) );
 
     m_PlanetsMenuRef->NameIsDisband = false;
+    PlanetsGrid->Filter->Update();
+}
+
+void Form1::PlanetsMenuShowAlienLSN(Alien ^alien)
+{
+    m_PlanetsAlienLSN = alien;
+    PlanetsGrid->Columns[m_PlanetsColumns.AlienLSN]->Visible = true;
     PlanetsGrid->Filter->Update();
 }
 
@@ -1710,7 +1752,10 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuCommands(CommandPhase phase)
         }
     }
     if( !anyProdCommand )
+    {
         prodMenu->DropDownItems->Add( "< No " + title + " orders >" );
+        prodMenu->DropDownItems[0]->Enabled = false;
+    }
 
     // Add new commands
     prodMenu->DropDownItems->Add( gcnew ToolStripSeparator );
@@ -2563,6 +2608,7 @@ void Form1::AliensInitControls()
     AliensGrid->Columns[c.Message]->DefaultCellStyle->Font  = m_GridFontSmall;
     AliensGrid->Columns[c.Teach]->DefaultCellStyle->Font    = m_GridFontSmall;
     AliensGrid->Columns[c.TechLev]->DefaultCellStyle->Font  = m_GridFontSmall;
+    AliensGrid->Columns[c.Atmosphere]->DefaultCellStyle->Font= m_GridFontSmall;
 
     GridFilter ^filter = gcnew GridFilter(AliensGrid, m_bGridUpdateEnabled);
     filter->GridSetup += gcnew GridSetupHandler(this, &Form1::AliensSetup);
@@ -2666,6 +2712,23 @@ void Form1::AliensSetup()
                 cells[c.Message]->Value = msgCell;
                 cells[c.Message]->ToolTipText = msgToolTip;
             }
+        }
+
+        // Atmosphere
+        if( alien->AtmReq->GasRequired != GAS_MAX )
+        {
+            String ^toxicGases = "";
+            for( int gas = 0; gas < GAS_MAX; ++gas )
+            {
+                if( alien->AtmReq->Poisonous[gas] )
+                    toxicGases = toxicGases + String::Format(",{0}", FHStrings::GasToString(static_cast<GasType>(gas)));
+            }
+            cells[c.Atmosphere]->Value = String::Format(
+                "{0} {1}-{2}% P:{3}",
+                FHStrings::GasToString( alien->AtmReq->GasRequired ),
+                alien->AtmReq->ReqMin,
+                alien->AtmReq->ReqMax,
+                toxicGases->Length > 0 ? toxicGases->Substring(1) : "?");
         }
 
         for each( IGridPlugin ^plugin in PluginManager::GridPlugins )

@@ -69,8 +69,6 @@ public:
     virtual String^     GetTooltipText() override;
     // --------------------------------------------------
 
-    int         CalculateLSN();
-
     String^     GetNameWithOrders();
     void        AddName(String ^name);
     void        DelName();

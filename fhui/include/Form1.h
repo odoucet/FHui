@@ -191,6 +191,9 @@ namespace FHUI {
         void        PlanetsMenuAddName(DataGridViewCellEventArgs ^cell);
         void        PlanetsMenuRemoveName(Object^, EventArgs^);
         void        PlanetsMenuRemoveNameCancel(Object^, EventArgs^);
+        ToolStripMenuItem^  PlanetsMenuFillAlienLSN();
+        void        PlanetsMenuShowAlienLSN(Alien ^alien);
+
 
         value struct PlanetsColumns
         {
@@ -202,6 +205,7 @@ namespace FHUI {
             int MD;
             int Grav;
             int LSN;
+            int AlienLSN;
             int Dist;
             int Visited;
             int Scan;
@@ -212,6 +216,7 @@ namespace FHUI {
         Planet             ^m_PlanetsMenuRef;
         int                 m_PlanetsMenuRefRow;
         PlanetsColumns      m_PlanetsColumns;
+        Alien^              m_PlanetsAlienLSN;
 
         // ==================================================
         // --- COLONIES ---

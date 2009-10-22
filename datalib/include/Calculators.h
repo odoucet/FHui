@@ -5,6 +5,8 @@ using namespace System;
 namespace FHUI
 {
     ref class Colony;
+    ref class Planet;
+    ref class Alien;
 
 public ref class Calculators
 {
@@ -30,6 +32,8 @@ public:
     static int      TransportCapacity(int size);
     static int      ColonyProduction(Colony^, int mi, int ma, int ls, int fleetPercentCost);
     static int      ProductionPenalty(int lsn, int ls);
+
+    static int      LSN(Planet ^planet, Alien ^alien);
 };
 
 } // end namespace FHUI

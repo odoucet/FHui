@@ -14,6 +14,19 @@ FHUI build ??
 + New column on Systems tab: Jmp - shows ship or number of ships
   jumping to this system in current turn. Full list of ships with
   current location and mishap chance printed in tooltip.
++ Aliens tab may now show alien's atmospheric information. Since this
+  info can only be obtained via diplomacy, you have to put it into
+  one of your reports in format:
+  INFO SP species_name; Home:[11 22 33 9] Temp:55 Press:66  Atm:XX 10-20% Poisons: XX,YY,ZZ
+  DON'T miss the semicolon after species name!!!
+  The "Home:[...]" section is optional.
+  For your convenience, ask your friend to share the data in format
+  presented by FHUI in the side bar. You just have to remove new lines
+  from that string, add the INFO SP prefix.
++ New column on Planets tab: AlienLSN. This column is by default hidden,
+  to make it display useful data use context menu/Show Alien LSN and
+  select species to show. You must have the full atmospheric data about
+  the species for this to work.
 
 FHUI build 202
 * Fixed bug: hang when production orders/cancel all option selected.
