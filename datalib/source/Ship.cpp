@@ -97,6 +97,18 @@ String^ Ship::PrintLocation()
                 }
             }
         }
+        else
+        {
+            // Maybe there is at least a named planet in the system?
+            for each( PlanetName ^pn in GameData::GetPlanetNames() )
+            {
+                if ( pn->System == System )
+                {
+                    nearColony = pn->Name;
+                    break;
+                }
+            }
+        }
 
         if( PlanetNum != -1 )
         {

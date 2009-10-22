@@ -445,6 +445,11 @@ Colony^ TurnData::AddColony(Alien ^sp, String ^name, StarSystem ^system, int plN
 
 void TurnData::AddPlanetName(StarSystem ^system, int pl, String ^name)
 {
+    if ( String::IsNullOrEmpty(system->Planets[pl]->Name) )
+    {
+        system->Planets[pl]->Name = name;
+    }
+
     String ^nameKey = name->ToLower();
     if( m_PlanetNames->ContainsKey(nameKey) )
     {
@@ -519,6 +524,14 @@ void TurnData::UpdateAliens()
 
 void TurnData::UpdateSystems()
 {
+    for each( Alien^ alien in GetAliens() )
+    {
+        if (alien->HomeSystem)
+        {
+            alien->HomeSystem->HomeSpecies = alien;
+        }
+    }
+
     for each( Colony ^colony in GetColonies() )
     {
         colony->System->AddColony(colony);

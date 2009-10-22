@@ -1383,6 +1383,8 @@ void Form1::PlanetsMenuAddName(DataGridViewCellEventArgs ^cell)
 
     if( addName )
     {
+        m_GameData->AddPlanetName( m_PlanetsMenuRef->System, m_PlanetsMenuRef->Number, name );
+
         m_CommandMgr->AddCommand( 
             gcnew CmdPlanetName( m_PlanetsMenuRef->System, m_PlanetsMenuRef->Number, name ) );
 

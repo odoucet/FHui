@@ -413,6 +413,7 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
             Planet ^planet = system->Planets[ m_RM->GetResultInt(3) ];
             String ^name = m_RM->Results[4];
             AddCommandDontSave( CmdSetOrigin(gcnew CmdPlanetName(system, planet->Number, name)) );
+            GameData::AddPlanetName(system, planet->Number, name);
             planet->AddName(name);
         }
         else if( m_RM->Match(line, m_RM->ExpCmdPLDisband) )
