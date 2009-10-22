@@ -1044,7 +1044,7 @@ void Form1::SystemsMenuExportScans(Object^, EventArgs^)
 
     for each( StarSystem ^system in systems )
     {
-        sw->WriteLine( system->GenerateScan() );
+        sw->WriteLine( system->GenerateScan(true) );
     }
     sw->Close();
 }

@@ -121,7 +121,7 @@ StarSystem^ StarSystem::GetWormholeTarget()
 
 void StarSystem::UpdateTooltip()
 {
-    GenerateScan();
+    GenerateScan(false);
     GenerateColoniesInfo();
     GenerateShipsInfo();
 
@@ -201,9 +201,9 @@ String^ StarSystem::GenerateShipsInfo()
     return m_TooltipShips;
 }
 
-String^ StarSystem::GenerateScan()
+String^ StarSystem::GenerateScan(bool hideLSN)
 {
-    if( m_TooltipScan )
+    if( m_TooltipScan && hideLSN == false )
         return m_TooltipScan;
 
     String ^scan = String::Format(
@@ -240,7 +240,7 @@ String^ StarSystem::GenerateScan()
             planet->TempClass,
             planet->PressClass,
             (double)planet->MiDiff / 100,
-            planet->LSN );
+            (hideLSN ? 99 : planet->LSN) );
         bool anyGas = false;
         for( int gas = 0; gas < GAS_MAX; ++gas )
         {
@@ -260,8 +260,9 @@ String^ StarSystem::GenerateScan()
         scan += plStr + "\r\n";
     }
 
-    m_TooltipScan = scan;
-    return m_TooltipScan;
+    if( hideLSN == false )
+        m_TooltipScan = scan;
+    return scan;
 }
 
 String^ StarSystem::PrintWormholeTarget()

@@ -107,7 +107,7 @@ public:
     String^         PrintComment();
     List<String^>^  PrintAliens();
 
-    String^         GenerateScan();
+    String^         GenerateScan(bool hideLSN);
     String^         GenerateColoniesInfo();
     String^         GenerateShipsInfo();
 

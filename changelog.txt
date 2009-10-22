@@ -27,6 +27,10 @@ FHUI build ??
   to make it display useful data use context menu/Show Alien LSN and
   select species to show. You must have the full atmospheric data about
   the species for this to work.
++ Systems tab has new 'Export Scans...' context menu. It saves scans of
+  selected systems to scans.txt file in game folder. This is useful for
+  sharing diplomatic data. This option works only in ROW selection mode.
+  Your LSN is replaced with 99 in all saved scans.
 
 FHUI build 202
 * Fixed bug: hang when production orders/cancel all option selected.
