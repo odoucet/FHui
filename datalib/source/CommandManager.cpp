@@ -253,8 +253,8 @@ void CommandManager::LoadCommands()
     {
         sr = File::OpenText( m_Path + String::Format(OrdersDir::Commands, GameData::CurrentTurn) );
 
-        RemoveGeneratedCommands(CommandOrigin::Auto, false);
-        RemoveGeneratedCommands(CommandOrigin::Plugin, false);
+        RemoveGeneratedCommands(CommandOrigin::Auto, false, false);
+        RemoveGeneratedCommands(CommandOrigin::Plugin, false, false);
 
         LoadCommandsGlobal(sr);
     }
@@ -634,15 +634,15 @@ bool CommandManager::LoadCommandsShip(String ^line, Ship ^ship)
     return false;
 }
 
-void CommandManager::RemoveGeneratedCommands(CommandOrigin origin, bool preserveScouting)
+void CommandManager::RemoveGeneratedCommands(CommandOrigin origin, bool productionOnly, bool preserveScouting)
 {
     for each( Colony ^colony in GameData::Player->Colonies )
-        RemoveGeneratedCommandsFromList( colony->Commands, origin, preserveScouting );
+        RemoveGeneratedCommandsFromList( colony->Commands, origin, productionOnly, preserveScouting );
 
     for each( Ship ^ship in GameData::Player->Ships )
-        RemoveGeneratedCommandsFromList( ship->Commands, origin, preserveScouting );
+        RemoveGeneratedCommandsFromList( ship->Commands, origin, productionOnly, preserveScouting );
 
-    RemoveGeneratedCommandsFromList( GetCommands(), origin, preserveScouting );
+    RemoveGeneratedCommandsFromList( GetCommands(), origin, productionOnly, preserveScouting );
 
     if( origin == CommandOrigin::Auto )
     {
@@ -650,7 +650,7 @@ void CommandManager::RemoveGeneratedCommands(CommandOrigin origin, bool preserve
     }
 }
 
-void CommandManager::RemoveGeneratedCommandsFromList(List<ICommand^> ^orders, CommandOrigin origin, bool preserveScouting)
+void CommandManager::RemoveGeneratedCommandsFromList(List<ICommand^> ^orders, CommandOrigin origin, bool productionOnly, bool preserveScouting)
 {
     bool repeat = false;
     do
@@ -660,6 +660,9 @@ void CommandManager::RemoveGeneratedCommandsFromList(List<ICommand^> ^orders, Co
         {
             if( cmd->Origin == origin )
             {
+                if( productionOnly && cmd->GetPhase() != CommandPhase::Production )
+                    continue;
+
                 if( preserveScouting )
                 {
                     if( cmd->GetCmdType() == CommandType::Scan )

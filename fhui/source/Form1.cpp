@@ -755,6 +755,7 @@ void Form1::SystemsInitControls()
     c.Visited  = ADD_COLUMN("Vis",          "Last turn you visited this system", int, Descending, Default);
     c.Scan     = ADD_COLUMN("Scan",         "System scan source",   String,     Ascending,  Default);
     c.Wormhole = ADD_COLUMN("WH",           "Wormhole target",      String,     Ascending,  Default);
+    c.Jumps    = ADD_COLUMN("Jmp",          "Ships jumping to this system", String, Ascending, Default);
     c.Colonies = ADD_COLUMN("Colonies",     "Summary of colonies and named planets", String, Ascending,  Default);
 
     for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
@@ -856,6 +857,55 @@ void Form1::SystemsSetup()
             cells[c.Visited]->Value = system->LastVisited;
         cells[c.Colonies]->Value    = system->PrintColoniesAll();
         cells[c.Notes]->Value       = system->PrintComment();
+
+        // Ship jumps
+        String ^jumpsCell = "";
+        String ^jumpsToolTip = "";
+        int jumpsCnt = 0;
+        for each( Ship ^ship in GameData::Player->Ships )
+        {
+            StarSystem ^jumpTarget = nullptr;
+            ICommand ^cmd = ship->GetJumpCommand();
+            if( cmd == nullptr )
+                continue;
+            switch( cmd->GetCmdType() )
+            {
+            case CommandType::Jump:
+                jumpTarget = safe_cast<ShipCmdJump^>(cmd)->m_JumpTarget;
+                break;
+
+            case CommandType::Wormhole:
+                jumpTarget = safe_cast<ShipCmdWormhole^>(cmd)->m_JumpTarget;
+                break;
+
+            default:
+                throw gcnew FHUIDataImplException("Not supported ship jump command: " + ((int)cmd->GetCmdType()).ToString());
+            }
+
+            if( system == jumpTarget )
+            {
+                ++jumpsCnt;
+                if( jumpsCnt > 1 )
+                    jumpsCell = jumpsCnt.ToString() + " Ships";
+                else
+                    jumpsCell = ship->PrintClassWithName();
+
+                double mishap = ship->System->CalcMishap(
+                    jumpTarget,
+                    Decimal::ToInt32(TechGV->Value),
+                    ship->Age );
+                
+                jumpsToolTip += String::Format("{0} from {1}; {2:F2}%\r\n",
+                    ship->PrintClassWithName(),
+                    ship->PrintLocation(),
+                    mishap );
+            }
+        }
+        if( !String::IsNullOrEmpty(jumpsCell) )
+        {
+            cells[c.Jumps]->Value = jumpsCell;
+            cells[c.Jumps]->ToolTipText = jumpsToolTip;
+        }
 
         //SystemsGrid->Columns[colColonies->Ordinal]->DefaultCellStyle->WrapMode = DataGridViewTriState::True;
 
@@ -1575,14 +1625,20 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuAuto()
         nullptr,
         gcnew EventHandler(this, &Form1::ColoniesMenuAutoToggle) );
 
+    autoMenu->DropDownItems->Add( gcnew ToolStripSeparator );
+
     autoMenu->DropDownItems->Add(
-        "Delete all Auto commands",
+        "Delete all production Auto commands",
         nullptr,
-        gcnew EventHandler(this, &Form1::ColoniesMenuAutoDeleteAll) );
+        gcnew EventHandler(this, &Form1::ColoniesMenuAutoDeleteAllProduction) );
     autoMenu->DropDownItems->Add(
         "Delete all non-scouting Auto commands",
         nullptr,
         gcnew EventHandler(this, &Form1::ColoniesMenuAutoDeleteAllNonScouting) );
+    autoMenu->DropDownItems->Add(
+        "Delete all Auto commands",
+        nullptr,
+        gcnew EventHandler(this, &Form1::ColoniesMenuAutoDeleteAll) );
 
     return autoMenu;
 }
@@ -2018,7 +2074,7 @@ void Form1::ColoniesMenuAutoToggle(Object^, EventArgs^)
 
 void Form1::ColoniesMenuAutoDeleteAll(Object^, EventArgs^)
 {
-    m_CommandMgr->RemoveGeneratedCommands(CommandOrigin::Auto, false);
+    m_CommandMgr->RemoveGeneratedCommands(CommandOrigin::Auto, false, false);
     m_CommandMgr->SaveCommands();
     ColoniesGrid->Filter->Update();
     ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
@@ -2026,7 +2082,15 @@ void Form1::ColoniesMenuAutoDeleteAll(Object^, EventArgs^)
 
 void Form1::ColoniesMenuAutoDeleteAllNonScouting(Object^, EventArgs^)
 {
-    m_CommandMgr->RemoveGeneratedCommands(CommandOrigin::Auto, true);
+    m_CommandMgr->RemoveGeneratedCommands(CommandOrigin::Auto, false, true);
+    m_CommandMgr->SaveCommands();
+    ColoniesGrid->Filter->Update();
+    ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
+}
+
+void Form1::ColoniesMenuAutoDeleteAllProduction(Object^, EventArgs^)
+{
+    m_CommandMgr->RemoveGeneratedCommands(CommandOrigin::Auto, true, true);
     m_CommandMgr->SaveCommands();
     ColoniesGrid->Filter->Update();
     ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);

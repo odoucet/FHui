@@ -62,7 +62,7 @@ public:
 
     void        GenerateTemplate(System::Windows::Forms::RichTextBox^);
 
-    void        RemoveGeneratedCommands(CommandOrigin origin, bool preserveScouting);
+    void        RemoveGeneratedCommands(CommandOrigin origin, bool productionOnly, bool preserveScouting);
 
     property bool AutoEnabled
     {
@@ -83,7 +83,7 @@ private:
     ICommand^   CmdSetOrigin(ICommand ^cmd);
     String^     PrintCommandToFile(ICommand ^cmd);
 
-    void        RemoveGeneratedCommandsFromList( List<ICommand^> ^orders, CommandOrigin origin, bool preserveScouting );
+    void        RemoveGeneratedCommandsFromList( List<ICommand^> ^orders, CommandOrigin origin, bool productionOnly, bool preserveScouting );
     void        AddPluginCommands();
 
     void        GenerateCombat();

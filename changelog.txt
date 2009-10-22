@@ -9,6 +9,11 @@ FHUI build ??
 * Fixed minor bug in comments for production orders - budget calculation.
 + Production/Cancel All menu option now requires confirmation before
   deleting all orders.
++ Automation menu: new option to delete all production Auto commands
+  (leaves scouting, installs, etc.).
++ New column on Systems tab: Jmp - shows ship or number of ships
+  jumping to this system in current turn. Full list of ships with
+  current location and mishap chance printed in tooltip.
 
 FHUI build 202
 * Fixed bug: hang when production orders/cancel all option selected.

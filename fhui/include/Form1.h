@@ -169,6 +169,7 @@ namespace FHUI {
             int Scan;
             int Wormhole;
             int Colonies;
+            int Jumps;
             int Notes;
         };
 
@@ -237,6 +238,7 @@ namespace FHUI {
         void        ColoniesMenuAutoToggle(Object^, EventArgs^);
         void        ColoniesMenuAutoDeleteAll(Object^, EventArgs^);
         void        ColoniesMenuAutoDeleteAllNonScouting(Object^, EventArgs^);
+        void        ColoniesMenuAutoDeleteAllProduction(Object^, EventArgs^);
 
         value struct ColoniesColumns
         {
