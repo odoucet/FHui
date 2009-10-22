@@ -1066,12 +1066,14 @@ void CommandManager::GenerateProduction()
         m_OrderList->Add("  PRODUCTION PL " + colony->Name);
         m_OrderList->AddRange( PrintSystemStatus(colony->System, true) );
 
+        // Remember EUs available before this colony contributes
+        int euCarried = m_Budget->GetTotalBudget();
+
         // Set budget tracker for this colony
         m_Budget->SetColony(colony);
         List<String^> ^orders = colony->OrdersText;
 
         // Production summary
-        int euCarried = m_Budget->GetTotalBudget();
         String ^prodSummary = String::Format("  ; {0} +{1} = {2}",
             colony->EUAvail, euCarried, m_Budget->GetTotalBudget());
         if( colony->PlanetType == PLANET_COLONY )

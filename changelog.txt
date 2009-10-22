@@ -6,6 +6,11 @@ Minor changes are listed only if originally requested by player
 [P] denotes player requested features
 
 FHUI build ??
+* Fixed minor bug in comments for production orders - budget calculation.
++ Production/Cancel All menu option now requires confirmation before
+  deleting all orders.
+
+FHUI build 202
 * Fixed bug: hang when production orders/cancel all option selected.
 * Fixed support for Install command generated from Auto.
 * Develop Auto command still not fully supported, but it is now

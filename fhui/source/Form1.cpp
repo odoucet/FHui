@@ -1949,6 +1949,18 @@ void Form1::ColoniesMenuCommandDel(ICommand ^cmd)
     }
     else
     {
+        System::Windows::Forms::DialogResult result = MessageBox::Show(
+            this,
+            "Delete All Production orders for PL " + m_ColoniesMenuRef->Name + "...\r\n"
+            "Are you SURE? Undo is NOT possible...",
+            "Delete All",
+            MessageBoxButtons::YesNo,
+            MessageBoxIcon::Exclamation,
+            MessageBoxDefaultButton::Button2);
+        if( result != System::Windows::Forms::DialogResult::Yes )
+            return;
+
+        // Delete all confirmed
         bool repeat;
         do
         {
