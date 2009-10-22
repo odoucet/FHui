@@ -826,7 +826,7 @@ List<String^>^ CommandManager::PrintSystemStatus(StarSystem^ system, bool listIn
             if (! String::IsNullOrEmpty(capabilities) ) capabilities += ";";
             capabilities += "pop:" + colony->AvailPop;
         }
-        if (colony->Shipyards) 
+        if( colony->Shipyards > 0 ) 
         {
             if (! String::IsNullOrEmpty(capabilities) ) capabilities += ";";
             capabilities += "SY:" + colony->Shipyards;

@@ -141,6 +141,7 @@ namespace FHUI {
         bool               ^m_bGridUpdateEnabled;
 
         System::Windows::Forms::ToolTip^    m_GridToolTip;
+        System::Drawing::Font^              m_GridFontSmall;
         DataGridViewCellMouseEventArgs^     m_LastMenuEventArg;
 
         // ==================================================
@@ -338,6 +339,7 @@ namespace FHUI {
             int TechLev;
             int TC;
             int PC;
+            int Atmosphere;
             int Teach;
             int Message;
             int EMail;

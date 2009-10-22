@@ -157,7 +157,7 @@ String^ StarSystem::GenerateColoniesInfo()
                 FHStrings::PlTypeToString(colony->PlanetType),
                 colony->Owner == player ? (" " + colony->Name) : "",
                 colony->PrintSize(),
-                colony->Owner == player ? (" " + colony->PrintInventory()) : "" );
+                colony->Owner == player ? (" [" + colony->PrintInventory()) + "]" : "" );
         }
     }
 

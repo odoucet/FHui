@@ -60,6 +60,7 @@ void Form1::InitControls()
     System::Text::RegularExpressions::Regex::CacheSize = 500;
 
     m_GridToolTip = gcnew ToolTip;
+    m_GridFontSmall = gcnew System::Drawing::Font(L"Tahoma", 6.75F);
 
     TextAbout->Text = GetAboutText();
 
@@ -770,8 +771,11 @@ void Form1::SystemsInitControls()
         plugin->GridFormat(GridType::Systems, SystemsGrid);
 
     SystemsGrid->Columns[c.Dist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
-    SystemsGrid->Columns[c.Colonies]->DefaultCellStyle->Font =
-        gcnew System::Drawing::Font(L"Tahoma", 6.75F);
+
+    SystemsGrid->Columns[c.Colonies]->DefaultCellStyle->Font    = m_GridFontSmall;
+    SystemsGrid->Columns[c.Jumps]->DefaultCellStyle->Font       = m_GridFontSmall;
+    SystemsGrid->Columns[c.Scan]->DefaultCellStyle->Font        = m_GridFontSmall;
+    SystemsGrid->Columns[c.Notes]->DefaultCellStyle->Font       = m_GridFontSmall;
 
     // Filter setup
     GridFilter ^filter = gcnew GridFilter(SystemsGrid, m_bGridUpdateEnabled);
@@ -1029,8 +1033,9 @@ void Form1::PlanetsInitControls()
         plugin->GridFormat(GridType::Planets, PlanetsGrid);
 
     PlanetsGrid->Columns[c.Dist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
-    PlanetsGrid->Columns[c.Colonies]->DefaultCellStyle->Font =
-        gcnew System::Drawing::Font(L"Tahoma", 6.75F);
+    PlanetsGrid->Columns[c.Colonies]->DefaultCellStyle->Font = m_GridFontSmall;
+    PlanetsGrid->Columns[c.Notes]->DefaultCellStyle->Font    = m_GridFontSmall;
+    PlanetsGrid->Columns[c.Scan]->DefaultCellStyle->Font     = m_GridFontSmall;
     PlanetsGrid->Columns[c.Grav]->Visible = false;
 
     // Filter setup
@@ -1376,8 +1381,8 @@ void Form1::ColoniesInitControls()
 
     ColoniesGrid->Columns[c.Size]->DefaultCellStyle->Format = "F1";
     ColoniesGrid->Columns[c.Dist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
-    ColoniesGrid->Columns[c.Inventory]->DefaultCellStyle->Font =
-        gcnew System::Drawing::Font(L"Tahoma", 6.75F);
+    ColoniesGrid->Columns[c.Inventory]->DefaultCellStyle->Font = m_GridFontSmall;
+    ColoniesGrid->Columns[c.Notes]->DefaultCellStyle->Font     = m_GridFontSmall;
     ColoniesGrid->Columns[c.MD]->Visible = false;
     ColoniesGrid->Columns[c.Grav]->Visible = false;
 
@@ -2134,8 +2139,9 @@ void Form1::ShipsInitControls()
         plugin->GridFormat(GridType::Ships, ShipsGrid);
 
     ShipsGrid->Columns[c.Dist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
-    ShipsGrid->Columns[c.Cargo]->DefaultCellStyle->Font =
-        gcnew System::Drawing::Font(L"Tahoma", 6.75F);
+    ShipsGrid->Columns[c.Cargo]->DefaultCellStyle->Font         = m_GridFontSmall;
+    ShipsGrid->Columns[c.JumpTarget]->DefaultCellStyle->Font    = m_GridFontSmall;
+    ShipsGrid->Columns[c.Commands]->DefaultCellStyle->Font      = m_GridFontSmall;
 
     GridFilter ^filter = gcnew GridFilter(ShipsGrid, m_bGridUpdateEnabled);
     filter->GridSetup += gcnew GridSetupHandler(this, &Form1::ShipsSetup);
@@ -2505,6 +2511,7 @@ void Form1::ShipsMenuSelectRef(Object^, EventArgs ^e)
 void Form1::ShipsMenuOrderSet(ShipCommandData ^data)
 {
     data->A->AddCommand( data->B );
+    SystemsGrid->Filter->Update();
     ShipsGrid->Filter->Update();
     m_CommandMgr->SaveCommands();
 }
@@ -2537,6 +2544,7 @@ void Form1::AliensInitControls()
     c.TechLev   = ADD_COLUMN("Tech Levels", "Estimated technology levels", String, Ascending, Default);
     c.TC        = ADD_COLUMN("TC",          "Temperature class of their home planet", int,  Ascending,  Default);
     c.PC        = ADD_COLUMN("PC",          "Pressure class of their home planet",    int,    Ascending,  Default);
+    c.Atmosphere= ADD_COLUMN("Atm",         "Atmospheric information",  String, Ascending,  Default);
     c.Message   = ADD_COLUMN("Msg",         "Message",                  String, Ascending,  Default);
     c.Teach     = ADD_COLUMN("Teach",       "Teach orders",             String, Ascending,  Default);
     c.EMail     = ADD_COLUMN("EMail",       "Species email",            String, Ascending,  Default);
@@ -2551,6 +2559,10 @@ void Form1::AliensInitControls()
         plugin->GridFormat(GridType::Aliens, AliensGrid);
 
     AliensGrid->Columns[c.Dist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
+    AliensGrid->Columns[c.EMail]->DefaultCellStyle->Font    = m_GridFontSmall;
+    AliensGrid->Columns[c.Message]->DefaultCellStyle->Font  = m_GridFontSmall;
+    AliensGrid->Columns[c.Teach]->DefaultCellStyle->Font    = m_GridFontSmall;
+    AliensGrid->Columns[c.TechLev]->DefaultCellStyle->Font  = m_GridFontSmall;
 
     GridFilter ^filter = gcnew GridFilter(AliensGrid, m_bGridUpdateEnabled);
     filter->GridSetup += gcnew GridSetupHandler(this, &Form1::AliensSetup);
