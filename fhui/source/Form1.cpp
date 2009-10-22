@@ -287,10 +287,7 @@ void Form1::TechLevelsChanged()
 
     if( *m_bGridUpdateEnabled )
     {
-        SystemsGrid->Filter->Update();
-        PlanetsGrid->Filter->Update();
-        ColoniesGrid->Filter->Update();
-        ShipsGrid->Filter->Update();
+        UpdateAllGrids();
 
         if( MenuTabs->SelectedIndex == TabIndex::Map )
             MapDraw();
@@ -615,6 +612,22 @@ void Form1::ColoniesFilterOnOff(ColumnsFilterData ^data)
     data->A->Columns[data->B]->Visible = !data->A->Columns[data->B]->Visible;
 
     SaveUISettings();
+}
+
+void Form1::UpdateSelectionMode(DblBufDGV ^grid, Object ^sender)
+{
+    CheckBox ^cb = safe_cast<CheckBox^>(sender);
+
+    if( grid->SelectionMode == System::Windows::Forms::DataGridViewSelectionMode::CellSelect )
+    {
+        grid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
+        cb->Text = "Select Rows";
+    }
+    else
+    {
+        grid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
+        cb->Text = "Select Cells";
+    }
 }
 
 Color Form1::GetAlienColor(Alien ^sp)
@@ -2134,7 +2147,7 @@ void Form1::ColoniesMenuAutoDeleteAllNonScouting(Object^, EventArgs^)
 {
     m_CommandMgr->RemoveGeneratedCommands(CommandOrigin::Auto, false, true);
     m_CommandMgr->SaveCommands();
-    ColoniesGrid->Filter->Update();
+    UpdateAllGrids();
     ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
 }
 
@@ -2142,7 +2155,7 @@ void Form1::ColoniesMenuAutoDeleteAllProduction(Object^, EventArgs^)
 {
     m_CommandMgr->RemoveGeneratedCommands(CommandOrigin::Auto, true, true);
     m_CommandMgr->SaveCommands();
-    ColoniesGrid->Filter->Update();
+    UpdateAllGrids();
     ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
 }
 
@@ -2564,6 +2577,7 @@ void Form1::ShipsMenuOrderSet(ShipCommandData ^data)
 void Form1::ShipsMenuOrderCancel(ICommand ^cmd)
 {
     m_ShipsMenuRef->Commands->Remove( cmd );
+    SystemsGrid->Filter->Update();
     ShipsGrid->Filter->Update();
     m_CommandMgr->SaveCommands();
 }
@@ -3026,10 +3040,7 @@ void Form1::AliensMenuSetRelation(AlienRelationData ^data)
 
     AliensGrid->Filter->Update();
     // Update other grids to reflect new colors
-    SystemsGrid->Filter->Update();
-    PlanetsGrid->Filter->Update();
-    ColoniesGrid->Filter->Update();
-    ShipsGrid->Filter->Update();
+    UpdateAllGrids();
 }
 
 void Form1::CopyOrdersTemplateToClipboard()
