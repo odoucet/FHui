@@ -726,7 +726,8 @@ void CommandManager::GenerateTemplate(System::Windows::Forms::RichTextBox^ targe
             continue;
         }
 
-        if( s[0] != ' ' )
+        if( s[0] != ' ' &&
+            (s->IndexOf("START ") == 0 || s == "END") )
         {   // section start/end
             target->Select(start, s->Length + 1);
             target->SelectionFont = sectionFont;

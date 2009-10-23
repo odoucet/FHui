@@ -27,6 +27,7 @@ public:
     }
 
     virtual void OnGridSetup();
+    virtual void OnGridSelectionChanged();
 
     virtual property GameData^      GameData;
     virtual property StarSystem^    RefSystem

@@ -454,6 +454,18 @@ void Report::MatchPlanetScan(String ^s)
     {
         m_ScanSystem->HasWormhole = true;
     }
+    else if( m_RM->Match(s, "^Wormhole to\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)$") )
+    {
+        m_ScanSystem->HasWormhole = true;
+        m_ScanSystem->WormholeTargetId = GameData::GetSystemId(
+            m_RM->GetResultInt(0),
+            m_RM->GetResultInt(1),
+            m_RM->GetResultInt(2) );
+    }
+    else if( s == "Wormhole to Unknown System" )
+    {
+        m_ScanSystem->HasWormhole = true;
+    }
     //                          0:plNum   1:dia    2:gv            3:tc       4:pc    5:mining diff
     else if( m_RM->Match(s, "^(\\d+)\\s+(\\d+)\\s+(\\d+)\\.(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\.(\\d+)\\s+") )
     {

@@ -51,6 +51,7 @@ public interface class IGridFilter
     void    SetRefSystem(Colony ^colony);
 
     void    OnGridSetup();
+    void    OnGridSelectionChanged();
 
     property GameData^      GameData;
     property bool           EnableUpdates;

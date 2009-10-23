@@ -196,7 +196,7 @@ void Form1::UpdateControls()
     AliensUpdateControls();
 
     UtilUpdateAll();
-    UpdateAllGrids();
+    UpdateAllGrids(true);
 }
 
 void Form1::UpdateTabs()
@@ -287,7 +287,7 @@ void Form1::TechLevelsChanged()
 
     if( *m_bGridUpdateEnabled )
     {
-        UpdateAllGrids();
+        UpdateAllGrids(false);
 
         if( MenuTabs->SelectedIndex == TabIndex::Map )
             MapDraw();
@@ -510,12 +510,22 @@ void Form1::LoadOrders()
 ////////////////////////////////////////////////////////////////
 // GUI misc
 
-void Form1::UpdateAllGrids()
+void Form1::UpdateAllGrids( bool setRefSystems )
 {
-    SystemsGrid->Filter->Update( SystemsRefHome );
-    PlanetsGrid->Filter->Update( PlanetsRefHome );
-    ColoniesGrid->Filter->Update( ColoniesRefHome );
-    ShipsGrid->Filter->Update( ShipsRefHome );
+    if( setRefSystems )
+    {
+        SystemsGrid->Filter->Update( SystemsRefHome );
+        PlanetsGrid->Filter->Update( PlanetsRefHome );
+        ColoniesGrid->Filter->Update( ColoniesRefHome );
+        ShipsGrid->Filter->Update( ShipsRefHome );
+    }
+    else
+    {
+        SystemsGrid->Filter->Update();
+        PlanetsGrid->Filter->Update();
+        ColoniesGrid->Filter->Update();
+        ShipsGrid->Filter->Update();
+    }
     AliensGrid->Filter->Update();
 }
 
@@ -628,6 +638,7 @@ void Form1::UpdateSelectionMode(DblBufDGV ^grid, Object ^sender)
         grid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
         cb->Text = "Select Cells";
     }
+    grid->Filter->OnGridSelectionChanged();
 }
 
 Color Form1::GetAlienColor(Alien ^sp)
@@ -2190,7 +2201,7 @@ void Form1::ColoniesMenuAutoDeleteAllNonScouting(Object^, EventArgs^)
 {
     m_CommandMgr->RemoveGeneratedCommands(CommandOrigin::Auto, false, true);
     m_CommandMgr->SaveCommands();
-    UpdateAllGrids();
+    UpdateAllGrids(false);
     ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
 }
 
@@ -2198,7 +2209,7 @@ void Form1::ColoniesMenuAutoDeleteAllProduction(Object^, EventArgs^)
 {
     m_CommandMgr->RemoveGeneratedCommands(CommandOrigin::Auto, true, true);
     m_CommandMgr->SaveCommands();
-    UpdateAllGrids();
+    UpdateAllGrids(false);
     ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
 }
 
@@ -3083,7 +3094,7 @@ void Form1::AliensMenuSetRelation(AlienRelationData ^data)
 
     AliensGrid->Filter->Update();
     // Update other grids to reflect new colors
-    UpdateAllGrids();
+    UpdateAllGrids(false);
 }
 
 void Form1::CopyOrdersTemplateToClipboard()

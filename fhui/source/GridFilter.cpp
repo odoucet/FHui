@@ -12,9 +12,18 @@ void GridFilter::OnGridSetup()
 {
     m_RowsCnt = 0;
     GridSetup();
+    OnGridSelectionChanged();
+}
 
+void GridFilter::OnGridSelectionChanged()
+{
     if( CtrlNumRows )
-        CtrlNumRows->Text = "Num grid rows: " + m_RowsCnt.ToString();
+    {
+        String ^text = "Num grid rows: " + m_RowsCnt.ToString();
+        if( m_Grid->SelectionMode == System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect )
+            text += "; selected: " + m_Grid->SelectedRows->Count;
+        CtrlNumRows->Text = text;
+    }
 }
 
 void GridFilter::Update()

@@ -91,7 +91,7 @@ namespace FHUI {
         void        LoadUISettings();
 
         // -- Data grids misc
-        void        UpdateAllGrids();
+        void        UpdateAllGrids(bool setRefSystems);
         void        ApplyDataAndFormat(
                         DataGridView ^grid,
                         DataTable ^dataTable,
@@ -608,7 +608,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->components = (gcnew System::ComponentModel::Container());
             System::Windows::Forms::SplitContainer^  TopSplitCont;
             System::Windows::Forms::SplitContainer^  splitContainer7;
-            System::Windows::Forms::ToolStripMenuItem^  copyToClipboardToolStripMenuItem;
             System::Windows::Forms::Label^  label25;
             System::Windows::Forms::Label^  label26;
             System::Windows::Forms::Label^  label23;
@@ -647,6 +646,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle13 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle14 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
             System::Windows::Forms::DataGridViewCellStyle^  dataGridViewCellStyle15 = (gcnew System::Windows::Forms::DataGridViewCellStyle());
+            System::Windows::Forms::ToolStripMenuItem^  copyToClipboardToolStripMenuItem;
             System::Windows::Forms::GroupBox^  groupBox6;
             System::Windows::Forms::Label^  label42;
             System::Windows::Forms::Label^  label43;
@@ -675,7 +675,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TurnReloadBtn = (gcnew System::Windows::Forms::Button());
             this->TurnSelect = (gcnew System::Windows::Forms::ComboBox());
             this->Summary = (gcnew System::Windows::Forms::RichTextBox());
-            this->OrdersCtxMenu = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
             this->TechBI = (gcnew System::Windows::Forms::NumericUpDown());
             this->TechMI = (gcnew System::Windows::Forms::NumericUpDown());
             this->TechResetTaught = (gcnew System::Windows::Forms::Button());
@@ -691,6 +690,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->RepTurnNr = (gcnew System::Windows::Forms::ComboBox());
             this->RepModeReports = (gcnew System::Windows::Forms::RadioButton());
             this->TabSystems = (gcnew System::Windows::Forms::TabPage());
+            this->SystemsSelMode = (gcnew System::Windows::Forms::CheckBox());
             this->SystemsNumRows = (gcnew System::Windows::Forms::Label());
             this->SystemsFiltVisN = (gcnew System::Windows::Forms::CheckBox());
             this->SystemsFiltColN = (gcnew System::Windows::Forms::CheckBox());
@@ -708,6 +708,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->SystemsRef = (gcnew System::Windows::Forms::Label());
             this->SystemsGrid = (gcnew FHUI::DblBufDGV());
             this->TabPlanets = (gcnew System::Windows::Forms::TabPage());
+            this->PlanetsSelMode = (gcnew System::Windows::Forms::CheckBox());
             this->PlanetsNumRows = (gcnew System::Windows::Forms::Label());
             this->PlanetsFiltVisN = (gcnew System::Windows::Forms::CheckBox());
             this->PlanetsFiltColN = (gcnew System::Windows::Forms::CheckBox());
@@ -726,6 +727,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->PlanetsGrid = (gcnew FHUI::DblBufDGV());
             this->TabColonies = (gcnew System::Windows::Forms::TabPage());
             this->splitContainer4 = (gcnew System::Windows::Forms::SplitContainer());
+            this->ColoniesSelMode = (gcnew System::Windows::Forms::CheckBox());
             this->ColoniesNumRows = (gcnew System::Windows::Forms::Label());
             this->ColoniesFiltOwnN = (gcnew System::Windows::Forms::CheckBox());
             this->ColoniesFiltOwnO = (gcnew System::Windows::Forms::CheckBox());
@@ -744,6 +746,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ColoniesGrid = (gcnew FHUI::DblBufDGV());
             this->TabShips = (gcnew System::Windows::Forms::TabPage());
             this->splitContainer5 = (gcnew System::Windows::Forms::SplitContainer());
+            this->ShipsSelMode = (gcnew System::Windows::Forms::CheckBox());
             this->ShipsNumRows = (gcnew System::Windows::Forms::Label());
             this->ShipsGroupByOwner = (gcnew System::Windows::Forms::CheckBox());
             this->ShipsRefXYZ = (gcnew System::Windows::Forms::ComboBox());
@@ -775,6 +778,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->AliensGrid = (gcnew FHUI::DblBufDGV());
             this->TabOrders = (gcnew System::Windows::Forms::TabPage());
             this->OrderTemplate = (gcnew System::Windows::Forms::RichTextBox());
+            this->OrdersCtxMenu = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
             this->TabUtils = (gcnew System::Windows::Forms::TabPage());
             this->UtilProdPenalty = (gcnew System::Windows::Forms::Label());
             this->UtilProdPenaltyLS = (gcnew System::Windows::Forms::NumericUpDown());
@@ -814,13 +818,8 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->textBox1 = (gcnew System::Windows::Forms::TextBox());
             this->comboBox2 = (gcnew System::Windows::Forms::ComboBox());
             this->BtnTooltip = (gcnew System::Windows::Forms::ToolTip(this->components));
-            this->SystemsSelMode = (gcnew System::Windows::Forms::CheckBox());
-            this->PlanetsSelMode = (gcnew System::Windows::Forms::CheckBox());
-            this->ColoniesSelMode = (gcnew System::Windows::Forms::CheckBox());
-            this->ShipsSelMode = (gcnew System::Windows::Forms::CheckBox());
             TopSplitCont = (gcnew System::Windows::Forms::SplitContainer());
             splitContainer7 = (gcnew System::Windows::Forms::SplitContainer());
-            copyToClipboardToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
             label25 = (gcnew System::Windows::Forms::Label());
             label26 = (gcnew System::Windows::Forms::Label());
             label23 = (gcnew System::Windows::Forms::Label());
@@ -844,6 +843,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             label24 = (gcnew System::Windows::Forms::Label());
             label10 = (gcnew System::Windows::Forms::Label());
             label27 = (gcnew System::Windows::Forms::Label());
+            copyToClipboardToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
             groupBox6 = (gcnew System::Windows::Forms::GroupBox());
             label42 = (gcnew System::Windows::Forms::Label());
             label43 = (gcnew System::Windows::Forms::Label());
@@ -875,7 +875,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             splitContainer7->Panel1->SuspendLayout();
             splitContainer7->Panel2->SuspendLayout();
             splitContainer7->SuspendLayout();
-            this->OrdersCtxMenu->SuspendLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechBI))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechMI))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechMA))->BeginInit();
@@ -920,6 +919,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->splitContainer6->SuspendLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->AliensGrid))->BeginInit();
             this->TabOrders->SuspendLayout();
+            this->OrdersCtxMenu->SuspendLayout();
             this->TabUtils->SuspendLayout();
             groupBox6->SuspendLayout();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->UtilProdPenaltyLS))->BeginInit();
@@ -1038,19 +1038,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->Summary->TabIndex = 3;
             this->Summary->Text = L"";
             this->Summary->WordWrap = false;
-            // 
-            // OrdersCtxMenu
-            // 
-            this->OrdersCtxMenu->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) {copyToClipboardToolStripMenuItem});
-            this->OrdersCtxMenu->Name = L"OrdersCtxMenu";
-            this->OrdersCtxMenu->Size = System::Drawing::Size(170, 26);
-            // 
-            // copyToClipboardToolStripMenuItem
-            // 
-            copyToClipboardToolStripMenuItem->Name = L"copyToClipboardToolStripMenuItem";
-            copyToClipboardToolStripMenuItem->Size = System::Drawing::Size(169, 22);
-            copyToClipboardToolStripMenuItem->Text = L"Copy to clipboard";
-            copyToClipboardToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::copyToClipboardToolStripMenuItem_Click);
             // 
             // TechBI
             // 
@@ -1237,7 +1224,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // TabReports
             // 
-            this->TabReports->BackColor = System::Drawing::Color::Transparent;
+            this->TabReports->BackColor = System::Drawing::SystemColors::Control;
             this->TabReports->Controls->Add(this->RepText);
             this->TabReports->Controls->Add(this->RepModeCommands);
             this->TabReports->Controls->Add(this->RepTurnNr);
@@ -1246,10 +1233,9 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabReports->Margin = System::Windows::Forms::Padding(0);
             this->TabReports->Name = L"TabReports";
             this->TabReports->Padding = System::Windows::Forms::Padding(3);
-            this->TabReports->Size = System::Drawing::Size(683, 535);
+            this->TabReports->Size = System::Drawing::Size(773, 514);
             this->TabReports->TabIndex = 0;
             this->TabReports->Text = L"Reports";
-            this->TabReports->UseVisualStyleBackColor = true;
             // 
             // RepText
             // 
@@ -1258,10 +1244,10 @@ private: System::Windows::Forms::Label^  SystemsRef;
                 | System::Windows::Forms::AnchorStyles::Right));
             this->RepText->Font = (gcnew System::Drawing::Font(L"Courier New", 8.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point, 
                 static_cast<System::Byte>(0)));
-            this->RepText->Location = System::Drawing::Point(0, 30);
+            this->RepText->Location = System::Drawing::Point(3, 32);
             this->RepText->Name = L"RepText";
             this->RepText->ReadOnly = true;
-            this->RepText->Size = System::Drawing::Size(677, 507);
+            this->RepText->Size = System::Drawing::Size(767, 479);
             this->RepText->TabIndex = 0;
             this->RepText->Text = L"";
             this->RepText->WordWrap = false;
@@ -1353,6 +1339,18 @@ private: System::Windows::Forms::Label^  SystemsRef;
             splitContainer2->SplitterDistance = 82;
             splitContainer2->SplitterWidth = 1;
             splitContainer2->TabIndex = 0;
+            // 
+            // SystemsSelMode
+            // 
+            this->SystemsSelMode->Appearance = System::Windows::Forms::Appearance::Button;
+            this->SystemsSelMode->Location = System::Drawing::Point(624, 25);
+            this->SystemsSelMode->Name = L"SystemsSelMode";
+            this->SystemsSelMode->Size = System::Drawing::Size(80, 22);
+            this->SystemsSelMode->TabIndex = 79;
+            this->SystemsSelMode->Text = L"Select Cells";
+            this->SystemsSelMode->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->SystemsSelMode->UseVisualStyleBackColor = true;
+            this->SystemsSelMode->CheckedChanged += gcnew System::EventHandler(this, &Form1::SystemsSelMode_CheckedChanged);
             // 
             // SystemsNumRows
             // 
@@ -1614,6 +1612,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->SystemsGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseEnter);
             this->SystemsGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::SystemsGrid_CellMouseDoubleClick);
             this->SystemsGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
+            this->SystemsGrid->SelectionChanged += gcnew System::EventHandler(this, &Form1::Grid_SelectionChanged);
             // 
             // TabPlanets
             // 
@@ -1665,6 +1664,18 @@ private: System::Windows::Forms::Label^  SystemsRef;
             splitContainer3->SplitterDistance = 82;
             splitContainer3->SplitterWidth = 1;
             splitContainer3->TabIndex = 1;
+            // 
+            // PlanetsSelMode
+            // 
+            this->PlanetsSelMode->Appearance = System::Windows::Forms::Appearance::Button;
+            this->PlanetsSelMode->Location = System::Drawing::Point(624, 25);
+            this->PlanetsSelMode->Name = L"PlanetsSelMode";
+            this->PlanetsSelMode->Size = System::Drawing::Size(80, 22);
+            this->PlanetsSelMode->TabIndex = 80;
+            this->PlanetsSelMode->Text = L"Select Cells";
+            this->PlanetsSelMode->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->PlanetsSelMode->UseVisualStyleBackColor = true;
+            this->PlanetsSelMode->CheckedChanged += gcnew System::EventHandler(this, &Form1::PlanetsSelMode_CheckedChanged);
             // 
             // PlanetsNumRows
             // 
@@ -1927,6 +1938,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->PlanetsGrid->CellEndEdit += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::PlanetsGrid_CellEndEdit);
             this->PlanetsGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::PlanetsGrid_CellMouseDoubleClick);
             this->PlanetsGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
+            this->PlanetsGrid->SelectionChanged += gcnew System::EventHandler(this, &Form1::Grid_SelectionChanged);
             // 
             // TabColonies
             // 
@@ -1979,6 +1991,18 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->splitContainer4->SplitterDistance = 82;
             this->splitContainer4->SplitterWidth = 1;
             this->splitContainer4->TabIndex = 2;
+            // 
+            // ColoniesSelMode
+            // 
+            this->ColoniesSelMode->Appearance = System::Windows::Forms::Appearance::Button;
+            this->ColoniesSelMode->Location = System::Drawing::Point(624, 25);
+            this->ColoniesSelMode->Name = L"ColoniesSelMode";
+            this->ColoniesSelMode->Size = System::Drawing::Size(80, 22);
+            this->ColoniesSelMode->TabIndex = 81;
+            this->ColoniesSelMode->Text = L"Select Cells";
+            this->ColoniesSelMode->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->ColoniesSelMode->UseVisualStyleBackColor = true;
+            this->ColoniesSelMode->CheckedChanged += gcnew System::EventHandler(this, &Form1::ColoniesSelMode_CheckedChanged);
             // 
             // ColoniesNumRows
             // 
@@ -2238,6 +2262,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ColoniesGrid->ColumnHeaderMouseClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_ColumnHeaderMouseClick);
             this->ColoniesGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseEnter);
             this->ColoniesGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::ColoniesGrid_CellMouseDoubleClick);
+            this->ColoniesGrid->SelectionChanged += gcnew System::EventHandler(this, &Form1::Grid_SelectionChanged);
             // 
             // TabShips
             // 
@@ -2292,6 +2317,18 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->splitContainer5->SplitterDistance = 82;
             this->splitContainer5->SplitterWidth = 1;
             this->splitContainer5->TabIndex = 2;
+            // 
+            // ShipsSelMode
+            // 
+            this->ShipsSelMode->Appearance = System::Windows::Forms::Appearance::Button;
+            this->ShipsSelMode->Location = System::Drawing::Point(624, 25);
+            this->ShipsSelMode->Name = L"ShipsSelMode";
+            this->ShipsSelMode->Size = System::Drawing::Size(80, 22);
+            this->ShipsSelMode->TabIndex = 82;
+            this->ShipsSelMode->Text = L"Select Cells";
+            this->ShipsSelMode->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->ShipsSelMode->UseVisualStyleBackColor = true;
+            this->ShipsSelMode->CheckedChanged += gcnew System::EventHandler(this, &Form1::ShipsSelMode_CheckedChanged);
             // 
             // ShipsNumRows
             // 
@@ -2596,6 +2633,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ShipsGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseEnter);
             this->ShipsGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::ShipsGrid_CellMouseDoubleClick);
             this->ShipsGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
+            this->ShipsGrid->SelectionChanged += gcnew System::EventHandler(this, &Form1::Grid_SelectionChanged);
             // 
             // TabAliens
             // 
@@ -2761,13 +2799,14 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->AliensGrid->CellMouseEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Form1::Grid_CellMouseEnter);
             this->AliensGrid->CellMouseDoubleClick += gcnew System::Windows::Forms::DataGridViewCellMouseEventHandler(this, &Form1::Grid_CellMouseDoubleClick);
             this->AliensGrid->DataBindingComplete += gcnew System::Windows::Forms::DataGridViewBindingCompleteEventHandler(this, &Form1::DataGrid_DataBindingComplete);
+            this->AliensGrid->SelectionChanged += gcnew System::EventHandler(this, &Form1::Grid_SelectionChanged);
             // 
             // TabOrders
             // 
             this->TabOrders->Controls->Add(this->OrderTemplate);
             this->TabOrders->Location = System::Drawing::Point(4, 22);
             this->TabOrders->Name = L"TabOrders";
-            this->TabOrders->Size = System::Drawing::Size(683, 535);
+            this->TabOrders->Size = System::Drawing::Size(773, 514);
             this->TabOrders->TabIndex = 9;
             this->TabOrders->Text = L"Orders";
             this->TabOrders->UseVisualStyleBackColor = true;
@@ -2781,9 +2820,22 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->OrderTemplate->Location = System::Drawing::Point(0, 0);
             this->OrderTemplate->Name = L"OrderTemplate";
             this->OrderTemplate->ReadOnly = true;
-            this->OrderTemplate->Size = System::Drawing::Size(683, 535);
+            this->OrderTemplate->Size = System::Drawing::Size(773, 514);
             this->OrderTemplate->TabIndex = 0;
             this->OrderTemplate->Text = L"";
+            // 
+            // OrdersCtxMenu
+            // 
+            this->OrdersCtxMenu->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) {copyToClipboardToolStripMenuItem});
+            this->OrdersCtxMenu->Name = L"OrdersCtxMenu";
+            this->OrdersCtxMenu->Size = System::Drawing::Size(170, 26);
+            // 
+            // copyToClipboardToolStripMenuItem
+            // 
+            copyToClipboardToolStripMenuItem->Name = L"copyToClipboardToolStripMenuItem";
+            copyToClipboardToolStripMenuItem->Size = System::Drawing::Size(169, 22);
+            copyToClipboardToolStripMenuItem->Text = L"Copy to clipboard";
+            copyToClipboardToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::copyToClipboardToolStripMenuItem_Click);
             // 
             // TabUtils
             // 
@@ -2793,7 +2845,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabUtils->Controls->Add(groupBox4);
             this->TabUtils->Location = System::Drawing::Point(4, 22);
             this->TabUtils->Name = L"TabUtils";
-            this->TabUtils->Size = System::Drawing::Size(683, 535);
+            this->TabUtils->Size = System::Drawing::Size(773, 514);
             this->TabUtils->TabIndex = 10;
             this->TabUtils->Text = L"Utils";
             // 
@@ -3108,7 +3160,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabMap->Location = System::Drawing::Point(4, 22);
             this->TabMap->Margin = System::Windows::Forms::Padding(0);
             this->TabMap->Name = L"TabMap";
-            this->TabMap->Size = System::Drawing::Size(683, 535);
+            this->TabMap->Size = System::Drawing::Size(773, 514);
             this->TabMap->TabIndex = 1;
             this->TabMap->Text = L"Map";
             this->TabMap->UseVisualStyleBackColor = true;
@@ -3126,9 +3178,9 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->panel1->Controls->Add(groupBox1);
             this->panel1->Controls->Add(this->MapSPSelf);
             this->panel1->Dock = System::Windows::Forms::DockStyle::Right;
-            this->panel1->Location = System::Drawing::Point(483, 0);
+            this->panel1->Location = System::Drawing::Point(573, 0);
             this->panel1->Name = L"panel1";
-            this->panel1->Size = System::Drawing::Size(200, 535);
+            this->panel1->Size = System::Drawing::Size(200, 514);
             this->panel1->TabIndex = 0;
             this->panel1->Visible = false;
             // 
@@ -3387,7 +3439,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabAbout->Location = System::Drawing::Point(4, 22);
             this->TabAbout->Name = L"TabAbout";
             this->TabAbout->Padding = System::Windows::Forms::Padding(3);
-            this->TabAbout->Size = System::Drawing::Size(683, 535);
+            this->TabAbout->Size = System::Drawing::Size(773, 514);
             this->TabAbout->TabIndex = 8;
             this->TabAbout->Text = L"About";
             this->TabAbout->UseVisualStyleBackColor = true;
@@ -3402,7 +3454,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TextAbout->Name = L"TextAbout";
             this->TextAbout->ReadOnly = true;
             this->TextAbout->ScrollBars = System::Windows::Forms::ScrollBars::Vertical;
-            this->TextAbout->Size = System::Drawing::Size(677, 529);
+            this->TextAbout->Size = System::Drawing::Size(767, 508);
             this->TextAbout->TabIndex = 0;
             // 
             // label5
@@ -3458,54 +3510,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->comboBox2->Size = System::Drawing::Size(147, 21);
             this->comboBox2->TabIndex = 1;
             // 
-            // SystemsSelMode
-            // 
-            this->SystemsSelMode->Appearance = System::Windows::Forms::Appearance::Button;
-            this->SystemsSelMode->Location = System::Drawing::Point(624, 25);
-            this->SystemsSelMode->Name = L"SystemsSelMode";
-            this->SystemsSelMode->Size = System::Drawing::Size(80, 22);
-            this->SystemsSelMode->TabIndex = 79;
-            this->SystemsSelMode->Text = L"Select Cells";
-            this->SystemsSelMode->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->SystemsSelMode->UseVisualStyleBackColor = true;
-            this->SystemsSelMode->CheckedChanged += gcnew System::EventHandler(this, &Form1::SystemsSelMode_CheckedChanged);
-            // 
-            // PlanetsSelMode
-            // 
-            this->PlanetsSelMode->Appearance = System::Windows::Forms::Appearance::Button;
-            this->PlanetsSelMode->Location = System::Drawing::Point(624, 25);
-            this->PlanetsSelMode->Name = L"PlanetsSelMode";
-            this->PlanetsSelMode->Size = System::Drawing::Size(80, 22);
-            this->PlanetsSelMode->TabIndex = 80;
-            this->PlanetsSelMode->Text = L"Select Cells";
-            this->PlanetsSelMode->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->PlanetsSelMode->UseVisualStyleBackColor = true;
-            this->PlanetsSelMode->CheckedChanged += gcnew System::EventHandler(this, &Form1::PlanetsSelMode_CheckedChanged);
-            // 
-            // ColoniesSelMode
-            // 
-            this->ColoniesSelMode->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ColoniesSelMode->Location = System::Drawing::Point(624, 25);
-            this->ColoniesSelMode->Name = L"ColoniesSelMode";
-            this->ColoniesSelMode->Size = System::Drawing::Size(80, 22);
-            this->ColoniesSelMode->TabIndex = 81;
-            this->ColoniesSelMode->Text = L"Select Cells";
-            this->ColoniesSelMode->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->ColoniesSelMode->UseVisualStyleBackColor = true;
-            this->ColoniesSelMode->CheckedChanged += gcnew System::EventHandler(this, &Form1::ColoniesSelMode_CheckedChanged);
-            // 
-            // ShipsSelMode
-            // 
-            this->ShipsSelMode->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ShipsSelMode->Location = System::Drawing::Point(624, 25);
-            this->ShipsSelMode->Name = L"ShipsSelMode";
-            this->ShipsSelMode->Size = System::Drawing::Size(80, 22);
-            this->ShipsSelMode->TabIndex = 82;
-            this->ShipsSelMode->Text = L"Select Cells";
-            this->ShipsSelMode->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->ShipsSelMode->UseVisualStyleBackColor = true;
-            this->ShipsSelMode->CheckedChanged += gcnew System::EventHandler(this, &Form1::ShipsSelMode_CheckedChanged);
-            // 
             // Form1
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -3522,7 +3526,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             splitContainer7->Panel1->ResumeLayout(false);
             splitContainer7->Panel2->ResumeLayout(false);
             splitContainer7->ResumeLayout(false);
-            this->OrdersCtxMenu->ResumeLayout(false);
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechBI))->EndInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechMI))->EndInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->TechMA))->EndInit();
@@ -3571,6 +3574,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->splitContainer6->ResumeLayout(false);
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->AliensGrid))->EndInit();
             this->TabOrders->ResumeLayout(false);
+            this->OrdersCtxMenu->ResumeLayout(false);
             this->TabUtils->ResumeLayout(false);
             groupBox6->ResumeLayout(false);
             groupBox6->PerformLayout();
@@ -3773,6 +3777,9 @@ private: System::Void ColoniesSelMode_CheckedChanged(System::Object^  sender, Sy
          }
 private: System::Void ShipsSelMode_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
              UpdateSelectionMode(ShipsGrid, sender);
+         }
+private: System::Void Grid_SelectionChanged(System::Object^  sender, System::EventArgs^  e) {
+             safe_cast<DblBufDGV^>(sender)->Filter->OnGridSelectionChanged();
          }
 };
 
