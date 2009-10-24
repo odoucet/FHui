@@ -82,7 +82,8 @@ void ReportParser::ScanReports()
         m_GameData->Update();
         try
         {
-            m_CommandMgr->LoadCommands();
+            if( currTurn > 0 )
+                m_CommandMgr->LoadCommands();
         }
         catch( FHUIParsingException ^ex )
         {
