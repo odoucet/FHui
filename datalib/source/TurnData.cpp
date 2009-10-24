@@ -445,7 +445,8 @@ Colony^ TurnData::AddColony(Alien ^sp, String ^name, StarSystem ^system, int plN
 
 void TurnData::AddPlanetName(StarSystem ^system, int pl, String ^name)
 {
-    if ( String::IsNullOrEmpty(system->Planets[pl]->Name) )
+    if ( system->Planets->ContainsKey(pl) &&
+         String::IsNullOrEmpty(system->Planets[pl]->Name) )
     {
         system->Planets[pl]->Name = name;
     }

@@ -67,4 +67,23 @@ String^ CmdTeach::Print()
         m_Alien->Name );
 }
 
+////////////////////////////////////////////////////////////////
+// Develop
+
+String^ ProdCmdDevelop::Print()
+{
+    if( m_Ship && m_Colony )
+        return String::Format("Develop {0} PL {1}, {2}",
+            m_Amount,
+            m_Colony->Name,
+            m_Ship->PrintClassWithName() );
+
+    if( m_Colony )
+        return String::Format("Develop {0} PL {1}",
+            m_Amount,
+            m_Colony->Name );
+
+    return "Develop " + m_Amount.ToString();
+}
+
 } // end namespace FHUI

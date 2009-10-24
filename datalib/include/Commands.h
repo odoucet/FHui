@@ -49,6 +49,7 @@ public enum class CommandType
     BuildShip,
     Recycle,
     Estimate,
+    Develop,
 };
 
 public enum class CommandOrigin
@@ -465,6 +466,34 @@ public:
 
     InventoryType   m_Type;
     int             m_Amount;
+};
+
+////////////////////////////////////////////////////////////
+
+// Develop
+public ref class ProdCmdDevelop : public CmdProdBase<CommandType::Develop>
+{
+public:
+    ProdCmdDevelop(int amount, Colony ^colony, Ship ^ship)
+        : m_Amount(amount), m_Colony(colony), m_Ship(ship) {}
+
+    ProdCmdDevelop^ operator = (ProdCmdDevelop ^cmd)
+    {
+        Origin      = cmd->Origin;
+        m_Amount    = cmd->m_Amount;
+        m_Colony    = cmd->m_Colony;
+        m_Ship      = cmd->m_Ship;
+        return this;
+    }
+
+    virtual int     GetEUCost() override    { return m_Amount; }
+    virtual int     GetPopCost() override   { return m_Colony ? m_Amount : ((m_Amount / 2) + (m_Amount % 1)); }
+
+    virtual String^ Print() override;
+
+    int         m_Amount;
+    Colony^     m_Colony;
+    Ship^       m_Ship;
 };
 
 ////////////////////////////////////////////////////////////

@@ -44,6 +44,9 @@ public:
     initonly Regex^     ExpCmdResearch;
     initonly Regex^     ExpCmdRecycle;
     initonly Regex^     ExpCmdEstimate;
+    initonly Regex^     ExpCmdDevelopCS;
+    initonly Regex^     ExpCmdDevelopC;
+    initonly Regex^     ExpCmdDevelop;
     initonly Regex^     ExpCmdInstall;
     initonly Regex^     ExpCmdBuildIUAU;
     initonly Regex^     ExpCmdBuildShipTR;

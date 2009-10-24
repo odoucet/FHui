@@ -7,6 +7,7 @@ Minor changes are listed only if originally requested by player
 
 FHUI build ??
 * Fixed minor bug in comments for production orders - budget calculation.
++ New commands supported: Develop.
 + Production/Cancel All menu option now requires confirmation before
   deleting all orders.
 + Automation menu: new option to delete all production Auto commands

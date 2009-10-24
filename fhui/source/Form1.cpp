@@ -11,6 +11,7 @@
 #include "CmdBuildShips.h"
 #include "CmdBuildIuAu.h"
 #include "CmdMessage.h"
+#include "CmdDevelopDlg.h"
 
 using namespace System::IO;
 using namespace System::Text::RegularExpressions;
@@ -1814,7 +1815,7 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuCommands(CommandPhase phase)
         if( cmd->GetPhase() == phase )
         {
             prodMenu->DropDownItems->Add(
-                ColoniesFillMenuProductionOptions(cmd) );
+                ColoniesFillMenuCommandsOptions(cmd) );
             anyProdCommand = true;
         }
     }
@@ -1911,6 +1912,12 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuProductionNew()
             gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuCommandAdd) ) );
     }
 
+    // Develop
+    menu->DropDownItems->Add( CreateCustomMenuItem<ProdCmdDevelop^>(
+        "Develop...",
+        nullptr,
+        gcnew EventHandler1Arg<ProdCmdDevelop^>(this, &Form1::ColoniesMenuProdCommandAddDevelop) ) );
+
     // Build CU/IU/AU
     menu->DropDownItems->Add(
         "Build CU/IU/AU...",
@@ -1962,7 +1969,7 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuProductionNew()
     return menu;
 }
 
-ToolStripMenuItem^ Form1::ColoniesFillMenuProductionOptions(ICommand ^cmd)
+ToolStripMenuItem^ Form1::ColoniesFillMenuCommandsOptions(ICommand ^cmd)
 {
     ToolStripMenuItem ^menu = gcnew ToolStripMenuItem( m_CommandMgr->PrintCommandWithInfo(cmd, 0) );
 
@@ -1993,8 +2000,18 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuProductionOptions(ICommand ^cmd)
             gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuCommandMoveDown) ) );
     }
 
-    // Cancel order
     menu->DropDownItems->Add( gcnew ToolStripSeparator );
+
+    // Edit command
+    if( cmd->GetCmdType() == CommandType::Develop )
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem<ProdCmdDevelop^>(
+            "Edit...",
+            safe_cast<ProdCmdDevelop^>(cmd),
+            gcnew EventHandler1Arg<ProdCmdDevelop^>(this, &Form1::ColoniesMenuProdCommandAddDevelop) ) );
+    }
+
+    // Cancel order
     menu->DropDownItems->Add( CreateCustomMenuItem(
         "Cancel",
         cmd,
@@ -2042,7 +2059,11 @@ void Form1::ColoniesMenuProdOrderAdjust(int adjustment)
 
 void Form1::ColoniesMenuCommandAdd(ICommand ^cmd)
 {
-    m_CommandMgr->AddCommand(m_ColoniesMenuRef, cmd);
+    if( cmd )
+        m_CommandMgr->AddCommand(m_ColoniesMenuRef, cmd);
+    else
+        m_CommandMgr->SaveCommands();
+
     ColoniesGrid->Filter->Update();
     ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
 }
@@ -2061,6 +2082,26 @@ void Form1::ColoniesMenuProdCommandAddResearch(Object^, EventArgs^)
                 ColoniesMenuCommandAdd(
                     gcnew ProdCmdResearch(tech, res) );
             }
+        }
+    }
+
+    delete dlg;
+}
+
+void Form1::ColoniesMenuProdCommandAddDevelop(ProdCmdDevelop ^cmd)
+{
+    CmdDevelopDlg ^dlg = gcnew CmdDevelopDlg(
+        m_ColoniesMenuRef, cmd );
+    if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
+    {
+        if( cmd == nullptr )
+        {
+            ColoniesMenuCommandAdd( dlg->GetCommand() );
+        }
+        else
+        {
+            *cmd = dlg->GetCommand();
+            ColoniesMenuCommandAdd(nullptr);
         }
     }
 

@@ -1132,7 +1132,7 @@ void Report::MatchOrdersTemplate(String ^s)
             return;
         }
         throw gcnew FHUIParsingException(
-            String::Format("INSTALL order for unknown planet: PL {0}", m_RM->Results[0]) );
+            "INSTALL order for unknown planet: PL " + m_RM->Results[0] );
     }
 
     // UNLOAD
@@ -1199,26 +1199,63 @@ void Report::MatchOrdersTemplate(String ^s)
             return;
         }
         throw gcnew FHUIParsingException(
-            String::Format("PRODUCTION order for unknown colony: PL {0}", m_RM->Results[0]) );
+            "PRODUCTION order for unknown colony: PL " + m_RM->Results[0] );
     }
 
     // DEVELOP
-    if( m_RM->Match(s, "^Develop\\s+(\\d+)$" ) )
+    if( m_RM->Match(s, m_RM->ExpCmdDevelopCS) )
     {
-        m_CommandMgr->SetAutoOrderProduction(
-            m_ColonyProduction, line, m_RM->GetResultInt(0) );
+        Planet ^planet = m_GameData->GetPlanetByName(m_RM->Results[1]);
+        if ( !planet )
+            throw gcnew FHUIParsingException("DEVELOP order for unknown planet: PL " + m_RM->Results[1]);
+        Colony ^colony = m_GameData->GetColonyFromPlanet(planet, true);
+        Ship^ ship = m_GameData->GetShip(m_RM->Results[1]);
+        if( !ship )
+            throw gcnew FHUIParsingException("JUMP order for unknown ship: {1}" + m_RM->Results[2]);
+
+        ICommand ^cmd = gcnew ProdCmdDevelop(
+            m_RM->GetResultInt(0),
+            colony,
+            ship );
+        m_ColonyProduction->Commands->Add( cmd );
+        cmd->Origin = CommandOrigin::Auto;
         return;
     }
-    if( m_RM->Match(s, "^Develop\\s+(\\d+)\\s+PL\\s+([^,]+)$" ) )
+    if( m_RM->Match(s, m_RM->ExpCmdDevelopC) )
     {
-        m_CommandMgr->SetAutoOrderProduction(
-            m_ColonyProduction, line, m_RM->GetResultInt(0) );
+        Planet ^planet = m_GameData->GetPlanetByName(m_RM->Results[1]);
+        if ( !planet )
+            throw gcnew FHUIParsingException("DEVELOP order for unknown planet: PL " + m_RM->Results[1]);
+        Colony ^colony = m_GameData->GetColonyFromPlanet(planet, true);
+
+        ICommand ^cmd = gcnew ProdCmdDevelop(
+            m_RM->GetResultInt(0),
+            colony,
+            nullptr );
+        m_ColonyProduction->Commands->Add( cmd );
+        cmd->Origin = CommandOrigin::Auto;
         return;
     }
-    if( m_RM->Match(s, "^Develop\\s+PL\\s+([^,]+),\\s+TR(\\d+)\\s+([^,]+)$") )
+    if( m_RM->Match(s, m_RM->ExpCmdDevelop) )
     {
-        m_CommandMgr->SetAutoOrderProduction(
-            m_ColonyProduction, line, Calculators::TransportCapacity(m_RM->GetResultInt(1)) );
+        ICommand ^cmd = gcnew ProdCmdDevelop(
+            m_RM->GetResultInt(0),
+            nullptr,
+            nullptr );
+        m_ColonyProduction->Commands->Add( cmd );
+        cmd->Origin = CommandOrigin::Auto;
+        return;
+    }
+
+    // Build CU/IU/AU
+    if( m_RM->Match(line, m_RM->ExpCmdBuildIUAU) )
+    {
+        int amount = m_RM->GetResultInt(0);
+        ICommand ^cmd = gcnew ProdCmdBuildIUAU(
+                amount,
+                FHStrings::InvFromString(m_RM->Results[1]) );
+        m_ColonyProduction->Commands->Add( cmd );
+        cmd->Origin = CommandOrigin::Auto;
         return;
     }
 

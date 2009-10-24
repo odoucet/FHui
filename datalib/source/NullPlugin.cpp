@@ -88,7 +88,7 @@ void BudgetTracker::UpdatePop(int pop)
     m_Colony->Res->AvailPop -= pop;
     if( m_Colony->Res->AvailPop < 0 )
     {
-        AddComment( String::Format("; !!!!!! NOT ENOUGH CU Available ({0} left) !!!!!!", m_Colony->Res->AvailPop + pop) );
+        AddComment( String::Format("; !!!!!! NOT ENOUGH Population Available ({0} left) !!!!!!", m_Colony->Res->AvailPop + pop) );
         m_Colony->Res->AvailPop = 0;
     }
 }

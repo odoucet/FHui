@@ -576,6 +576,48 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
             String::Format("INSTALL order for unknown planet: PL {0}", m_RM->Results[0]) );
     }
 
+    // Develop
+    if( m_RM->Match(line, m_RM->ExpCmdDevelopCS) )
+    {
+        Planet ^planet = m_GameData->GetPlanetByName(m_RM->Results[1]);
+        if ( !planet )
+            throw gcnew FHUIParsingException("DEVELOP order for unknown planet: PL " + m_RM->Results[1]);
+        Colony ^devColony = m_GameData->GetColonyFromPlanet(planet, true);
+        Ship^ ship = m_GameData->GetShip(m_RM->Results[1]);
+        if( !ship )
+            throw gcnew FHUIParsingException("JUMP order for unknown ship: {1}" + m_RM->Results[2]);
+
+        colony->Commands->Add( CmdSetOrigin(gcnew ProdCmdDevelop(
+            m_RM->GetResultInt(0),
+            devColony,
+            ship ) ) );
+
+        return true;
+    }
+    if( m_RM->Match(line, m_RM->ExpCmdDevelopC) )
+    {
+        Planet ^planet = m_GameData->GetPlanetByName(m_RM->Results[1]);
+        if ( !planet )
+            throw gcnew FHUIParsingException("DEVELOP order for unknown planet: PL " + m_RM->Results[1]);
+        Colony ^devColony = m_GameData->GetColonyFromPlanet(planet, true);
+
+        colony->Commands->Add( CmdSetOrigin(gcnew ProdCmdDevelop(
+            m_RM->GetResultInt(0),
+            devColony,
+            nullptr ) ) );
+
+        return true;
+    }
+    if( m_RM->Match(line, m_RM->ExpCmdDevelop) )
+    {
+        colony->Commands->Add( CmdSetOrigin(gcnew ProdCmdDevelop(
+            m_RM->GetResultInt(0),
+            nullptr,
+            nullptr ) ) );
+
+        return true;
+    }
+
     return false;
 }
 

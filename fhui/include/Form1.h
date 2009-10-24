@@ -58,14 +58,8 @@ namespace FHUI {
         void        CopyOrdersTemplateToClipboard();
 
         void        LoadOrders();
-    private: System::Windows::Forms::CheckBox^  SystemsSelMode;
-    private: System::Windows::Forms::CheckBox^  PlanetsSelMode;
-    private: System::Windows::Forms::CheckBox^  ColoniesSelMode;
-    private: System::Windows::Forms::CheckBox^  ShipsSelMode;
 
-
-
-             SortedList<String^, String^>^   m_OrderFiles;
+        SortedList<String^, String^>^   m_OrderFiles;
 
         void        InitPlugins();
         void        InitGameData();
@@ -240,7 +234,7 @@ namespace FHUI {
         ToolStripMenuItem^  ColoniesFillMenuPreDepartureNew();
         ToolStripMenuItem^  ColoniesFillMenuProductionNew();
         ToolStripMenuItem^  ColoniesFillMenuPostArrivalNew();
-        ToolStripMenuItem^  ColoniesFillMenuProductionOptions(ICommand ^cmd);
+        ToolStripMenuItem^  ColoniesFillMenuCommandsOptions(ICommand ^cmd);
         void        ColoniesMenuSelectRef(Object^, EventArgs^);
         void        ColoniesMenuProdOrderAdjust(int adjustment);
         void        ColoniesMenuCommandAdd(ICommand ^cmd);
@@ -250,6 +244,7 @@ namespace FHUI {
         void        ColoniesMenuProdCommandAddResearch(Object^, EventArgs^);
         void        ColoniesMenuProdCommandAddBuildIuAu(Object^, EventArgs^);
         void        ColoniesMenuProdCommandAddBuildShip(Object^, EventArgs^);
+        void        ColoniesMenuProdCommandAddDevelop(ProdCmdDevelop ^cmd);
         void        ColoniesMenuAutoToggle(Object^, EventArgs^);
         void        ColoniesMenuAutoDeleteAll(Object^, EventArgs^);
         void        ColoniesMenuAutoDeleteAllNonScouting(Object^, EventArgs^);
@@ -404,6 +399,10 @@ namespace FHUI {
         // Auto-generated code below this point
         // --------------------------------------------------
 
+    private: System::Windows::Forms::CheckBox^  SystemsSelMode;
+    private: System::Windows::Forms::CheckBox^  PlanetsSelMode;
+    private: System::Windows::Forms::CheckBox^  ColoniesSelMode;
+    private: System::Windows::Forms::CheckBox^  ShipsSelMode;
     private: System::Windows::Forms::Label^  UtilTrInfoCost;
     private: System::Windows::Forms::CheckBox^  ShipsGroupByOwner;
     private: System::Windows::Forms::Label^  UtilResInfoAverage;

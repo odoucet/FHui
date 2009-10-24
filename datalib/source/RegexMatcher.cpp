@@ -28,6 +28,9 @@ RegexMatcher::RegexMatcher()
     ExpCmdBuildIUAU = gcnew Regex("^Build\\s+(\\d+)\\s+([IAC]U)$");
     ExpCmdBuildShipTR = gcnew Regex("^Build\\s+TR(\\d+)([Ss]?)\\s+(.+)$");
     ExpCmdBuildShip = gcnew Regex("^Build\\s+([A-Za-z]{2})([Ss]?)\\s+(.+)$");
+    ExpCmdDevelopCS = gcnew Regex("^Develop\\s+(\\d+)\\s+PL\\s+([^,;]+),\\s+TR[0-9]+\\s+([^,;]+)$");
+    ExpCmdDevelopC  = gcnew Regex("^Develop\\s+(\\d+)\\s+PL\\s+([^,;]+)$");
+    ExpCmdDevelop   = gcnew Regex("^Develop\\s+(\\d+)$");
     ExpCmdShipJump  = gcnew Regex("^Jump\\s+[A-Z0-9]+\\s+[^,;]+,\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+([0-9-]+)$");
     ExpCmdShipWormhole= gcnew Regex("^Wormhole\\s+[A-Z0-9]+\\s+[^,;]+,\\s+([0-9-]+)$");
     ExpCmdShipUpg   = gcnew Regex("^Upgrade\\s+[A-Z0-9]+\\s+([^,;]+)$");

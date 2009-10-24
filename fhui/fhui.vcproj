@@ -330,6 +330,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\source\CmdDevelopDlg.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\source\CmdResearch.cpp"
 					>
 				</File>
@@ -432,6 +436,15 @@
 					>
 					<File
 						RelativePath=".\include\CmdBuildShips.resx"
+						>
+					</File>
+				</File>
+				<File
+					RelativePath=".\include\CmdDevelopDlg.h"
+					FileType="3"
+					>
+					<File
+						RelativePath=".\include\CmdDevelopDlg.resx"
 						>
 					</File>
 				</File>
