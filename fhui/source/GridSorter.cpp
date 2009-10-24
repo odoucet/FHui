@@ -12,6 +12,7 @@ namespace FHUI
 GridSorterBase::GridSorterBase(DataGridView ^grid)
     : m_Grid(grid)
     , m_RefSystem(nullptr)
+    , m_RefSystemPrev(nullptr)
     , m_SortColumn(-1)
     , m_SortOrder(SortOrder::None)
     , m_GroupBySpecies(false)
@@ -48,6 +49,8 @@ void GridSorterBase::SetRefSystem(StarSystem ^refSystem)
 {
     if( m_RefSystem != refSystem )
     {
+        // For the very first set, clone refSystem to prev too
+        m_RefSystemPrev = m_RefSystem ? m_RefSystem : refSystem;
         m_RefSystem = refSystem;
         m_Grid->Sort( this );
     }
@@ -158,7 +161,11 @@ int GridSorterBase::Compare( Object^ obj1, Object^ obj2 )
         break;
 
     case CustomSortMode::Distance:
-        result = CompareDistance(o1, o2);
+        result = CompareDistance(m_RefSystem, o1, o2);
+        break;
+
+    case CustomSortMode::DistanceSec:
+        result = CompareDistance(m_RefSystemPrev, o1, o2);
         break;
 
     case CustomSortMode::Relation:
@@ -249,13 +256,13 @@ int GridSorterBase::CompareLocation(IGridDataSrc ^o1, IGridDataSrc ^o2)
     return result;
 }
 
-int GridSorterBase::CompareDistance(IGridDataSrc ^o1, IGridDataSrc ^o2)
+int GridSorterBase::CompareDistance(StarSystem ^refSystem, IGridDataSrc ^o1, IGridDataSrc ^o2)
 {
-    if( m_RefSystem == nullptr )
+    if( refSystem == nullptr )
         return 0;
 
     double distDiff =
-        o1->GetFilterSystem()->CalcDistance(m_RefSystem) - o2->GetFilterSystem()->CalcDistance(m_RefSystem);
+        o1->GetFilterSystem()->CalcDistance(refSystem) - o2->GetFilterSystem()->CalcDistance(refSystem);
 
     if( distDiff == 0 )
         return 0;
@@ -282,7 +289,7 @@ int SystemsGridSorter::BackupCompare(DataGridViewRow ^r1, DataGridViewRow ^r2)
     int result = 0;
 
     // Step 1: by distance to ref system
-    result = CompareDistance(s1, s2) * GetForcedDirectionModifier(SortOrder::Ascending);
+    result = CompareDistance(m_RefSystem, s1, s2) * GetForcedDirectionModifier(SortOrder::Ascending);
 
     // Step 2: by available LSN
     if( result == 0 )
@@ -306,7 +313,7 @@ int PlanetsGridSorter::BackupCompare(DataGridViewRow ^r1, DataGridViewRow ^r2)
     int result = 0;
 
     // Step 1: by distance to ref system
-    result = CompareDistance(p1, p2) * GetForcedDirectionModifier(SortOrder::Ascending);
+    result = CompareDistance(m_RefSystem, p1, p2) * GetForcedDirectionModifier(SortOrder::Ascending);
 
     // Step 2: by available LSN
     if( result == 0 )
@@ -329,7 +336,7 @@ int ColoniesGridSorter::BackupCompare(DataGridViewRow ^r1, DataGridViewRow ^r2)
     int result = 0;
 
     // Step 1: by distance to ref system
-    result = CompareDistance(c1, c2) * GetForcedDirectionModifier(SortOrder::Ascending);
+    result = CompareDistance(m_RefSystem, c1, c2) * GetForcedDirectionModifier(SortOrder::Ascending);
 
     // Step 2: by production capacity
     if( result == 0 )
@@ -375,7 +382,7 @@ int ShipsGridSorter::BackupCompare(DataGridViewRow ^r1, DataGridViewRow ^r2)
         result = (s1->Age - s2->Age) * GetForcedDirectionModifier(SortOrder::Ascending);
 
     // Step 3: by distance to ref system
-    result = CompareDistance(s1, s2) * GetForcedDirectionModifier(SortOrder::Ascending);
+    result = CompareDistance(m_RefSystem, s1, s2) * GetForcedDirectionModifier(SortOrder::Ascending);
 
     // Step 4: by name
     if( result == 0 )

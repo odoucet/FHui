@@ -123,7 +123,7 @@ bool GridFilter::Filter(IGridDataSrc ^item)
     if( CtrlFiltOwnO )
     {
         Alien ^owner = item->GetFilterOwner();
-        Alien ^sp    = GameData->Player;
+        Alien ^sp    = GameData::Player;
         if( (!CtrlFiltOwnO->Checked && owner == sp) ||
             (!CtrlFiltOwnN->Checked && owner != sp) )
         {
@@ -286,7 +286,7 @@ void GridFilter::SetRefText()
         int z = int::Parse(m->Groups[3]->ToString());
 
         // Allow void systems - user may enter any coords
-        StarSystem ^system = GameData->GetStarSystem(x, y, z, true);
+        StarSystem ^system = GameData::GetStarSystem(x, y, z, true);
 
         if( RefSystem == system )
             return;
@@ -321,7 +321,7 @@ void GridFilter::SetRefXYZ()
         int y = int::Parse(m->Groups[2]->ToString());
         int z = int::Parse(m->Groups[3]->ToString());
 
-        StarSystem ^system = GameData->GetStarSystem(x, y, z, false);
+        StarSystem ^system = GameData::GetStarSystem(x, y, z, false);
 
         if( RefSystem == system )
             return;
@@ -346,7 +346,7 @@ void GridFilter::SetRefHome()
     if( String::IsNullOrEmpty(ref) || ref[0] == '[' )
         return;
 
-    Alien ^sp = GameData->GetAlien(ref);
+    Alien ^sp = GameData::GetAlien(ref);
 
     if( RefSystem == sp->HomeSystem )
         return;
@@ -369,7 +369,7 @@ void GridFilter::SetRefColony()
     if( String::IsNullOrEmpty(ref) || ref[0] == '[' )
         return;
 
-    Alien ^sp = GameData->Player;
+    Alien ^sp = GameData::Player;
 
     Colony ^colony = nullptr;
     bool bFound = false;
@@ -383,7 +383,7 @@ void GridFilter::SetRefColony()
     }
     if( !bFound )
     {
-        for each( colony in GameData->GetColonies() )
+        for each( colony in GameData::GetColonies() )
         {
             if( colony->Owner == sp )
                 continue;
@@ -452,7 +452,7 @@ Ship^ GridFilter::GetShipFromRefList(ComboBox ^combo)
 
     Match ^m = Regex("^[A-Z0-9s]+ (.*) \\(A\\d+\\)$").Match(ref);
     if( m->Success )
-        return GameData->GetShip( m->Groups[1]->ToString() );
+        return GameData::GetShip( m->Groups[1]->ToString() );
 
     throw gcnew FHUIDataIntegrityException("Can't find reference ship: " + ref);
 }

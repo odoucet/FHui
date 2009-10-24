@@ -8,7 +8,6 @@ namespace FHUI
 ref class Alien;
 ref class StarSystem;
 ref class Colony;
-ref class GameData;
 
 ////////////////////////////////////////////////////////////////
 
@@ -53,9 +52,9 @@ public interface class IGridFilter
     void    OnGridSetup();
     void    OnGridSelectionChanged();
 
-    property GameData^      GameData;
     property bool           EnableUpdates;
     property StarSystem^    RefSystem;
+    property StarSystem^    RefSystemPrev;
     property IGridSorter^   Sorter;
 
     property int            DefaultLSN;

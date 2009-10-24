@@ -18,7 +18,6 @@ public:
         , m_RefreshDummy(gcnew Object)
         , m_LastFiltMask(0)
     {
-        GameData = nullptr;
         DefaultLSN = 99;
         DefaultMishap = 100;
         SelectRefSystemFromRefShip = true;
@@ -29,17 +28,21 @@ public:
     virtual void OnGridSetup();
     virtual void OnGridSelectionChanged();
 
-    virtual property GameData^      GameData;
     virtual property StarSystem^    RefSystem
     {
         void set(StarSystem^ sys)
         {
-            m_RefSystem = sys;
-            if( Sorter )
-                Sorter->RefSystem = sys;
+            if( sys != m_RefSystem )
+            {
+                RefSystemPrev = m_RefSystem ? m_RefSystem : sys;
+                m_RefSystem = sys;
+                if( Sorter )
+                    Sorter->RefSystem = sys;
+            }
         }
         StarSystem^ get()           { return m_RefSystem; }
     }
+    virtual property StarSystem^    RefSystemPrev;
     virtual property IGridSorter^   Sorter;
     virtual property bool           EnableUpdates
     {

@@ -778,6 +778,7 @@ void Form1::SystemsInitControls()
     c.LSN      = ADD_COLUMN("Min LSN",      "Minimum LSN",          int,        Ascending,  Default);
     c.LSNAvail = ADD_COLUMN("Free LSN",     "Minimum free LSN",     int,        Ascending,  Default);
     c.Dist     = ADD_COLUMN("Distance",     "Distance to ref system and mishap chance [%]", String, Ascending, Distance);
+    c.DistSec  = ADD_COLUMN("Dist Prev",    "Distance to previous ref system and mishap chance [%]", String, Ascending, DistanceSec);
     c.Visited  = ADD_COLUMN("Vis",          "Last turn you visited this system", int, Descending, Default);
     c.Scan     = ADD_COLUMN("Scan",         "System scan source",   String,     Ascending,  Default);
     c.Wormhole = ADD_COLUMN("WH",           "Wormhole target",      String,     Ascending,  Default);
@@ -795,12 +796,14 @@ void Form1::SystemsInitControls()
     for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
         plugin->GridFormat(GridType::Systems, SystemsGrid);
 
-    SystemsGrid->Columns[c.Dist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
+    SystemsGrid->Columns[c.Dist]->DefaultCellStyle->Alignment   = DataGridViewContentAlignment::MiddleRight;
+    SystemsGrid->Columns[c.DistSec]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
 
     SystemsGrid->Columns[c.Colonies]->DefaultCellStyle->Font    = m_GridFontSmall;
     SystemsGrid->Columns[c.Jumps]->DefaultCellStyle->Font       = m_GridFontSmall;
     SystemsGrid->Columns[c.Scan]->DefaultCellStyle->Font        = m_GridFontSmall;
     SystemsGrid->Columns[c.Notes]->DefaultCellStyle->Font       = m_GridFontSmall;
+    SystemsGrid->Columns[c.DistSec]->Visible = false;
 
     // Filter setup
     GridFilter ^filter = gcnew GridFilter(SystemsGrid, m_bGridUpdateEnabled);
@@ -835,8 +838,6 @@ void Form1::SystemsUpdateControls()
 {
     // Inhibit grid update
     SystemsGrid->Filter->EnableUpdates  = false;
-
-    SystemsGrid->Filter->GameData       = m_GameData;
 
     SystemsRefXYZ->DataSource       = m_RefListSystemsXYZ;
     SystemsRefHome->DataSource      = m_RefListHomes;
@@ -879,6 +880,7 @@ void Form1::SystemsSetup()
                 cells[c.LSNAvail]->Value= system->MinLSNAvail;
         }
         cells[c.Dist]->Value        = GridPrintDistance(system, SystemsGrid->Filter->RefSystem, gv, age);
+        cells[c.DistSec]->Value     = GridPrintDistance(system, SystemsGrid->Filter->RefSystemPrev, gv, age);
         cells[c.Scan]->Value        = system->PrintScanStatus();
         if( system->HasWormhole )
             cells[c.Wormhole]->Value= system->PrintWormholeTarget();
@@ -1084,6 +1086,7 @@ void Form1::PlanetsInitControls()
     c.LSN       = ADD_COLUMN("LSN",         "LSN",                  int,        Ascending,  Default);
     c.AlienLSN  = ADD_COLUMN("AlienLSN",    "Alien LSN",            int,        Ascending,  Default);
     c.Dist      = ADD_COLUMN("Distance",    "Distance to ref system and mishap chance [%]", String, Ascending, Distance);
+    c.DistSec   = ADD_COLUMN("Dist Prev",   "Distance to previous ref system and mishap chance [%]", String, Ascending, DistanceSec);
     c.Visited   = ADD_COLUMN("Vis",         "Last turn you visited planet's system", int, Descending, Default);
     c.Scan      = ADD_COLUMN("Scan",        "Planet scan source",   String,     Ascending,  Default);
     c.Colonies  = ADD_COLUMN("Colonies",    "Summary of colonies and named planets", String, Ascending,  Default);
@@ -1099,12 +1102,14 @@ void Form1::PlanetsInitControls()
     for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
         plugin->GridFormat(GridType::Planets, PlanetsGrid);
 
-    PlanetsGrid->Columns[c.Dist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
+    PlanetsGrid->Columns[c.Dist]->DefaultCellStyle->Alignment   = DataGridViewContentAlignment::MiddleRight;
+    PlanetsGrid->Columns[c.DistSec]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
     PlanetsGrid->Columns[c.Colonies]->DefaultCellStyle->Font = m_GridFontSmall;
     PlanetsGrid->Columns[c.Notes]->DefaultCellStyle->Font    = m_GridFontSmall;
     PlanetsGrid->Columns[c.Scan]->DefaultCellStyle->Font     = m_GridFontSmall;
     PlanetsGrid->Columns[c.Grav]->Visible = false;
     PlanetsGrid->Columns[c.AlienLSN]->Visible = false;
+    PlanetsGrid->Columns[c.DistSec]->Visible = false;
 
     // Filter setup
     GridFilter ^filter = gcnew GridFilter(PlanetsGrid, m_bGridUpdateEnabled);
@@ -1140,7 +1145,6 @@ void Form1::PlanetsUpdateControls()
     // Inhibit grid update
     PlanetsGrid->Filter->EnableUpdates  = false;
 
-    PlanetsGrid->Filter->GameData   = m_GameData;
     m_PlanetsAlienLSN               = nullptr;
 
     PlanetsRefXYZ->DataSource       = m_RefListSystemsXYZ;
@@ -1181,6 +1185,7 @@ void Form1::PlanetsSetup()
             cells[c.Grav]->Value    = (double)planet->Grav / 100.0;
             cells[c.LSN]->Value     = planet->LSN;
             cells[c.Dist]->Value    = GridPrintDistance(system, PlanetsGrid->Filter->RefSystem, gv, age);
+            cells[c.DistSec]->Value = GridPrintDistance(system, PlanetsGrid->Filter->RefSystemPrev, gv, age);
             if( system->LastVisited != -1 )
                 cells[c.Visited]->Value = system->LastVisited;
             cells[c.Scan]->Value    = system->PrintScanStatus();
@@ -1474,6 +1479,7 @@ void Form1::ColoniesInitControls()
     c.Balance   = ADD_COLUMN("IU/AU",       "IU/AU balance",                String, Descending, Default);
     c.Pop       = ADD_COLUMN("Pop",         "Available population",         int,    Descending, Default);
     c.Dist      = ADD_COLUMN("Distance",    "Distance to ref system and mishap chance [%]", String, Ascending, Distance);
+    c.DistSec   = ADD_COLUMN("Dist Prev",   "Distance to previous ref system and mishap chance [%]", String, Ascending, DistanceSec);
     c.Inventory = ADD_COLUMN("Inventory",   "Planetary inventory",          String, Ascending, Default);
     c.ProdPerc  = ADD_COLUMN("Eff",         "Production effectiveness",     int,    Descending, Default);
     c.Seen      = ADD_COLUMN("Seen",        "Last seen turn",               int,    Descending, Default);
@@ -1495,6 +1501,7 @@ void Form1::ColoniesInitControls()
     ColoniesGrid->Columns[c.Notes]->DefaultCellStyle->Font     = m_GridFontSmall;
     ColoniesGrid->Columns[c.MD]->Visible = false;
     ColoniesGrid->Columns[c.Grav]->Visible = false;
+    ColoniesGrid->Columns[c.DistSec]->Visible = false;
 
     // Filter setup
     GridFilter ^filter = gcnew GridFilter(ColoniesGrid, m_bGridUpdateEnabled);
@@ -1528,8 +1535,6 @@ void Form1::ColoniesUpdateControls()
 {
     // Inhibit grid update
     ColoniesGrid->Filter->EnableUpdates = false;
-
-    ColoniesGrid->Filter->GameData      = m_GameData;
 
     ColoniesRefXYZ->DataSource      = m_RefListSystemsXYZ;
     ColoniesRefHome->DataSource     = m_RefListHomes;
@@ -1569,6 +1574,7 @@ void Form1::ColoniesSetup()
         if( colony->EconomicBase != -1 )
             cells[c.Size]->Value    = (double)colony->EconomicBase / 10.0;
         cells[c.Dist]->Value        = GridPrintDistance(colony->System, ColoniesGrid->Filter->RefSystem, gv, age);
+        cells[c.DistSec]->Value     = GridPrintDistance(colony->System, ColoniesGrid->Filter->RefSystemPrev, gv, age);
         cells[c.Inventory]->Value   = colony->PrintInventory();
         if( colony->Planet )
         {
@@ -2275,6 +2281,7 @@ void Form1::ShipsInitControls()
     c.Age       = ADD_COLUMN("Age",         "Age",                      int,    Ascending,  Default);
     c.Cap       = ADD_COLUMN("Cap",         "Capacity",                 int,    Ascending,  Default);
     c.Dist      = ADD_COLUMN("Distance",    "Distance to ref system and mishap chance [%]", String, Ascending, Distance);
+    c.DistSec   = ADD_COLUMN("Dist Prev",   "Distance to previous ref system and mishap chance [%]", String, Ascending, DistanceSec);
     c.Cargo     = ADD_COLUMN("Cargo",       "Cargo on board",           String, Ascending,  Default);
     c.Maint     = ADD_COLUMN("Maint",       "Maintenance cost",         double, Ascending,  Default);
     c.UpgCost   = ADD_COLUMN("Upg",         "Upgrade cost to age 0",    int,    Ascending,  Default);
@@ -2291,10 +2298,12 @@ void Form1::ShipsInitControls()
     for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
         plugin->GridFormat(GridType::Ships, ShipsGrid);
 
-    ShipsGrid->Columns[c.Dist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
+    ShipsGrid->Columns[c.Dist]->DefaultCellStyle->Alignment     = DataGridViewContentAlignment::MiddleRight;
+    ShipsGrid->Columns[c.DistSec]->DefaultCellStyle->Alignment  = DataGridViewContentAlignment::MiddleRight;
     ShipsGrid->Columns[c.Cargo]->DefaultCellStyle->Font         = m_GridFontSmall;
     ShipsGrid->Columns[c.JumpTarget]->DefaultCellStyle->Font    = m_GridFontSmall;
     ShipsGrid->Columns[c.Commands]->DefaultCellStyle->Font      = m_GridFontSmall;
+    ShipsGrid->Columns[c.DistSec]->Visible = false;
 
     GridFilter ^filter = gcnew GridFilter(ShipsGrid, m_bGridUpdateEnabled);
     filter->GridSetup += gcnew GridSetupHandler(this, &Form1::ShipsSetup);
@@ -2331,8 +2340,6 @@ void Form1::ShipsUpdateControls()
 {
     // Inhibit grid update
     ShipsGrid->Filter->EnableUpdates = false;
-
-    ShipsGrid->Filter->GameData      = m_GameData;
 
     ShipsRefXYZ->DataSource      = m_RefListSystemsXYZ;
     ShipsRefHome->DataSource     = m_RefListHomes;
@@ -2374,6 +2381,7 @@ void Form1::ShipsSetup()
             cells[c.Age]->Value     = ship->Age;
         cells[c.Cap]->Value         = ship->Capacity;
         cells[c.Dist]->Value        = GridPrintDistance(ship->System, ShipsGrid->Filter->RefSystem, gv, ship->Age);
+        cells[c.DistSec]->Value     = GridPrintDistance(ship->System, ShipsGrid->Filter->RefSystemPrev, gv, ship->Age);
         if( sp == ship->Owner )
         {
             cells[c.Cargo]->Value   = ship->PrintCargo();
@@ -2712,12 +2720,12 @@ void Form1::AliensInitControls()
     for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
         plugin->GridFormat(GridType::Aliens, AliensGrid);
 
-    AliensGrid->Columns[c.Dist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
-    AliensGrid->Columns[c.EMail]->DefaultCellStyle->Font    = m_GridFontSmall;
-    AliensGrid->Columns[c.Message]->DefaultCellStyle->Font  = m_GridFontSmall;
-    AliensGrid->Columns[c.Teach]->DefaultCellStyle->Font    = m_GridFontSmall;
-    AliensGrid->Columns[c.TechLev]->DefaultCellStyle->Font  = m_GridFontSmall;
-    AliensGrid->Columns[c.Atmosphere]->DefaultCellStyle->Font= m_GridFontSmall;
+    AliensGrid->Columns[c.Dist]->DefaultCellStyle->Alignment    = DataGridViewContentAlignment::MiddleRight;
+    AliensGrid->Columns[c.EMail]->DefaultCellStyle->Font        = m_GridFontSmall;
+    AliensGrid->Columns[c.Message]->DefaultCellStyle->Font      = m_GridFontSmall;
+    AliensGrid->Columns[c.Teach]->DefaultCellStyle->Font        = m_GridFontSmall;
+    AliensGrid->Columns[c.TechLev]->DefaultCellStyle->Font      = m_GridFontSmall;
+    AliensGrid->Columns[c.Atmosphere]->DefaultCellStyle->Font   = m_GridFontSmall;
 
     GridFilter ^filter = gcnew GridFilter(AliensGrid, m_bGridUpdateEnabled);
     filter->GridSetup += gcnew GridSetupHandler(this, &Form1::AliensSetup);

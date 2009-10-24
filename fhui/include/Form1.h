@@ -169,6 +169,7 @@ namespace FHUI {
             int LSN;
             int LSNAvail;
             int Dist;
+            int DistSec;
             int Visited;
             int Scan;
             int Wormhole;
@@ -210,6 +211,7 @@ namespace FHUI {
             int LSN;
             int AlienLSN;
             int Dist;
+            int DistSec;
             int Visited;
             int Scan;
             int Colonies;
@@ -268,6 +270,7 @@ namespace FHUI {
             int Balance;
             int Pop;
             int Dist;
+            int DistSec;
             int Inventory;
             int ProdOrder;
             int Budget;
@@ -306,6 +309,7 @@ namespace FHUI {
             int Age;
             int Cap;
             int Dist;
+            int DistSec;
             int Cargo;
             int Maint;
             int UpgCost;

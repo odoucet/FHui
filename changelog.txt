@@ -32,6 +32,10 @@ FHUI build ??
   selected systems to scans.txt file in game folder. This is useful for
   sharing diplomatic data. This option works only in ROW selection mode.
   Your LSN is replaced with 99 in all saved scans.
++ "Dist.Prev" column added on Systems, Planets, Colonies and Ships tabs.
+  This is distance to previous reference system that was active before
+  switching to another one. This column is by default not visible.
+  To show or hide it latter right click the grid header with column names.
 
 FHUI build 202
 * Fixed bug: hang when production orders/cancel all option selected.

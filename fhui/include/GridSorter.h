@@ -42,6 +42,7 @@ public:
         Type,
         Location,
         Distance,
+        DistanceSec,    // Secondary distance
         Relation,
     };
 
@@ -71,12 +72,13 @@ protected:
     virtual int     CompareOwner(IGridDataSrc ^o1, IGridDataSrc ^o2);
     virtual int     CompareType(IGridDataSrc ^o1, IGridDataSrc ^o2);    // must be overriden for proper usage
     virtual int     CompareLocation(IGridDataSrc ^o1, IGridDataSrc ^o2);
-    virtual int     CompareDistance(IGridDataSrc ^o1, IGridDataSrc ^o2);
+    virtual int     CompareDistance(StarSystem ^refSystem, IGridDataSrc ^o1, IGridDataSrc ^o2);
     virtual int     CompareRelation(IGridDataSrc ^o1, IGridDataSrc ^o2);
 
 protected:
     DataGridView^   m_Grid;
     StarSystem^     m_RefSystem;
+    StarSystem^     m_RefSystemPrev;
 
     int             m_SortColumn;
     SortOrder       m_SortOrder;
