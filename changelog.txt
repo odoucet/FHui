@@ -7,7 +7,7 @@ Minor changes are listed only if originally requested by player
 
 FHUI build ??
 * Fixed minor bug in comments for production orders - budget calculation.
-+ New commands supported: Develop.
++ New commands supported: Develop, Visited.
 + Production/Cancel All menu option now requires confirmation before
   deleting all orders.
 + Automation menu: new option to delete all production Auto commands
@@ -36,6 +36,10 @@ FHUI build ??
   This is distance to previous reference system that was active before
   switching to another one. This column is by default not visible.
   To show or hide it latter right click the grid header with column names.
++ New context menu option on Systems tab: "Mark as Visited". This is available
+  for systems that you did not yet visit yourself, but for example received
+  scan via diplomacy and don't want your scouts to go there.
+  This generates 'Visited' order in orders template.
 
 FHUI build 202
 * Fixed bug: hang when production orders/cancel all option selected.

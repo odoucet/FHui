@@ -20,6 +20,7 @@ public:
         Z = z;
         Type = type;
         TurnScanned = -1;
+        IsMarkedVisited = false;
         LastVisited = -1;
         MinLSN = 99999;
         MinLSNAvail = 99999;
@@ -43,6 +44,7 @@ public:
         Z = src->Z;
         Type = src->Type;
         TurnScanned = src->TurnScanned;
+        IsMarkedVisited = src->IsMarkedVisited;
         LastVisited = src->LastVisited;
         MinLSN = src->MinLSN;
         MinLSNAvail = src->MinLSNAvail;
@@ -87,7 +89,7 @@ public:
 
     int             GetId();
 
-    bool            IsExplored() { return TurnScanned != -1; }
+    bool            IsExplored() { return TurnScanned != -1 || IsMarkedVisited; }
 
     bool            IsWormholeTarget(StarSystem ^system);
     StarSystem^     GetWormholeTarget();
@@ -111,22 +113,23 @@ public:
     String^         GenerateColoniesInfo();
     String^         GenerateShipsInfo();
 
-    property int            X;
-    property int            Y;
-    property int            Z;
-    property String^        Type;
-    property String^        Comment;
-    property String^        CommentHome;    // comment about destroyed home planet
-    property int            TurnScanned;
-    property int            LastVisited;
-    property int            MinLSN;
-    property int            MinLSNAvail;
-    property bool           HasWormhole;
-    property int            WormholeTargetId;
+    int             X;
+    int             Y;
+    int             Z;
+    String^         Type;
+    String^         Comment;
+    String^         CommentHome;    // comment about destroyed home planet
+    int             TurnScanned;
+    bool            IsMarkedVisited;
+    int             LastVisited;
+    int             MinLSN;
+    int             MinLSNAvail;
+    bool            HasWormhole;
+    int             WormholeTargetId;
 
-    property Alien^         HomeSpecies;
-    property Alien^         Master;
-    property bool           IsVoid;
+    Alien^          HomeSpecies;
+    Alien^          Master;
+    bool            IsVoid;
 
     property IList<Ship^>^   Ships         { IList<Ship^>^ get()   { return m_Ships->AsReadOnly(); } }
     property IList<Ship^>^   ShipsOwned    { IList<Ship^>^ get()   { return m_ShipsOwned->AsReadOnly(); } }
@@ -154,6 +157,7 @@ protected:
 
     initonly static String^ s_ScanNone = "Not scanned";
     initonly static String^ s_ScanDipl = "Received";
+    initonly static String^ s_ScanDiplVisited = "Recv/Vis";
     initonly static String^ s_ScanSelf = "Scanned";
 };
 

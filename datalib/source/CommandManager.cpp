@@ -27,6 +27,7 @@ public:
 
 CommandManager::CommandManager(GameData^ gd, String^ path)
     : m_RM(gcnew RegexMatcher)
+    , m_bSaveEnabled(true)
 {
     m_GameData = gd;
     m_Path = path;
@@ -102,13 +103,9 @@ void CommandManager::AddCommand(ICommand ^cmd)
 
     m_CommandData[m_CurrentTurn]->Commands->Add(cmd);
     SortCommands();
-    SaveCommands();
-}
 
-void CommandManager::AddCommandDontSave(ICommand ^cmd)
-{
-    m_CommandData[m_CurrentTurn]->Commands->Add(cmd);
-    SortCommands();
+    if( m_bSaveEnabled )
+        SaveCommands();
 }
 
 void CommandManager::DelCommand(ICommand ^cmd)
@@ -245,6 +242,7 @@ ICommand^ CommandManager::CmdSetOrigin(ICommand ^cmd)
 
 void CommandManager::LoadCommands()
 {
+    m_bSaveEnabled = false;
     AddPluginCommands();
 
     // Open file
@@ -270,6 +268,7 @@ void CommandManager::LoadCommands()
     {
         if( sr )
             sr->Close();
+        m_bSaveEnabled = true;
     }
 }
 
@@ -318,7 +317,7 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
             {
                 if( messageTarget )
                 {
-                    AddCommandDontSave( CmdSetOrigin( gcnew CmdMessage(messageTarget, messageText) ) );
+                    AddCommand( CmdSetOrigin( gcnew CmdMessage(messageTarget, messageText) ) );
                     messageTarget = nullptr;
                     messageText = "";
                 }
@@ -412,7 +411,7 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
                 false);
             Planet ^planet = system->Planets[ m_RM->GetResultInt(3) ];
             String ^name = m_RM->Results[4];
-            AddCommandDontSave( CmdSetOrigin(gcnew CmdPlanetName(system, planet->Number, name)) );
+            AddCommand( CmdSetOrigin(gcnew CmdPlanetName(system, planet->Number, name)) );
             GameData::AddPlanetName(system, planet->Number, name);
             planet->AddName(name);
         }
@@ -423,7 +422,7 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
             {
                 if( pn->Name == name )
                 {
-                    AddCommandDontSave( CmdSetOrigin(gcnew CmdDisband(name)) );
+                    AddCommand( CmdSetOrigin(gcnew CmdDisband(name)) );
                     pn->System->Planets[ pn->PlanetNum ]->DelName();
                     break;
                 }
@@ -437,7 +436,7 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
                 throw gcnew FHUIParsingException("Inconsistent alien relation command (neutral)!");
 
             alien->Relation = SP_NEUTRAL;
-            AddCommandDontSave( CmdSetOrigin(gcnew CmdAlienRelation(alien, SP_NEUTRAL)) );
+            AddCommand( CmdSetOrigin(gcnew CmdAlienRelation(alien, SP_NEUTRAL)) );
         }
         else if( m_RM->Match(line, m_RM->ExpCmdSPAlly) )
         {
@@ -447,7 +446,7 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
                 throw gcnew FHUIParsingException("Inconsistent alien relation command (ally)!");
 
             alien->Relation = SP_ALLY;
-            AddCommandDontSave( CmdSetOrigin(gcnew CmdAlienRelation(alien, SP_ALLY)) );
+            AddCommand( CmdSetOrigin(gcnew CmdAlienRelation(alien, SP_ALLY)) );
         }
         else if( m_RM->Match(line, m_RM->ExpCmdSPEnemy) )
         {
@@ -457,7 +456,7 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
                 throw gcnew FHUIParsingException("Inconsistent alien relation command (enemy)!");
 
             alien->Relation = SP_ENEMY;
-            AddCommandDontSave( CmdSetOrigin(gcnew CmdAlienRelation(alien, SP_ENEMY)) );
+            AddCommand( CmdSetOrigin(gcnew CmdAlienRelation(alien, SP_ENEMY)) );
         }
         else if( m_RM->Match(line, m_RM->ExpCmdSPTeach) )
         {
@@ -470,12 +469,21 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
             if( level != GameData::Player->TechLevels[tech] )
                 throw gcnew FHUIParsingException("Inconsistent tech level for Teach command!");
 
-            AddCommandDontSave( CmdSetOrigin(gcnew CmdTeach(alien, tech, level)) );
+            AddCommand( CmdSetOrigin(gcnew CmdTeach(alien, tech, level)) );
             alien->TeachOrders |= 1 << tech;
         }
         else if( m_RM->Match(line, m_RM->ExpCmdSPMsg) )
         {
             messageTarget = GameData::GetAlien(m_RM->Results[0]);
+        }
+        else if( m_RM->Match(line, m_RM->ExpCmdVisited) )
+        {
+            AddCommand( CmdSetOrigin(gcnew CmdVisited(
+                GameData::GetStarSystem(
+                m_RM->GetResultInt(0),
+                m_RM->GetResultInt(1),
+                m_RM->GetResultInt(2),
+                false ) ) ) );
         }
         else
             throw gcnew FHUIParsingException("Unrecognized line in commands template: " + line);
@@ -679,6 +687,9 @@ bool CommandManager::LoadCommandsShip(String ^line, Ship ^ship)
 
 void CommandManager::RemoveGeneratedCommands(CommandOrigin origin, bool productionOnly, bool preserveScouting)
 {
+    if( GameData::Player == nullptr )
+        return; // unlikely case commands are saved for turn 0?
+
     for each( Colony ^colony in GameData::Player->Colonies )
         RemoveGeneratedCommandsFromList( colony->Commands, origin, productionOnly, preserveScouting );
 
@@ -731,7 +742,10 @@ void CommandManager::RemoveGeneratedCommandsFromList(List<ICommand^> ^orders, Co
 
 void CommandManager::AddPluginCommands()
 {
-    //TODO...
+    for each( IOrdersPlugin ^plugin in PluginManager::OrderPlugins )
+    {
+        plugin->GenerateCommands( this );
+    }
 }
 
 ////////////////////////////////////////////////////////////////
@@ -985,7 +999,14 @@ void CommandManager::GeneratePreDepartureInfo(StarSystem^ system)
 void CommandManager::GenerateJumps()
 {
     m_OrderList->Add("START JUMPS");
-    
+
+    // Print UI commands
+    for each( ICommand ^cmd in GetCommands() )
+    {
+        if( cmd->GetPhase() == CommandPhase::Jump )
+            m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
+    }
+
     List<Ship^>^ jumpList = GameData::Player->Ships;
     jumpList->Sort( gcnew Ship::TypeTonnageLocationComparer );
 

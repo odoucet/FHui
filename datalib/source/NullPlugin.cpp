@@ -15,10 +15,7 @@ namespace FHUI
 public ref class NullPluginBase : public IPluginBase
 {
 public:
-    virtual void        SetGameData(GameData^ gd) { m_GameData = gd; }
-
-protected:
-    GameData^   m_GameData;
+    virtual void        SetTurn(int turn) {}
 };
 
 // ---------------------------------------------------------

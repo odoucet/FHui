@@ -37,6 +37,7 @@ RegexMatcher::RegexMatcher()
     ExpCmdShipRec   = gcnew Regex("^Recycle\\s+[A-Z0-9]+\\s+([^,;]+)$");
     ExpCmdShipUnload= gcnew Regex("^Unload\\s+[A-Z0-9]+\\s+([^,;]+)$");
     ExpCmdShipScan  = gcnew Regex("^Scan\\s+[A-Z0-9]+\\s+([^,;]+)$");
+    ExpCmdVisited   = gcnew Regex("^Visited\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)$");
 }
 
 int RegexMatcher::GetResultInt(int arg)

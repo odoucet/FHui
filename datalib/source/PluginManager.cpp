@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "PluginManager.h"
 #include "IFHUIPlugin.h"
+#include "GameData.h"
 
 using namespace System::IO;
 using namespace System::Reflection;
@@ -8,9 +9,8 @@ using namespace System::Reflection;
 namespace FHUI
 {
 
-PluginManager::PluginManager(GameData^ gd, String^ path)
-    : m_GameData(gd)
-    , m_Path(path)
+PluginManager::PluginManager(String^ path)
+    : m_Path(path)
 {
     if ( m_AllPlugins == nullptr )    m_AllPlugins = gcnew List<IPluginBase^>;
     if ( m_GridPlugins == nullptr )   m_GridPlugins = gcnew List<IGridPlugin^>;
@@ -68,7 +68,7 @@ void PluginManager::UpdatePlugins()
 {
     for each( IGridPlugin ^plugin in m_GridPlugins )
     {
-        plugin->SetGameData(m_GameData);
+        plugin->SetTurn(GameData::CurrentTurn);
     }
 }
 

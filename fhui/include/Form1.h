@@ -153,6 +153,7 @@ namespace FHUI {
         void        SystemsSetup();
         void        SystemsSelectPlanets( int rowIndex );
         void        SystemsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
+        void        SystemsMenuMarkVisited(Object^, EventArgs^);
         void        SystemsMenuShowPlanets(Object^, EventArgs^);
         void        SystemsMenuShowColonies(Object^, EventArgs^);
         void        SystemsMenuSelectRef(Object^, EventArgs^);

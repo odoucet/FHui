@@ -30,6 +30,7 @@ public enum class CommandType
 {
     Disband,
     Name,
+    Visited,
     AlienRelation,  // Enemy/Neutral/Ally
     Install,
     Teach,
@@ -340,6 +341,24 @@ public:
     Alien^          m_Alien;
     TechType        m_Tech;
     int             m_Level;
+};
+
+////////////////////////////////////////////////////////////
+
+// Visited
+public ref class CmdVisited
+    : public CmdBase<CommandPhase::Jump, CommandType::Visited>
+{
+public:
+    CmdVisited(StarSystem ^system)
+        : m_System(system)
+    {}
+
+    virtual StarSystem^ GetRefSystem() override { return m_System; }
+
+    virtual String^ Print() override    { return "Visited " + m_System->PrintLocation(); }
+
+    StarSystem^     m_System;
 };
 
 ////////////////////////////////////////////////////////////

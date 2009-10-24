@@ -6,7 +6,6 @@ using namespace System::Collections::Generic;
 namespace FHUI
 {
 
-ref class GameData;
 interface class IPluginBase;
 interface class IGridPlugin;
 interface class IOrdersPlugin;
@@ -14,7 +13,7 @@ interface class IOrdersPlugin;
 public ref class PluginManager
 {
 public:
-    PluginManager(GameData^, String^);
+    PluginManager(String^);
 
     void LoadPlugins();
     void UpdatePlugins();
@@ -34,7 +33,6 @@ public:
 
 private:
 
-    GameData^                      m_GameData;
     String^                        m_Path;
 
     static List<IPluginBase^>^     m_AllPlugins;

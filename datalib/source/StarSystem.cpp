@@ -278,9 +278,16 @@ String^ StarSystem::PrintWormholeTarget()
 
 String^ StarSystem::PrintScanStatus()
 {
-    if( TurnScanned == -1 )     return s_ScanNone;
-    else if( TurnScanned == 0 ) return s_ScanDipl;
-    else                        return s_ScanSelf;
+    if( TurnScanned == -1 )
+        return s_ScanNone;
+    else if( TurnScanned == 0 )
+    {
+        if( IsMarkedVisited )
+            return s_ScanDiplVisited;
+        return s_ScanDipl;
+    }
+    else
+        return s_ScanSelf;
 }
 
 String^ StarSystem::PrintColoniesAll()

@@ -51,7 +51,6 @@ public:
     String^     PrintCommandWithInfo(ICommand ^cmd, int indent);
 
     void        AddCommand(ICommand ^cmd);
-    void        AddCommandDontSave(ICommand ^cmd);
     void        DelCommand(ICommand ^cmd);
     List<ICommand^>^ GetCommands() { return m_CommandData[m_CurrentTurn]->Commands; }
 
@@ -108,6 +107,7 @@ private:
     RegexMatcher^           m_RM;
 
     CommandOrigin           m_CmdOrigin;
+    bool                    m_bSaveEnabled;
 
     int                     m_CurrentTurn;
     SortedList<int, TurnCommands^>^ m_CommandData;

@@ -261,6 +261,14 @@ bool Report::Parse(String ^s)
                     m_RM->GetResultInt(2),
                     m_RM->GetResultInt(3) ) );
         }
+        else if( m_RM->Match(s, "^The star system at\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+was marked as visited\\.$") )
+        {
+            GameData::GetStarSystem(
+                m_RM->GetResultInt(0),
+                m_RM->GetResultInt(1),
+                m_RM->GetResultInt(2),
+                false)->IsMarkedVisited = true;
+        }
         else if( Regex("^Production orders:").Match(s)->Success )
             m_Phase = PHASE_ORDERS_PROD;
         break;

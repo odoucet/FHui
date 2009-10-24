@@ -18,6 +18,7 @@ interface class IGridFilter;
 interface class IGridSorter;
 interface class ICommand;
 ref class BudgetTracker;
+ref class CommandManager;
 
 // ---------------------------------------------------------
 //
@@ -26,7 +27,7 @@ ref class BudgetTracker;
 public interface class IPluginBase
 {
 public:
-    void        SetGameData(GameData^);
+    void        SetTurn(int turn);
 };
 
 // ---------------------------------------------------------
@@ -60,6 +61,13 @@ public:
 public interface class IOrdersPlugin : public IPluginBase
 {
 public:
+    // Add real commands (ICommand derived objects).
+    // This is only called once at the begin of each turn
+    // to generate orders.
+    void        GenerateCommands(CommandManager^);
+
+    // These functions are only good for adding comments to orders template.
+    // All functions below are called each time orders template is refresed.
     void        GenerateCombat(List<String^>^, StarSystem^);
     void        GeneratePreDeparture(List<String^>^, StarSystem^);
     void        GenerateJumps(List<String^>^, Ship^);

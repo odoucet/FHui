@@ -78,7 +78,7 @@ void Form1::InitControls()
 
 void Form1::InitPlugins()
 {
-    m_PluginMgr = gcnew PluginManager(m_GameData, Application::StartupPath);
+    m_PluginMgr = gcnew PluginManager(Application::StartupPath);
 
     if( EnablePlugins )
     {
@@ -1004,13 +1004,48 @@ void Form1::SystemsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex
         menu->Items->Add( jumpMenu );
     }
 
+    if( system->TurnScanned <= 0 && !system->IsMarkedVisited )
+    {
+        ToolStripMenuItem ^menuItem = gcnew ToolStripMenuItem(
+            "Mark as Visited",
+            nullptr,
+            gcnew EventHandler(this, &Form1::SystemsMenuMarkVisited) );
+        for each( ICommand ^cmd in m_CommandMgr->GetCommands() )
+        {
+            if( cmd->GetCmdType() == CommandType::Visited &&
+                cmd->GetRefSystem() == system )
+            {
+                menuItem->Checked = true;
+                break;
+            }
+        }
+
+        menu->Items->Add( menuItem );
+    }
+
     // Export selected systems' scans
+    menu->Items->Add( gcnew ToolStripSeparator );
     menu->Items->Add(
         "Export Scans...",
         nullptr,
         gcnew EventHandler(this, &Form1::SystemsMenuExportScans));
     if( SystemsGrid->SelectionMode == System::Windows::Forms::DataGridViewSelectionMode::CellSelect )
         menu->Items[ menu->Items->Count - 1 ]->Enabled = false;
+}
+
+void Form1::SystemsMenuMarkVisited(Object^, EventArgs^)
+{
+    for each( ICommand ^cmd in m_CommandMgr->GetCommands() )
+    {
+        if( cmd->GetCmdType() == CommandType::Visited &&
+            cmd->GetRefSystem() == m_SystemsMenuRef )
+        {
+            m_CommandMgr->DelCommand(cmd);
+            return;
+        }
+    }
+
+    m_CommandMgr->AddCommand( gcnew CmdVisited(m_SystemsMenuRef) );
 }
 
 void Form1::SystemsMenuShowPlanets(Object^, EventArgs^)

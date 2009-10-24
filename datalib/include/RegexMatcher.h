@@ -51,6 +51,7 @@ public:
     initonly Regex^     ExpCmdBuildIUAU;
     initonly Regex^     ExpCmdBuildShipTR;
     initonly Regex^     ExpCmdBuildShip;
+    initonly Regex^     ExpCmdVisited;
 
     initonly Regex^     ExpCmdShipJump_Obsolete;
     initonly Regex^     ExpCmdShipUpg_Obsolete;
