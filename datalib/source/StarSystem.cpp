@@ -233,6 +233,7 @@ String^ StarSystem::GenerateScan(bool hideLSN)
         }
 
         String ^plStr = String::Format(
+            Globalization::CultureInfo::InvariantCulture,
             "{0,3}{1,5}{2,6:F2}{3,3}{4,3}{5,5:F2}{6,3}  ",
             planet->Number,
             planet->Diameter,
