@@ -14,7 +14,7 @@ ReportParser::ReportParser(GameData^ gd, CommandManager^ cm, String^ galaxyPath,
     , m_ReportPath(reportPath)
     , m_RM(gcnew RegexMatcher)
     , m_Reports(gcnew SortedList<int, String^>)
-    , m_RepFiles(gcnew SortedList<int, String^>)
+    , m_RepFiles(gcnew SortedList<String^, int>)
 {
 }
 
@@ -58,32 +58,45 @@ void ReportParser::ScanReports()
 {
     DirectoryInfo ^dir = gcnew DirectoryInfo(m_ReportPath);
 
+    int minTurn = 100;
+    int maxTurn = 0;
+
     for each( FileInfo ^f in dir->GetFiles("*"))
     {   // First check each file if it is a report and find out for which turn.
         // Then reports will be loaded in chronological order.
         int turn = VerifyReport(f->FullName);
         if( turn != -1 )
         {
-            m_RepFiles[turn] = f->FullName;
+            m_RepFiles->Add(f->FullName, turn);
+            if (minTurn > turn)
+            {
+                minTurn = turn;
+            }
+            if (maxTurn < turn)
+            {
+                maxTurn = turn;
+            }
         }
     }
 
-    for each( int currTurn in m_RepFiles->Keys )
+    for (int currTurn = minTurn; currTurn <= maxTurn; currTurn ++)
     {
         m_GameData->SelectTurn(currTurn);
         m_CommandMgr->SelectTurn(currTurn);
 
-        if ( currTurn == m_RepFiles->Keys[0] )
+        if ( currTurn == minTurn )
         {   // First turn on the list, parse galaxy data
             LoadGalaxy();
         }
 
-        LoadReport( m_RepFiles[currTurn] );
+        LoadReports( currTurn );
         m_GameData->Update();
         try
         {
             if( currTurn > 0 )
+            {
                 m_CommandMgr->LoadCommands();
+            }
         }
         catch( FHUIParsingException ^ex )
         {
@@ -130,41 +143,60 @@ int ReportParser::VerifyReport(String ^fileName)
     return -1;
 }
 
-void ReportParser::LoadReport(String ^fileName)
+void ReportParser::LoadReports( int turn )
 {
     Report ^report = gcnew Report(m_GameData, m_CommandMgr, m_RM);
+    String ^content, ^line, ^fileName;
 
-    StreamReader ^sr = File::OpenText(fileName);
-    String ^line;
-
-    try
+    for( int i = 0; i < m_RepFiles->Count; i++ )
     {
-        while( (line = sr->ReadLine()) != nullptr ) 
+        if ( m_RepFiles->Values[i] != turn )
         {
-            if( false == report->Parse(line) )
-                break;
+            continue;
         }
 
-        if( report->GetTurn() > 0 &&
-            !report->IsValid() )
-            throw gcnew FHUIParsingException("File is not a valid FH report.");
+        StreamReader ^sr;
 
-        m_Reports[report->GetTurn()] = report->GetContent();
+        try
+        {
+            fileName = m_RepFiles->Keys[i];
+            sr = File::OpenText( fileName );
+
+            while( (line = sr->ReadLine()) != nullptr ) 
+            {
+                if( false == report->Parse(line) )
+                    break;
+            }
+
+            if( report->IsValid() )
+            {
+                content += report->GetContent() + "\n";
+            }
+            else
+            {
+                if( report->GetTurn() > 0 )
+                {
+                    throw gcnew FHUIParsingException("File is not a valid FH report.");
+                }
+            }
+        }
+        catch( Exception ^ex )
+        {
+            throw gcnew FHUIParsingException(
+                String::Format("Error occured while parsing report: {0}, line {1}:\r\n{2}\r\nError description:\r\n  {3}",
+                    fileName,
+                    report->GetLineCount(),
+                    line,
+                    ex->Message),
+                ex );
+        }
+        finally
+        {
+            sr->Close();
+        }
     }
-    catch( Exception ^ex )
-    {
-        throw gcnew FHUIParsingException(
-            String::Format("Error occured while parsing report: {0}, line {1}:\r\n{2}\r\nError description:\r\n  {3}",
-                fileName,
-                report->GetLineCount(),
-                line,
-                ex->Message),
-            ex );
-    }
-    finally
-    {
-        sr->Close();
-    }
+
+    m_Reports[turn] = content;
 }
 
 } // end namespace FHUI

@@ -19,18 +19,19 @@ public:
     }
 
     void        ScanReports();
-    int         VerifyReport(String ^fileName);
-    void        LoadGalaxy();
-    void        LoadReport(String ^fileName);
 
 private:
+    void        LoadGalaxy();
+    void        LoadReports( int turn );
+    int         VerifyReport( String ^fileName );
+
     String^                         m_GalaxyPath;
     String^                         m_ReportPath;
     RegexMatcher^                   m_RM;
     GameData^                       m_GameData;
     CommandManager^                 m_CommandMgr;
     SortedList<int, String^>^       m_Reports;
-    SortedList<int, String^>^       m_RepFiles;
+    SortedList<String^, int>^       m_RepFiles;
 
 };
 

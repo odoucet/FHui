@@ -1075,14 +1075,31 @@ void Form1::SystemsMenuExportScans(Object^, EventArgs^)
         return;
     }
 
-    //TODO try/catch
-    StreamWriter ^sw = File::CreateText( "scans.txt" );
-
-    for each( StarSystem ^system in systems )
+    try
     {
-        sw->WriteLine( system->GenerateScan(true) );
+        String^ filename = "scans_" + GameData::Player->Name + ".t" + GameData::CurrentTurn;
+        StreamWriter ^sw = File::CreateText( GetDataDir(filename) );
+
+        // Header to facilitate parsing the file with scans
+        sw->WriteLine( "" );
+        sw->WriteLine( "\t\t\tEVENT LOG FOR TURN 0" );
+        sw->WriteLine( "" );
+
+        for each( StarSystem ^system in systems )
+        {
+            sw->WriteLine( system->GenerateScan(true) );
+        }
+        sw->Close();
     }
-    sw->Close();
+    catch( SystemException^ e )
+    {
+        MessageBox::Show(
+            this,
+            "Error generating scan file: " + e->Message,
+            "Export Scans",
+            MessageBoxButtons::OK,
+            MessageBoxIcon::Error);
+    }
 }
 
 ////////////////////////////////////////////////////////////////
