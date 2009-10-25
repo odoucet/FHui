@@ -8,36 +8,40 @@ RegexMatcher::RegexMatcher()
 {
     m_Results = gcnew array<String^>(1);
 
-    ExpCmdColony    = gcnew Regex("^COLONY ([^,;]+)$");
-    ExpCmdShip      = gcnew Regex("^SHIP ([^,;]+)$");
+    ExpCmdColony        = gcnew Regex("^COLONY ([^,;]+)$");
+    ExpCmdShip          = gcnew Regex("^SHIP ([^,;]+)$");
+    ExpCmdPLName        = gcnew Regex("^Name\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+PL\\s+([^,;]+)$");
+    ExpCmdPLDisband     = gcnew Regex("^Disband\\s+PL\\s+([^,;]+)$");
+    ExpCmdSPNeutral     = gcnew Regex("^Neutral\\s+SP\\s+([^,;]+)$");
+    ExpCmdSPAlly        = gcnew Regex("^Ally\\s+SP\\s+([^,;]+)$");
+    ExpCmdSPEnemy       = gcnew Regex("^Enemy\\s+SP\\s+([^,;]+)$");
+    ExpCmdSPTeach       = gcnew Regex("^Teach\\s+([A-Z]{2})\\s+(\\d+)\\s+SP\\s+([^,;]+)$");
+    ExpCmdSPMsg         = gcnew Regex("^Message\\s+SP\\s+([^,;]+)$");
+    ExpCmdResearch      = gcnew Regex("^Research\\s+(\\d+)\\s+([A-Z]{2})$");
+    ExpCmdRecycle       = gcnew Regex("^Recycle\\s+(\\d+)\\s+(\\w+)$");
+    ExpCmdEstimate      = gcnew Regex("^Estimate\\s+SP\\s+([^,;]+)$");
+    ExpCmdInstall       = gcnew Regex("^Install\\s+(\\d+)\\s+([IAia][Uu])\\s+PL\\s+([^,;]+)$");
+    ExpCmdBuildIUAU     = gcnew Regex("^Build\\s+(\\d+)\\s+([IAC]U)");  // no $ here, target may follow
+    ExpCmdBuildShipTR   = gcnew Regex("^Build\\s+TR(\\d+)([Ss]?)\\s+(.+)$");
+    ExpCmdBuildShip     = gcnew Regex("^Build\\s+([A-Za-z]{2})([Ss]?)\\s+(.+)$");
+    ExpCmdDevelopCS     = gcnew Regex("^Develop\\s+(\\d+)\\s+PL\\s+([^,;]+),\\s+TR[0-9]+\\s+([^,;]+)$");
+    ExpCmdDevelopC      = gcnew Regex("^Develop\\s+(\\d+)\\s+PL\\s+([^,;]+)$");
+    ExpCmdDevelop       = gcnew Regex("^Develop\\s+(\\d+)$");
+    ExpCmdShipJump      = gcnew Regex("^Jump\\s+[A-Z0-9]+\\s+[^,;]+,\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+([0-9-]+)$");
+    ExpCmdShipWormhole  = gcnew Regex("^Wormhole\\s+[A-Z0-9]+\\s+[^,;]+,\\s+([0-9-]+)$");
+    ExpCmdShipUpg       = gcnew Regex("^Upgrade\\s+[A-Z0-9]+\\s+([^,;]+)$");
+    ExpCmdShipRec       = gcnew Regex("^Recycle\\s+[A-Z0-9]+\\s+([^,;]+)$");
+    ExpCmdShipUnload    = gcnew Regex("^Unload\\s+[A-Z0-9]+\\s+([^,;]+)$");
+    ExpCmdShipScan      = gcnew Regex("^Scan\\s+[A-Z0-9]+\\s+([^,;]+)$");
+    ExpCmdVisited       = gcnew Regex("^Visited\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)$");
+
+    ExpCmdTargetColony  = gcnew Regex("^PL\\s+([^,;]+)$");
+    ExpCmdTargetShip    = gcnew Regex("^[A-Z0-9]+\\s+([^,;]+)$");
+
     ExpCmdShipJump_Obsolete     = gcnew Regex("^SHIP [A-Z0-9]+ ([^,;]+) Jump to\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+([0-9-]+)$");
     ExpCmdShipWormhole_Obsolete = gcnew Regex("^SHIP [A-Z0-9]+ ([^,;]+) Wormhole\\s+([0-9-]+)$");
     ExpCmdShipUpg_Obsolete      = gcnew Regex("^SHIP [A-Z0-9]+ ([^,;]+) Upgrade$");
     ExpCmdShipRec_Obsolete      = gcnew Regex("^SHIP [A-Z0-9]+ ([^,;]+) Recycle$");
-    ExpCmdPLName    = gcnew Regex("^Name\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+PL\\s+([^,;]+)$");
-    ExpCmdPLDisband = gcnew Regex("^Disband\\s+PL\\s+([^,;]+)$");
-    ExpCmdSPNeutral = gcnew Regex("^Neutral\\s+SP\\s+([^,;]+)$");
-    ExpCmdSPAlly    = gcnew Regex("^Ally\\s+SP\\s+([^,;]+)$");
-    ExpCmdSPEnemy   = gcnew Regex("^Enemy\\s+SP\\s+([^,;]+)$");
-    ExpCmdSPTeach   = gcnew Regex("^Teach\\s+([A-Z]{2})\\s+(\\d+)\\s+SP\\s+([^,;]+)$");
-    ExpCmdSPMsg     = gcnew Regex("^Message\\s+SP\\s+([^,;]+)$");
-    ExpCmdResearch  = gcnew Regex("^Research\\s+(\\d+)\\s+([A-Z]{2})$");
-    ExpCmdRecycle   = gcnew Regex("^Recycle\\s+(\\d+)\\s+(\\w+)$");
-    ExpCmdEstimate  = gcnew Regex("^Estimate\\s+SP\\s+([^,;]+)$");
-    ExpCmdInstall   = gcnew Regex("^Install\\s+(\\d+)\\s+([IAia][Uu])\\s+PL\\s+([^,;]+)$");
-    ExpCmdBuildIUAU = gcnew Regex("^Build\\s+(\\d+)\\s+([IAC]U)$");
-    ExpCmdBuildShipTR = gcnew Regex("^Build\\s+TR(\\d+)([Ss]?)\\s+(.+)$");
-    ExpCmdBuildShip = gcnew Regex("^Build\\s+([A-Za-z]{2})([Ss]?)\\s+(.+)$");
-    ExpCmdDevelopCS = gcnew Regex("^Develop\\s+(\\d+)\\s+PL\\s+([^,;]+),\\s+TR[0-9]+\\s+([^,;]+)$");
-    ExpCmdDevelopC  = gcnew Regex("^Develop\\s+(\\d+)\\s+PL\\s+([^,;]+)$");
-    ExpCmdDevelop   = gcnew Regex("^Develop\\s+(\\d+)$");
-    ExpCmdShipJump  = gcnew Regex("^Jump\\s+[A-Z0-9]+\\s+[^,;]+,\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+([0-9-]+)$");
-    ExpCmdShipWormhole= gcnew Regex("^Wormhole\\s+[A-Z0-9]+\\s+[^,;]+,\\s+([0-9-]+)$");
-    ExpCmdShipUpg   = gcnew Regex("^Upgrade\\s+[A-Z0-9]+\\s+([^,;]+)$");
-    ExpCmdShipRec   = gcnew Regex("^Recycle\\s+[A-Z0-9]+\\s+([^,;]+)$");
-    ExpCmdShipUnload= gcnew Regex("^Unload\\s+[A-Z0-9]+\\s+([^,;]+)$");
-    ExpCmdShipScan  = gcnew Regex("^Scan\\s+[A-Z0-9]+\\s+([^,;]+)$");
-    ExpCmdVisited   = gcnew Regex("^Visited\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)$");
 }
 
 int RegexMatcher::GetResultInt(int arg)

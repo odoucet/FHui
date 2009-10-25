@@ -519,10 +519,28 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
     if( m_RM->Match(line, m_RM->ExpCmdBuildIUAU) )
     {
         int amount = m_RM->GetResultInt(0);
+        InventoryType inv = FHStrings::InvFromString(m_RM->Results[1]);
+
+        Colony ^targetColony;
+        Ship ^targetShip;
+        line = line->Trim();
+        if( !String::IsNullOrEmpty(line) )
+        {
+            if( m_RM->Match(line, m_RM->ExpCmdTargetColony) )
+                targetColony = GameData::GetColonyFromPlanet(
+                    GameData::GetPlanetByName(m_RM->Results[0]),
+                    true );
+            else if( m_RM->Match(line, m_RM->ExpCmdTargetShip) )
+                targetShip = GameData::GetShip( m_RM->Results[0] );
+            else
+                throw gcnew FHUIParsingException("Invalid build target: " + line);
+        }
         colony->Commands->Add( CmdSetOrigin(
             gcnew ProdCmdBuildIUAU(
                 amount,
-                FHStrings::InvFromString(m_RM->Results[1]) ) ) );
+                inv,
+                targetColony,
+                targetShip) ) );
         return true;
     }
 

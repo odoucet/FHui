@@ -6,6 +6,11 @@ Minor changes are listed only if originally requested by player
 [P] denotes player requested features
 
 FHUI build ??
+* [P] Localization independent string formatting when generating scans.
++ Build Cu/Iu/Au: it is not possible to specify target for build command
+  and edit already added command.
+
+FHUI build 217
 * Fixed minor bug in comments for production orders - budget calculation.
 + New commands supported: Develop, Visited.
 + Production/Cancel All menu option now requires confirmation before

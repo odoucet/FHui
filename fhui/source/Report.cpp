@@ -1261,7 +1261,9 @@ void Report::MatchOrdersTemplate(String ^s)
         int amount = m_RM->GetResultInt(0);
         ICommand ^cmd = gcnew ProdCmdBuildIUAU(
                 amount,
-                FHStrings::InvFromString(m_RM->Results[1]) );
+                FHStrings::InvFromString(m_RM->Results[1]),
+                nullptr,
+                nullptr );
         m_ColonyProduction->Commands->Add( cmd );
         cmd->Origin = CommandOrigin::Auto;
         return;

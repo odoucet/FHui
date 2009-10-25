@@ -46,8 +46,6 @@ namespace FHUI
 
         void        InidDialog(Colony ^colony, ProdCmdDevelop ^cmd);
 
-        String^     GetShipTextEntry(Ship ^ship);
-
         bool        GenerateCommand(bool validate);
 
         Colony^         m_Colony;

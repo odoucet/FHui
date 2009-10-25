@@ -86,4 +86,20 @@ String^ ProdCmdDevelop::Print()
     return "Develop " + m_Amount.ToString();
 }
 
+////////////////////////////////////////////////////////////////
+// Build CU/IU/AU
+String^ ProdCmdBuildIUAU::Print()
+{
+    String ^target = "";
+    if( m_Colony )
+        target = " PL " + m_Colony->Name;
+    else if( m_Ship )
+        target = " " + m_Ship->PrintClassWithName();
+
+    return String::Format("Build {0} {1}{2}",
+        m_Amount,
+        FHStrings::InvToString(m_Unit),
+        target);
+}
+
 } // end namespace FHUI

@@ -895,23 +895,10 @@ void Form1::SystemsSetup()
         int jumpsCnt = 0;
         for each( Ship ^ship in GameData::Player->Ships )
         {
-            StarSystem ^jumpTarget = nullptr;
             ICommand ^cmd = ship->GetJumpCommand();
             if( cmd == nullptr )
                 continue;
-            switch( cmd->GetCmdType() )
-            {
-            case CommandType::Jump:
-                jumpTarget = safe_cast<ShipCmdJump^>(cmd)->m_JumpTarget;
-                break;
-
-            case CommandType::Wormhole:
-                jumpTarget = safe_cast<ShipCmdWormhole^>(cmd)->m_JumpTarget;
-                break;
-
-            default:
-                throw gcnew FHUIDataImplException("Not supported ship jump command: " + ((int)cmd->GetCmdType()).ToString());
-            }
+            StarSystem ^jumpTarget = cmd->GetRefSystem();
 
             if( system == jumpTarget )
             {
@@ -1960,10 +1947,10 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuProductionNew()
         gcnew EventHandler1Arg<ProdCmdDevelop^>(this, &Form1::ColoniesMenuProdCommandAddDevelop) ) );
 
     // Build CU/IU/AU
-    menu->DropDownItems->Add(
+    menu->DropDownItems->Add( CreateCustomMenuItem<ProdCmdBuildIUAU^>(
         "Build CU/IU/AU...",
         nullptr,
-        gcnew EventHandler(this, &Form1::ColoniesMenuProdCommandAddBuildIuAu) );
+        gcnew EventHandler1Arg<ProdCmdBuildIUAU^>(this, &Form1::ColoniesMenuProdCommandAddBuildIuAu) ) );
 
     // Research
     menu->DropDownItems->Add(
@@ -2050,6 +2037,13 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuCommandsOptions(ICommand ^cmd)
             "Edit...",
             safe_cast<ProdCmdDevelop^>(cmd),
             gcnew EventHandler1Arg<ProdCmdDevelop^>(this, &Form1::ColoniesMenuProdCommandAddDevelop) ) );
+    }
+    if( cmd->GetCmdType() == CommandType::BuildIuAu )
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem<ProdCmdBuildIUAU^>(
+            "Edit...",
+            safe_cast<ProdCmdBuildIUAU^>(cmd),
+            gcnew EventHandler1Arg<ProdCmdBuildIUAU^>(this, &Form1::ColoniesMenuProdCommandAddBuildIuAu) ) );
     }
 
     // Cancel order
@@ -2149,32 +2143,44 @@ void Form1::ColoniesMenuProdCommandAddDevelop(ProdCmdDevelop ^cmd)
     delete dlg;
 }
 
-void Form1::ColoniesMenuProdCommandAddBuildIuAu(Object^, EventArgs^)
+void Form1::ColoniesMenuProdCommandAddBuildIuAu(ProdCmdBuildIUAU ^cmd)
 {
-    CmdBuildIuAu ^dlg = gcnew CmdBuildIuAu(
-        m_ColoniesMenuRef->Res->AvailPop,
-        m_ColoniesMenuRef->Res->AvailEU );
+    CmdBuildIuAu ^dlg = gcnew CmdBuildIuAu(m_ColoniesMenuRef, cmd);
     if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
     {
-        int cu = dlg->GetCUAmount();
-        if( cu > 0 )
+        ProdCmdBuildIUAU ^newCmd;
+        if( cmd )
         {
-            ColoniesMenuCommandAdd(
-                gcnew ProdCmdBuildIUAU(cu, INV_CU) );
+            if( cmd->m_Unit == INV_CU )
+                newCmd = dlg->GetCUCommand();
+            else if( cmd->m_Unit == INV_IU )
+                newCmd = dlg->GetIUCommand();
+            else if( cmd->m_Unit == INV_AU )
+                newCmd = dlg->GetAUCommand();
+            else
+                throw gcnew FHUIDataIntegrityException("Invalid Build CU/IU/AU inventory type: " + ((int)cmd->m_Unit).ToString());
+            if( newCmd )
+            {
+                *cmd = newCmd;
+                ColoniesMenuCommandAdd(nullptr);
+            }
+            else
+                ColoniesMenuCommandDel(cmd);
         }
-
-        int iu = dlg->GetIUAmount();
-        if( iu > 0 )
+        else
         {
-            ColoniesMenuCommandAdd(
-                gcnew ProdCmdBuildIUAU(iu, INV_IU) );
-        }
 
-        int au = dlg->GetAUAmount();
-        if( au > 0 )
-        {
-            ColoniesMenuCommandAdd(
-                gcnew ProdCmdBuildIUAU(au, INV_AU) );
+            newCmd = dlg->GetCUCommand();
+            if( newCmd )
+                ColoniesMenuCommandAdd( newCmd );
+
+            newCmd = dlg->GetIUCommand();
+            if( newCmd )
+                ColoniesMenuCommandAdd( newCmd );
+
+            newCmd = dlg->GetAUCommand();
+            if( newCmd )
+                ColoniesMenuCommandAdd( newCmd );
         }
     }
 

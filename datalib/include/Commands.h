@@ -208,6 +208,8 @@ public:
         : m_Ship(ship), m_JumpTarget(target), m_PlanetNum(planetNum)
     {}
 
+    virtual StarSystem^ GetRefSystem() override { return m_JumpTarget; }
+
     virtual String^ Print() override;
     virtual String^ PrintForUI() override   { return "Jump to " + m_Ship->PrintJumpDestination(); }
 
@@ -224,6 +226,8 @@ public:
     ShipCmdWormhole(Ship ^ship, StarSystem ^target, int planetNum)
         : m_Ship(ship), m_JumpTarget(target), m_PlanetNum(planetNum)
     {}
+
+    virtual StarSystem^ GetRefSystem() override { return m_JumpTarget; }
 
     virtual String^ Print() override        { return String::Format("Wormhole {0}, {1}",
                                                         m_Ship->PrintClassWithName(),
@@ -424,8 +428,8 @@ public:
 public ref class ProdCmdBuildIUAU : public CmdProdBase<CommandType::BuildIuAu>
 {
 public:
-    ProdCmdBuildIUAU(int amount, InventoryType unit)
-        : m_Amount(amount), m_PopCost(0), m_Unit(unit)
+    ProdCmdBuildIUAU(int amount, InventoryType unit, Colony ^colony, Ship ^ship)
+        : m_Amount(amount), m_PopCost(0), m_Unit(unit), m_Colony(colony), m_Ship(ship)
     {
         if ( unit == INV_CU )
         {
@@ -433,15 +437,28 @@ public:
         }
     }
 
+    ProdCmdBuildIUAU^ operator = (ProdCmdBuildIUAU ^cmd)
+    {
+        Origin      = cmd->Origin;
+        m_Amount    = cmd->m_Amount;
+        m_PopCost   = cmd->m_PopCost;
+        m_Unit      = cmd->m_Unit;
+        m_Colony    = cmd->m_Colony;
+        m_Ship      = cmd->m_Ship;
+        return this;
+    }
+
     virtual int     GetEUCost() override    { return m_Amount; }
     virtual int     GetPopCost() override   { return m_PopCost; }
     virtual int     GetInvMod(InventoryType i) override { return i == m_Unit ? m_Amount : 0; }
 
-    virtual String^ Print() override        { return String::Format("Build {0} {1}", m_Amount, FHStrings::InvToString(m_Unit)); }
+    virtual String^ Print() override;
 
     int             m_Amount;
     int             m_PopCost;
     InventoryType   m_Unit;
+    Colony^         m_Colony;
+    Ship^           m_Ship;
 };
 
 ////////////////////////////////////////////////////////////

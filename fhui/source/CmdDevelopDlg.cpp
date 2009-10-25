@@ -34,7 +34,7 @@ void CmdDevelopDlg::InidDialog(Colony ^colony, ProdCmdDevelop ^cmd)
             iShip->SubLight == false &&
             iShip->System == colony->System )
         {
-            ships->Add( GetShipTextEntry(iShip) );
+            ships->Add( iShip->PrintRefListEntry() );
         }
     }
 
@@ -48,15 +48,10 @@ void CmdDevelopDlg::InidDialog(Colony ^colony, ProdCmdDevelop ^cmd)
         if( cmd->m_Colony )
             DevColony->Text = cmd->m_Colony->Name;
         if( cmd->m_Ship )
-            DevShip->Text = GetShipTextEntry(cmd->m_Ship);
+            DevShip->Text = cmd->m_Ship->PrintRefListEntry();
     }
 
     GenerateCommand(false);
-}
-
-String^ CmdDevelopDlg::GetShipTextEntry(Ship ^ship)
-{
-    return ship->PrintClassWithName() + "; Age " + ship->Age.ToString();
 }
 
 bool CmdDevelopDlg::GenerateCommand(bool validate)
@@ -67,12 +62,7 @@ bool CmdDevelopDlg::GenerateCommand(bool validate)
     else
         m_Command->m_Colony = nullptr;
     if( DevShip->SelectedIndex != 0 )
-    {
-        int space = DevShip->Text->IndexOf(' ');
-        int semicolon = DevShip->Text->IndexOf(';');
-
-        m_Command->m_Ship = GameData::GetShip( DevShip->Text->Substring(space + 1, semicolon - (space + 1)));
-    }
+        m_Command->m_Ship = Ship::FindRefListEntry( DevShip->Text );
     else
         m_Command->m_Ship = nullptr;
 

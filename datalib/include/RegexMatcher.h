@@ -53,6 +53,9 @@ public:
     initonly Regex^     ExpCmdBuildShip;
     initonly Regex^     ExpCmdVisited;
 
+    initonly Regex^     ExpCmdTargetColony;
+    initonly Regex^     ExpCmdTargetShip;
+
     initonly Regex^     ExpCmdShipJump_Obsolete;
     initonly Regex^     ExpCmdShipUpg_Obsolete;
     initonly Regex^     ExpCmdShipRec_Obsolete;

@@ -33,6 +33,9 @@ public:
         Commands = gcnew List<ICommand^>;
     }
 
+    // --------------------------------------------------
+    static Ship^        FindRefListEntry(String ^entry);
+
     // -------- IComparable -----------------------------
     virtual Int32 CompareTo( Object^ obj );
 

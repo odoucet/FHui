@@ -245,7 +245,7 @@ namespace FHUI {
         void        ColoniesMenuCommandMoveUp(ICommand ^cmd);
         void        ColoniesMenuCommandMoveDown(ICommand ^cmd);
         void        ColoniesMenuProdCommandAddResearch(Object^, EventArgs^);
-        void        ColoniesMenuProdCommandAddBuildIuAu(Object^, EventArgs^);
+        void        ColoniesMenuProdCommandAddBuildIuAu(ProdCmdBuildIUAU ^cmd);
         void        ColoniesMenuProdCommandAddBuildShip(Object^, EventArgs^);
         void        ColoniesMenuProdCommandAddDevelop(ProdCmdDevelop ^cmd);
         void        ColoniesMenuAutoToggle(Object^, EventArgs^);

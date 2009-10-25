@@ -35,6 +35,17 @@ String^ Ship::PrintRefListEntry()
     return PrintClassWithName() + " (A" + Age.ToString() + ")";
 }
 
+Ship^ Ship::FindRefListEntry(String ^entry)
+{
+    int space = entry->IndexOf(' ');
+    int age = entry->IndexOf(" (A");
+
+    if( space == -1 || age == -1 )
+        throw gcnew FHUIDataIntegrityException("Invalid ship ref entry: " + entry);
+
+    return GameData::GetShip( entry->Substring(space + 1, age - (space + 1)) );
+}
+
 String^ Ship::PrintAgeLocation()
 {
     if (EUToComplete > 0)
