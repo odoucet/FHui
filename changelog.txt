@@ -7,9 +7,9 @@ Minor changes are listed only if originally requested by player
 
 FHUI build ??
 * [P] Localization independent string formatting when generating scans.
-* Scan file is exported to data directory instead of working directory
-+ Splitting "turn 0" content into several files is now allowed
-+ Build Cu/Iu/Au: it is not possible to specify target for build command
+* Scan file is exported to data directory instead of working directory.
++ Splitting "turn 0" content into several files is now allowed.
++ Build Cu/Iu/Au: it is now possible to specify target for build command
   and edit already added command.
 + Filters changed:
   On Systems Visited/Not visited replaced with Known/Unknown (scanned or not).
