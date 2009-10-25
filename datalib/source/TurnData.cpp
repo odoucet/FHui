@@ -639,18 +639,20 @@ void TurnData::UpdateHomeWorlds()
 
     for each( Colony ^colony in GetColonies() )
     {
-        if( colony->PlanetType == PLANET_HOME )
+        if( colony->PlanetType == PLANET_HOME && 
+            colony->System->Planets->ContainsKey( colony->PlanetNum ) )
         {
-            if( colony->System->Planets->ContainsKey( colony->PlanetNum ) )
-            {
-                Planet ^planet = colony->System->Planets[colony->PlanetNum];
+            Planet ^planet = colony->System->Planets[colony->PlanetNum];
 
-                // Find species born here
-                for each( Alien ^alien in GetAliens() )
+            // Find species born here
+            for each( Alien ^alien in GetAliens() )
+            {
+                if( alien->HomeSystem &&
+                    alien->HomeSystem->GetId() == colony->System->GetId() &&
+                    alien->HomePlanet == colony->PlanetNum )
                 {
-                    if( alien->HomeSystem &&
-                        alien->HomeSystem->GetId() == colony->System->GetId() &&
-                        alien->HomePlanet == colony->PlanetNum )
+                    // Update species' living requirements, if unknown
+                    if ( ! alien->AtmReq->IsValid() )
                     {
                         alien->AtmReq->TempClass = planet->TempClass;
                         alien->AtmReq->PressClass = planet->PressClass;

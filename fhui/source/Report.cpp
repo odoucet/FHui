@@ -1350,20 +1350,11 @@ void Report::MatchAlienInfo(String ^s, Alien ^alien)
             m_RM->GetResultInt(2),
             false );
         alien->HomePlanet = m_RM->GetResultInt(3);
-        if ( !alien->HomeSystem->Planets->ContainsKey(alien->HomePlanet) )
-        {
-            alien->HomeSystem->Planets->Add(
-                alien->HomePlanet,
-                Planet::Default(alien->HomeSystem, alien->HomePlanet) );
-        }
     }
 
     if( m_RM->Match(s, "^Temp:(\\d+)\\s+Press:(\\d+)\\s*") )
     {
-        Planet ^home = alien->HomeSystem->Planets[alien->HomePlanet];
-        home->TempClass = m_RM->GetResultInt(0);
         alien->AtmReq->TempClass  = m_RM->GetResultInt(0);
-        home->PressClass = m_RM->GetResultInt(1);
         alien->AtmReq->PressClass = m_RM->GetResultInt(1);
     }
 
