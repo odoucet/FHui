@@ -38,3 +38,24 @@ Startup:
    dir or add command line parameter: -dir <your_fh_dir>
      Example: -dir c:\games\fh\
 5. Have fun using FHUI :)
+
+
+Other Far Horizons support tools:
+---------------------------------
+
+Here you can find useful tool to map the galaxy:
+
+http://groups.google.com/group/far-horizons?hl=pl&lnk=
+
+While browsing there you can also read the FH guide.
+
+
+FH Mapper Startup:
+
+1. Download all parts to the same folder and unpack.
+2. Copy galaxy_map.txt to that folder
+3. Rename galaxy_map.txt to galaxy_map.map
+4. Run FMapper and load galaxy_map.map
+5. Save to new file name.fhm
+
+There is NO autosave, so don't forget to save before quit or all the changes are lost.
