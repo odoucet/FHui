@@ -2666,19 +2666,23 @@ ToolStripMenuItem^ Form1::ShipsMenuCreateJumpItem(
 
     String ^itemText;
     ICommand ^cmd;
+    String ^cargo = String::IsNullOrEmpty( ship->PrintCargo() ) ? "" : "; " + ship->PrintCargo();
     if( ship->System->IsWormholeTarget(system) )
     {
-        itemText = String::Format("{0}   (Wormhole)  From {1}",
+        itemText = String::Format("{0}   (Wormhole) (A{2}{3}) From {1}",
             text,
+            ship->Age,
+            cargo,
             ship->PrintLocation() );
         cmd = gcnew ShipCmdWormhole(ship, system, planetNum);
     }
     else
     {
-        itemText = String::Format("{0}   {1:F2}% ({2} FS)  From {3}",
+        itemText = String::Format("{0}   {1:F2}% (A{2}{3})  From {4}",
             text,
             mishap,
-            ship->Cargo[INV_FS],
+            ship->Age,
+            cargo,
             ship->PrintLocation() );
         cmd = gcnew ShipCmdJump(ship, system, planetNum);
     }

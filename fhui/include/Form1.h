@@ -1383,7 +1383,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->SystemsFiltScanU->TabIndex = 75;
             this->SystemsFiltScanU->Text = L"U";
             this->SystemsFiltScanU->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->BtnTooltip->SetToolTip(this->SystemsFiltScanU, L"Show NOT KNOWN systems.");
+            this->BtnTooltip->SetToolTip(this->SystemsFiltScanU, L"Show UNKNOWN systems.");
             this->SystemsFiltScanU->UseVisualStyleBackColor = true;
             this->SystemsFiltScanU->CheckedChanged += gcnew System::EventHandler(this, &Form1::Systems_Update);
             // 
