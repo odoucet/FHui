@@ -821,8 +821,8 @@ void Form1::SystemsInitControls()
     filter->CtrlShipAge     = SystemsShipAge;
     filter->CtrlMaxMishap   = SystemsMaxMishap;
     filter->CtrlMaxLSN      = SystemsMaxLSN;
-    filter->CtrlFiltVisV    = SystemsFiltVisV;
-    filter->CtrlFiltVisN    = SystemsFiltVisN;
+    filter->CtrlFiltScanK   = SystemsFiltScanK;
+    filter->CtrlFiltScanU   = SystemsFiltScanU;
     filter->CtrlFiltColC    = SystemsFiltColC;
     filter->CtrlFiltColN    = SystemsFiltColN;
     filter->CtrlNumRows     = SystemsNumRows;
@@ -1149,8 +1149,6 @@ void Form1::PlanetsInitControls()
     filter->CtrlShipAge     = PlanetsShipAge;
     filter->CtrlMaxMishap   = PlanetsMaxMishap;
     filter->CtrlMaxLSN      = PlanetsMaxLSN;
-    filter->CtrlFiltVisV    = PlanetsFiltVisV;
-    filter->CtrlFiltVisN    = PlanetsFiltVisN;
     filter->CtrlFiltColC    = PlanetsFiltColC;
     filter->CtrlFiltColN    = PlanetsFiltColN;
     filter->CtrlNumRows     = PlanetsNumRows;
@@ -1543,6 +1541,9 @@ void Form1::ColoniesInitControls()
     filter->CtrlMaxLSN      = ColoniesMaxLSN;
     filter->CtrlFiltOwnO    = ColoniesFiltOwnO;
     filter->CtrlFiltOwnN    = ColoniesFiltOwnN;
+    filter->CtrlFiltRelA    = ColoniesFiltRelA;
+    filter->CtrlFiltRelE    = ColoniesFiltRelE;
+    filter->CtrlFiltRelN    = ColoniesFiltRelN;
     filter->CtrlMiMaBalance = ColoniesMiMaBalanced;
     filter->CtrlNumRows     = ColoniesNumRows;
 

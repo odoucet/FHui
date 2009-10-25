@@ -88,6 +88,7 @@ public:
     virtual StarSystem^ GetFilterLocation(int %pl) override { pl = PlanetNum; return System; }
     virtual Alien^      GetFilterOwner() override       { return Owner; }
     virtual int         GetFilterLSN() override         { return LSN; }
+    virtual SPRelType   GetFilterRelType() override     { return Owner->GetFilterRelType(); }
     virtual String^     GetTooltipText() override       { return System->GetTooltipText(); }
     // -------- IComparers ------------------------------
     ref class ProdOrderComparer : public IComparer<Colony^>

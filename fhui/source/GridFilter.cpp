@@ -59,8 +59,8 @@ void GridFilter::Update(Object ^sender)
             else if( sender == m_RefreshDummy ||
                 sender == CtrlMaxMishap ||
                 sender == CtrlMaxLSN ||
-                sender == CtrlFiltVisV ||
-                sender == CtrlFiltVisN ||
+                sender == CtrlFiltScanK ||
+                sender == CtrlFiltScanU ||
                 sender == CtrlFiltColC ||
                 sender == CtrlFiltColN ||
                 sender == CtrlFiltOwnO ||
@@ -77,8 +77,8 @@ void GridFilter::Update(Object ^sender)
                 __int64 filtMask =
                     ( CtrlMaxLSN ? Decimal::ToByte(CtrlMaxLSN->Value) : 0 ) +
                     ( CtrlMaxMishap ? (Decimal::ToByte(CtrlMaxMishap->Value) << 8) : 0 ) +
-                    ( CtrlFiltVisV ? (CtrlFiltVisV->Checked ? (1 << 17) : 0) : 0 ) +
-                    ( CtrlFiltVisN ? (CtrlFiltVisN->Checked ? (1 << 18) : 0) : 0 ) +
+                    ( CtrlFiltScanK ? (CtrlFiltScanK->Checked ? (1 << 17) : 0) : 0 ) +
+                    ( CtrlFiltScanU ? (CtrlFiltScanU->Checked ? (1 << 18) : 0) : 0 ) +
                     ( CtrlFiltColC ? (CtrlFiltColC->Checked ? (1 << 20) : 0) : 0 ) +
                     ( CtrlFiltColN ? (CtrlFiltColN->Checked ? (1 << 21) : 0) : 0 ) +
                     ( CtrlFiltOwnO ? (CtrlFiltOwnO->Checked ? (1 << 23) : 0) : 0 ) +
@@ -149,7 +149,7 @@ bool GridFilter::Filter(IGridDataSrc ^item)
                 return true;
             break;
         case SP_PIRATE:
-            if( CtrlFiltRelP->Checked == false )
+            if( CtrlFiltRelP && CtrlFiltRelP->Checked == false )
                 return true;
             break;
         }
@@ -178,12 +178,12 @@ bool GridFilter::Filter(IGridDataSrc ^item)
     if( system )
     {
         // Visited
-        if( CtrlFiltVisV )
+        if( CtrlFiltScanU )
         {
-            bool bShowVisV = CtrlFiltVisV->Checked;
-            bool bShowVisN = CtrlFiltVisN->Checked;
-            if( (!CtrlFiltVisN->Checked && system->LastVisited == -1) ||
-                (!CtrlFiltVisV->Checked && system->LastVisited != -1) )
+            bool bShowScanK = CtrlFiltScanK->Checked;
+            bool bShowScanU = CtrlFiltScanU->Checked;
+            if( (!bShowScanK && system->TurnScanned != -1) ||
+                (!bShowScanU && system->TurnScanned == -1) )
             {
                 return true;
             }
@@ -236,10 +236,10 @@ void GridFilter::ResetControls(bool doUpdate)
         CtrlMaxLSN->Value = DefaultLSN;
     if( CtrlMaxMishap )
         CtrlMaxMishap->Value = DefaultMishap;
-    if( CtrlFiltVisV )
+    if( CtrlFiltScanK )
     {
-        CtrlFiltVisV->Checked = true;
-        CtrlFiltVisN->Checked = true;
+        CtrlFiltScanK->Checked = true;
+        CtrlFiltScanU->Checked = true;
     }
     if( CtrlFiltColC )
     {
@@ -256,7 +256,8 @@ void GridFilter::ResetControls(bool doUpdate)
         CtrlFiltRelA->Checked = true;
         CtrlFiltRelE->Checked = true;
         CtrlFiltRelN->Checked = true;
-        CtrlFiltRelP->Checked = true;
+        if( CtrlFiltRelP )
+            CtrlFiltRelP->Checked = true;
     }
     if( CtrlFiltTypeBas )
     {

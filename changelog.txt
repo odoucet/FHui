@@ -9,6 +9,10 @@ FHUI build ??
 * [P] Localization independent string formatting when generating scans.
 + Build Cu/Iu/Au: it is not possible to specify target for build command
   and edit already added command.
++ Filters changed:
+  On Systems Visited/Not visited replaced with Known/Unknown (scanned or not).
+  On Planets tab: visited/not visited removed, it did not make sense.
+  On Colonies tab: Show allied/neutral/enemy colonies filter added.
 
 FHUI build 217
 * Fixed minor bug in comments for production orders - budget calculation.

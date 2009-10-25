@@ -74,8 +74,8 @@ public:
     NumericUpDown   ^CtrlShipAge;
     NumericUpDown   ^CtrlMaxMishap;
     NumericUpDown   ^CtrlMaxLSN;
-    CheckBox        ^CtrlFiltVisV;
-    CheckBox        ^CtrlFiltVisN;
+    CheckBox        ^CtrlFiltScanK;
+    CheckBox        ^CtrlFiltScanU;
     CheckBox        ^CtrlFiltColC;
     CheckBox        ^CtrlFiltColN;
     CheckBox        ^CtrlFiltOwnO;
