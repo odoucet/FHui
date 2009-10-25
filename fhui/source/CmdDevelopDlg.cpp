@@ -9,9 +9,17 @@ void CmdDevelopDlg::InidDialog(Colony ^colony, ProdCmdDevelop ^cmd)
 {
     m_Colony = colony;
 
+    int availEU = colony->Res->AvailEU;
+    int availPop = colony->Res->AvailPop;
+    if( cmd )
+    {
+        availEU += cmd->GetEUCost();
+        availPop += cmd->GetPopCost();
+    }
+
     InfoColony->Text = colony->Name;
-    InfoBudget->Text = colony->Res->AvailEU.ToString();
-    InfoPop->Text = colony->Res->AvailPop.ToString();
+    InfoBudget->Text = availEU.ToString();
+    InfoPop->Text = availPop.ToString();
 
     List<String^> ^colonies = gcnew List<String^>;
     List<String^> ^ships = gcnew List<String^>;

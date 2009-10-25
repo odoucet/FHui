@@ -58,6 +58,11 @@ void CmdBuildIuAu::InitAvailResources(Colony ^colony, ProdCmdBuildIUAU ^cmd)
     m_Colony = colony;
     m_AvailPop = colony->Res->AvailPop;
     m_AvailEU  = colony->Res->AvailEU;
+    if( cmd )
+    {
+        m_AvailEU += cmd->GetEUCost();
+        m_AvailPop += cmd->GetPopCost();
+    }
 
     InfoColony->Text = m_Colony->Name;
     AvailPop->Text  = m_AvailPop.ToString();
