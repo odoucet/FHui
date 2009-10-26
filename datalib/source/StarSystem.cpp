@@ -535,4 +535,44 @@ void StarSystem::UpdateMaster()
     }
 }
 
+void StarSystem::SetWormhole(int targetId)
+{
+    HasWormhole = true;
+
+    if( WormholeTargetId == -1 )
+    {
+        WormholeTargetId = targetId;
+    }
+    else if( WormholeTargetId != targetId )
+        throw gcnew FHUIDataIntegrityException("System " + PrintLocation() +
+            " is already marked as wormhole connected with " + GetWormholeTarget()->PrintLocation());
+
+    if( targetId != -1 )
+    {
+        StarSystem ^target = GameData::GetStarSystem(targetId);
+        if( target->HasWormhole == false ||
+            target->WormholeTargetId != this->GetId() )
+        {
+            target->SetWormhole( this->GetId() );
+        }
+
+        // Generate random color for wormhole
+        WormholeColor = System::Drawing::Color::Gold;
+        Random ^rnd = gcnew Random;
+        bool r,g,b;
+        do
+        {
+            r = rnd->Next(0, 3) == 0;
+            g = rnd->Next(0, 3) == 0;
+            b = rnd->Next(0, 3) == 0;
+        } while ( !r && !g && !b );
+        WormholeColor = System::Drawing::Color::FromArgb(
+            0xff,
+            r ? rnd->Next(0x50, 0xd0) : 0xff,
+            g ? rnd->Next(0x50, 0xd0) : 0xff,
+            b ? rnd->Next(0x50, 0xd0) : 0xff );
+        target->WormholeColor = WormholeColor;
+    }
+}
+
 } // end namespace FHUI

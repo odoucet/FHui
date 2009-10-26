@@ -672,12 +672,26 @@ void Form1::SetGridBgAndTooltip(DataGridView ^grid)
         {
             IGridDataSrc ^iDataSrc = safe_cast<IGridDataSrc^>(row->Cells[index]->Value);
             String ^tooltip = iDataSrc->GetTooltipText();
-            Color bgColor = GetAlienColor( iDataSrc->GetAlienForBgColor() );
+            Color rowColor = GetAlienColor( iDataSrc->GetAlienForBgColor() );
             for each( DataGridViewCell ^cell in row->Cells )
             {
+                Color cellColor(rowColor);
+
+                // Special coloring rules
+                if( grid == SystemsGrid )
+                {
+                    StarSystem ^system = iDataSrc->GetFilterSystem();
+                    if( cell->ColumnIndex == m_SystemsColumns.Wormhole )
+                    {
+                        if( system->HasWormhole &&
+                            system->WormholeTargetId != -1 )
+                            cellColor = system->WormholeColor;
+                    }
+                }
+
                 if( String::IsNullOrEmpty(cell->ToolTipText) )
                     cell->ToolTipText = tooltip;
-                cell->Style->BackColor = bgColor;
+                cell->Style->BackColor = cellColor;
             }
         }
     }

@@ -464,11 +464,10 @@ void Report::MatchPlanetScan(String ^s)
     }
     else if( m_RM->Match(s, "^Wormhole to\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)$") )
     {
-        m_ScanSystem->HasWormhole = true;
-        m_ScanSystem->WormholeTargetId = GameData::GetSystemId(
+        m_ScanSystem->SetWormhole( GameData::GetSystemId(
             m_RM->GetResultInt(0),
             m_RM->GetResultInt(1),
-            m_RM->GetResultInt(2) );
+            m_RM->GetResultInt(2) ) );
     }
     else if( s == "Wormhole to Unknown System" )
     {

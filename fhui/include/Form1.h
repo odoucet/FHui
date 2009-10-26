@@ -59,10 +59,6 @@ namespace FHUI {
 
         void        LoadOrders();
 
-    private: System::Windows::Forms::CheckBox^  ColoniesFiltRelN;
-    private: System::Windows::Forms::CheckBox^  ColoniesFiltRelE;
-    private: System::Windows::Forms::CheckBox^  ColoniesFiltRelA;
-
         SortedList<String^, String^>^   m_OrderFiles;
 
         void        InitPlugins();
@@ -408,6 +404,9 @@ namespace FHUI {
         // Auto-generated code below this point
         // --------------------------------------------------
 
+    private: System::Windows::Forms::CheckBox^  ColoniesFiltRelN;
+    private: System::Windows::Forms::CheckBox^  ColoniesFiltRelE;
+    private: System::Windows::Forms::CheckBox^  ColoniesFiltRelA;
     private: System::Windows::Forms::CheckBox^  SystemsSelMode;
     private: System::Windows::Forms::CheckBox^  PlanetsSelMode;
     private: System::Windows::Forms::CheckBox^  ColoniesSelMode;

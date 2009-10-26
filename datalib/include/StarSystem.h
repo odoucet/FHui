@@ -26,6 +26,7 @@ public:
         MinLSNAvail = 99999;
         HasWormhole = false;
         WormholeTargetId = -1;
+        WormholeColor = System::Drawing::Color::White;
         Master = nullptr;
         m_Ships = gcnew List<Ship^>;
         m_ShipsOwned = gcnew List<Ship^>;
@@ -50,6 +51,7 @@ public:
         MinLSNAvail = src->MinLSNAvail;
         HasWormhole = src->HasWormhole;
         WormholeTargetId = src->WormholeTargetId;
+        WormholeColor = src->WormholeColor;
         IsVoid = src->IsVoid;
 
         Master = nullptr;
@@ -113,6 +115,8 @@ public:
     String^         GenerateColoniesInfo();
     String^         GenerateShipsInfo();
 
+    void            SetWormhole(int targetId);
+
     int             X;
     int             Y;
     int             Z;
@@ -126,6 +130,7 @@ public:
     int             MinLSNAvail;
     bool            HasWormhole;
     int             WormholeTargetId;
+    System::Drawing::Color  WormholeColor;
 
     Alien^          HomeSpecies;
     Alien^          Master;

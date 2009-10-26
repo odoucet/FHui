@@ -498,11 +498,7 @@ void TurnData::UpdateShips()
             Ship ^ship = GetShip(jump->A);
             StarSystem ^from = GetStarSystem(jump->B);
             // Add wormhole link
-            from->HasWormhole = true;
-            from->WormholeTargetId = ship->System->GetId();
-            // Also add back link
-            ship->System->HasWormhole = true;
-            ship->System->WormholeTargetId = jump->B;
+            from->SetWormhole( ship->System->GetId() );
         }
         catch ( KeyNotFoundException^ )
         {
