@@ -71,7 +71,8 @@ public:
         TechLevelsAssumed = gcnew array<int>(TECH_MAX){0};
         TeachOrders = 0;
 
-        LastMessageTurn = 0;
+        LastMessageRecvTurn = 0;
+        LastMessageSentTurn = 0;
     }
     // --- copy constructor - does not perform full copy !!! ---
     Alien(StarSystem^ home, Alien^ src)
@@ -96,8 +97,9 @@ public:
         src->TechLevels->CopyTo(TechLevels, 0);
         TeachOrders = 0;
 
-        LastMessage = src->LastMessage;
-        LastMessageTurn = src->LastMessageTurn;
+        LastMessageRecv = src->LastMessageRecv;
+        LastMessageRecvTurn = src->LastMessageRecvTurn;
+        LastMessageSentTurn = src->LastMessageSentTurn;
     }
     // -------- IGridDataSrc ----------------------------
     virtual Alien^      GetAlienForBgColor() override   { return this; }
@@ -142,8 +144,9 @@ public:
     array<int>^         TechLevelsAssumed;
     int                 TeachOrders;
 
-    String^             LastMessage;
-    int                 LastMessageTurn;
+    String^             LastMessageRecv;
+    int                 LastMessageRecvTurn;
+    int                 LastMessageSentTurn;
 };
 
 } // end namespace FHUI

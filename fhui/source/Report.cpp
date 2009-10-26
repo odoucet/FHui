@@ -184,8 +184,8 @@ bool Report::Parse(String ^s)
     case PHASE_MESSAGE:
         if( s == "*** End of Message ***" )
         {
-            m_ScanAlien->LastMessage = m_ScanMessage;
-            m_ScanAlien->LastMessageTurn = m_GameData->CurrentTurn;
+            m_ScanAlien->LastMessageRecv = m_ScanMessage;
+            m_ScanAlien->LastMessageRecvTurn = m_GameData->CurrentTurn - 1;
             m_ScanMessage = nullptr;
             m_Phase = PHASE_GLOBAL;
         }
@@ -248,6 +248,8 @@ bool Report::Parse(String ^s)
         // System scan
         else if( MatchSystemScanStart(s) )
         {}
+        else if( MatchMessageSent(s) )
+        {}
         break;
 
     case PHASE_ORDERS_JUMP:
@@ -288,6 +290,8 @@ bool Report::Parse(String ^s)
             m_Phase = PHASE_ORDERS_STRIKE;
         // System scan
         else if( MatchSystemScanStart(s) )
+        {}
+        else if( MatchMessageSent(s) )
         {}
         break;
 
@@ -433,6 +437,16 @@ bool Report::MatchSectionEnd(String ^s)
 {
     if( Regex("^(\\*\\s)+\\*\\s*$").Match(s)->Success )
         return true;
+    return false;
+}
+
+bool Report::MatchMessageSent(String ^s)
+{
+    if( m_RM->Match(s, "^A message was sent to SP ([^,;]+)\\.$") )
+    {
+        m_GameData->AddAlien(m_RM->Results[0])->LastMessageSentTurn = m_GameData->CurrentTurn - 1;
+        return true;
+    }
     return false;
 }
 

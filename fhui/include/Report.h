@@ -56,6 +56,7 @@ private:
 
     bool            MatchSectionEnd(String ^s);
     bool            MatchTech(String ^s, String ^techName, TechType tech);
+    bool            MatchMessageSent(String ^s);
     bool            MatchSystemScanStart(String ^s);
     void            MatchPlanetScan(String ^s);
     void            MatchColonyScan(String ^s);

@@ -2797,6 +2797,7 @@ void Form1::AliensInitControls()
     c.Object    = ADD_COLUMN(nullptr,       nullptr,                    Alien,  None,       Default);
     c.Name      = ADD_COLUMN("Name",        "Species name",             String, Ascending,  Default);
     c.Relation  = ADD_COLUMN("Relation",    "Current relation",         String, Ascending,  Relation);
+    //c.LastSeen  = ADD_COLUMN("Seen",        "Turn number when you last seen this species", int,  Ascending,  Default);
     c.Home      = ADD_COLUMN("Home",        "Home planet location",     String, Ascending,  Location);
     c.Dist      = ADD_COLUMN("Dist",        "Home distance from your home system", double, Ascending, Default);
     c.TechLev   = ADD_COLUMN("Tech Levels", "Estimated technology levels", String, Ascending, Default);
@@ -2903,22 +2904,37 @@ void Form1::AliensSetup()
                     if( cmdMsg->m_Alien == alien )
                     {
                         msgToolTip = "Message to be sent:\r\n" + cmdMsg->m_Text;
-                        msgCell = "Send";
+                        msgCell = "Send NEW";
                         break;
                     }
                 }
             }
-            if( alien->LastMessage )
+            if( alien->LastMessageSentTurn )
             {
                 if( !String::IsNullOrEmpty(msgToolTip) )
                 {
                     msgToolTip += "\r\n--------------------------------------------------\r\n";
-                    msgCell += "/";
+                    msgCell += ", ";
+                }
+                msgCell += "S: " + alien->LastMessageSentTurn.ToString();
+                msgToolTip += "Last message sent in turn " + alien->LastMessageSentTurn.ToString() + "\r\n";
+            }
+            if( alien->LastMessageRecv )
+            {
+                if( !String::IsNullOrEmpty(msgToolTip) )
+                {
+                    msgToolTip += "\r\n--------------------------------------------------\r\n";
+                    msgCell += ", ";
                 }
                 msgToolTip += "Last message received in turn "
-                    + alien->LastMessageTurn.ToString() + ":\r\n";
-                msgToolTip += alien->LastMessage;
-                msgCell += "Recv";
+                    + alien->LastMessageRecvTurn.ToString() + ":\r\n";
+                msgToolTip += alien->LastMessageRecv;
+                msgCell += "R: " + alien->LastMessageRecvTurn.ToString();
+                if( alien->LastMessageRecvTurn == GameData::CurrentTurn - 1 )
+                {
+                    msgCell += " (New)";
+                    cells[c.Message]->Style->ForeColor = Color::Red;
+                }
             }
             if( !String::IsNullOrEmpty(msgCell) )
             {

@@ -14,6 +14,11 @@ FHUI build ??
 + Colonies tab: include LS changes on toolbar when calculating colony
   production and production penalty. This is useful for production
   simulation at given tech levels.
++ Aliens tab: Message column format changed to:
+  S: last sent msg turn nr, R: last recv msg turn nr.
+  If you prepare new message in current turn "Send NEW" will appear.
+  If you receive a new message in last turn, this will be marked as
+  "(New)" and cell will be displayed in red.
 
 FHUI build 226
 * [P] Localization independent string formatting when generating scans.
