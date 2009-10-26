@@ -1665,10 +1665,10 @@ void Form1::ColoniesSetup()
                 sp->TechLevelsAssumed[TECH_LS],
                 m_GameData->GetFleetPercentCost() );
 
-            cells[c.Prod]->Value    = prodCalculated;
-            cells[c.ProdOrder]->Value = colony->ProductionOrder;
-            cells[c.ProdPerc]->Value= 100 - colony->ProdPenalty;
-            cells[c.Pop]->Value     = colony->AvailPop;
+            cells[c.Prod]->Value        = prodCalculated;
+            cells[c.ProdOrder]->Value   = colony->ProductionOrder;
+            cells[c.ProdPerc]->Value    = 100 - Calculators::ProductionPenalty(colony->LSN, sp->TechLevelsAssumed[TECH_LS]);
+            cells[c.Pop]->Value         = colony->AvailPop;
 
             if( colony->PlanetType == PLANET_HOME ||
                 colony->PlanetType == PLANET_COLONY )

@@ -11,6 +11,9 @@ FHUI build ??
 + Systems tab: mark matching wormhole terminus endpoints with colors.
 + Planets tab: mark empty planets in alien home system with brighter
   alien color.
++ Colonies tab: include LS changes on toolbar when calculating colony
+  production and production penalty. This is useful for production
+  simulation at given tech levels.
 
 FHUI build 226
 * [P] Localization independent string formatting when generating scans.

@@ -194,34 +194,36 @@ int Calculators::ResearchCost(int startLevel, int endLevel, bool guided)
 
 int Calculators::ColonyProduction(Colony^ colony, int mi, int ma, int ls, int fleetPercentCost)
 {
-    int rawMaterialUnits, productionCapacity, availableToSpend;
-
     if (colony->MiDiff == 0)
     {
         return 0; // TODO: Fix at MiDiff parsing
     }
 
+    int rawMaterialUnits;
+    int productionCapacity;
+    int availableToSpend;
+
+    int productionPenalty = ProductionPenalty(colony->LSN, ls);
+
     rawMaterialUnits = (10 * mi * colony->MiBase) / colony->MiDiff;
     productionCapacity = (ma * colony->MaBase) / 10;
 
-    rawMaterialUnits -= (colony->ProdPenalty * rawMaterialUnits) / 100;
+    rawMaterialUnits -= (productionPenalty * rawMaterialUnits) / 100;
     rawMaterialUnits = ((colony->EconomicEff * rawMaterialUnits) + 50) / 100;
 
-    productionCapacity -= (colony->ProdPenalty * productionCapacity) / 100;
+    productionCapacity -= (productionPenalty * productionCapacity) / 100;
     productionCapacity = ((colony->EconomicEff * productionCapacity) + 50) / 100;
 
     if ( colony->PlanetType == PLANET_COLONY_MINING )
-    {
-        /* Mining colony */
+    {   // Mining colony
         availableToSpend = (2 * rawMaterialUnits) / 3; 
     }
     else if ( colony->PlanetType == PLANET_COLONY_RESORT )
-    {
-        /* Resort colony */
+    {   // Resort colony
         availableToSpend = (2 * productionCapacity) / 3; 
     }
     else
-    {
+    {   // Home or Colony Planet
         rawMaterialUnits += colony->Inventory[INV_RM];
         availableToSpend = Math::Min(rawMaterialUnits, productionCapacity);
     }
