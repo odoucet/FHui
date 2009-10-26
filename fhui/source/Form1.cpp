@@ -647,14 +647,12 @@ Color Form1::GetAlienColor(Alien ^sp)
     if( sp == nullptr )
         return Color::White;
 
-    if( sp == GameData::Player )
-        return Color::FromArgb(225, 255, 255);
-
     switch( sp->Relation )
     {
-    case SP_NEUTRAL:    return Color::FromArgb(255, 255, 210);
-    case SP_ALLY:       return Color::FromArgb(220, 255, 210);
-    case SP_ENEMY:      return Color::FromArgb(255, 220, 220);
+    case SP_PLAYER:     return Color::FromArgb(210, 255, 255);
+    case SP_NEUTRAL:    return Color::FromArgb(255, 255, 195);
+    case SP_ALLY:       return Color::FromArgb(220, 255, 200);
+    case SP_ENEMY:      return Color::FromArgb(255, 210, 210);
     case SP_PIRATE:     return Color::FromArgb(230, 230, 230);
     case SP_MIXED:      return Color::FromArgb(235, 235, 235);
     }
@@ -673,14 +671,35 @@ void Form1::SetGridBgAndTooltip(DataGridView ^grid)
             IGridDataSrc ^iDataSrc = safe_cast<IGridDataSrc^>(row->Cells[index]->Value);
             String ^tooltip = iDataSrc->GetTooltipText();
             Color rowColor = GetAlienColor( iDataSrc->GetAlienForBgColor() );
+
+            // Special ROW coloring rules
+            if( grid == PlanetsGrid )
+            {
+                if( rowColor == Color::White )
+                {
+                    StarSystem ^system = iDataSrc->GetFilterSystem();
+                    // Mark empty planet in alien home system with brighter alien color
+                    if( system->HomeSpecies )
+                    {
+                        rowColor = GetAlienColor( system->HomeSpecies );
+                        rowColor = Color::FromArgb(
+                            0xff,
+                            Math::Min(255, rowColor.R + 25),
+                            Math::Min(255, rowColor.G + 25),
+                            Math::Min(255, rowColor.B + 25) );
+                    }
+                }
+            }
+
             for each( DataGridViewCell ^cell in row->Cells )
             {
                 Color cellColor(rowColor);
 
-                // Special coloring rules
+                // Special CELL coloring rules
                 if( grid == SystemsGrid )
                 {
                     StarSystem ^system = iDataSrc->GetFilterSystem();
+                    // Mark wormhole terminus'
                     if( cell->ColumnIndex == m_SystemsColumns.Wormhole )
                     {
                         if( system->HasWormhole &&

@@ -6,6 +6,13 @@ Minor changes are listed only if originally requested by player
 [P] denotes player requested features
 
 FHUI build ??
++ Develop command dialog: display TR jumping to developing system as
+  potential develop target ship.
++ Systems tab: mark matching wormhole terminus endpoints with colors.
++ Planets tab: mark empty planets in alien home system with brighter
+  alien color.
+
+FHUI build 226
 * [P] Localization independent string formatting when generating scans.
 * Scan file is exported to data directory instead of working directory.
 + Splitting "turn 0" content into several files is now allowed.
