@@ -19,6 +19,7 @@ TurnData::TurnData(int turn)
     , m_PlanetNames(gcnew SortedList<String^, PlanetName^>)
     , m_Ships(gcnew SortedList<String^, Ship^>)
     , m_WormholeJumps(gcnew List<WormholeJump^>)
+    , m_Misjumps(gcnew List<String^>)
 {
 }
 
@@ -493,17 +494,23 @@ void TurnData::UpdateShips()
     // Update wormhole targets
     for each( WormholeJump ^jump in m_WormholeJumps )
     {
-        try
+        // The ship could have been intercepted
+        if( m_Ships->ContainsKey(jump->A->ToLower()) )
         {
             Ship ^ship = GetShip(jump->A);
             StarSystem ^from = GetStarSystem(jump->B);
             // Add wormhole link
             from->SetWormhole( ship->System->GetId() );
         }
-        catch ( KeyNotFoundException^ )
+    }
+
+    // Update misjumped ships
+    for each( String ^misjump in m_Misjumps )
+    {
+        // The ship could have been intercepted
+        if( m_Ships->ContainsKey(misjump->ToLower()) )
         {
-            // Assume that the ship was intercepted
-            // and ignore this jump attempt
+            GetShip(misjump)->HadMishap = true;
         }
     }
 }
@@ -715,6 +722,11 @@ Ship^ TurnData::AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, S
 void TurnData::AddWormholeJump(String ^shipName, int fromSystemId)
 {
     m_WormholeJumps->Add( gcnew WormholeJump(shipName, fromSystemId) );
+}
+
+void TurnData::AddMishap(String ^shipName)
+{
+    m_Misjumps->Add( shipName );
 }
 
 void TurnData::DeleteAlienColonies(StarSystem^ system)

@@ -177,6 +177,9 @@ bool Report::Parse(String ^s)
         {
             MatchAlienInfo(s, m_GameData->AddAlien(m_RM->Results[0]));
         }
+        // Ship misjump
+        else if( m_RM->Match(s, "^!!! [A-Za-z0-9]+ ([^,;]+) mis-jumped to \\d+ \\d+ \\d+!$") )
+            m_GameData->AddMishap(m_RM->Results[0]);
         else if( Regex("^ORDER SECTION.").Match(s)->Success )
             m_Phase = PHASE_ORDERS_TEMPLATE;
         break;

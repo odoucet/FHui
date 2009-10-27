@@ -54,6 +54,7 @@ public:
     static void         AddPlanetName(StarSystem ^system, int pl, String ^name);
     static Ship^        AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);
     static void         AddWormholeJump(String ^shipName, int fromSystemId);
+    static void         AddMishap(String ^shipName);
 
     static void         SetSpecies(String ^sp);
     static void         SetAtmosphereReq(GasType gas, int, int);

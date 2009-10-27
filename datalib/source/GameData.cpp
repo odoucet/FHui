@@ -185,6 +185,11 @@ void GameData::AddWormholeJump(String ^shipName, int fromSystemId)
     m_CurrentTurnData->AddWormholeJump(shipName, fromSystemId);
 }
 
+void GameData::AddMishap(String ^shipName)
+{
+    m_CurrentTurnData->AddMishap(shipName);
+}
+
 void GameData::SetAtmosphereReq(GasType gas, int reqMin, int reqMax)
 {
     AtmosphericReq ^atm = Player->AtmReq;

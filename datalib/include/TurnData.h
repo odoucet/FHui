@@ -61,6 +61,7 @@ public:
     void            AddPlanetName(StarSystem ^system, int pl, String ^name);
     Ship^           AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);
     void            AddWormholeJump(String ^shipName, int fromSystemId);
+    void            AddMishap(String ^shipName);
 
 protected:
 
@@ -101,6 +102,7 @@ protected:
 
     typedef Pair<String^, int> WormholeJump;
     List<WormholeJump^>^                m_WormholeJumps;
+    List<String^>^                      m_Misjumps;
 
     initonly int        m_Turn;
 };

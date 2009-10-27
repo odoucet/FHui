@@ -2473,6 +2473,8 @@ void Form1::ShipsSetup()
         if( ship->EUToComplete > 0 )
             cells[c.Name]->Value    = ship->Name + " (incomplete)";
         cells[c.Location]->Value    = ship->PrintLocation();
+        if( ship->HadMishap )
+            cells[c.Location]->Style->ForeColor = Color::Red;
         if( !ship->IsPirate )
             cells[c.Age]->Value     = ship->Age;
         cells[c.Cap]->Value         = ship->Capacity;

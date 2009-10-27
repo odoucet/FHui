@@ -28,7 +28,8 @@ public:
         System = nullptr;
         Capacity = 0;
         IsPirate = false;
-        m_Cargo = gcnew array<int>(INV_MAX){0};
+        HadMishap = false;
+        Cargo = gcnew array<int>(INV_MAX){0};
         DidWormholeJump = false;
         Commands = gcnew List<ICommand^>;
     }
@@ -102,32 +103,30 @@ public:
 
     void            CalculateCapacity();
 
-    property Alien^         Owner;
-    property ShipType       Type;
-    property String^        Name;
-    property bool           SubLight;
-    property bool           CanJump;
-    property int            Age;
-    property ShipLocType    Location;
-    property int            PlanetNum;
-    property StarSystem^    System;
-    property int            Capacity;
-    property bool           IsPirate;
-    property int            Tonnage;
-    property int            WarTonnage;
-    property int            OriginalCost;
-    property int            EUToComplete;
-    property bool           DidWormholeJump;
+    Alien^          Owner;
+    ShipType        Type;
+    String^         Name;
+    bool            SubLight;
+    bool            CanJump;
+    int             Age;
+    ShipLocType     Location;
+    int             PlanetNum;
+    StarSystem^     System;
+    int             Capacity;
+    bool            IsPirate;
+    bool            HadMishap;
+    int             Tonnage;
+    int             WarTonnage;
+    int             OriginalCost;
+    int             EUToComplete;
+    bool            DidWormholeJump;
+    array<int>^     Cargo;
 
     property int            Size {
         int get() { return m_Size; }
         void set(int val) { m_Size = val; SetupTonnage(); }
     }
 
-    property int            Cargo [int] {
-        int  get(int inv)           { return m_Cargo[inv]; }
-        void set(int inv, int val)  { m_Cargo[inv] = val; }
-    }
 
     // ---- Ship orders ----
     List<ICommand^>^        Commands;
@@ -146,7 +145,6 @@ protected:
     void            SetupTonnage();
 
     int             m_Size;
-    array<int>     ^m_Cargo;
 };
 
 } // end namespace FHUI

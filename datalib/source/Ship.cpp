@@ -184,7 +184,7 @@ String^ Ship::PrintLocation()
 
 String^ Ship::PrintCargo()
 {
-    return GameData::PrintInventory(m_Cargo);
+    return GameData::PrintInventory(Cargo);
 }
 
 void Ship::CalculateCapacity()
@@ -262,6 +262,7 @@ String^ Ship::PrintJumpDestination()
     case CommandType::Wormhole:
         {
             ShipCmdWormhole ^cmd = safe_cast<ShipCmdWormhole^>(cmdJump);
+            jumpTarget = cmd->m_JumpTarget;
             planetNum = cmd->m_PlanetNum;
         }
         break;

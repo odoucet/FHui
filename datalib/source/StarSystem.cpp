@@ -189,7 +189,8 @@ String^ StarSystem::GenerateShipsInfo()
                 continue;
 
             String^ inv = ship->PrintCargo();
-            m_TooltipShips += String::Format("{0} {1} {2}{3}{4}\r\n",
+            m_TooltipShips += String::Format("{0}{1} {2} {3}{4}{5}\r\n",
+                ship->HadMishap ? "[MISJUMPED] " : "",
                 ship->Owner->Name,
                 ship->PrintClassWithName(),
                 ship->Type == SHIP_BAS ? String::Format("({0}k)", ship->Size / 1000) : "",
