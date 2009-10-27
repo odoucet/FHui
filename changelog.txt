@@ -6,6 +6,8 @@ Minor changes are listed only if originally requested by player
 [P] denotes player requested features
 
 FHUI build ??
+* [P] Fixed recycle command for ships.
++ New commands supported: Unload.
 + Develop command dialog: display TR jumping to developing system as
   potential develop target ship.
 + Systems tab: mark matching wormhole terminus endpoints with colors.
@@ -19,6 +21,7 @@ FHUI build ??
   If you prepare new message in current turn "Send NEW" will appear.
   If you receive a new message in last turn, this will be marked as
   "(New)" and cell will be displayed in red.
++ Ships commands menu reorganized to be similar to the one on Colonies tab.
 
 FHUI build 226
 * [P] Localization independent string formatting when generating scans.

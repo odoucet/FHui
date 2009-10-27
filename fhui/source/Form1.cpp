@@ -789,6 +789,41 @@ String^ Form1::GridPrintDistance(StarSystem ^from, StarSystem ^to, int gv, int a
     return String::Format("{0:F1}  ({1:F1}%)", distance, mishap);
 }
 
+void Form1::MenuCommandMoveUp(MenuCommandUpDownData ^data)
+{
+    List<ICommand^> ^commands = data->A;
+    ICommand ^cmd = data->B;
+
+    int i = commands->IndexOf(cmd);
+    if( i > 0 )
+    {
+        int newPos = i - 1;
+        while( newPos && commands[newPos]->GetPhase() != cmd->GetPhase() )
+            --newPos;
+        commands->RemoveAt(i);
+        commands->Insert(newPos, cmd);
+        m_CommandMgr->SaveCommands();
+    }
+}
+
+void Form1::MenuCommandMoveDown(MenuCommandUpDownData ^data)
+{
+    List<ICommand^> ^commands = data->A;
+    ICommand ^cmd = data->B;
+
+    int i = commands->IndexOf(cmd);
+    if( i < ( commands->Count - 1) )
+    {
+        int newPos = i + 1;
+        while( newPos < commands->Count &&
+                commands[newPos]->GetPhase() != cmd->GetPhase() )
+            ++newPos;
+        commands->RemoveAt(i);
+        commands->Insert(newPos, cmd);
+        m_CommandMgr->SaveCommands();
+    }
+}
+
 ////////////////////////////////////////////////////////////////
 // Systems
 
@@ -1886,51 +1921,51 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuCommands(CommandPhase phase)
         throw gcnew FHUIDataImplException("Unsupported command phase: " + ((int)phase).ToString());
     }
 
-    ToolStripMenuItem ^prodMenu = gcnew ToolStripMenuItem(title + ":");
+    ToolStripMenuItem ^menu = gcnew ToolStripMenuItem(title + ":");
 
-    bool anyProdCommand = false;
+    bool anyCommand = false;
     for each( ICommand ^cmd in m_ColoniesMenuRef->Commands )
     {
         if( cmd->GetPhase() == phase )
         {
-            prodMenu->DropDownItems->Add(
+            menu->DropDownItems->Add(
                 ColoniesFillMenuCommandsOptions(cmd) );
-            anyProdCommand = true;
+            anyCommand = true;
         }
     }
-    if( !anyProdCommand )
+    if( !anyCommand )
     {
-        prodMenu->DropDownItems->Add( "< No " + title + " orders >" );
-        prodMenu->DropDownItems[0]->Enabled = false;
+        menu->DropDownItems->Add( "< No " + title + " orders >" );
+        menu->DropDownItems[0]->Enabled = false;
     }
 
     // Add new commands
-    prodMenu->DropDownItems->Add( gcnew ToolStripSeparator );
+    menu->DropDownItems->Add( gcnew ToolStripSeparator );
     switch( phase )
     {
     case CommandPhase::PreDeparture:
-        prodMenu->DropDownItems->Add( ColoniesFillMenuPreDepartureNew() );
+        menu->DropDownItems->Add( ColoniesFillMenuPreDepartureNew() );
         break;
 
     case CommandPhase::Production:
-        prodMenu->DropDownItems->Add( ColoniesFillMenuProductionNew() );
+        menu->DropDownItems->Add( ColoniesFillMenuProductionNew() );
         break;
 
     case CommandPhase::PostArrival:
-        prodMenu->DropDownItems->Add( ColoniesFillMenuPostArrivalNew() );
+        menu->DropDownItems->Add( ColoniesFillMenuPostArrivalNew() );
         break;
     }
 
-    if( anyProdCommand )
+    if( anyCommand )
     {
-        prodMenu->DropDownItems->Add( gcnew ToolStripSeparator );
-        prodMenu->DropDownItems->Add( CreateCustomMenuItem(
+        menu->DropDownItems->Add( gcnew ToolStripSeparator );
+        menu->DropDownItems->Add( CreateCustomMenuItem(
             "Cancel All",
             static_cast<ICommand^>(nullptr),
             gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuCommandDel) ) );
     }
 
-    return prodMenu;
+    return menu;
 }
 
 ToolStripMenuItem^ Form1::ColoniesFillMenuPreDepartureNew()
@@ -2068,15 +2103,15 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuCommandsOptions(ICommand ^cmd)
     {
         menu->DropDownItems->Add( CreateCustomMenuItem(
             "Move up",
-            cmd,
-            gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuCommandMoveUp) ) );
+            gcnew MenuCommandUpDownData(m_ColoniesMenuRef->Commands, cmd),
+            gcnew EventHandler1Arg<MenuCommandUpDownData^>(this, &Form1::MenuCommandMoveUp) ) );
     }
     if( cmd != cmdLast )
     {
         menu->DropDownItems->Add( CreateCustomMenuItem(
             "Move down",
-            cmd,
-            gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuCommandMoveDown) ) );
+            gcnew MenuCommandUpDownData(m_ColoniesMenuRef->Commands, cmd),
+            gcnew EventHandler1Arg<MenuCommandUpDownData^>(this, &Form1::MenuCommandMoveDown) ) );
     }
 
     menu->DropDownItems->Add( gcnew ToolStripSeparator );
@@ -2290,37 +2325,6 @@ void Form1::ColoniesMenuCommandDel(ICommand ^cmd)
         m_CommandMgr->SaveCommands();
     }
     ColoniesGrid->Filter->Update();
-}
-
-void Form1::ColoniesMenuCommandMoveUp(ICommand ^cmd)
-{
-    int i = m_ColoniesMenuRef->Commands->IndexOf(cmd);
-    if( i > 0 )
-    {
-        int newPos = i - 1;
-        while( newPos && m_ColoniesMenuRef->Commands[newPos]->GetPhase() != cmd->GetPhase() )
-            --newPos;
-        m_ColoniesMenuRef->Commands->RemoveAt(i);
-        m_ColoniesMenuRef->Commands->Insert(newPos, cmd);
-        m_CommandMgr->SaveCommands();
-    }
-    ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
-}
-
-void Form1::ColoniesMenuCommandMoveDown(ICommand ^cmd)
-{
-    int i = m_ColoniesMenuRef->Commands->IndexOf(cmd);
-    if( i < ( m_ColoniesMenuRef->Commands->Count - 1) )
-    {
-        int newPos = i + 1;
-        while( newPos < m_ColoniesMenuRef->Commands->Count &&
-                m_ColoniesMenuRef->Commands[newPos]->GetPhase() != cmd->GetPhase() )
-            ++newPos;
-        m_ColoniesMenuRef->Commands->RemoveAt(i);
-        m_ColoniesMenuRef->Commands->Insert(newPos, cmd);
-        m_CommandMgr->SaveCommands();
-    }
-    ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
 }
 
 void Form1::ColoniesMenuAutoToggle(Object^, EventArgs^)
@@ -2549,144 +2553,270 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
             }
         }
 
-        EventHandler1Arg<ShipCommandData^> ^handler =
-            gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuOrderSet);
-        ToolStripMenuItem ^menuItem;
-
+        menu->Items->Add( ShipsFillMenuCommands(CommandPhase::PreDeparture) );
+        menu->Items->Add( ShipsFillMenuCommands(CommandPhase::Jump) );
         if( prodOrderPossible )
+            menu->Items->Add( ShipsFillMenuCommands(CommandPhase::Production) );
+        menu->Items->Add( ShipsFillMenuCommands(CommandPhase::PostArrival) );
+    }
+}
+
+ToolStripMenuItem^ Form1::ShipsFillMenuCommands(CommandPhase phase)
+{
+    String ^title;
+    switch( phase )
+    {
+    case CommandPhase::PreDeparture:
+        title = "Pre-Departure";
+        break;
+
+    case CommandPhase::Jump:
+        title = "Jumps";
+        break;
+
+    case CommandPhase::Production:
+        title = "Production";
+        break;
+
+    case CommandPhase::PostArrival:
+        title = "Post-Arrival";
+        break;
+
+    default:
+        throw gcnew FHUIDataImplException("Unsupported command phase: " + ((int)phase).ToString());
+    }
+
+    ToolStripMenuItem ^menu = gcnew ToolStripMenuItem(title + ":");
+
+    bool anyCommand = false;
+    for each( ICommand ^cmd in m_ShipsMenuRef->Commands )
+    {
+        if( cmd->GetPhase() == phase )
         {
-            if( ship->EUToComplete == 0 )
+            menu->DropDownItems->Add(
+                ShipsFillMenuCommandsOptions(cmd) );
+            anyCommand = true;
+        }
+    }
+    if( !anyCommand )
+    {
+        menu->DropDownItems->Add( "< No " + title + " orders >" );
+        menu->DropDownItems[0]->Enabled = false;
+    }
+
+    // Add new commands
+    menu->DropDownItems->Add( gcnew ToolStripSeparator );
+    switch( phase )
+    {
+    case CommandPhase::PreDeparture:
+        menu->DropDownItems->Add( ShipsFillMenuPreDepartureNew() );
+        break;
+
+    case CommandPhase::Jump:
+        menu->DropDownItems->Add( ShipsFillMenuJumpsNew() );
+        break;
+
+    case CommandPhase::Production:
+        menu->DropDownItems->Add( ShipsFillMenuProductionNew() );
+        break;
+
+    case CommandPhase::PostArrival:
+        menu->DropDownItems->Add( ShipsFillMenuPostArrivalNew() );
+        break;
+    }
+
+    if( anyCommand )
+    {
+        menu->DropDownItems->Add( gcnew ToolStripSeparator );
+        menu->DropDownItems->Add( CreateCustomMenuItem(
+            "Cancel All",
+            static_cast<ICommand^>(nullptr),
+            gcnew EventHandler1Arg<ICommand^>(this, &Form1::ShipsMenuCommandDel) ) );
+    }
+
+    return menu;
+}
+
+ToolStripMenuItem^ Form1::ShipsFillMenuPreDepartureNew()
+{
+    Ship ^ship = m_ShipsMenuRef;
+    ToolStripMenuItem ^menu = gcnew ToolStripMenuItem("Add:");
+
+    if( ship->Cargo[INV_CU] > 0 ||
+        ship->Cargo[INV_AU] > 0 ||
+        ship->Cargo[INV_IU] > 0 )
+    {
+        bool suitablePlanet = false;
+        for each( Planet ^planet in ship->System->Planets->Values )
+        {
+            if( String::IsNullOrEmpty(planet->Name) == false )
             {
-                menuItem = CreateCustomMenuItem<ShipCommandData^>(
-                    "Upgrade",
-                    gcnew ShipCommandData(ship, gcnew ShipCmdUpgrade(ship)),
-                    handler );
-                if( ship->GetProdCommand() &&
-                    ship->GetProdCommand()->GetCmdType() == CommandType::Upgrade )
-                {
-                    menuItem->Checked = true;
-                }
-                menu->Items->Add( menuItem );
+                suitablePlanet = true;
+                break;
             }
+        }
+        if( suitablePlanet )
+        {
+            menu->DropDownItems->Add( CreateCustomMenuItem<ShipCommandData^>(
+                "Unload",
+                gcnew ShipCommandData(ship, gcnew ShipCmdUnload(ship)),
+                gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandSet) ) );
+        }
+    }
 
-            menuItem = CreateCustomMenuItem<ShipCommandData^>(
-                "Recycle",
-                gcnew ShipCommandData(ship, gcnew ShipCmdRecycle(ship)),
-                handler );
-            if( ship->GetProdCommand() &&
-                ship->GetProdCommand()->GetCmdType() == CommandType::RecycleShip )
-                menuItem->Checked = true;
-            menu->Items->Add( menuItem );
+    return menu;
+}
+
+ToolStripMenuItem^ Form1::ShipsFillMenuJumpsNew()
+{
+    Ship ^ship = m_ShipsMenuRef;
+    ToolStripMenuItem ^menu = gcnew ToolStripMenuItem("Add:");
+
+    if( ship->System->HasWormhole )
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem<ShipCommandData^>(
+            "Enter Wormhole to " + ship->System->PrintWormholeTarget(),
+            gcnew ShipCommandData(ship, gcnew ShipCmdWormhole(ship, ship->System->GetWormholeTarget(), -1)),
+            gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandSet) ) );
+    }
+
+    if( ship->CanJump )
+    {
+        ToolStripMenuItem ^jumpMenu = gcnew ToolStripMenuItem("Jump to:");
+        bool anyJump = false;
+
+        // Jump to ref system
+        if( ShipsGrid->Filter->RefSystem != ship->System )
+        {
+            jumpMenu->DropDownItems->Add(
+                ShipsMenuCreateJumpItem(
+                ship,
+                ShipsGrid->Filter->RefSystem,
+                -1,
+                ShipsRef->Text ) );
+            anyJump = true;
         }
 
-        bool bCmdScan = false;
-        for each( ICommand ^cmd in ship->Commands )
+        // Colonies
+        for each( Colony ^colony in GameData::Player->Colonies )
         {
-            if( cmd->GetCmdType() == CommandType::Scan )
-                bCmdScan = true;
-        }
-
-        menuItem = CreateCustomMenuItem<ShipCommandData^>(
-            "Scan",
-            gcnew ShipCommandData(ship, gcnew ShipCmdScan(ship)),
-            handler );
-        if( bCmdScan )
-            menuItem->Checked = true;
-        menu->Items->Add( menuItem );
-
-        if( ship->System->HasWormhole )
-        {
-            EventHandler1Arg<ShipCommandData^> ^handler =
-                gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuOrderSet);
-            ToolStripMenuItem ^menuItem = CreateCustomMenuItem<ShipCommandData^>(
-                "Enter Wormhole to " + ship->System->PrintWormholeTarget(),
-                gcnew ShipCommandData(ship, gcnew ShipCmdWormhole(ship, ship->System->GetWormholeTarget(), -1)),
-                handler );
-
-            if( ship->GetJumpCommand() &&
-                ship->GetJumpCommand()->GetCmdType() == CommandType::Wormhole )
-                menuItem->Checked = true;
-
-            menu->Items->Add( menuItem );
-        }
-
-        if( ship->CanJump )
-        {
-            ToolStripMenuItem ^jumpMenu = gcnew ToolStripMenuItem("Jump to:");
-            bool anyJump = false;
-
-            if( ship->GetJumpCommand() &&
-                ship->GetJumpCommand()->GetCmdType() == CommandType::Jump )
-                jumpMenu->Checked = true;
-
-            // Jump to ref system
-            if( ShipsGrid->Filter->RefSystem != ship->System )
+            if( colony->System != ship->System )
             {
                 jumpMenu->DropDownItems->Add(
                     ShipsMenuCreateJumpItem(
-                        ship,
-                        ShipsGrid->Filter->RefSystem,
-                        -1,
-                        ShipsRef->Text ) );
+                    ship,
+                    colony->System,
+                    colony->PlanetNum,
+                    "PL " + colony->Name ) );
                 anyJump = true;
             }
-
-            // Colonies
-            for each( Colony ^colony in GameData::Player->Colonies )
-            {
-                if( colony->System != ship->System )
-                {
-                    jumpMenu->DropDownItems->Add(
-                        ShipsMenuCreateJumpItem(
-                            ship,
-                            colony->System,
-                            colony->PlanetNum,
-                            "PL " + colony->Name ) );
-                    anyJump = true;
-                }
-            }
-
-            // Named planets
-            bool anyPlanet = false;
-            for each( PlanetName ^planet in m_GameData->GetPlanetNames() )
-            {
-                if( planet->System != ship->System )
-                {
-                    if( !anyPlanet && anyJump )
-                        jumpMenu->DropDownItems->Add( gcnew ToolStripSeparator );
-
-                    jumpMenu->DropDownItems->Add(
-                        ShipsMenuCreateJumpItem(
-                            ship,
-                            planet->System,
-                            planet->PlanetNum,
-                            "PL " + planet->Name ) );
-                    anyJump = true;
-                    anyPlanet = true;
-                }
-            }
-
-            if( anyJump )
-                menu->Items->Add( jumpMenu );
         }
 
-        // If ship already has command, add option to cancel it.
-        if( ship->Commands->Count )
+        // Named planets
+        bool anyPlanet = false;
+        for each( PlanetName ^planet in m_GameData->GetPlanetNames() )
         {
-            menu->Items->Add( gcnew ToolStripSeparator );
-            ToolStripMenuItem ^cancelMenu = gcnew ToolStripMenuItem("Cancel order:");
-
-            for each( ICommand ^cmd in ship->Commands )
+            if( planet->System != ship->System )
             {
-                cancelMenu->DropDownItems->Add( CreateCustomMenuItem<ICommand^>(
-                    cmd->PrintForUI(),
-                    cmd,
-                    gcnew EventHandler1Arg<ICommand^>(this, &Form1::ShipsMenuOrderCancel) ) );
-            }
+                if( !anyPlanet && anyJump )
+                    jumpMenu->DropDownItems->Add( gcnew ToolStripSeparator );
 
-            menu->Items->Add( cancelMenu );
+                jumpMenu->DropDownItems->Add(
+                    ShipsMenuCreateJumpItem(
+                    ship,
+                    planet->System,
+                    planet->PlanetNum,
+                    "PL " + planet->Name ) );
+                anyJump = true;
+                anyPlanet = true;
+            }
+        }
+
+        if( anyJump )
+            menu->DropDownItems->Add( jumpMenu );
+    }
+
+    return menu;
+}
+
+ToolStripMenuItem^ Form1::ShipsFillMenuProductionNew()
+{
+    Ship ^ship = m_ShipsMenuRef;
+    ToolStripMenuItem ^menu = gcnew ToolStripMenuItem("Add:");
+
+    if( ship->EUToComplete == 0 )
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem<ShipCommandData^>(
+            "Upgrade",
+            gcnew ShipCommandData(ship, gcnew ShipCmdUpgrade(ship)),
+            gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandSet) ) );
+    }
+
+    menu->DropDownItems->Add( CreateCustomMenuItem<ShipCommandData^>(
+        "Recycle",
+        gcnew ShipCommandData(ship, gcnew ShipCmdRecycle(ship)),
+        gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandSet) ) );
+
+    return menu;
+}
+
+ToolStripMenuItem^ Form1::ShipsFillMenuPostArrivalNew()
+{
+    Ship ^ship = m_ShipsMenuRef;
+    ToolStripMenuItem ^menu = gcnew ToolStripMenuItem("Add:");
+
+    menu->DropDownItems->Add( CreateCustomMenuItem<ShipCommandData^>(
+        "Scan",
+        gcnew ShipCommandData(ship, gcnew ShipCmdScan(ship)),
+        gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandSet) ) );
+
+    return menu;
+}
+
+ToolStripMenuItem^ Form1::ShipsFillMenuCommandsOptions(ICommand ^cmd)
+{
+    Ship ^ship = m_ShipsMenuRef;
+    ToolStripMenuItem ^menu = gcnew ToolStripMenuItem( m_CommandMgr->PrintCommandWithInfo(cmd, 0) );
+
+    ICommand ^cmdFirst = nullptr;
+    ICommand ^cmdLast = nullptr;
+    for each( ICommand ^iCmd in ship->Commands )
+    {
+        if( iCmd->GetPhase() == cmd->GetPhase() )
+        {
+            if( cmdFirst == nullptr )
+                cmdFirst = iCmd;
+            cmdLast = iCmd;
         }
     }
+
+    if( cmd != cmdFirst )
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem(
+            "Move up",
+            gcnew MenuCommandUpDownData(ship->Commands, cmd),
+            gcnew EventHandler1Arg<MenuCommandUpDownData^>(this, &Form1::MenuCommandMoveUp) ) );
+    }
+    if( cmd != cmdLast )
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem(
+            "Move down",
+            gcnew MenuCommandUpDownData(ship->Commands, cmd),
+            gcnew EventHandler1Arg<MenuCommandUpDownData^>(this, &Form1::MenuCommandMoveDown) ) );
+    }
+
+    menu->DropDownItems->Add( gcnew ToolStripSeparator );
+
+    // Edit command
+    // none yet...
+
+    // Cancel order
+    menu->DropDownItems->Add( CreateCustomMenuItem(
+        "Cancel",
+        cmd,
+        gcnew EventHandler1Arg<ICommand^>(this, &Form1::ShipsMenuCommandDel) ) );
+
+    return menu;
 }
 
 ToolStripMenuItem^ Form1::ShipsMenuCreateJumpItem(
@@ -2723,7 +2853,7 @@ ToolStripMenuItem^ Form1::ShipsMenuCreateJumpItem(
     ToolStripMenuItem ^menuItem = CreateCustomMenuItem<ShipCommandData^>(
         itemText,
         gcnew ShipCommandData(ship, cmd),
-        gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuOrderSet) );
+        gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandSet) );
 
     return menuItem;
 }
@@ -2765,7 +2895,7 @@ void Form1::ShipsMenuSelectRef(Object^, EventArgs ^e)
         ShipsGrid->Filter->SetRefSystem(m_ShipsMenuRef->System);
 }
 
-void Form1::ShipsMenuOrderSet(ShipCommandData ^data)
+void Form1::ShipsMenuCommandSet(ShipCommandData ^data)
 {
     data->A->AddCommand( data->B );
     SystemsGrid->Filter->Update();
@@ -2773,7 +2903,7 @@ void Form1::ShipsMenuOrderSet(ShipCommandData ^data)
     m_CommandMgr->SaveCommands();
 }
 
-void Form1::ShipsMenuOrderCancel(ICommand ^cmd)
+void Form1::ShipsMenuCommandDel(ICommand ^cmd)
 {
     m_ShipsMenuRef->Commands->Remove( cmd );
     SystemsGrid->Filter->Update();

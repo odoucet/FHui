@@ -961,14 +961,6 @@ void CommandManager::GeneratePreDeparture()
         if( cmd->GetPhase() == CommandPhase::PreDeparture )
             m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
     }
-    for each( Ship ^ship in GameData::Player->Ships )
-    {
-        for each( ICommand ^cmd in ship->Commands )
-        {
-            if( cmd->GetPhase() == CommandPhase::PreDeparture )
-                m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
-        }
-    }
 
     for each ( StarSystem^ system in m_GameData->GetStarSystems() )
     {
@@ -989,6 +981,14 @@ void CommandManager::GeneratePreDeparture()
         GeneratePreDepartureInfo( system );
 
         // Print UI commands
+        for each( Ship ^ship in system->ShipsOwned )
+        {
+            for each( ICommand ^cmd in ship->Commands )
+            {
+                if( cmd->GetPhase() == CommandPhase::PreDeparture )
+                    m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
+            }
+        }
         for each( Colony ^colony in system->ColoniesOwned )
         {
             for each( ICommand ^cmd in colony->Commands )
@@ -1232,7 +1232,7 @@ void CommandManager::GenerateProductionRecycle(Colony ^colony)
         ICommand ^prodCmd = ship->GetProdCommand();
 
         if( prodCmd != nullptr &&
-            prodCmd->GetCmdType() == CommandType::Recycle &&
+            prodCmd->GetCmdType() == CommandType::RecycleShip &&
             ship->CommandProdPlanet == -1 )    // not yet done
         {
             // If ship is incomplete,

@@ -42,6 +42,9 @@ public enum class CommandType
     Wormhole,
     Scan,
     Unload,
+    Land,
+    Deep,
+    Orbit,
     // Production commands:
     Hide,
     Shipyard,
@@ -185,6 +188,45 @@ public:
     virtual String^ PrintForUI() override   { return "Unload"; }
 
     Ship^   m_Ship;
+};
+
+// Land
+public ref class ShipCmdLand : public CmdBase<CommandPhase::PreDeparture, CommandType::Land>
+{
+public:
+    ShipCmdLand(Ship ^ship) : m_Ship(ship) {}
+
+    virtual String^ Print() override        { return "Land " + m_Ship->PrintClassWithName(); }
+    virtual String^ PrintForUI() override   { return "Land"; }
+
+    Ship^   m_Ship;
+};
+
+// Deep
+public ref class ShipCmdDeep : public CmdBase<CommandPhase::PreDeparture, CommandType::Deep>
+{
+public:
+    ShipCmdDeep(Ship ^ship) : m_Ship(ship) {}
+
+    virtual String^ Print() override        { return "Deep " + m_Ship->PrintClassWithName(); }
+    virtual String^ PrintForUI() override   { return "Deep"; }
+
+    Ship^   m_Ship;
+};
+
+// Orbit
+public ref class ShipCmdOrbit : public CmdBase<CommandPhase::PreDeparture, CommandType::Orbit>
+{
+public:
+    ShipCmdOrbit(Ship ^ship, Planet ^planet) : m_Ship(ship), m_Planet(planet) {}
+
+    virtual String^ Print() override        { return String::Format("Orbit {0}, {1}", m_Ship->PrintClassWithName(), GetOrbitTarget()); }
+    virtual String^ PrintForUI() override   { return "Orbit " + GetOrbitTarget(); }
+
+    virtual String^ GetOrbitTarget() { return String::IsNullOrEmpty(m_Planet->Name) ? m_Planet->Number.ToString() : m_Planet->Name; }
+
+    Ship^   m_Ship;
+    Planet^ m_Planet;
 };
 
 // Scan

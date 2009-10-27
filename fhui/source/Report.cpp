@@ -1157,9 +1157,9 @@ void Report::MatchOrdersTemplate(String ^s)
     }
 
     // UNLOAD
-    if( m_RM->Match(s, "^Unload\\s+(\\w+)\\s+([^,]+)$") )
+    if( m_RM->Match(s, m_RM->ExpCmdShipUnload) )
     {
-        Ship^ ship = m_GameData->GetShip(m_RM->Results[1]);  
+        Ship^ ship = m_GameData->GetShip(m_RM->Results[0]);  
         if ( ship )
         {
             ICommand ^cmd = gcnew ShipCmdUnload(ship);

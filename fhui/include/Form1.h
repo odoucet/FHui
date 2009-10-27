@@ -109,6 +109,10 @@ namespace FHUI {
             T data,
             EventHandler1Arg<T> ^handler );
 
+        typedef Pair<List<ICommand^>^, ICommand^>   MenuCommandUpDownData;
+        void        MenuCommandMoveUp(MenuCommandUpDownData ^data);
+        void        MenuCommandMoveDown(MenuCommandUpDownData ^data);
+
         // ==================================================
 
         ////////////////////////////////////////////////////////////////
@@ -242,8 +246,6 @@ namespace FHUI {
         void        ColoniesMenuProdOrderAdjust(int adjustment);
         void        ColoniesMenuCommandAdd(ICommand ^cmd);
         void        ColoniesMenuCommandDel(ICommand ^cmd);
-        void        ColoniesMenuCommandMoveUp(ICommand ^cmd);
-        void        ColoniesMenuCommandMoveDown(ICommand ^cmd);
         void        ColoniesMenuProdCommandAddResearch(Object^, EventArgs^);
         void        ColoniesMenuProdCommandAddBuildIuAu(ProdCmdBuildIUAU ^cmd);
         void        ColoniesMenuProdCommandAddBuildShip(Object^, EventArgs^);
@@ -288,11 +290,17 @@ namespace FHUI {
         void        ShipsSetup();
         void        ShipsSetRef( int rowIndex );
         void        ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
+        ToolStripMenuItem^  ShipsFillMenuCommands(CommandPhase phase);
+        ToolStripMenuItem^  ShipsFillMenuPreDepartureNew();
+        ToolStripMenuItem^  ShipsFillMenuJumpsNew();
+        ToolStripMenuItem^  ShipsFillMenuProductionNew();
+        ToolStripMenuItem^  ShipsFillMenuPostArrivalNew();
+        ToolStripMenuItem^  ShipsFillMenuCommandsOptions(ICommand ^cmd);
         void        ShipsMenuSelectRef(Object^, EventArgs^);
 
         typedef Pair<Ship^, ICommand^>  ShipCommandData;
-        void        ShipsMenuOrderSet(ShipCommandData ^data);
-        void        ShipsMenuOrderCancel(ICommand ^cmd);
+        void        ShipsMenuCommandSet(ShipCommandData ^data);
+        void        ShipsMenuCommandDel(ICommand ^cmd);
 
         ToolStripMenuItem^ ShipsMenuAddJumpsHere(
                         StarSystem ^system, int planetNum );
