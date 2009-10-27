@@ -136,6 +136,20 @@ public:
     bool            Hidden;
     bool            UnderSiege;
     bool            Shared;
+    property bool   IsNew
+    {
+        bool get()
+        {
+            return IsNameCommandPending();
+        }
+    }
+    property bool   IsDisband
+    {
+        bool get()
+        {
+            return IsDisbandCommandPending();
+        }
+    }
 
     property int EconomicBase { int get() { return Math::Max(-1, MiBase + MaBase); } }
     property int EUAvail { int get() { return EUProd - EUFleet; } }
@@ -165,6 +179,8 @@ public:
     };
 
     void                ProductionReset();
+    bool                IsNameCommandPending();
+    bool                IsDisbandCommandPending();
 
     List<ICommand^>^    Commands;       // Colony commands
     Resources^          Res;            // Resource tracking for orders template

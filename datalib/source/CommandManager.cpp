@@ -128,7 +128,10 @@ void CommandManager::DelCommand(ICommand ^cmd)
 void CommandManager::AddCommand(Colony ^colony, ICommand ^cmd)
 {
     colony->Commands->Add(cmd);
-    SaveCommands();
+    if( m_bSaveEnabled )
+    {
+        SaveCommands();
+    }
 }
 
 void CommandManager::DelCommand(Colony ^colony, ICommand ^cmd)
@@ -193,12 +196,41 @@ void CommandManager::SaveCommands()
     GameData::Player->SortColoniesByProdOrder();
     for each( Colony ^colony in GameData::Player->Colonies )
     {
-        commandList->Add( "COLONY " + colony->Name );
-        for each( ICommand ^cmd in colony->Commands )
+        if( colony->IsNew )
         {
-            commandList->Add( PrintCommandToFile(cmd) );
+            // Fresh colony
+            // Put the NAME command outside of section
+            for each( ICommand ^cmd in colony->Commands )
+            {
+                if( cmd->GetCmdType() == CommandType::Name )
+                {
+                    commandList->Add( PrintCommandToFile(cmd) );
+                }
+            }
+
+            if( colony->Commands->Count > 1 )
+            {
+                commandList->Add( "COLONY " + colony->Name );
+                for each( ICommand ^cmd in colony->Commands )
+                {
+                    if( cmd->GetCmdType() != CommandType::Name )
+                    {
+                        commandList->Add( PrintCommandToFile(cmd) );
+                    }
+                }
+                commandList->Add( "END_COLONY" );
+            }
         }
-        commandList->Add( "END_COLONY" );
+        else
+        {
+            // Established colony
+            commandList->Add( "COLONY " + colony->Name );
+            for each( ICommand ^cmd in colony->Commands )
+            {
+                commandList->Add( PrintCommandToFile(cmd) );
+            }
+            commandList->Add( "END_COLONY" );
+        }
     }
 
     // -- Ships
@@ -411,22 +443,15 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
                 false);
             Planet ^planet = system->Planets[ m_RM->GetResultInt(3) ];
             String ^name = m_RM->Results[4];
-            AddCommand( CmdSetOrigin(gcnew CmdPlanetName(system, planet->Number, name)) );
-            GameData::AddPlanetName(system, planet->Number, name);
-            planet->AddName(name);
+            AddCommand(
+                m_GameData->AddColony(GameData::Player, name, system, planet->Number, false),
+                CmdSetOrigin(gcnew CmdPlanetName(system, planet->Number, name)) );
         }
         else if( m_RM->Match(line, m_RM->ExpCmdPLDisband) )
         {
-            String ^name = m_RM->Results[0];
-            for each( PlanetName ^pn in m_GameData->GetPlanetNames() )
-            {
-                if( pn->Name == name )
-                {
-                    AddCommand( CmdSetOrigin(gcnew CmdDisband(name)) );
-                    pn->System->Planets[ pn->PlanetNum ]->DelName();
-                    break;
-                }
-            }
+            AddCommand(
+                GameData::GetColony( m_RM->Results[0] ),
+                CmdSetOrigin(gcnew CmdDisband( m_RM->Results[0] )) );
         }
         else if( m_RM->Match(line, m_RM->ExpCmdSPNeutral) )
         {
@@ -527,13 +552,17 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
         if( !String::IsNullOrEmpty(line) )
         {
             if( m_RM->Match(line, m_RM->ExpCmdTargetColony) )
-                targetColony = GameData::GetColonyFromPlanet(
-                    GameData::GetPlanetByName(m_RM->Results[0]),
-                    true );
+            {
+                targetColony = GameData::GetColony( m_RM->Results[0] );
+            }
             else if( m_RM->Match(line, m_RM->ExpCmdTargetShip) )
+            {
                 targetShip = GameData::GetShip( m_RM->Results[0] );
+            }
             else
+            {
                 throw gcnew FHUIParsingException("Invalid build target: " + line);
+            }
         }
         colony->Commands->Add( CmdSetOrigin(
             gcnew ProdCmdBuildIUAU(
@@ -586,30 +615,21 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
     // Install
     if( m_RM->Match(line, m_RM->ExpCmdInstall) )
     {
-        Planet ^planet = m_GameData->GetPlanetByName( m_RM->Results[2] );  
-        if ( planet )
-        {
-            Colony ^colony = GameData::GetColonyFromPlanet(planet, true);
+        Colony ^colony = GameData::GetColony( m_RM->Results[2] );
 
-            colony->Commands->Add( CmdSetOrigin(gcnew CmdInstall(
-                m_RM->GetResultInt(0),
-                m_RM->Results[1],
-                colony ) ) );
+        colony->Commands->Add( CmdSetOrigin(gcnew CmdInstall(
+            m_RM->GetResultInt(0),
+            m_RM->Results[1],
+            colony ) ) );
 
-            return true;
-        }
-        throw gcnew FHUIParsingException(
-            String::Format("INSTALL order for unknown planet: PL {0}", m_RM->Results[0]) );
+        return true;
     }
 
     // Develop
     if( m_RM->Match(line, m_RM->ExpCmdDevelopCS) )
     {
-        Planet ^planet = m_GameData->GetPlanetByName(m_RM->Results[1]);
-        if ( !planet )
-            throw gcnew FHUIParsingException("DEVELOP order for unknown planet: PL " + m_RM->Results[1]);
-        Colony ^devColony = m_GameData->GetColonyFromPlanet(planet, true);
-        Ship^ ship = m_GameData->GetShip(m_RM->Results[1]);
+        Colony ^devColony = m_GameData->GetColony(m_RM->Results[1]);
+        Ship^ ship = m_GameData->GetShip(m_RM->Results[2]);
         if( !ship )
             throw gcnew FHUIParsingException("JUMP order for unknown ship: {1}" + m_RM->Results[2]);
 
@@ -622,10 +642,7 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
     }
     if( m_RM->Match(line, m_RM->ExpCmdDevelopC) )
     {
-        Planet ^planet = m_GameData->GetPlanetByName(m_RM->Results[1]);
-        if ( !planet )
-            throw gcnew FHUIParsingException("DEVELOP order for unknown planet: PL " + m_RM->Results[1]);
-        Colony ^devColony = m_GameData->GetColonyFromPlanet(planet, true);
+        Colony ^devColony = m_GameData->GetColony(m_RM->Results[1]);
 
         colony->Commands->Add( CmdSetOrigin(gcnew ProdCmdDevelop(
             m_RM->GetResultInt(0),

@@ -29,15 +29,9 @@ public:
     static StarSystem^     GetStarSystem(String ^name)         { return m_CurrentTurnData->GetStarSystem(name); }
     static Colony^         GetColony(String ^name)             { return m_CurrentTurnData->GetColony(name); }
     static Ship^           GetShip(String ^name)               { return m_CurrentTurnData->GetShip(name); }
-    static Planet^         GetPlanetByName(String ^name)       { return m_CurrentTurnData->GetPlanetByName(name); }
-
-    // Returns Player's colony for given planet. If colony doesn't yet exists,
-    // create one if allowed. New colony will be owned by the Player.
-    static Colony^          GetColonyFromPlanet(Planet ^planet, bool allowCreate);
 
     static IList<Alien^>^          GetAliens()          { return m_CurrentTurnData->GetAliens(); }
     static IList<StarSystem^>^     GetStarSystems()     { return m_CurrentTurnData->GetStarSystems(); }
-    static IList<PlanetName^>^     GetPlanetNames()     { return m_CurrentTurnData->GetPlanetNames(); }
     static IList<Ship^>^           GetShips()           { return m_CurrentTurnData->GetShips(); }
     static IList<Colony^>^         GetColonies()        { return m_CurrentTurnData->GetColonies(); }
 
@@ -50,8 +44,8 @@ public:
     static void         AddPlanetScan(StarSystem ^system, Planet ^planet);
     static void         SetTurnStartEU(int eu);
     static void         AddTurnProducedEU(int eu);
-    static Colony^      AddColony(Alien ^sp, String ^name, StarSystem ^system, int plNum);
-    static void         AddPlanetName(StarSystem ^system, int pl, String ^name);
+    static Colony^      AddColony(Alien ^sp, String ^name, StarSystem ^system, int plNum, bool);
+    static void         DelColony(String ^name);
     static Ship^        AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);
     static void         AddWormholeJump(String ^shipName, int fromSystemId);
     static void         AddMishap(String ^shipName);

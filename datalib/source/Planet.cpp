@@ -13,30 +13,23 @@ String^ Planet::GetTooltipText()
 
 String^ Planet::GetNameWithOrders()
 {
+    if( String::IsNullOrEmpty(Name) )
+    {
+        return nullptr;
+    }
+
     String ^n = Name;
-    if( NameIsNew )
+    Colony ^colony = GameData::GetColony(Name);
+    if( colony->IsNew )
+    {
         n += " (new)";
-    else if( NameIsDisband )
+    }
+    else if( colony->IsDisband )
+    {
         n += " (disband)";
+    }
 
     return n;
-}
-
-void Planet::AddName(String ^name)
-{
-    Name = name;
-    NameIsNew = true;
-}
-
-void Planet::DelName()
-{
-    if( NameIsNew )
-    {
-        Name = nullptr;
-        NameIsNew = false;
-    }
-    else
-        NameIsDisband = true;
 }
 
 String^ Planet::PrintLocation()

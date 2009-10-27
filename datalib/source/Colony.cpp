@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "GameData.h"
+#include "Commands.h"
 
 namespace FHUI
 {
@@ -104,6 +105,30 @@ void Colony::ProductionReset()
     Res->Inventory = gcnew array<int>(INV_MAX){0};
     for( int i = 0; i < INV_MAX; ++i )
         Res->Inventory[i] = Inventory[i];
+}
+
+bool Colony::IsDisbandCommandPending()
+{
+    for each( ICommand ^cmd in Commands )
+    {
+        if( cmd->GetCmdType() == CommandType::Disband )
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Colony::IsNameCommandPending()
+{
+    for each( ICommand ^cmd in Commands )
+    {
+        if( cmd->GetCmdType() == CommandType::Name )
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 } // end namespace FHUI

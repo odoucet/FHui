@@ -235,16 +235,7 @@ bool Report::Parse(String ^s)
     case PHASE_ORDERS_PRE_DEP:
         if( m_RM->Match(s, "Named PL ([^,;]+) at (\\d+)\\s+(\\d+)\\s+(\\d+), planet #(\\d+)\\.") )
         {
-            StarSystem^ system = m_GameData->GetStarSystem(
-                m_RM->GetResultInt(1),
-                m_RM->GetResultInt(2),
-                m_RM->GetResultInt(3),
-                false );
-
-            int plNum = m_RM->GetResultInt(4);
-            String^ plName = m_RM->Results[0];
-
-            m_GameData->AddPlanetName( system, plNum, plName);
+            // Ignore, planet will be parsed later in the turn status
         }
         else if( Regex("^Jump orders:").Match(s)->Success )
             m_Phase = PHASE_ORDERS_JUMP;
@@ -615,10 +606,8 @@ void Report::MatchColonyScan(String ^s)
                 GameData::Player,
                 plName,
                 system,
-                plNum );
-
-            // Species have colony here, so system is visited
-            system->LastVisited = m_Turn;
+                plNum,
+                true );
 
             if( m_ScanColony == nullptr )
             {
@@ -1021,40 +1010,35 @@ void Report::MatchOtherPlanetsShipsScan(String ^s)
         int plNum = m_RM->GetResultInt(3);
         String^ plName = m_RM->Results[4];
 
-        m_GameData->AddPlanetName( system, plNum, plName);
+        // TODO: Not sure if system is under observation when no CUs are present on the planet
+        bool isObserver = ( m_RM->Results[5]->Length > 0 );
 
-        if( m_RM->Results[5]->Length > 0 )
+        // Treat as colony of size 0
+        Colony^ colony = m_GameData->AddColony(
+            GameData::Player,
+            plName,
+            system,
+            plNum,
+            isObserver );
+
+        colony->PlanetType = PLANET_COLONY;
+        colony->LSN = system->Planets[plNum]->LSN;
+        colony->MiDiff = system->Planets[plNum]->MiDiff;
+        colony->MiBase = 0;
+        colony->MaBase = 0;
+        colony->EconomicEff = 0;
+
+        while( !String::IsNullOrEmpty(s) )
         {
-            // Treat as colony of size 0
-            Colony^ colony = m_GameData->AddColony(
-                GameData::Player,
-                plName,
-                system,
-                plNum );
-
-            colony->PlanetType = PLANET_COLONY;
-            colony->LSN = system->Planets[plNum]->LSN;
-            colony->MiDiff = system->Planets[plNum]->MiDiff;
-            colony->MiBase = 0;
-            colony->MaBase = 0;
-            colony->EconomicEff = 0;
-
-            // Species have colony here, so system is visited
-            // TODO: Not sure if system is under surveillance when no CUs are present on the planet
-            system->LastVisited = m_Turn;
-
-            while( !String::IsNullOrEmpty(s) )
+            if( m_RM->Match(s, "^,?\\s+(\\d+)\\s+(\\w+)\\s*") )
             {
-                if( m_RM->Match(s, "^,?\\s+(\\d+)\\s+(\\w+)\\s*") )
-                {
-                    int amount = m_RM->GetResultInt(0);
-                    InventoryType inv = FHStrings::InvFromString( m_RM->Results[1] );
-                    colony->Inventory[inv] = amount;
-                }
-                else
-                    throw gcnew FHUIParsingException(
-                        String::Format("Unable to parse colony '{0}' inventory.", plName));
+                int amount = m_RM->GetResultInt(0);
+                InventoryType inv = FHStrings::InvFromString( m_RM->Results[1] );
+                colony->Inventory[inv] = amount;
             }
+            else
+                throw gcnew FHUIParsingException(
+                    String::Format("Unable to parse colony '{0}' inventory.", plName));
         }
     }
 
@@ -1089,7 +1073,7 @@ void Report::MatchAliensReport(String ^s)
             int plNum    = m_RM->GetResultInt(1);
             Alien ^sp    = m_GameData->AddAlien(m_RM->Results[2]);
 
-            m_ScanColony = m_GameData->AddColony(sp, name, system, plNum);
+            m_ScanColony = m_GameData->AddColony(sp, name, system, plNum, false);
             if( m_ScanColony )
             {
                 m_ScanColony->LastSeen = Math::Max(m_Turn, m_ScanColony->LastSeen);
@@ -1142,21 +1126,15 @@ void Report::MatchOrdersTemplate(String ^s)
     // INSTALL
     if( m_RM->Match(s, m_RM->ExpCmdInstall) )
     {
-        Planet ^planet = m_GameData->GetPlanetByName(m_RM->Results[2]);  
-        if ( planet )
-        {
-            Colony ^colony = GameData::GetColonyFromPlanet(planet, true);
+        Colony ^colony = GameData::GetColony( m_RM->Results[2] );
 
-            ICommand ^cmd = gcnew CmdInstall(
-                m_RM->GetResultInt(0),
-                m_RM->Results[1],
-                colony );
-            cmd->Origin = CommandOrigin::Auto;
-            colony->Commands->Add( cmd );
-            return;
-        }
-        throw gcnew FHUIParsingException(
-            "INSTALL order for unknown planet: PL " + m_RM->Results[0] );
+        ICommand ^cmd = gcnew CmdInstall(
+            m_RM->GetResultInt(0),
+            m_RM->Results[1],
+            colony );
+        cmd->Origin = CommandOrigin::Auto;
+        colony->Commands->Add( cmd );
+        return;
     }
 
     // UNLOAD
@@ -1196,11 +1174,11 @@ void Report::MatchOrdersTemplate(String ^s)
                     true );
                 cmd = gcnew ShipCmdJump(ship, jumpTarget, -1);
             }
-            else if( m_RM->Match(target, "PL\\s+([^,]+)") )
+            else if( m_RM->Match(target, "PL\\s+([^,;]+)") )
             {
-                Planet ^planet = GameData::GetPlanetByName(m_RM->Results[0]);
-                if( planet )
-                    cmd = gcnew ShipCmdJump(ship, planet->System, planet->Number);
+                Colony ^colony = GameData::GetColony(m_RM->Results[0]->TrimEnd());
+                if( colony )
+                    cmd = gcnew ShipCmdJump(ship, colony->System, colony->PlanetNum);
             }
             if( cmd )
             {
@@ -1229,11 +1207,8 @@ void Report::MatchOrdersTemplate(String ^s)
     // DEVELOP
     if( m_RM->Match(s, m_RM->ExpCmdDevelopCS) )
     {
-        Planet ^planet = m_GameData->GetPlanetByName(m_RM->Results[1]);
-        if ( !planet )
-            throw gcnew FHUIParsingException("DEVELOP order for unknown planet: PL " + m_RM->Results[1]);
-        Colony ^colony = m_GameData->GetColonyFromPlanet(planet, true);
-        Ship^ ship = m_GameData->GetShip(m_RM->Results[1]);
+        Colony ^colony = m_GameData->GetColony(m_RM->Results[1]);
+        Ship^ ship = m_GameData->GetShip(m_RM->Results[2]);
         if( !ship )
             throw gcnew FHUIParsingException("JUMP order for unknown ship: {1}" + m_RM->Results[2]);
 
@@ -1247,10 +1222,7 @@ void Report::MatchOrdersTemplate(String ^s)
     }
     if( m_RM->Match(s, m_RM->ExpCmdDevelopC) )
     {
-        Planet ^planet = m_GameData->GetPlanetByName(m_RM->Results[1]);
-        if ( !planet )
-            throw gcnew FHUIParsingException("DEVELOP order for unknown planet: PL " + m_RM->Results[1]);
-        Colony ^colony = m_GameData->GetColonyFromPlanet(planet, true);
+        Colony ^colony = m_GameData->GetColony(m_RM->Results[1]);
 
         ICommand ^cmd = gcnew ProdCmdDevelop(
             m_RM->GetResultInt(0),

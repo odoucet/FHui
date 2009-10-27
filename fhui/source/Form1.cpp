@@ -1385,30 +1385,34 @@ void Form1::PlanetsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex
             nullptr,
             gcnew EventHandler(this, &Form1::PlanetsMenuAddNameStart) );
     }
-    else if( planet->NameIsDisband )
+    else
     {
-        menu->Items->Add( gcnew ToolStripSeparator );
-        menu->Items->Add(
-            "Cancel Disband",
-            nullptr,
-            gcnew EventHandler(this, &Form1::PlanetsMenuRemoveNameCancel) );
-    }
-    else if( planet->NameIsNew ||
-        planet->NumColoniesOwned == 0 )
-    {
-        menu->Items->Add( gcnew ToolStripSeparator );
-        menu->Items->Add(
-            "Remove Name",
-            nullptr,
-            gcnew EventHandler(this, &Form1::PlanetsMenuRemoveName) );
-    }
+        Colony ^colony = GameData::GetColony(planet->Name);
 
-    // Ship jumps to this planet
-    ToolStripMenuItem ^jumpMenu = ShipsMenuAddJumpsHere( planet->System, planet->Number );
-    if( jumpMenu )
-    {
-        menu->Items->Add( gcnew ToolStripSeparator );
-        menu->Items->Add( jumpMenu );
+        if( colony->IsDisband )
+        {
+            menu->Items->Add( gcnew ToolStripSeparator );
+            menu->Items->Add(
+                "Cancel Disband",
+                nullptr,
+                gcnew EventHandler(this, &Form1::PlanetsMenuRemoveNameCancel) );
+        }
+        else if( colony->EconomicBase <= 0 )
+        {
+            menu->Items->Add( gcnew ToolStripSeparator );
+            menu->Items->Add(
+                "Remove Name",
+                nullptr,
+                gcnew EventHandler(this, &Form1::PlanetsMenuRemoveName) );
+        }
+
+        // Ship jumps to this planet
+        ToolStripMenuItem ^jumpMenu = ShipsMenuAddJumpsHere( planet->System, planet->Number );
+        if( jumpMenu )
+        {
+            menu->Items->Add( gcnew ToolStripSeparator );
+            menu->Items->Add( jumpMenu );
+        }
     }
 
     menu->Items->Add( PlanetsMenuFillAlienLSN() );
@@ -1482,58 +1486,52 @@ void Form1::PlanetsMenuAddName(DataGridViewCellEventArgs ^cell)
     if( String::IsNullOrEmpty(name) )
         return;
 
-    bool addName = true;
-
     // Check for duplicate name
-    String ^nameLower = name->ToLower();
-    for each( StarSystem ^system in m_GameData->GetStarSystems() )
+    if( GameData::GetColony( name->ToLower() ) )
     {
-        for each( Planet ^planet in system->Planets->Values )
-            if( !String::IsNullOrEmpty(planet->Name) &&
-                planet->Name->ToLower() == nameLower )
-            {
-                MessageBox::Show(
-                    this,
-                    "Planet named '" + name + "' already exists.",
-                    "Planet Name",
-                    MessageBoxButtons::OK,
-                    MessageBoxIcon::Error);
-
-                addName = false;
-            }
+        MessageBox::Show(
+            this,
+            "Planet named '" + name + "' already exists.",
+            "Planet Name",
+            MessageBoxButtons::OK,
+            MessageBoxIcon::Error);
+        return;
     }
 
-    if( addName )
-    {
-        m_GameData->AddPlanetName( m_PlanetsMenuRef->System, m_PlanetsMenuRef->Number, name );
+    Colony ^colony = m_GameData->AddColony(
+        GameData::Player,
+        name,
+        m_PlanetsMenuRef->System,
+        m_PlanetsMenuRef->Number,
+        false );
 
-        m_CommandMgr->AddCommand( 
-            gcnew CmdPlanetName( m_PlanetsMenuRef->System, m_PlanetsMenuRef->Number, name ) );
-
-        m_PlanetsMenuRef->AddName(name);
-    }
+    m_CommandMgr->AddCommand( colony, 
+        gcnew CmdPlanetName( m_PlanetsMenuRef->System, m_PlanetsMenuRef->Number, name ) );
 
     PlanetsGrid->Filter->Update();
 }
 
 void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
 {
-    if( m_PlanetsMenuRef->NameIsNew )
+    Colony ^colony = GameData::GetColony( m_PlanetsMenuRef->Name );
+
+    if( colony->IsNew )
     {   // Remove Name command
         CmdPlanetName ^cmdDup = gcnew CmdPlanetName(
             m_PlanetsMenuRef->System,
             m_PlanetsMenuRef->Number,
             m_PlanetsMenuRef->Name);
 
-        m_CommandMgr->DelCommand( cmdDup );
-        //m_PlanetsMenuRef->NameIsDisband = false;
+        // Delete the token colony
+        GameData::DelColony( m_PlanetsMenuRef->Name );
+
+        m_CommandMgr->DelCommand( colony, cmdDup );
+        m_PlanetsMenuRef->Name = nullptr;
     }
     else
     {   // Add Disband command
-        m_CommandMgr->AddCommand( gcnew CmdDisband( m_PlanetsMenuRef->Name ) );
+        m_CommandMgr->AddCommand( colony, gcnew CmdDisband( m_PlanetsMenuRef->Name ) );
     }
-
-    m_PlanetsMenuRef->DelName();
 
     PlanetsGrid->Filter->Update();
 }
@@ -1542,9 +1540,9 @@ void Form1::PlanetsMenuRemoveNameCancel(Object^, EventArgs^)
 {
     // Remove Disband command
     m_CommandMgr->DelCommand(
+        GameData::GetColony( m_PlanetsMenuRef->Name ),
         gcnew CmdDisband( m_PlanetsMenuRef->Name ) );
 
-    m_PlanetsMenuRef->NameIsDisband = false;
     PlanetsGrid->Filter->Update();
 }
 
@@ -1731,17 +1729,22 @@ void Form1::ColoniesSetup()
                 }
             }
             else
+            {
                 prodOrders = "< No production orders >";
+            }
 
-            cells[c.Budget]->Value  = prodSum != 0
-                ? String::Format("{0} ({1}{2})", colony->Res->TotalEU, prodSum < 0 ? "+" : "", -prodSum)
-                :  colony->Res->TotalEU.ToString();
-            if( colony->Res->TotalEU < 0 )
-                cells[c.Budget]->Style->ForeColor = Color::Red;
+            if( colony->EconomicBase != -1 )
+            {
+                cells[c.Budget]->Value  = prodSum != 0
+                    ? String::Format("{0} ({1}{2})", colony->Res->TotalEU, prodSum < 0 ? "+" : "", -prodSum)
+                    :  colony->Res->TotalEU.ToString();
+                if( colony->Res->TotalEU < 0 )
+                    cells[c.Budget]->Style->ForeColor = Color::Red;
 
-            cells[c.Prod]->ToolTipText      = prodOrders;
-            cells[c.ProdOrder]->ToolTipText = prodOrders;
-            cells[c.Budget]->ToolTipText    = prodOrders;
+                cells[c.Prod]->ToolTipText      = prodOrders;
+                cells[c.ProdOrder]->ToolTipText = prodOrders;
+                cells[c.Budget]->ToolTipText    = prodOrders;
+            }
         }
         else
         {

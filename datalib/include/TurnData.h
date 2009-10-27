@@ -38,10 +38,8 @@ public:
 
     IList<Alien^>^          GetAliens()                         { return m_Aliens->Values; }
     IList<StarSystem^>^     GetStarSystems()                    { return m_Systems->Values; }
-    IList<PlanetName^>^     GetPlanetNames()                    { return m_PlanetNames->Values; }
     IList<Ship^>^           GetShips()                          { return m_ShipsByTonnage; }
     IList<Colony^>^         GetColonies()                       { return m_Colonies->Values; }
-    Planet^                 GetPlanetByName(String ^name);
 
     // ------------------------------------------
     void            Update();
@@ -57,8 +55,8 @@ public:
     void            SetTurnStartEU(int eu);
     void            AddTurnProducedEU(int eu);
     void            AddColony(Colony^);
-    Colony^         AddColony(Alien ^sp, String ^name, StarSystem ^system, int plNum);
-    void            AddPlanetName(StarSystem ^system, int pl, String ^name);
+    void            DelColony(String ^name);
+    Colony^         AddColony(Alien ^sp, String ^name, StarSystem ^system, int plNum, bool);
     Ship^           AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);
     void            AddWormholeJump(String ^shipName, int fromSystemId);
     void            AddMishap(String ^shipName);
@@ -70,7 +68,6 @@ protected:
     void            UpdateShips();
     void            UpdateAliens();
     void            UpdateSystems();
-    void            LinkPlanetNames();
     void            UpdateHomeWorlds();
     void            UpdateColonies();
 
@@ -96,7 +93,6 @@ protected:
     SortedList<int, StarSystem^>^       m_Systems;
     SortedList<String^, Alien^>^        m_Aliens;
     SortedList<String^, Colony^>^       m_Colonies;
-    SortedList<String^, PlanetName^>^   m_PlanetNames;
     SortedList<String^, Ship^>^         m_Ships;
     List<Ship^>^                        m_ShipsByTonnage;
 

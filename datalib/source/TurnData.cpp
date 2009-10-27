@@ -16,7 +16,6 @@ TurnData::TurnData(int turn)
     , m_Aliens(gcnew SortedList<String^, Alien^>)
     , m_Systems(gcnew SortedList<int, StarSystem^>)
     , m_Colonies(gcnew SortedList<String^, Colony^>)
-    , m_PlanetNames(gcnew SortedList<String^, PlanetName^>)
     , m_Ships(gcnew SortedList<String^, Ship^>)
     , m_WormholeJumps(gcnew List<WormholeJump^>)
     , m_Misjumps(gcnew List<String^>)
@@ -234,10 +233,6 @@ StarSystem^ TurnData::GetStarSystem(String ^name)
     {
         return m_Colonies[name->ToLower()]->System;
     }
-    else if ( m_PlanetNames->ContainsKey( name->ToLower() ) )
-    {
-        return m_PlanetNames[name->ToLower()]->System;
-    }
     else
     {
         return nullptr;
@@ -246,7 +241,14 @@ StarSystem^ TurnData::GetStarSystem(String ^name)
 
 Colony^ TurnData::GetColony(String ^name)
 {
-    return m_Colonies[name->ToLower()];
+    if( m_Colonies->ContainsKey( name->ToLower() ) )
+    {
+        return m_Colonies[ name->ToLower() ];
+    }
+    else
+    {
+        return nullptr;
+    }
 }
 
 List<Colony^>^ TurnData::GetColonies(StarSystem ^sys, Alien ^sp)
@@ -358,7 +360,7 @@ void TurnData::AddAlien(Alien^ alien)
 
 void TurnData::AddColony(Colony^ colony)
 {
-    m_Colonies->Add( colony->Name, colony );
+    m_Colonies->Add( colony->Name->ToLower(), colony );
 }
 
 StarSystem^ TurnData::AddStarSystem(int x, int y, int z, String ^type, String ^comment)
@@ -416,7 +418,7 @@ void TurnData::AddTurnProducedEU(int eu)
     m_TurnEUProduced += eu;
 }
 
-Colony^ TurnData::AddColony(Alien ^sp, String ^name, StarSystem ^system, int plNum)
+Colony^ TurnData::AddColony(Alien ^sp, String ^name, StarSystem ^system, int plNum, bool isObserver)
 {
     if( m_Colonies->ContainsKey( name->ToLower() ) )
     {
@@ -426,6 +428,7 @@ Colony^ TurnData::AddColony(Alien ^sp, String ^name, StarSystem ^system, int plN
     {
         Colony ^colony = gcnew Colony(sp, name, system, plNum);
         m_Colonies->Add(name->ToLower(), colony);
+        sp->Colonies->Add(colony);
 
         if( ! system->Planets->ContainsKey(plNum) )
         {
@@ -433,40 +436,30 @@ Colony^ TurnData::AddColony(Alien ^sp, String ^name, StarSystem ^system, int plN
             system->Planets->Add(plNum, Planet::Default(system, plNum) );
         }
         colony->Planet = system->Planets[plNum];
+        colony->Planet->Name = name;
+
         //TODO: WTF? WHY DOES IT CRASH???
         //if( colony->Planet->SuspectedColonies->ContainsKey(sp) )
         //    colony->Planet->SuspectedColonies->Remove(sp);
-        if( sp == GameData::Player )
+        if( isObserver && (sp == GameData::Player ) )
         {
+            system->LastVisited = m_Turn;
             DeleteAlienColonies(system);
         }
         return colony;
     }
 }
 
-void TurnData::AddPlanetName(StarSystem ^system, int pl, String ^name)
+void TurnData::DelColony(String ^name)
 {
-    if ( system->Planets->ContainsKey(pl) &&
-         String::IsNullOrEmpty(system->Planets[pl]->Name) )
+    String ^lowName = name->ToLower();
+    if( m_Colonies->ContainsKey( lowName ) )
     {
-        system->Planets[pl]->Name = name;
+        Colony ^colony = m_Colonies[lowName];
+        colony->Planet->Name = nullptr;
+        m_Colonies->Remove( lowName );
+        colony->Owner->Colonies->Remove(colony);
     }
-
-    String ^nameKey = name->ToLower();
-    if( m_PlanetNames->ContainsKey(nameKey) )
-    {
-        PlanetName ^plName = m_PlanetNames[nameKey];
-        if( plName->System != system ||
-            plName->PlanetNum != pl ||
-            plName->Name->ToLower() != nameKey )
-        {
-            throw gcnew FHUIDataIntegrityException("Named planet mismatch: " + name);
-        }
-
-        return;
-    }
-
-    m_PlanetNames[nameKey] = gcnew PlanetName(system, pl, name);
 }
 
 void TurnData::Update()
@@ -479,7 +472,6 @@ void TurnData::Update()
         UpdateShips();
         UpdateAliens();
         UpdateSystems();
-        LinkPlanetNames();
         UpdateHomeWorlds();
         UpdateColonies();
     }
@@ -521,7 +513,6 @@ void TurnData::UpdateAliens()
     {
         alien->RelationOriginal = alien->Relation;
 
-        alien->Colonies = GetColonies(nullptr, alien);
         alien->Ships    = GetShips(nullptr, alien);
     }
 }
@@ -596,35 +587,6 @@ void TurnData::UpdateSystems()
         system->MinLSNAvail = minLSNAvail;
 
         system->UpdateMaster();
-    }
-}
-
-void TurnData::LinkPlanetNames()
-{
-    for each( Colony ^colony in GetColonies() )
-    {
-        StarSystem ^system = colony->System;
-        colony->Planet = system->Planets[colony->PlanetNum];
-
-        if( colony->Owner == GameData::Player )
-        {
-            if( colony->Planet == nullptr )
-                throw gcnew FHUIDataIntegrityException(
-                    String::Format("Colony PL {0} at [{1} {2} {3} {4}]: Planet not scanned!",
-                        colony->Name,
-                        system->X, system->Y, system->Z,
-                        colony->PlanetNum ) );
-
-            colony->Planet->Name = colony->Name;
-        }
-    }
-
-    for each( PlanetName ^plName in m_PlanetNames->Values )
-    {
-        if( plName->System->Planets->ContainsKey( plName->PlanetNum ) )
-        {
-            plName->System->Planets[plName->PlanetNum]->Name = plName->Name;
-        }
     }
 }
 
@@ -753,29 +715,6 @@ void TurnData::DeleteAlienColonies(StarSystem^ system)
             }
         }
     } while( bRemoved );
-}
-
-Planet^ TurnData::GetPlanetByName(String ^name)
-{
-    if ( m_Colonies->ContainsKey( name->ToLower() ) )
-    {
-        Colony ^colony = m_Colonies[name->ToLower()];
-        return colony->System->Planets[colony->PlanetNum];
-    }
-    else if ( m_PlanetNames->ContainsKey( name->ToLower() ) )
-    {
-        PlanetName ^plName = m_PlanetNames[name->ToLower()];
-        Planet ^planet = plName->System->Planets[plName->PlanetNum];
-        if( String::IsNullOrEmpty(planet->Name) )
-            planet->Name = plName->Name;
-        else if ( planet->Name->ToLower() != plName->Name->ToLower() )
-            throw gcnew FHUIDataIntegrityException("Planet names conflict: '" + planet->Name + "' and '" + plName->Name + "'!");
-        return planet;
-    }
-    else
-    {
-        return nullptr;
-    }
 }
 
 } // end namespace FHUI
