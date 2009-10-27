@@ -41,6 +41,9 @@ void Form1::SaveUIGrid(List<String^> ^settings, DblBufDGV ^grid, String ^tab)
 {
     settings->Add("");
     settings->Add("TAB " + tab);
+    settings->Add("Select "
+        + ( grid->SelectionMode == System::Windows::Forms::DataGridViewSelectionMode::CellSelect
+            ? "cells" : "rows"));
     for each( DataGridViewColumn ^column in grid->Columns )
     {
         if( column->Index == 0 )
@@ -122,6 +125,17 @@ void Form1::LoadUISettings()
                 grid = AliensGrid;
             sortIndex = -1;
             sortAscending = true;
+            continue;
+        }
+
+        if( line == "Select cells" )
+        {
+            grid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
+            continue;
+        }
+        if( line == "Select rows" )
+        {
+            grid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
             continue;
         }
 

@@ -74,6 +74,15 @@ void Form1::InitControls()
     AliensInitControls();
 
     LoadUISettings();
+    ApplyUISettings();
+}
+
+void Form1::ApplyUISettings()
+{
+    SystemsSelMode->Checked     = ( SystemsGrid->SelectionMode == System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect );
+    PlanetsSelMode->Checked     = ( PlanetsGrid->SelectionMode == System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect );
+    ColoniesSelMode->Checked    = ( ColoniesGrid->SelectionMode == System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect );
+    ShipsSelMode->Checked       = ( ShipsGrid->SelectionMode == System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect );
 }
 
 void Form1::InitPlugins()
@@ -629,17 +638,25 @@ void Form1::UpdateSelectionMode(DblBufDGV ^grid, Object ^sender)
 {
     CheckBox ^cb = safe_cast<CheckBox^>(sender);
 
-    if( grid->SelectionMode == System::Windows::Forms::DataGridViewSelectionMode::CellSelect )
+    System::Windows::Forms::DataGridViewSelectionMode selMode;
+
+    if( cb->Checked )
     {
-        grid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
+        selMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
         cb->Text = "Select Rows";
     }
     else
     {
-        grid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
+        selMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
         cb->Text = "Select Cells";
     }
     grid->Filter->OnGridSelectionChanged();
+
+    if( grid->SelectionMode != selMode )
+    {
+        grid->SelectionMode = selMode;
+        SaveUISettings();
+    }
 }
 
 Color Form1::GetAlienColor(Alien ^sp)

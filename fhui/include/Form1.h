@@ -83,6 +83,7 @@ namespace FHUI {
         void        SaveUISettings();
         void        SaveUIGrid(List<String^> ^settings, DblBufDGV ^grid, String ^tab);
         void        LoadUISettings();
+        void        ApplyUISettings();
 
         // -- Data grids misc
         void        UpdateAllGrids(bool setRefSystems);

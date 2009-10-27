@@ -7,7 +7,7 @@ Minor changes are listed only if originally requested by player
 
 FHUI build ??
 * [P] Fixed recycle command for ships.
-* Fixed wormhole target printing on Ships tab/Jumps column.
+* Fixed wormhole target printing on Ships tab/Jump column.
 + New commands supported: Unload.
 + Develop command dialog: display TR jumping to developing system as
   potential develop target ship.
