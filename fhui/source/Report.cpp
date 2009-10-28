@@ -361,7 +361,7 @@ bool Report::Parse(String ^s)
         {
             if( m_ScanHasPlanets )
             {
-                m_Phase = PHASE_GLOBAL;
+                m_Phase = m_PhasePreScan;
                 m_ScanAlien = nullptr;
             }
         }
@@ -448,6 +448,7 @@ bool Report::MatchSystemScanStart(String ^s)
 {
     if( m_RM->Match(s, "^Coordinates:\\s+[Xx]\\s+=\\s+(\\d+)\\s+[Yy]\\s+=\\s+(\\d+)\\s+[Zz]\\s+=\\s+(\\d+)") )
     {
+        m_PhasePreScan = m_Phase;
         m_Phase = PHASE_SYSTEM_SCAN;
         m_ScanX = m_RM->GetResultInt(0);
         m_ScanY = m_RM->GetResultInt(1);

@@ -76,6 +76,7 @@ private:
     int             m_LineCnt;
 
     PhaseType       m_Phase;
+    PhaseType       m_PhasePreScan;
     PhaseType       m_PhasePreAggregate;
 
     bool            m_bParsingAggregate;
