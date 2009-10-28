@@ -2119,8 +2119,10 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuCommandsOptions(ICommand ^cmd)
         }
     }
 
+    bool needSeparator = false;
     if( cmd != cmdFirst )
     {
+        needSeparator = true;
         menu->DropDownItems->Add( CreateCustomMenuItem(
             "Move up",
             gcnew MenuCommandUpDownData(m_ColoniesMenuRef->Commands, cmd),
@@ -2128,13 +2130,15 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuCommandsOptions(ICommand ^cmd)
     }
     if( cmd != cmdLast )
     {
+        needSeparator = true;
         menu->DropDownItems->Add( CreateCustomMenuItem(
             "Move down",
             gcnew MenuCommandUpDownData(m_ColoniesMenuRef->Commands, cmd),
             gcnew EventHandler1Arg<MenuCommandUpDownData^>(this, &Form1::MenuCommandMoveDown) ) );
     }
 
-    menu->DropDownItems->Add( gcnew ToolStripSeparator );
+    if( needSeparator )
+        menu->DropDownItems->Add( gcnew ToolStripSeparator );
 
     // Edit command
     if( cmd->GetCmdType() == CommandType::Develop )
@@ -2734,26 +2738,6 @@ ToolStripMenuItem^ Form1::ShipsFillMenuJumpsNew()
             }
         }
 
-        // Named planets
-        bool anyPlanet = false;
-        for each( PlanetName ^planet in m_GameData->GetPlanetNames() )
-        {
-            if( planet->System != ship->System )
-            {
-                if( !anyPlanet && anyJump )
-                    jumpMenu->DropDownItems->Add( gcnew ToolStripSeparator );
-
-                jumpMenu->DropDownItems->Add(
-                    ShipsMenuCreateJumpItem(
-                    ship,
-                    planet->System,
-                    planet->PlanetNum,
-                    "PL " + planet->Name ) );
-                anyJump = true;
-                anyPlanet = true;
-            }
-        }
-
         if( anyJump )
             menu->DropDownItems->Add( jumpMenu );
     }
@@ -2812,8 +2796,10 @@ ToolStripMenuItem^ Form1::ShipsFillMenuCommandsOptions(ICommand ^cmd)
         }
     }
 
+    bool needSeparator = false;
     if( cmd != cmdFirst )
     {
+        needSeparator = true;
         menu->DropDownItems->Add( CreateCustomMenuItem(
             "Move up",
             gcnew MenuCommandUpDownData(ship->Commands, cmd),
@@ -2821,13 +2807,15 @@ ToolStripMenuItem^ Form1::ShipsFillMenuCommandsOptions(ICommand ^cmd)
     }
     if( cmd != cmdLast )
     {
+        needSeparator = true;
         menu->DropDownItems->Add( CreateCustomMenuItem(
             "Move down",
             gcnew MenuCommandUpDownData(ship->Commands, cmd),
             gcnew EventHandler1Arg<MenuCommandUpDownData^>(this, &Form1::MenuCommandMoveDown) ) );
     }
 
-    menu->DropDownItems->Add( gcnew ToolStripSeparator );
+    if( needSeparator )
+        menu->DropDownItems->Add( gcnew ToolStripSeparator );
 
     // Edit command
     // none yet...
