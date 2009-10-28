@@ -570,7 +570,7 @@ public:
 
     virtual int     GetEUCost() override    { return m_Amount; }
     virtual int     GetPopCost() override   { return m_PopCost; }
-    virtual int     GetInvMod(InventoryType i) override { return i == m_Unit ? m_Amount : 0; }
+    virtual int     GetInvMod(InventoryType i) override { return (i == m_Unit && m_Colony == nullptr && m_Ship == nullptr) ? m_Amount : 0; }
 
     virtual String^ Print() override;
 
@@ -643,7 +643,7 @@ public:
     }
 
     virtual int     GetEUCost() override    { return m_Amount; }
-    virtual int     GetPopCost() override   { return m_Colony ? m_Amount : ((m_Amount / 2) + (m_Amount % 1)); }
+    virtual int     GetPopCost() override   { return m_Ship ? m_Amount : ((m_Amount / 2) + (m_Amount % 1)); }
 
     virtual String^ Print() override;
 
