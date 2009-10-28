@@ -34,6 +34,8 @@ public:
     initonly Regex^     ExpCmdShipWormhole;
     initonly Regex^     ExpCmdShipUnload;
     initonly Regex^     ExpCmdShipScan;
+    initonly Regex^     ExpCmdShipDeep;
+    initonly Regex^     ExpCmdShipLand;
     initonly Regex^     ExpCmdPLName;
     initonly Regex^     ExpCmdPLDisband;
     initonly Regex^     ExpCmdSPNeutral;
@@ -52,6 +54,7 @@ public:
     initonly Regex^     ExpCmdBuildShipTR;
     initonly Regex^     ExpCmdBuildShip;
     initonly Regex^     ExpCmdVisited;
+    initonly Regex^     ExpCmdCustom;
 
     initonly Regex^     ExpCmdTargetColony;
     initonly Regex^     ExpCmdTargetShip;

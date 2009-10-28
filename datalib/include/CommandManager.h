@@ -107,6 +107,7 @@ private:
     RegexMatcher^           m_RM;
 
     CommandOrigin           m_CmdOrigin;
+    CommandPhase            m_CmdPhase;
     bool                    m_bSaveEnabled;
 
     int                     m_CurrentTurn;

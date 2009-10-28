@@ -33,7 +33,10 @@ RegexMatcher::RegexMatcher()
     ExpCmdShipRec       = gcnew Regex("^Recycle\\s+[A-Z0-9]+\\s+([^,;]+)$");
     ExpCmdShipUnload    = gcnew Regex("^Unload\\s+[A-Z0-9]+\\s+([^,;]+)$");
     ExpCmdShipScan      = gcnew Regex("^Scan\\s+[A-Z0-9]+\\s+([^,;]+)$");
+    ExpCmdShipDeep      = gcnew Regex("^Deep\\s+[A-Z0-9]+\\s+([^,;]+)$");
+    ExpCmdShipLand      = gcnew Regex("^Land\\s+[A-Z0-9]+\\s+([^,;]+)$");
     ExpCmdVisited       = gcnew Regex("^Visited\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)$");
+    ExpCmdCustom        = gcnew Regex("^CUSTOM\\s+(.+)$");
 
     ExpCmdTargetColony  = gcnew Regex("^PL\\s+([^,;]+)$");
     ExpCmdTargetShip    = gcnew Regex("^[A-Z0-9]+\\s+([^,;]+)$");

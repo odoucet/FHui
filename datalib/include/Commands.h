@@ -23,7 +23,8 @@ public enum class CommandPhase
     Jump,
     Production,
     PostArrival,
-    Strike
+    Strike,
+    Custom
 };
 
 public enum class CommandType
@@ -35,6 +36,7 @@ public enum class CommandType
     Install,
     Teach,
     Message,
+    Custom,
     // Ship commands:
     Upgrade,
     RecycleShip,
@@ -70,6 +72,7 @@ public interface class ICommand : public IComparable
     
     property CommandOrigin  Origin;
     property bool           UsageMarker;
+    property bool           RequiresPhasePrefix;
 
     StarSystem^     GetRefSystem();
 
@@ -97,6 +100,7 @@ public:
     {
         Origin = CommandOrigin::GUI;
         UsageMarker = false;
+        RequiresPhasePrefix = false;
     }
 
     virtual CommandPhase    GetPhase()                  { return Phase; }
@@ -104,6 +108,7 @@ public:
 
     virtual property CommandOrigin  Origin;
     virtual property bool           UsageMarker;
+    virtual property bool           RequiresPhasePrefix;
 
     virtual StarSystem^     GetRefSystem()              { return nullptr; }
 
@@ -148,6 +153,66 @@ template<CommandType CmdType>
 public ref class CmdProdBase abstract
     : public CmdBase<CommandPhase::Production, CmdType>
 {
+};
+
+////////////////////////////////////////////////////////////
+
+public ref class CmdPhaseWrapper
+    : public CmdBase<CommandPhase::Custom, CommandType::Custom>
+{
+public:
+    CmdPhaseWrapper(CommandPhase phase, ICommand ^command)
+        : m_Phase(phase), m_Command(command)
+    {
+        RequiresPhasePrefix = true;
+    }
+
+    virtual CommandPhase    GetPhase() override                 { return m_Phase; }
+    virtual CommandType     GetCmdType() override               { return m_Command->GetCmdType(); }
+
+    virtual StarSystem^     GetRefSystem() override             { return m_Command->GetRefSystem(); }
+
+    virtual int             GetEUCost() override                { return m_Command->GetEUCost(); }
+    virtual int             GetPopCost() override               { return m_Command->GetPopCost(); }
+    virtual int             GetInvMod(InventoryType i) override { return m_Command->GetInvMod(i); }
+
+    virtual String^         Print() override                    { return m_Command->Print(); }
+    virtual String^         PrintForUI() override               { return m_Command->PrintForUI(); }
+
+    CommandPhase    m_Phase;
+    ICommand^       m_Command;
+};
+
+////////////////////////////////////////////////////////////
+
+public ref class CmdCustom
+    : public CmdBase<CommandPhase::Custom, CommandType::Custom>
+{
+public:
+    CmdCustom(CommandPhase phase, String ^command)
+        : m_Phase(phase), m_Command(command) {}
+
+    static String^          PhaseAsString(CommandPhase phase)
+    {
+        switch( phase )
+        {
+        case CommandPhase::Combat:          return "Combat";
+        case CommandPhase::PreDeparture:    return "Pre-Departure";
+        case CommandPhase::Jump:            return "Jumps";
+        case CommandPhase::Production:      return "Production";
+        case CommandPhase::PostArrival:     return "Post-Arrival";
+        case CommandPhase::Strike:          return "Strikes";
+        default:
+            return "INVALID";
+        }
+    }
+
+    virtual CommandPhase    GetPhase() override     { return m_Phase; }
+
+    virtual String^         Print() override        { return m_Command; }
+
+    CommandPhase    m_Phase;
+    String^         m_Command;
 };
 
 ////////////////////////////////////////////////////////////

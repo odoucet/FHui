@@ -163,15 +163,35 @@ void CommandManager::DeleteCommands()
 
 String^ CommandManager::PrintCommandToFile(ICommand ^cmd)
 {
+    String ^prefix = "";
+
     switch( cmd->Origin )
     {
-    case CommandOrigin::Auto:
-        return "[A] " + cmd->Print();
-    case CommandOrigin::Plugin:
-        return "[P] " + cmd->Print();
+    case CommandOrigin::Auto:   prefix = "[A] "; break;
+    case CommandOrigin::Plugin: prefix = "[P] "; break;
     default:
-        return cmd->Print();
+        break;
     }
+
+    if( cmd->RequiresPhasePrefix )
+    {
+        switch( cmd->GetPhase() )
+        {
+        case CommandPhase::Combat:          prefix = "{C} "; break;
+        case CommandPhase::PreDeparture:    prefix = "{D} "; break;
+        case CommandPhase::Jump:            prefix = "{J} "; break;
+        case CommandPhase::Production:      prefix = "{P} "; break;
+        case CommandPhase::PostArrival:     prefix = "{A} "; break;
+        case CommandPhase::Strike:          prefix = "{S} "; break;
+        default:
+            throw gcnew FHUIDataIntegrityException("Invalid command phase: " + ((int)cmd->GetPhase()).ToString());
+        }
+    }
+
+    if( cmd->GetCmdType() == CommandType::Custom )
+        prefix += "CUSTOM ";
+
+    return prefix + cmd->Print();
 }
 
 void CommandManager::SaveCommands()
@@ -269,6 +289,16 @@ void CommandManager::SaveCommands()
 ICommand^ CommandManager::CmdSetOrigin(ICommand ^cmd)
 {
     cmd->Origin = m_CmdOrigin;
+
+    if( m_CmdPhase != CommandPhase::Custom &&
+        m_CmdPhase != cmd->GetPhase() )
+    {
+        cmd = gcnew CmdPhaseWrapper(m_CmdPhase, cmd);
+    }
+
+    if( cmd->GetPhase() == CommandPhase::Custom )
+        throw gcnew FHUIParsingException("Command loaded with undefined phase!");
+
     return cmd;
 }
 
@@ -330,6 +360,27 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
                 m_CmdOrigin = CommandOrigin::Plugin;
 
             if( m_CmdOrigin != CommandOrigin::GUI )
+                line = line->Substring(4);
+        }
+
+        m_CmdPhase = CommandPhase::Custom;
+        if( line->Length > 4 )
+        {
+            String ^prefix = line->Substring(0, 4);
+            if( prefix == "{C} " )
+                m_CmdPhase = CommandPhase::Combat;
+            else if( prefix == "{D} " )
+                m_CmdPhase = CommandPhase::PreDeparture;
+            else if( prefix == "{J} " )
+                m_CmdPhase = CommandPhase::Jump;
+            else if( prefix == "{P} " )
+                m_CmdPhase = CommandPhase::Production;
+            else if( prefix == "{A} " )
+                m_CmdPhase = CommandPhase::PostArrival;
+            else if( prefix == "{S} " )
+                m_CmdPhase = CommandPhase::Strike;
+
+            if( m_CmdPhase != CommandPhase::Custom )
                 line = line->Substring(4);
         }
 
@@ -510,6 +561,10 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
                 m_RM->GetResultInt(2),
                 false ) ) ) );
         }
+        else if( m_RM->Match(line, m_RM->ExpCmdCustom) )
+        {
+            AddCommand( CmdSetOrigin(gcnew CmdCustom(m_CmdPhase, m_RM->Results[0])) );
+        }
         else
             throw gcnew FHUIParsingException("Unrecognized line in commands template: " + line);
     }
@@ -661,6 +716,13 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
         return true;
     }
 
+    // Custom
+    if( m_RM->Match(line, m_RM->ExpCmdCustom) )
+    {
+        colony->Commands->Add( CmdSetOrigin(gcnew CmdCustom(m_CmdPhase, m_RM->Results[0])) );
+        return true;
+    }
+
     return false;
 }
 
@@ -714,6 +776,27 @@ bool CommandManager::LoadCommandsShip(String ^line, Ship ^ship)
     if( m_RM->Match(line, m_RM->ExpCmdShipScan) )
     {
         ship->AddCommand( CmdSetOrigin(gcnew ShipCmdScan(ship)) );
+        return true;
+    }
+
+    // Deep
+    if( m_RM->Match(line, m_RM->ExpCmdShipDeep) )
+    {
+        ship->AddCommand( CmdSetOrigin(gcnew ShipCmdDeep(ship)) );
+        return true;
+    }
+
+    // Land
+    if( m_RM->Match(line, m_RM->ExpCmdShipLand) )
+    {
+        ship->AddCommand( CmdSetOrigin(gcnew ShipCmdLand(ship)) );
+        return true;
+    }
+
+    // Custom
+    if( m_RM->Match(line, m_RM->ExpCmdCustom) )
+    {
+        ship->AddCommand( CmdSetOrigin(gcnew CmdCustom(m_CmdPhase, m_RM->Results[0])) );
         return true;
     }
 

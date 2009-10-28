@@ -419,14 +419,18 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuCommands(CommandPhase phase)
         break;
     }
 
+    menu->DropDownItems->Add( gcnew ToolStripSeparator );
     if( anyCommand )
     {
-        menu->DropDownItems->Add( gcnew ToolStripSeparator );
         menu->DropDownItems->Add( CreateCustomMenuItem(
-            "Cancel All",
-            static_cast<ICommand^>(nullptr),
-            gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuCommandDel) ) );
+            "Cancel All " + CmdCustom::PhaseAsString(phase),
+            phase,
+            gcnew EventHandler1Arg<CommandPhase>(this, &Form1::ColoniesMenuCommandDelAll) ) );
     }
+    menu->DropDownItems->Add( CreateCustomMenuItem(
+        "Cancel ALL PL " + m_ColoniesMenuRef->Name + " orders",
+        CommandPhase::Custom,
+        gcnew EventHandler1Arg<CommandPhase>(this, &Form1::ColoniesMenuCommandDelAll) ) );
 
     return menu;
 }
@@ -755,33 +759,43 @@ void Form1::ColoniesMenuProdCommandAddBuildShip(Object^, EventArgs^)
 
 void Form1::ColoniesMenuCommandDel(ICommand ^cmd)
 {
-    if( cmd )
-    {
-        m_CommandMgr->DelCommand(m_ColoniesMenuRef, cmd);
-        if( m_ColoniesMenuRef->Commands->Count > 0 )
-            ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
-    }
+    m_CommandMgr->DelCommand(m_ColoniesMenuRef, cmd);
+
+    ColoniesGrid->Filter->Update();
+
+    if( m_ColoniesMenuRef->Commands->Count > 0 )
+        ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
+}
+
+void Form1::ColoniesMenuCommandDelAll(CommandPhase phase)
+{
+    String ^phaseStr = "";
+    if( phase != CommandPhase::Custom )
+        phaseStr = " " + CmdCustom::PhaseAsString(phase);
+
+    System::Windows::Forms::DialogResult result = MessageBox::Show(
+        this,
+        "Delete ALL" + phaseStr + " orders for PL " + m_ColoniesMenuRef->Name + "...\r\n"
+        "Are you SURE? Undo is NOT possible...",
+        "Delete All" + phaseStr,
+        MessageBoxButtons::YesNo,
+        MessageBoxIcon::Exclamation,
+        MessageBoxDefaultButton::Button2);
+    if( result != System::Windows::Forms::DialogResult::Yes )
+        return;
+
+    // Delete all confirmed
+    if( phase == CommandPhase::Custom )
+        m_ColoniesMenuRef->Commands->Clear();
     else
     {
-        System::Windows::Forms::DialogResult result = MessageBox::Show(
-            this,
-            "Delete All Production orders for PL " + m_ColoniesMenuRef->Name + "...\r\n"
-            "Are you SURE? Undo is NOT possible...",
-            "Delete All",
-            MessageBoxButtons::YesNo,
-            MessageBoxIcon::Exclamation,
-            MessageBoxDefaultButton::Button2);
-        if( result != System::Windows::Forms::DialogResult::Yes )
-            return;
-
-        // Delete all confirmed
         bool repeat;
         do
         {
             repeat = false;
             for each( ICommand ^cmd in m_ColoniesMenuRef->Commands )
             {
-                if( cmd->GetPhase() == CommandPhase::Production )
+                if( cmd->GetPhase() == phase )
                 {
                     m_ColoniesMenuRef->Commands->Remove(cmd);
                     repeat = true;
@@ -789,8 +803,9 @@ void Form1::ColoniesMenuCommandDel(ICommand ^cmd)
                 }
             }
         } while( repeat );
-        m_CommandMgr->SaveCommands();
     }
+    m_CommandMgr->SaveCommands();
+
     ColoniesGrid->Filter->Update();
 }
 

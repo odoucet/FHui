@@ -282,14 +282,18 @@ ToolStripMenuItem^ Form1::ShipsFillMenuCommands(CommandPhase phase)
         break;
     }
 
+    menu->DropDownItems->Add( gcnew ToolStripSeparator );
     if( anyCommand )
     {
-        menu->DropDownItems->Add( gcnew ToolStripSeparator );
         menu->DropDownItems->Add( CreateCustomMenuItem(
-            "Cancel All",
-            static_cast<ICommand^>(nullptr),
-            gcnew EventHandler1Arg<ICommand^>(this, &Form1::ShipsMenuCommandDel) ) );
+            "Cancel All " + CmdCustom::PhaseAsString(phase),
+            phase,
+            gcnew EventHandler1Arg<CommandPhase>(this, &Form1::ShipsMenuCommandDelAll) ) );
     }
+    menu->DropDownItems->Add( CreateCustomMenuItem(
+        "Cancel ALL PL " + m_ShipsMenuRef->Name + " orders",
+        CommandPhase::Custom,
+        gcnew EventHandler1Arg<CommandPhase>(this, &Form1::ShipsMenuCommandDelAll) ) );
 
     return menu;
 }
@@ -319,6 +323,15 @@ ToolStripMenuItem^ Form1::ShipsFillMenuPreDepartureNew()
                 gcnew ShipCommandData(ship, gcnew ShipCmdUnload(ship)),
                 gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandSet) ) );
         }
+
+        menu->DropDownItems->Add( CreateCustomMenuItem<ShipCommandData^>(
+            "Deep",
+            gcnew ShipCommandData(ship, gcnew CmdPhaseWrapper(CommandPhase::PreDeparture, gcnew ShipCmdDeep(ship))),
+            gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandSet) ) );
+        menu->DropDownItems->Add( CreateCustomMenuItem<ShipCommandData^>(
+            "Land",
+            gcnew ShipCommandData(ship, gcnew CmdPhaseWrapper(CommandPhase::PreDeparture, gcnew ShipCmdLand(ship))),
+            gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandSet) ) );
     }
 
     return menu;
@@ -405,6 +418,14 @@ ToolStripMenuItem^ Form1::ShipsFillMenuPostArrivalNew()
     menu->DropDownItems->Add( CreateCustomMenuItem<ShipCommandData^>(
         "Scan",
         gcnew ShipCommandData(ship, gcnew ShipCmdScan(ship)),
+        gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandSet) ) );
+    menu->DropDownItems->Add( CreateCustomMenuItem<ShipCommandData^>(
+        "Deep",
+        gcnew ShipCommandData(ship, gcnew CmdPhaseWrapper(CommandPhase::PostArrival, gcnew ShipCmdDeep(ship))),
+        gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandSet) ) );
+    menu->DropDownItems->Add( CreateCustomMenuItem<ShipCommandData^>(
+        "Land",
+        gcnew ShipCommandData(ship, gcnew CmdPhaseWrapper(CommandPhase::PostArrival, gcnew ShipCmdLand(ship))),
         gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandSet) ) );
 
     return menu;
@@ -547,9 +568,58 @@ void Form1::ShipsMenuCommandSet(ShipCommandData ^data)
 void Form1::ShipsMenuCommandDel(ICommand ^cmd)
 {
     m_ShipsMenuRef->Commands->Remove( cmd );
+
+    m_CommandMgr->SaveCommands();
+
     SystemsGrid->Filter->Update();
     ShipsGrid->Filter->Update();
+
+    if( m_ShipsMenuRef->Commands->Count > 0 )
+        ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
+}
+
+void Form1::ShipsMenuCommandDelAll(CommandPhase phase)
+{
+    String ^phaseStr = "";
+    if( phase != CommandPhase::Custom )
+        phaseStr = " " + CmdCustom::PhaseAsString(phase);
+
+    System::Windows::Forms::DialogResult result = MessageBox::Show(
+        this,
+        "Delete ALL" + phaseStr + " orders for " + m_ShipsMenuRef->PrintClassWithName() + "...\r\n"
+        "Are you SURE? Undo is NOT possible...",
+        "Delete All" + phaseStr,
+        MessageBoxButtons::YesNo,
+        MessageBoxIcon::Exclamation,
+        MessageBoxDefaultButton::Button2);
+    if( result != System::Windows::Forms::DialogResult::Yes )
+        return;
+
+    // Delete all confirmed
+    if( phase == CommandPhase::Custom )
+        m_ShipsMenuRef->Commands->Clear();
+    else
+    {
+        bool repeat;
+        do
+        {
+            repeat = false;
+            for each( ICommand ^cmd in m_ShipsMenuRef->Commands )
+            {
+                if( cmd->GetPhase() == phase )
+                {
+                    m_ShipsMenuRef->Commands->Remove(cmd);
+                    repeat = true;
+                    break;
+                }
+            }
+        } while( repeat );
+    }
+
     m_CommandMgr->SaveCommands();
+
+    SystemsGrid->Filter->Update();
+    ShipsGrid->Filter->Update();
 }
 
 ////////////////////////////////////////////////////////////////
