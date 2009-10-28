@@ -155,7 +155,7 @@ namespace FHUI {
         // --- SYSTEMS ---
         void        SystemsInitControls();
         void        SystemsUpdateControls();
-        void        SystemsSetup();
+        void        SystemsFillGrid();
         void        SystemsSelectPlanets( int rowIndex );
         void        SystemsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
         void        SystemsMenuMarkVisited(Object^, EventArgs^);
@@ -192,7 +192,7 @@ namespace FHUI {
         // --- PLANETS ---
         void        PlanetsInitControls();
         void        PlanetsUpdateControls();
-        void        PlanetsSetup();
+        void        PlanetsFillGrid();
         void        PlanetsSelectColonies( int rowIndex );
         void        PlanetsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
         void        PlanetsMenuShowColonies(Object^, EventArgs^);
@@ -233,7 +233,7 @@ namespace FHUI {
         // --- COLONIES ---
         void        ColoniesInitControls();
         void        ColoniesUpdateControls();
-        void        ColoniesSetup();
+        void        ColoniesFillGrid();
         void        ColoniesSetRef( int rowIndex );
         void        ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
         ToolStripMenuItem^  ColoniesFillMenuAuto();
@@ -288,7 +288,7 @@ namespace FHUI {
         // --- SHIPS ---
         void        ShipsInitControls();
         void        ShipsUpdateControls();
-        void        ShipsSetup();
+        void        ShipsFillGrid();
         void        ShipsSetRef( int rowIndex );
         void        ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
         ToolStripMenuItem^  ShipsFillMenuCommands(CommandPhase phase);
@@ -335,7 +335,7 @@ namespace FHUI {
         // --- ALIENS ---
         void        AliensInitControls();
         void        AliensUpdateControls();
-        void        AliensSetup();
+        void        AliensFillGrid();
         void        AliensFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
         void        AliensFillMenuRelations(Windows::Forms::ContextMenuStrip ^menu);
         void        AliensFillMenuMessage(Windows::Forms::ContextMenuStrip ^menu);

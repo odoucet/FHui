@@ -346,6 +346,26 @@
 					>
 				</File>
 				<File
+					RelativePath=".\source\Form1Aliens.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\Form1Colonies.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\Form1Planets.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\Form1Ships.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\source\Form1Systems.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\source\GridFilter.cpp"
 					>
 				</File>
