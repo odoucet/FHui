@@ -195,7 +195,7 @@ bool Report::Parse(String ^s)
         else
         {
             m_ScanMessage += s + "\r\n";
-            if( m_RM->Match(s, "([a-zA-Z0-9_.]+@[a-zA-Z0-9_.]+\\.[a-zA-Z0-9_]+)") )
+            if( m_RM->Match(s, "([a-zA-Z0-9_.-]+@[a-zA-Z0-9_.]+\\.[a-zA-Z0-9_]+)") )
                 m_ScanAlien->Email = m_RM->Results[0];
         }
         break;
