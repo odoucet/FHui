@@ -491,10 +491,10 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuProductionNew()
         gcnew EventHandler1Arg<ProdCmdBuildIUAU^>(this, &Form1::ColoniesMenuProdCommandAddBuildIuAu) ) );
 
     // Research
-    menu->DropDownItems->Add(
+    menu->DropDownItems->Add( CreateCustomMenuItem<ProdCmdResearch^>(
         "Research...",
         nullptr,
-        gcnew EventHandler(this, &Form1::ColoniesMenuProdCommandAddResearch) );
+        gcnew EventHandler1Arg<ProdCmdResearch^>(this, &Form1::ColoniesMenuProdCommandAddResearch) ) );
 
     // Build Ship
     menu->DropDownItems->Add(
@@ -579,6 +579,13 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuCommandsOptions(ICommand ^cmd)
         menu->DropDownItems->Add( gcnew ToolStripSeparator );
 
     // Edit command
+    if( cmd->GetCmdType() == CommandType::Research )
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem<ProdCmdResearch^>(
+            "Edit...",
+            safe_cast<ProdCmdResearch^>(cmd),
+            gcnew EventHandler1Arg<ProdCmdResearch^>(this, &Form1::ColoniesMenuProdCommandAddResearch) ) );
+    }
     if( cmd->GetCmdType() == CommandType::Develop )
     {
         menu->DropDownItems->Add( CreateCustomMenuItem<ProdCmdDevelop^>(
@@ -659,19 +666,36 @@ void Form1::ColoniesMenuCommandAdd(ICommand ^cmd)
     ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
 }
 
-void Form1::ColoniesMenuProdCommandAddResearch(Object^, EventArgs^)
+void Form1::ColoniesMenuProdCommandAddResearch(ProdCmdResearch ^cmd)
 {
-    CmdResearch ^dlg = gcnew CmdResearch( m_ColoniesMenuRef->Res->AvailEU );
+    CmdResearch ^dlg = gcnew CmdResearch( m_ColoniesMenuRef->Res->AvailEU, cmd );
     if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
     {
         for( int i = 0; i < TECH_MAX; ++i )
         {
-            TechType tech = static_cast<TechType>(i);
-            int res = dlg->GetAmount(tech);
-            if( res > 0 )
+            if( cmd )
             {
-                ColoniesMenuCommandAdd(
-                    gcnew ProdCmdResearch(tech, res) );
+                int amount = dlg->GetAmount(cmd->m_Tech);
+                if( amount != cmd->m_Amount )
+                {
+                    if( amount <= 0 )
+                        ColoniesMenuCommandDel(cmd);
+                    else
+                    {
+                        cmd->m_Amount = amount;
+                        ColoniesMenuCommandAdd(nullptr);
+                    }
+                }
+            }
+            else
+            {
+                TechType tech = static_cast<TechType>(i);
+                int res = dlg->GetAmount(tech);
+                if( res > 0 )
+                {
+                    ColoniesMenuCommandAdd(
+                        gcnew ProdCmdResearch(tech, res) );
+                }
             }
         }
     }

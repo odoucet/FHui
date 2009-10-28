@@ -249,7 +249,7 @@ namespace FHUI {
         void        ColoniesMenuCommandAdd(ICommand ^cmd);
         void        ColoniesMenuCommandDel(ICommand ^cmd);
         void        ColoniesMenuCommandDelAll(CommandPhase phase);
-        void        ColoniesMenuProdCommandAddResearch(Object^, EventArgs^);
+        void        ColoniesMenuProdCommandAddResearch(ProdCmdResearch ^cmd);
         void        ColoniesMenuProdCommandAddBuildIuAu(ProdCmdBuildIUAU ^cmd);
         void        ColoniesMenuProdCommandAddBuildShip(Object^, EventArgs^);
         void        ColoniesMenuProdCommandAddDevelop(ProdCmdDevelop ^cmd);

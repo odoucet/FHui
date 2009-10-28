@@ -24,14 +24,12 @@ namespace FHUI
 	public ref class CmdResearch : public System::Windows::Forms::Form
 	{
 	public:
-		CmdResearch(int availEU)
+		CmdResearch(int availEU, ProdCmdResearch ^cmd)
 		{
 			InitializeComponent();
 
-            m_AvailEU = availEU;
-            AvailEU->Text = availEU.ToString();
-
             InitGroups();
+            InitData(availEU, cmd);
 		}
 
         int     GetAmount(TechType tech);
@@ -50,6 +48,7 @@ namespace FHUI
 
     protected: 
         void    InitGroups();
+        void    InitData(int availEU, ProdCmdResearch ^cmd);
 
         void    UpdateEnable(Object ^sender);
         void    UpdateAmount();

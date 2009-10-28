@@ -65,6 +65,34 @@ void CmdResearch::InitGroups()
     }
 }
 
+void CmdResearch::InitData(int availEU, ProdCmdResearch ^cmd)
+{
+    m_AvailEU = availEU;
+    if( cmd )
+        m_AvailEU += cmd->GetEUCost();
+
+    AvailEU->Text = m_AvailEU.ToString();
+
+    if( cmd )
+    {
+        m_Groups[cmd->m_Tech].Amount->Value = cmd->m_Amount;
+
+        for(int i = 0; i < TECH_MAX; ++i )
+        {
+            if( i != (int)cmd->m_Tech )
+            {
+                m_Groups[i].Amount->Enabled = false;
+                m_Groups[i].CalcAvg->Enabled = false;
+                m_Groups[i].CalcGtd->Enabled = false;
+                m_Groups[i].CalcGui->Enabled = false;
+                m_Groups[i].En->Enabled = false;
+                m_Groups[i].LvlFrom->Enabled = false;
+                m_Groups[i].LvlTo->Enabled = false;
+            }
+        }
+    }
+}
+
 void CmdResearch::UpdateAmount()
 {
     Decimal d = 0;
