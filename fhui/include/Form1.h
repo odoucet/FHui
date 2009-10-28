@@ -66,7 +66,8 @@ namespace FHUI {
         void        InitData();
         void        InitRefLists();
         void        InitControls();
-        void        TurnReload();
+        void        ShowReloadMenu();
+        void        TurnReload(bool resetCommands);
         void        UpdateControls();
         void        UpdateTabs();
 
@@ -257,6 +258,9 @@ namespace FHUI {
         void        ColoniesMenuAutoDeleteAllNonScouting(Object^, EventArgs^);
         void        ColoniesMenuAutoDeleteAllProduction(Object^, EventArgs^);
 
+        typedef Pair<CommandPhase, CmdCustom^>  CustomCmdData;
+        void        ColoniesMenuCommandCustom(CustomCmdData ^data);
+
         value struct ColoniesColumns
         {
             int Object;
@@ -300,8 +304,7 @@ namespace FHUI {
         ToolStripMenuItem^  ShipsFillMenuCommandsOptions(ICommand ^cmd);
         void        ShipsMenuSelectRef(Object^, EventArgs^);
 
-        typedef Pair<CommandPhase, CmdCustom^>  ShipsCustomCmdData;
-        void        ShipsMenuCommandCustom(ShipsCustomCmdData ^data);
+        void        ShipsMenuCommandCustom(CustomCmdData ^data);
 
         typedef Pair<Ship^, ICommand^>  ShipCommandData;
         void        ShipsMenuCommandAdd(ShipCommandData ^data);
@@ -3668,7 +3671,7 @@ private: System::Void MapUpdate(System::Object^  sender, System::EventArgs^  e) 
              MapDraw();
          }
 private: System::Void TurnReload_Click(System::Object^  sender, System::EventArgs^  e) {
-             TurnReload();
+             ShowReloadMenu();
          }
 private: System::Void RepMode_CheckedChanged(System::Object^  sender, System::EventArgs^  e) {
              RepModeChanged();

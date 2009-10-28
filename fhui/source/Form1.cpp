@@ -366,32 +366,62 @@ String^ Form1::GetDataDir(String ^suffix)
     return ret;
 }
 
-void Form1::TurnReload()
+void Form1::ShowReloadMenu()
 {
-    System::Windows::Forms::DialogResult result = MessageBox::Show(
-        this,
-        String::Format("Delete ALL FHUI Commands for TURN {0}?", m_GameData->CurrentTurn),
-        "Reload Turn",
-        MessageBoxButtons::YesNo,
-        MessageBoxIcon::Question,
-        MessageBoxDefaultButton::Button1);
+    // Create menu
+    Windows::Forms::ContextMenuStrip ^menu = gcnew Windows::Forms::ContextMenuStrip;
 
-    if( result == System::Windows::Forms::DialogResult::Yes )
+    menu->Items->Add( CreateCustomMenuItem(
+        "Reload All (reset ALL orders)",
+        true,
+        gcnew EventHandler1Arg<bool>(this, &Form1::TurnReload) ) );
+
+    menu->Items->Add( CreateCustomMenuItem(
+        "Reload Reports (DON'T reset orders)",
+        false,
+        gcnew EventHandler1Arg<bool>(this, &Form1::TurnReload) ) );
+
+    // TDB...
+    //menu->Items->Add( "Reload Auto Orders from current turn" );
+    //if( m_PluginMgr->OrderPlugins->Count > 0 )
+    //{
+    //    menu->Items->Add( "Recreate Plugin orders" );
+    //}
+
+    // Show menu
+    Rectangle r = TurnReloadBtn->DisplayRectangle;
+    menu->Show(TurnReloadBtn, r.Left + r.Width / 2, r.Top + r.Height / 2);
+}
+
+void Form1::TurnReload(bool resetCommands)
+{
+    if( resetCommands )
     {
-        m_CommandMgr->DeleteCommands();
+        System::Windows::Forms::DialogResult result = MessageBox::Show(
+            this,
+            String::Format("Delete ALL FHUI Commands for TURN {0}?", m_GameData->CurrentTurn),
+            "Reload Turn",
+            MessageBoxButtons::YesNo,
+            MessageBoxIcon::Question,
+            MessageBoxDefaultButton::Button1);
 
-        // Bring up the first tab
-        MenuTabs->SelectedTab = MenuTabs->TabPages[ TabIndex::Reports ];
-
-        // Purge all grids
-        SystemsGrid->Rows->Clear();
-        PlanetsGrid->Rows->Clear();
-        ColoniesGrid->Rows->Clear();
-        ShipsGrid->Rows->Clear();
-        AliensGrid->Rows->Clear();
-
-        InitGameData();
+        if( result == System::Windows::Forms::DialogResult::Yes )
+            m_CommandMgr->DeleteCommands();
+        else
+            return;
     }
+
+    // Bring up the first tab
+    MenuTabs->SelectedTab = MenuTabs->TabPages[ TabIndex::Reports ];
+
+    // Purge all grids
+    SystemsGrid->Rows->Clear();
+    PlanetsGrid->Rows->Clear();
+    ColoniesGrid->Rows->Clear();
+    ShipsGrid->Rows->Clear();
+    AliensGrid->Rows->Clear();
+
+    InitGameData();
 }
 
 void Form1::DisplayTurn()

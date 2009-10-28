@@ -8,6 +8,7 @@
 #include "CmdBuildShips.h"
 #include "CmdBuildIuAu.h"
 #include "CmdDevelopDlg.h"
+#include "CmdCustomDlg.h"
 
 ////////////////////////////////////////////////////////////////
 
@@ -422,10 +423,11 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuPreDepartureNew()
     Colony ^colony = m_ColoniesMenuRef;
     ToolStripMenuItem ^menu = gcnew ToolStripMenuItem("Add:");
 
-    //menu->DropDownItems->Add( CreateCustomMenuItem(
-    //    "Hide Colony",
-    //    static_cast<ICommand^>(gcnew ProdCmdHide(colony)),
-    //    gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuCommandAdd) ) );
+    // Custom command
+    menu->DropDownItems->Add( CreateCustomMenuItem<CustomCmdData^>(
+        "Custom Order...",
+        gcnew CustomCmdData(CommandPhase::PreDeparture, nullptr),
+        gcnew EventHandler1Arg<CustomCmdData^>(this, &Form1::ColoniesMenuCommandCustom) ) );
 
     return menu;
 }
@@ -435,10 +437,11 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuPostArrivalNew()
     Colony ^colony = m_ColoniesMenuRef;
     ToolStripMenuItem ^menu = gcnew ToolStripMenuItem("Add:");
 
-    //menu->DropDownItems->Add( CreateCustomMenuItem(
-    //    "Hide Colony",
-    //    static_cast<ICommand^>(gcnew ProdCmdHide(colony)),
-    //    gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuCommandAdd) ) );
+    // Custom command
+    menu->DropDownItems->Add( CreateCustomMenuItem<CustomCmdData^>(
+        "Custom Order...",
+        gcnew CustomCmdData(CommandPhase::PostArrival, nullptr),
+        gcnew EventHandler1Arg<CustomCmdData^>(this, &Form1::ColoniesMenuCommandCustom) ) );
 
     return menu;
 }
@@ -529,6 +532,12 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuProductionNew()
     if( estimateAny )
         menu->DropDownItems->Add(menuEstimate);
 
+    // Custom command
+    menu->DropDownItems->Add( CreateCustomMenuItem<CustomCmdData^>(
+        "Custom Order...",
+        gcnew CustomCmdData(CommandPhase::Production, nullptr),
+        gcnew EventHandler1Arg<CustomCmdData^>(this, &Form1::ColoniesMenuCommandCustom) ) );
+
     return menu;
 }
 
@@ -583,6 +592,14 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuCommandsOptions(ICommand ^cmd)
             "Edit...",
             safe_cast<ProdCmdBuildIUAU^>(cmd),
             gcnew EventHandler1Arg<ProdCmdBuildIUAU^>(this, &Form1::ColoniesMenuProdCommandAddBuildIuAu) ) );
+    }
+    if( cmd->GetCmdType() == CommandType::Custom )
+    {
+        CmdCustom ^cmdCustom = safe_cast<CmdCustom^>(cmd);
+        menu->DropDownItems->Add( CreateCustomMenuItem<CustomCmdData^>(
+            "Edit...",
+            gcnew CustomCmdData(cmdCustom->GetPhase(), cmdCustom),
+            gcnew EventHandler1Arg<CustomCmdData^>(this, &Form1::ColoniesMenuCommandCustom) ) );
     }
 
     // Cancel order
@@ -818,6 +835,24 @@ void Form1::ColoniesMenuAutoDeleteAllProduction(Object^, EventArgs^)
     m_CommandMgr->SaveCommands();
     UpdateAllGrids(false);
     ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
+}
+
+void Form1::ColoniesMenuCommandCustom(CustomCmdData ^data)
+{
+    CmdCustomDlg ^dlg = gcnew CmdCustomDlg( data->B );
+    if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
+    {
+        CmdCustom ^cmd = dlg->GetCommand( data->A );
+        if( data->B )
+        {
+            *data->B = cmd;
+            ColoniesMenuCommandAdd( nullptr );
+        }
+        else
+            ColoniesMenuCommandAdd( cmd );
+    }
+
+    delete dlg;
 }
 
 ////////////////////////////////////////////////////////////////

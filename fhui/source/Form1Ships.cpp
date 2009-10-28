@@ -337,10 +337,10 @@ ToolStripMenuItem^ Form1::ShipsFillMenuPreDepartureNew()
 
         // Custom command
         menu->DropDownItems->Add( gcnew ToolStripSeparator );
-        menu->DropDownItems->Add( CreateCustomMenuItem<ShipsCustomCmdData^>(
+        menu->DropDownItems->Add( CreateCustomMenuItem<CustomCmdData^>(
             "Custom Order...",
-            gcnew ShipsCustomCmdData(CommandPhase::PreDeparture, nullptr),
-            gcnew EventHandler1Arg<ShipsCustomCmdData^>(this, &Form1::ShipsMenuCommandCustom) ) );
+            gcnew CustomCmdData(CommandPhase::PreDeparture, nullptr),
+            gcnew EventHandler1Arg<CustomCmdData^>(this, &Form1::ShipsMenuCommandCustom) ) );
     }
 
     return menu;
@@ -439,10 +439,10 @@ ToolStripMenuItem^ Form1::ShipsFillMenuPostArrivalNew()
 
     // Custom order
     menu->DropDownItems->Add( gcnew ToolStripSeparator );
-    menu->DropDownItems->Add( CreateCustomMenuItem<ShipsCustomCmdData^>(
+    menu->DropDownItems->Add( CreateCustomMenuItem<CustomCmdData^>(
         "Custom Order...",
-        gcnew ShipsCustomCmdData(CommandPhase::PostArrival, nullptr),
-        gcnew EventHandler1Arg<ShipsCustomCmdData^>(this, &Form1::ShipsMenuCommandCustom) ) );
+        gcnew CustomCmdData(CommandPhase::PostArrival, nullptr),
+        gcnew EventHandler1Arg<CustomCmdData^>(this, &Form1::ShipsMenuCommandCustom) ) );
 
     return menu;
 }
@@ -489,10 +489,10 @@ ToolStripMenuItem^ Form1::ShipsFillMenuCommandsOptions(ICommand ^cmd)
     if( cmd->GetCmdType() == CommandType::Custom )
     {
         CmdCustom ^cmdCustom = safe_cast<CmdCustom^>(cmd);
-        menu->DropDownItems->Add( CreateCustomMenuItem<ShipsCustomCmdData^>(
+        menu->DropDownItems->Add( CreateCustomMenuItem<CustomCmdData^>(
             "Edit...",
-            gcnew ShipsCustomCmdData(cmdCustom->GetPhase(), cmdCustom),
-            gcnew EventHandler1Arg<ShipsCustomCmdData^>(this, &Form1::ShipsMenuCommandCustom) ) );
+            gcnew CustomCmdData(cmdCustom->GetPhase(), cmdCustom),
+            gcnew EventHandler1Arg<CustomCmdData^>(this, &Form1::ShipsMenuCommandCustom) ) );
     }
 
     // Cancel order
@@ -584,12 +584,13 @@ void Form1::ShipsMenuCommandAdd(ShipCommandData ^data)
 {
     if( data )
         data->A->AddCommand( data->B );
-    else
-        m_CommandMgr->SaveCommands();
+
+    m_CommandMgr->SaveCommands();
 
     SystemsGrid->Filter->Update();
     ShipsGrid->Filter->Update();
-    m_CommandMgr->SaveCommands();
+    if( data && data->B->GetPhase() == CommandPhase::Production )
+        ColoniesGrid->Filter->Update();
 }
 
 void Form1::ShipsMenuCommandDel(ICommand ^cmd)
@@ -600,6 +601,8 @@ void Form1::ShipsMenuCommandDel(ICommand ^cmd)
 
     SystemsGrid->Filter->Update();
     ShipsGrid->Filter->Update();
+    if( cmd->GetPhase() == CommandPhase::Production )
+        ColoniesGrid->Filter->Update();
 
     if( m_ShipsMenuRef->Commands->Count > 0 )
         ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
@@ -646,10 +649,11 @@ void Form1::ShipsMenuCommandDelAll(CommandPhase phase)
     m_CommandMgr->SaveCommands();
 
     SystemsGrid->Filter->Update();
+    ColoniesGrid->Filter->Update();
     ShipsGrid->Filter->Update();
 }
 
-void Form1::ShipsMenuCommandCustom(ShipsCustomCmdData ^data)
+void Form1::ShipsMenuCommandCustom(CustomCmdData ^data)
 {
     CmdCustomDlg ^dlg = gcnew CmdCustomDlg( data->B );
     if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )

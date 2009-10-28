@@ -10,6 +10,10 @@ FHUI build ??
 * Fixed wormhole target printing on Ships tab/Jump column.
 * Fixed 'Cancel All' commands menus for non-production phases.
 + New commands supported: Unload, Deep, Land.
++ Custom commands added for colonies and ships. You can enter
+  any command you want.
++ Reload button now has two options: reload all and reload reports
+  without losing commands.
 + Develop command dialog: display TR jumping to developing system as
   potential develop target ship.
 + Systems tab: mark matching wormhole terminus endpoints with colors.
