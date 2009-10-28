@@ -34,6 +34,7 @@ public:
         // Do NOT copy planet name. This is to enable planet name disband.
         // Planets that still have name will have it read from the report.
         //Name = src->Name;
+        AlienName = src->AlienName;
         Comment = src->Comment;
         Diameter = src->Diameter;
         Grav = src->Grav;
@@ -71,21 +72,22 @@ public:
     String^     PrintLocationAligned();
     String^     PrintComment();
 
-    property StarSystem^    System;
-    property int            Number;
-    property String^        Name;
-    property String^        Comment;
-    property int            Diameter;
-    property int            Grav;   // * 100
-    property int            TempClass;
-    property int            PressClass;
-    property int            MiDiff; // * 100
-    property int            LSN;
-    property Alien^         Master;
-    property int            NumColonies;
-    property int            NumColoniesOwned;
-    property array<int>^    Atmosphere;
-    property SortedList<Alien^, int>^ SuspectedColonies;
+    StarSystem^     System;
+    int             Number;
+    String^         Name;
+    String^         AlienName;
+    String^         Comment;
+    int             Diameter;
+    int             Grav;           // * 100
+    int             TempClass;
+    int             PressClass;
+    int             MiDiff;         // * 100
+    int             LSN;
+    Alien^          Master;
+    int             NumColonies;
+    int             NumColoniesOwned;
+    array<int>^     Atmosphere;
+    SortedList<Alien^, int>^ SuspectedColonies;
 };
 
 } // end namespace FHUI

@@ -15,7 +15,9 @@ String^ Planet::GetNameWithOrders()
 {
     if( String::IsNullOrEmpty(Name) )
     {
-        return nullptr;
+        if( String::IsNullOrEmpty(AlienName) )
+            return nullptr;
+        return "<" + AlienName + ">";
     }
 
     String ^n = Name;

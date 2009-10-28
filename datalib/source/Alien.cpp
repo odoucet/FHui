@@ -13,20 +13,19 @@ String^ Alien::PrintHome()
 {
     if( HomeSystem == nullptr )
         return "???";
-    String ^plName = nullptr;
-    if( HomeSystem->Planets->ContainsKey(HomePlanet) )
+
+    String ^plName = "";
+    for each( Colony ^colony in HomeSystem->Colonies )
     {
-        String ^n = HomeSystem->Planets[HomePlanet]->Name;
-        if( !String::IsNullOrEmpty(n) )
-            plName = String::Format("PL {0}", n);
+        if( colony->Owner == this &&
+            colony->PlanetType == PLANET_HOME )
+        {
+            plName = String::Format(" {0} (PL {1})", colony->PlanetNum, colony->Name);
+            break;
+        }
     }
 
-    String ^ret = String::Format( "{0} {1}",
-        HomeSystem->PrintLocation(), HomePlanet );
-    if( plName )
-        ret += " (" + plName + ")";
-    return ret;
-
+    return HomeSystem->PrintLocation() + plName;
 }
 
 String^ Alien::PrintTechLevels()

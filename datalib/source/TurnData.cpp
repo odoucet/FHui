@@ -152,17 +152,11 @@ String^ TurnData::GetPlanetsSummary()
 {
     String ^ret = "";
 
-    for each( StarSystem ^system in GetStarSystems() )
+    for each( Colony ^colony in GameData::Player->Colonies )
     {
-        for each( Planet ^planet in system->Planets->Values )
-        {
-            if( String::IsNullOrEmpty(planet->Name) )
-                continue;
-
-            ret += String::Format("PL {0} @ {1}\r\n",
-                planet->Name,
-                planet->PrintLocation() );
-        }
+        ret += String::Format("PL {0} @ {1}\r\n",
+            colony->Name,
+            colony->Planet->PrintLocation() );
     }
 
     return ret;
@@ -436,7 +430,10 @@ Colony^ TurnData::AddColony(Alien ^sp, String ^name, StarSystem ^system, int plN
             system->Planets->Add(plNum, Planet::Default(system, plNum) );
         }
         colony->Planet = system->Planets[plNum];
-        colony->Planet->Name = name;
+        if( sp == GameData::Player )
+            colony->Planet->Name = name;
+        else
+            colony->Planet->AlienName = name;
 
         //TODO: WTF? WHY DOES IT CRASH???
         //if( colony->Planet->SuspectedColonies->ContainsKey(sp) )
