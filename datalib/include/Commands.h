@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Enums.h"
+#include "FHStrings.h"
 #include "Calculators.h"
-#include "GameData.h"
-#include "StarSystem.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -13,6 +12,7 @@ namespace FHUI
 
 ref class StarSystem;
 ref class Alien;
+ref class Ship;
 
 ////////////////////////////////////////////////////////////
 
@@ -158,21 +158,21 @@ public ref class ShipCmdUpgrade : public CmdProdBase<CommandType::Upgrade>
 public:
     ShipCmdUpgrade(Ship ^ship) : m_Ship(ship) {}
 
-    virtual int     GetEUCost() override    { return Calculators::ShipUpgradeCost(m_Ship->Age, m_Ship->OriginalCost); }
-    virtual String^ Print() override        { return "Upgrade " + m_Ship->PrintClassWithName(); }
+    virtual int     GetEUCost() override;
+    virtual String^ Print() override;
     virtual String^ PrintForUI() override   { return "Upgrade"; }
 
     Ship^   m_Ship;
 };
 
-// Recycle
+// Recycle ship
 public ref class ShipCmdRecycle : public CmdProdBase<CommandType::RecycleShip>
 {
 public:
     ShipCmdRecycle(Ship ^ship) : m_Ship(ship) {}
 
-    virtual int     GetEUCost() override    { return -m_Ship->GetRecycleValue(); }
-    virtual String^ Print() override        { return "Recycle " + m_Ship->PrintClassWithName(); }
+    virtual int     GetEUCost() override;
+    virtual String^ Print() override;
     virtual String^ PrintForUI() override   { return "Recycle"; }
 
     Ship^   m_Ship;
@@ -184,7 +184,7 @@ public ref class ShipCmdUnload : public CmdBase<CommandPhase::PreDeparture, Comm
 public:
     ShipCmdUnload(Ship ^ship) : m_Ship(ship) {}
 
-    virtual String^ Print() override        { return "Unload " + m_Ship->PrintClassWithName(); }
+    virtual String^ Print() override;
     virtual String^ PrintForUI() override   { return "Unload"; }
 
     Ship^   m_Ship;
@@ -196,7 +196,7 @@ public ref class ShipCmdLand : public CmdBase<CommandPhase::PreDeparture, Comman
 public:
     ShipCmdLand(Ship ^ship) : m_Ship(ship) {}
 
-    virtual String^ Print() override        { return "Land " + m_Ship->PrintClassWithName(); }
+    virtual String^ Print() override;
     virtual String^ PrintForUI() override   { return "Land"; }
 
     Ship^   m_Ship;
@@ -208,7 +208,7 @@ public ref class ShipCmdDeep : public CmdBase<CommandPhase::PreDeparture, Comman
 public:
     ShipCmdDeep(Ship ^ship) : m_Ship(ship) {}
 
-    virtual String^ Print() override        { return "Deep " + m_Ship->PrintClassWithName(); }
+    virtual String^ Print() override;
     virtual String^ PrintForUI() override   { return "Deep"; }
 
     Ship^   m_Ship;
@@ -220,10 +220,10 @@ public ref class ShipCmdOrbit : public CmdBase<CommandPhase::PreDeparture, Comma
 public:
     ShipCmdOrbit(Ship ^ship, Planet ^planet) : m_Ship(ship), m_Planet(planet) {}
 
-    virtual String^ Print() override        { return String::Format("Orbit {0}, {1}", m_Ship->PrintClassWithName(), GetOrbitTarget()); }
+    virtual String^ Print() override;
     virtual String^ PrintForUI() override   { return "Orbit " + GetOrbitTarget(); }
 
-    virtual String^ GetOrbitTarget() { return String::IsNullOrEmpty(m_Planet->Name) ? m_Planet->Number.ToString() : m_Planet->Name; }
+    virtual String^ GetOrbitTarget();
 
     Ship^   m_Ship;
     Planet^ m_Planet;
@@ -235,7 +235,7 @@ public ref class ShipCmdScan : public CmdBase<CommandPhase::PostArrival, Command
 public:
     ShipCmdScan(Ship ^ship) : m_Ship(ship) {}
 
-    virtual String^ Print() override        { return "Scan " + m_Ship->PrintClassWithName(); }
+    virtual String^ Print() override;
     virtual String^ PrintForUI() override   { return "Scan"; }
 
     Ship^   m_Ship;
@@ -253,7 +253,7 @@ public:
     virtual StarSystem^ GetRefSystem() override { return m_JumpTarget; }
 
     virtual String^ Print() override;
-    virtual String^ PrintForUI() override   { return "Jump to " + m_Ship->PrintJumpDestination(); }
+    virtual String^ PrintForUI() override;
 
     Ship^       m_Ship;
     StarSystem^ m_JumpTarget;
@@ -271,10 +271,8 @@ public:
 
     virtual StarSystem^ GetRefSystem() override { return m_JumpTarget; }
 
-    virtual String^ Print() override        { return String::Format("Wormhole {0}, {1}",
-                                                        m_Ship->PrintClassWithName(),
-                                                        m_PlanetNum ); }
-    virtual String^ PrintForUI() override   { return "Wormhole to " + m_Ship->PrintJumpDestination(); }
+    virtual String^ Print() override;
+    virtual String^ PrintForUI() override;
 
     Ship^       m_Ship;
     StarSystem^ m_JumpTarget;
@@ -326,9 +324,9 @@ public:
         : m_Amount(amount), m_Unit(unit), m_Colony(colony)
     {}
 
-    virtual StarSystem^ GetRefSystem() override { return m_Colony->System; }
+    virtual StarSystem^ GetRefSystem() override;
 
-    virtual String^ Print() override    { return String::Format("Install {0} {1} PL {2}", m_Amount, m_Unit, m_Colony->Name); }
+    virtual String^ Print() override;
 
     int             m_Amount;
     String^         m_Unit;
@@ -365,7 +363,7 @@ public:
         , m_Text(text)
     {}
 
-    virtual String^ Print() override { return String::Format("Message SP {0}\r\n{1}\r\nZzz", m_Alien->Name, m_Text); }
+    virtual String^ Print() override;
 
     Alien^          m_Alien;
     String^         m_Text;
@@ -402,7 +400,7 @@ public:
 
     virtual StarSystem^ GetRefSystem() override { return m_System; }
 
-    virtual String^ Print() override    { return "Visited " + m_System->PrintLocation(); }
+    virtual String^ Print() override;
 
     StarSystem^     m_System;
 };
@@ -431,7 +429,7 @@ public:
     ProdCmdEstimate(Alien ^alien) : m_Alien(alien) {}
 
     virtual int     GetEUCost() override    { return 25; }
-    virtual String^ Print() override        { return "Estimate SP " + m_Alien->Name; } 
+    virtual String^ Print() override;
 
     Alien^      m_Alien;
 };
@@ -442,7 +440,7 @@ public:
 public ref class ProdCmdShipyard : public CmdProdBase<CommandType::Shipyard>
 {
 public:
-    virtual int     GetEUCost() override    { return Calculators::ShipyardCost(GameData::Player->TechLevels[TECH_MA]); }
+    virtual int     GetEUCost() override;
     virtual String^ Print() override        { return "Shipyard"; } 
 };
 

@@ -324,13 +324,35 @@ String^ Ship::PrintCmdSummary()
 String^ Ship::PrintCmdDetails()
 {
     String ^ret = "";
+    String ^cmds;
+
+    ret += "PRE-DEPARTURE:\r\n";
+    cmds = PrintCmdDetailsPhase(CommandPhase::PreDeparture);
+    ret += String::IsNullOrEmpty( cmds ) ? "<none>\r\n\r\n" : cmds + "\r\n";
+
+    ret += "JUMPS:\r\n";
+    cmds = PrintCmdDetailsPhase(CommandPhase::Jump);
+    ret += String::IsNullOrEmpty( cmds ) ? "<none>\r\n\r\n" : cmds + "\r\n";
+
+    ret += "PRODUCTION:\r\n";
+    cmds = PrintCmdDetailsPhase(CommandPhase::Production);
+    ret += String::IsNullOrEmpty( cmds ) ? "<none>\r\n\r\n" : cmds + "\r\n";
+
+    ret += "POST-ARRIVAL:\r\n";
+    cmds = PrintCmdDetailsPhase(CommandPhase::PostArrival);
+    ret += String::IsNullOrEmpty( cmds ) ? "<none>\r\n" : cmds;
+
+    return ret;
+}
+
+String^ Ship::PrintCmdDetailsPhase(CommandPhase phase)
+{
+    String ^ret = "";
 
     for each( ICommand ^cmd in Commands )
     {
-        if( cmd->GetPhase() == CommandPhase::Jump )
-            continue;
-
-        ret += cmd->PrintForUI() + "\r\n";
+        if( cmd->GetPhase() == phase )
+            ret += cmd->PrintForUI() + "\r\n";
     }
 
     return ret;

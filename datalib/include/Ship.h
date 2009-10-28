@@ -2,11 +2,10 @@
 #include "GridDataSrcBase.h"
 #include "Alien.h"
 #include "StarSystem.h"
+#include "Commands.h"
 
 namespace FHUI
 {
-
-interface class ICommand;
 
 // ---------------------------------------------------
 // Ship or starbase
@@ -140,6 +139,7 @@ public:
 
     String^         PrintCmdSummary();
     String^         PrintCmdDetails();
+    String^         PrintCmdDetailsPhase(CommandPhase phase);
 
 protected:
     void            SetupTonnage();

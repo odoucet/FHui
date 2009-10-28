@@ -1,4 +1,4 @@
-This is a change log for FHUI releases.
+*This is a change log for FHUI releases.
 Major new features and bug fixes will be listed here.
 Minor changes are listed only if originally requested by player
 * Bug fixes

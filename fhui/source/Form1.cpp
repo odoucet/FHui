@@ -2515,7 +2515,10 @@ void Form1::ShipsSetup()
             if( cmd )
                 cells[c.JumpTarget]->Value  = cmd->PrintForUI();
             cells[c.Commands]->Value        = ship->PrintCmdSummary();
-            cells[c.Commands]->ToolTipText  = ship->PrintCmdDetails();
+
+            String ^cmdDetails = ship->PrintCmdDetails();
+            cells[c.JumpTarget]->ToolTipText= cmdDetails;
+            cells[c.Commands]->ToolTipText  = cmdDetails;
 
             if( ship->EUToComplete )
                 cells[c.Commands]->Value    = ship->EUToComplete.ToString() + " EU to complete";
