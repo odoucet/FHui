@@ -415,10 +415,13 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
         if( m_RM->Match(line, m_RM->ExpCmdColony) )
         {
             Colony ^colony = m_GameData->GetColony(m_RM->Results[0]);
-            if( colony->Owner == GameData::Player )
+            if( colony->Owner == GameData::Player)
             {
-                colony->ProductionOrder = colonyProdOrder++;
                 refColony = colony;
+                if( colony->EconomicBase > 0 || colony->HasInventory )
+                {
+                    colony->ProductionOrder = colonyProdOrder++;
+                }
             }
             else
                 throw gcnew FHUIParsingException("Inconsistent commands template (colony production order)!");
@@ -494,9 +497,9 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
                 false);
             Planet ^planet = system->Planets[ m_RM->GetResultInt(3) ];
             String ^name = m_RM->Results[4];
-            AddCommand(
-                m_GameData->AddColony(GameData::Player, name, system, planet->Number, false),
-                CmdSetOrigin(gcnew CmdPlanetName(system, planet->Number, name)) );
+            Colony ^colony = m_GameData->AddColony(GameData::Player, name, system, planet->Number, false);
+            colony->PlanetType = PLANET_COLONY;
+            AddCommand( colony, CmdSetOrigin(gcnew CmdPlanetName(system, planet->Number, name)) );
         }
         else if( m_RM->Match(line, m_RM->ExpCmdPLDisband) )
         {
@@ -1059,6 +1062,15 @@ void CommandManager::GeneratePreDeparture()
     m_OrderList->Add("START PRE-DEPARTURE");
 
     // Print UI commands
+    for each( Colony ^colony in m_GameData->GetColonies() )
+    {
+        for each( ICommand ^cmd in colony->Commands )
+        {
+            if( cmd->GetCmdType() == CommandType::Name )
+                m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
+        }
+    }
+
     for each( ICommand ^cmd in GetCommands() )
     {
         if( cmd->GetPhase() == CommandPhase::PreDeparture )
@@ -1246,9 +1258,8 @@ void CommandManager::GenerateProduction()
     // Generate production template for each colony
     for each( Colony ^colony in GameData::Player->Colonies )
     {
-        //if ( (colony->EconomicBase <= 0) &&
-        //     (colony->HasInventory == false) )
-        //    continue;
+        if ( (colony->EconomicBase <= 0) && (colony->HasInventory == false) )
+            continue;
 
         // Section header
         m_OrderList->Add("");

@@ -343,10 +343,13 @@ void Form1::PlanetsMenuAddName(DataGridViewCellEventArgs ^cell)
         m_PlanetsMenuRef->Number,
         false );
 
+    colony->PlanetType = PLANET_COLONY;
+
     m_CommandMgr->AddCommand( colony, 
         gcnew CmdPlanetName( m_PlanetsMenuRef->System, m_PlanetsMenuRef->Number, name ) );
 
     PlanetsGrid->Filter->Update();
+    ColoniesGrid->Filter->Update();
 }
 
 void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
@@ -372,6 +375,7 @@ void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
     }
 
     PlanetsGrid->Filter->Update();
+    ColoniesGrid->Filter->Update();
 }
 
 void Form1::PlanetsMenuRemoveNameCancel(Object^, EventArgs^)

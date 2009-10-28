@@ -26,6 +26,7 @@ FHUI build ??
 + Ships commands menu reorganized to be similar to the one on Colonies tab.
 + Ships tab: mark misjumped ships' location with red color.
 + Rows/Cells selection mode is saved for future FHUI sessions.
++ Planet after naming is treated as colony with zero size.
 
 FHUI build 226
 * [P] Localization independent string formatting when generating scans.

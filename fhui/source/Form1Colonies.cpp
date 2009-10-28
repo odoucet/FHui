@@ -137,8 +137,6 @@ void Form1::ColoniesFillGrid()
         cells[c.Name]->Value        = colony->Name;
         cells[c.Type]->Value        = FHStrings::PlTypeToString(colony->PlanetType);
         cells[c.Location]->Value    = colony->PrintLocation();
-        if( colony->EconomicBase != -1 )
-            cells[c.Size]->Value    = (double)colony->EconomicBase / 10.0;
         cells[c.Dist]->Value        = GridPrintDistance(colony->System, ColoniesGrid->Filter->RefSystem, gv, age);
         cells[c.DistSec]->Value     = GridPrintDistance(colony->System, ColoniesGrid->Filter->RefSystemPrev, gv, age);
         cells[c.Inventory]->Value   = colony->PrintInventory();
@@ -149,29 +147,31 @@ void Form1::ColoniesFillGrid()
             cells[c.Grav]->Value    = (double)colony->Planet->Grav / 100.0;
         }
 
-        if( colony->Owner == sp )
+        if( colony->EconomicBase > 0 )
         {
-            int prodCalculated = Calculators::ColonyProduction(
-                colony,
-                sp->TechLevelsAssumed[TECH_MI],
-                sp->TechLevelsAssumed[TECH_MA],
-                sp->TechLevelsAssumed[TECH_LS],
-                m_GameData->GetFleetPercentCost() );
+            cells[c.Size]->Value    = (double)colony->EconomicBase / 10.0;
 
-            cells[c.Prod]->Value        = prodCalculated;
-            cells[c.ProdOrder]->Value   = colony->ProductionOrder;
-            cells[c.ProdPerc]->Value    = 100 - Calculators::ProductionPenalty(colony->LSN, sp->TechLevelsAssumed[TECH_LS]);
-            cells[c.Pop]->Value         = colony->AvailPop;
-
-            if( colony->PlanetType == PLANET_HOME ||
-                colony->PlanetType == PLANET_COLONY )
+            if( colony->Owner == sp )
             {
-                colony->CalculateBalance(ColoniesGrid->Filter->MiMaBalanced);
-                cells[c.Balance]->Value = colony->PrintBalance();
-            }
+                int prodCalculated = Calculators::ColonyProduction(
+                    colony,
+                    sp->TechLevelsAssumed[TECH_MI],
+                    sp->TechLevelsAssumed[TECH_MA],
+                    sp->TechLevelsAssumed[TECH_LS],
+                    m_GameData->GetFleetPercentCost() );
 
-            if( colony->EconomicBase != -1 )
-            {
+                cells[c.Prod]->Value        = prodCalculated;
+                cells[c.ProdOrder]->Value   = colony->ProductionOrder;
+                cells[c.ProdPerc]->Value    = 100 - Calculators::ProductionPenalty(colony->LSN, sp->TechLevelsAssumed[TECH_LS]);
+                cells[c.Pop]->Value         = colony->AvailPop;
+
+                if( colony->PlanetType == PLANET_HOME ||
+                    colony->PlanetType == PLANET_COLONY )
+                {
+                    colony->CalculateBalance(ColoniesGrid->Filter->MiMaBalanced);
+                    cells[c.Balance]->Value = colony->PrintBalance();
+                }
+
                 int prodSum;
                 String ^orders = colony->PrintCmdDetails(m_CommandMgr, prodSum);
                 cells[c.Budget]->Value = prodSum != 0
@@ -187,16 +187,16 @@ void Form1::ColoniesFillGrid()
                 if( colony->Res->AvailEU < 0 )
                     cells[c.Prod]->Style->ForeColor = Color::Red;
             }
-        }
-        else
-        {
-            if( colony->LastSeen > 0 )
-                cells[c.Seen]->Value = colony->LastSeen;
-        }
+            else
+            {
+                if( colony->LastSeen > 0 )
+                    cells[c.Seen]->Value = colony->LastSeen;
+            }
 
-        if( colony->Shipyards != -1 )
-        {
-            cells[c.Shipyards]->Value = colony->Shipyards;
+            if( colony->Shipyards != -1 )
+            {
+                cells[c.Shipyards]->Value = colony->Shipyards;
+            }
         }
 
         String^ notes = gcnew String("");
