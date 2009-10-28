@@ -189,8 +189,20 @@ public ref class CmdCustom
     : public CmdBase<CommandPhase::Custom, CommandType::Custom>
 {
 public:
-    CmdCustom(CommandPhase phase, String ^command)
-        : m_Phase(phase), m_Command(command) {}
+    CmdCustom(CommandPhase phase, String ^command, int cost)
+        : m_Phase(phase), m_Command(command) , m_EUCost(cost)
+    {
+        RequiresPhasePrefix = true;
+    }
+
+    CmdCustom^ operator = (CmdCustom ^cmd)
+    {
+        Origin      = cmd->Origin;
+        m_Phase     = cmd->m_Phase;
+        m_Command   = cmd->m_Command;
+        m_EUCost    = cmd->m_EUCost;
+        return this;
+    }
 
     static String^          PhaseAsString(CommandPhase phase)
     {
@@ -209,10 +221,13 @@ public:
 
     virtual CommandPhase    GetPhase() override     { return m_Phase; }
 
+    virtual int             GetEUCost() override    { return m_EUCost; }
+
     virtual String^         Print() override        { return m_Command; }
 
     CommandPhase    m_Phase;
     String^         m_Command;
+    int             m_EUCost;
 };
 
 ////////////////////////////////////////////////////////////

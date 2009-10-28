@@ -300,8 +300,11 @@ namespace FHUI {
         ToolStripMenuItem^  ShipsFillMenuCommandsOptions(ICommand ^cmd);
         void        ShipsMenuSelectRef(Object^, EventArgs^);
 
+        typedef Pair<CommandPhase, CmdCustom^>  ShipsCustomCmdData;
+        void        ShipsMenuCommandCustom(ShipsCustomCmdData ^data);
+
         typedef Pair<Ship^, ICommand^>  ShipCommandData;
-        void        ShipsMenuCommandSet(ShipCommandData ^data);
+        void        ShipsMenuCommandAdd(ShipCommandData ^data);
         void        ShipsMenuCommandDel(ICommand ^cmd);
         void        ShipsMenuCommandDelAll(CommandPhase phase);
 

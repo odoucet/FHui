@@ -189,7 +189,7 @@ String^ CommandManager::PrintCommandToFile(ICommand ^cmd)
     }
 
     if( cmd->GetCmdType() == CommandType::Custom )
-        prefix += "CUSTOM ";
+        prefix += "CUSTOM " + cmd->GetEUCost().ToString() + " ";
 
     return prefix + cmd->Print();
 }
@@ -563,7 +563,8 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
         }
         else if( m_RM->Match(line, m_RM->ExpCmdCustom) )
         {
-            AddCommand( CmdSetOrigin(gcnew CmdCustom(m_CmdPhase, m_RM->Results[0])) );
+            AddCommand( CmdSetOrigin(
+                gcnew CmdCustom(m_CmdPhase, m_RM->Results[1], m_RM->GetResultInt(0))) );
         }
         else
             throw gcnew FHUIParsingException("Unrecognized line in commands template: " + line);
@@ -719,7 +720,8 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
     // Custom
     if( m_RM->Match(line, m_RM->ExpCmdCustom) )
     {
-        colony->Commands->Add( CmdSetOrigin(gcnew CmdCustom(m_CmdPhase, m_RM->Results[0])) );
+        colony->Commands->Add( CmdSetOrigin(
+            gcnew CmdCustom(m_CmdPhase, m_RM->Results[1], m_RM->GetResultInt(0))) );
         return true;
     }
 
@@ -796,7 +798,8 @@ bool CommandManager::LoadCommandsShip(String ^line, Ship ^ship)
     // Custom
     if( m_RM->Match(line, m_RM->ExpCmdCustom) )
     {
-        ship->AddCommand( CmdSetOrigin(gcnew CmdCustom(m_CmdPhase, m_RM->Results[0])) );
+        ship->AddCommand( CmdSetOrigin(
+            gcnew CmdCustom(m_CmdPhase, m_RM->Results[1], m_RM->GetResultInt(0))) );
         return true;
     }
 

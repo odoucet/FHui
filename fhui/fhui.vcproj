@@ -446,6 +446,15 @@
 					</File>
 				</File>
 				<File
+					RelativePath=".\include\CmdCustomDlg.h"
+					FileType="3"
+					>
+					<File
+						RelativePath=".\include\CmdCustomDlg.resx"
+						>
+					</File>
+				</File>
+				<File
 					RelativePath=".\include\CmdDevelopDlg.h"
 					FileType="3"
 					>

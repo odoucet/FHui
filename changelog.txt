@@ -9,7 +9,7 @@ FHUI build ??
 * [P] Fixed recycle command for ships.
 * Fixed wormhole target printing on Ships tab/Jump column.
 * Fixed 'Cancel All' commands menus for non-production phases.
-+ New commands supported: Unload.
++ New commands supported: Unload, Deep, Land.
 + Develop command dialog: display TR jumping to developing system as
   potential develop target ship.
 + Systems tab: mark matching wormhole terminus endpoints with colors.
@@ -25,6 +25,7 @@ FHUI build ??
   "(New)" and cell will be displayed in red.
 + Ships commands menu reorganized to be similar to the one on Colonies tab.
 + Ships tab: mark misjumped ships' location with red color.
++ Rows/Cells selection mode is saved for future FHUI sessions.
 
 FHUI build 226
 * [P] Localization independent string formatting when generating scans.
