@@ -170,40 +170,22 @@ void Form1::ColoniesFillGrid()
                 cells[c.Balance]->Value = colony->PrintBalance();
             }
 
-            String ^prodOrders = "";
-            int prodSum = 0;
-            if( colony->Commands->Count > 0 )
-            {
-                for each( ICommand ^cmd in colony->Commands )
-                {
-                    if( cmd->GetPhase() == CommandPhase::Production )
-                    {
-                        prodOrders += m_CommandMgr->PrintCommandWithInfo(cmd, 0) + "\r\n";
-                        prodSum += cmd->GetEUCost();
-                    }
-                }
-                if( colony->Res->AvailEU < 0 )
-                {
-                    prodOrders += "!!! BUDGET EXCEEDED !!!";
-                    cells[c.Prod]->Style->ForeColor = Color::Red;
-                }
-            }
-            else
-            {
-                prodOrders = "< No production orders >";
-            }
-
             if( colony->EconomicBase != -1 )
             {
-                cells[c.Budget]->Value  = prodSum != 0
+                int prodSum;
+                String ^orders = colony->PrintCmdDetails(m_CommandMgr, prodSum);
+                cells[c.Budget]->Value = prodSum != 0
                     ? String::Format("{0} ({1}{2})", colony->Res->TotalEU, prodSum < 0 ? "+" : "", -prodSum)
                     :  colony->Res->TotalEU.ToString();
                 if( colony->Res->TotalEU < 0 )
                     cells[c.Budget]->Style->ForeColor = Color::Red;
 
-                cells[c.Prod]->ToolTipText      = prodOrders;
-                cells[c.ProdOrder]->ToolTipText = prodOrders;
-                cells[c.Budget]->ToolTipText    = prodOrders;
+                cells[c.Prod]->ToolTipText      = orders;
+                cells[c.ProdOrder]->ToolTipText = orders;
+                cells[c.Budget]->ToolTipText    = orders;
+
+                if( colony->Res->AvailEU < 0 )
+                    cells[c.Prod]->Style->ForeColor = Color::Red;
             }
         }
         else

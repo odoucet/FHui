@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 #include "GameData.h"
-#include "Commands.h"
+#include "CommandManager.h"
 
 namespace FHUI
 {
@@ -129,6 +129,58 @@ bool Colony::IsNameCommandPending()
         }
     }
     return false;
+}
+
+String^ Colony::PrintCmdDetails(CommandManager ^cmdMgr, int %prodSum)
+{
+    String ^ret = "";
+    String ^cmds;
+
+    ret += "PRE-DEPARTURE:\r\n";
+    cmds = PrintCmdDetailsPhase(CommandPhase::PreDeparture);
+    ret += String::IsNullOrEmpty( cmds ) ? "<none>\r\n\r\n" : cmds + "\r\n";
+
+    ret += "PRODUCTION:\r\n";
+    cmds = PrintCmdDetailsPhaseProduction(cmdMgr, prodSum);
+    ret += String::IsNullOrEmpty( cmds ) ? "<none>\r\n\r\n" : cmds + "\r\n";
+
+    ret += "POST-ARRIVAL:\r\n";
+    cmds = PrintCmdDetailsPhase(CommandPhase::PostArrival);
+    ret += String::IsNullOrEmpty( cmds ) ? "<none>\r\n" : cmds;
+
+    return ret;
+}
+
+String^ Colony::PrintCmdDetailsPhase(CommandPhase phase)
+{
+    String ^ret = "";
+
+    for each( ICommand ^cmd in Commands )
+    {
+        if( cmd->GetPhase() == phase )
+            ret += cmd->Print() + "\r\n";
+    }
+
+    return ret;
+}
+
+String^ Colony::PrintCmdDetailsPhaseProduction(CommandManager ^cmdMgr, int %prodSum)
+{
+    String ^ret = "";
+    prodSum = 0;
+
+    for each( ICommand ^cmd in Commands )
+    {
+        if( cmd->GetPhase() == CommandPhase::Production )
+        {
+            ret += cmdMgr->PrintCommandWithInfo(cmd, 0) + "\r\n";
+            prodSum += cmd->GetEUCost();
+        }
+    }
+    if( Res->AvailEU < 0 )
+        ret += "!!! BUDGET EXCEEDED !!!\r\n";
+
+    return ret;
 }
 
 } // end namespace FHUI

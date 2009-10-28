@@ -1,12 +1,14 @@
 #pragma once
 #include "GridDataSrcBase.h"
 #include "StarSystem.h"
+#include "Commands.h"
 
 namespace FHUI
 {
 
 ref class Planet;
 ref class StarSystem;
+ref class CommandManager;
 interface class ICommand;
 
 // ---------------------------------------------------
@@ -181,6 +183,10 @@ public:
     void                ProductionReset();
     bool                IsNameCommandPending();
     bool                IsDisbandCommandPending();
+
+    String^             PrintCmdDetails(CommandManager ^cmdMgr, int %prodSum);
+    String^             PrintCmdDetailsPhase(CommandPhase phase);
+    String^             PrintCmdDetailsPhaseProduction(CommandManager ^cmdMgr, int %prodSum);
 
     List<ICommand^>^    Commands;       // Colony commands
     Resources^          Res;            // Resource tracking for orders template
