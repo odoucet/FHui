@@ -6,9 +6,12 @@ Minor changes are listed only if originally requested by player
 [P] denotes player requested features
 
 FHUI build ??
+* Fixed bug that did not allow custom pre-departure commands for
+  ships without any cargo.
 + Commands management menu added to Systems tab. Custom orders
   now possible for Combat, Pre-Departure, Post-Arrival and Strikes
   phases independent of colonies and ships.
++ New commands supported: Orbit.
 
 FHUI build 251
 * [P] Fixed recycle command for ships.

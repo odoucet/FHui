@@ -35,6 +35,8 @@ RegexMatcher::RegexMatcher()
     ExpCmdShipScan      = gcnew Regex("^Scan\\s+[A-Z0-9]+\\s+([^,;]+)$");
     ExpCmdShipDeep      = gcnew Regex("^Deep\\s+[A-Z0-9]+\\s+([^,;]+)$");
     ExpCmdShipLand      = gcnew Regex("^Land\\s+[A-Z0-9]+\\s+([^,;]+)$");
+    ExpCmdShipOrbitPLName   = gcnew Regex("^Orbit\\s+[A-Z0-9]+\\s+([^,;]+)\\s*,\\s+PL\\s+([^,;]+)$");
+    ExpCmdShipOrbitPLNum    = gcnew Regex("^Orbit\\s+[A-Z0-9]+\\s+([^,;]+)\\s*,\\s+(\\d+)$");
     ExpCmdVisited       = gcnew Regex("^Visited\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)$");
     ExpCmdCustom        = gcnew Regex("^CUSTOM\\s+(\\d+)\\s+(.+)$");
 

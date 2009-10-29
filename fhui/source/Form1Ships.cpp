@@ -316,23 +316,39 @@ ToolStripMenuItem^ Form1::ShipsFillMenuPreDepartureNew()
                 gcnew ShipCommandData(ship, gcnew ShipCmdUnload(ship)),
                 gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandAdd) ) );
         }
+    }
 
+    if( ship->System->Planets->Count > 0 )
+    {
         menu->DropDownItems->Add( CreateCustomMenuItem<ShipCommandData^>(
             "Deep",
             gcnew ShipCommandData(ship, gcnew CmdPhaseWrapper(CommandPhase::PreDeparture, gcnew ShipCmdDeep(ship))),
             gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandAdd) ) );
+
+        // Orbit
+        ToolStripMenuItem ^menuOrbit = gcnew ToolStripMenuItem("Orbit:");
+        for each( Planet ^planet in ship->System->Planets->Values )
+        {
+            menuOrbit->DropDownItems->Add( CreateCustomMenuItem<ShipCommandData^>(
+                "PL " + (String::IsNullOrEmpty(planet->Name) ? "#" + planet->Number.ToString() : planet->Name),
+                gcnew ShipCommandData(ship, gcnew CmdPhaseWrapper(CommandPhase::PreDeparture, gcnew ShipCmdOrbit(ship, planet))),
+                gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandAdd) ) );
+        }
+        menu->DropDownItems->Add( menuOrbit );
+
         menu->DropDownItems->Add( CreateCustomMenuItem<ShipCommandData^>(
             "Land",
             gcnew ShipCommandData(ship, gcnew CmdPhaseWrapper(CommandPhase::PreDeparture, gcnew ShipCmdLand(ship))),
             gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandAdd) ) );
-
-        // Custom command
-        menu->DropDownItems->Add( gcnew ToolStripSeparator );
-        menu->DropDownItems->Add( CreateCustomMenuItem<CustomCmdData^>(
-            "Custom Order...",
-            gcnew CustomCmdData(CommandPhase::PreDeparture, nullptr),
-            gcnew EventHandler1Arg<CustomCmdData^>(this, &Form1::ShipsMenuCommandCustom) ) );
     }
+
+    // Custom command
+    if( menu->DropDownItems->Count > 0 )
+        menu->DropDownItems->Add( gcnew ToolStripSeparator );
+    menu->DropDownItems->Add( CreateCustomMenuItem<CustomCmdData^>(
+        "Custom Order...",
+        gcnew CustomCmdData(CommandPhase::PreDeparture, nullptr),
+        gcnew EventHandler1Arg<CustomCmdData^>(this, &Form1::ShipsMenuCommandCustom) ) );
 
     return menu;
 }
@@ -419,14 +435,35 @@ ToolStripMenuItem^ Form1::ShipsFillMenuPostArrivalNew()
         "Scan",
         gcnew ShipCommandData(ship, gcnew ShipCmdScan(ship)),
         gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandAdd) ) );
-    menu->DropDownItems->Add( CreateCustomMenuItem<ShipCommandData^>(
-        "Deep",
-        gcnew ShipCommandData(ship, gcnew CmdPhaseWrapper(CommandPhase::PostArrival, gcnew ShipCmdDeep(ship))),
-        gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandAdd) ) );
-    menu->DropDownItems->Add( CreateCustomMenuItem<ShipCommandData^>(
-        "Land",
-        gcnew ShipCommandData(ship, gcnew CmdPhaseWrapper(CommandPhase::PostArrival, gcnew ShipCmdLand(ship))),
-        gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandAdd) ) );
+
+    StarSystem ^system = ship->System;
+    ICommand ^jumpCmd = ship->GetJumpCommand();
+    if( jumpCmd->GetRefSystem() )
+        system = jumpCmd->GetRefSystem();
+
+    if( system->Planets->Count > 0 )
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem<ShipCommandData^>(
+            "Deep",
+            gcnew ShipCommandData(ship, gcnew CmdPhaseWrapper(CommandPhase::PostArrival, gcnew ShipCmdDeep(ship))),
+            gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandAdd) ) );
+
+        // Orbit
+        ToolStripMenuItem ^menuOrbit = gcnew ToolStripMenuItem("Orbit:");
+        for each( Planet ^planet in system->Planets->Values )
+        {
+            menuOrbit->DropDownItems->Add( CreateCustomMenuItem<ShipCommandData^>(
+                "PL " + (String::IsNullOrEmpty(planet->Name) ? "#" + planet->Number.ToString() : planet->Name),
+                gcnew ShipCommandData(ship, gcnew CmdPhaseWrapper(CommandPhase::PostArrival, gcnew ShipCmdOrbit(ship, planet))),
+                gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandAdd) ) );
+        }
+        menu->DropDownItems->Add( menuOrbit );
+
+        menu->DropDownItems->Add( CreateCustomMenuItem<ShipCommandData^>(
+            "Land",
+            gcnew ShipCommandData(ship, gcnew CmdPhaseWrapper(CommandPhase::PostArrival, gcnew ShipCmdLand(ship))),
+            gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandAdd) ) );
+    }
 
     // Custom order
     menu->DropDownItems->Add( gcnew ToolStripSeparator );

@@ -798,6 +798,29 @@ bool CommandManager::LoadCommandsShip(String ^line, Ship ^ship)
         return true;
     }
 
+    // Orbit
+    if( m_RM->Match(line, m_RM->ExpCmdShipOrbitPLName) )
+    {
+        Planet ^planet = GameData::GetColony(m_RM->Results[1])->Planet;
+        ship->AddCommand( CmdSetOrigin(gcnew ShipCmdOrbit(ship, planet)) );
+        return true;
+    }
+    if( m_RM->Match(line, m_RM->ExpCmdShipOrbitPLNum) )
+    {
+        // Planet may be from the jump target system
+        // but I don't want to search for it here.
+        // If planet of given number is not present in current system,
+        // just make up a new fake planet.
+        Planet ^planet;
+        int plNum = m_RM->GetResultInt(1);
+        if( ship->System->Planets->ContainsKey(plNum) )
+            planet = ship->System->Planets[plNum];
+        else
+            planet = Planet::Default(ship->System, plNum);
+        ship->AddCommand( CmdSetOrigin(gcnew ShipCmdOrbit(ship, planet)) );
+        return true;
+    }
+
     // Custom
     if( m_RM->Match(line, m_RM->ExpCmdCustom) )
     {

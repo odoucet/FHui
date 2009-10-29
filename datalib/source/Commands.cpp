@@ -163,7 +163,7 @@ String^ ShipCmdOrbit::Print()
 String^ ShipCmdOrbit::GetOrbitTarget()
 {
     return String::IsNullOrEmpty(m_Planet->Name)
-        ? m_Planet->Number.ToString() : m_Planet->Name;
+        ? m_Planet->Number.ToString() : "PL " + m_Planet->Name;
 }
 
 

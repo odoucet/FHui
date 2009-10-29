@@ -36,6 +36,8 @@ public:
     initonly Regex^     ExpCmdShipScan;
     initonly Regex^     ExpCmdShipDeep;
     initonly Regex^     ExpCmdShipLand;
+    initonly Regex^     ExpCmdShipOrbitPLName;
+    initonly Regex^     ExpCmdShipOrbitPLNum;
     initonly Regex^     ExpCmdPLName;
     initonly Regex^     ExpCmdPLDisband;
     initonly Regex^     ExpCmdSPNeutral;
