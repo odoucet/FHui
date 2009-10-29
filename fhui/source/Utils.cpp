@@ -66,19 +66,14 @@ void Form1::LoadUISettings()
     // Open file
     StreamReader ^sr;
     String ^path = GetDataDir("fhui.ini");
+    FileInfo ^fileInfo = gcnew FileInfo(path);
 
-    try 
-    {
-        sr = File::OpenText( path );
-    }
-    catch( DirectoryNotFoundException^ )
+    if( !fileInfo->Exists )
     {
         return;
     }
-    catch( FileNotFoundException^ )
-    {
-        return;
-    }
+
+    sr = File::OpenText( path );
 
     String ^line;
     DblBufDGV ^grid;

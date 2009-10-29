@@ -534,12 +534,12 @@ void Form1::LoadOrders()
 {
     m_OrderFiles->Clear();
 
-    try
-    {
-        String^ ordersDir = GetDataDir("orders");
-        DirectoryInfo ^dir = gcnew DirectoryInfo(ordersDir);
+    String^ ordersDir = GetDataDir("orders");
+    DirectoryInfo ^dir = gcnew DirectoryInfo(ordersDir);
 
-        for each( FileInfo ^f in dir->GetFiles("*"))
+    if( dir->Exists )
+    {
+        for each( FileInfo ^f in dir->GetFiles() )
         {
             if( f->Length <= 0x10000 ) // 64 KB, more than enough for any commands
             {
@@ -551,13 +551,8 @@ void Form1::LoadOrders()
             }
         }
     }
-    catch( DirectoryNotFoundException^ )
-    {
-    }
-    finally
-    {
-        RepModeCommands->Enabled = m_OrderFiles->Count > 0;
-    }
+
+    RepModeCommands->Enabled = m_OrderFiles->Count > 0;
 }
 
 ////////////////////////////////////////////////////////////////

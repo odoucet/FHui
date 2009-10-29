@@ -61,7 +61,7 @@ void ReportParser::ScanReports()
     int minTurn = 100;
     int maxTurn = 0;
 
-    for each( FileInfo ^f in dir->GetFiles("*"))
+    for each( FileInfo ^f in dir->GetFiles() )
     {   // First check each file if it is a report and find out for which turn.
         // Then reports will be loaded in chronological order.
         int turn = VerifyReport(f->FullName);

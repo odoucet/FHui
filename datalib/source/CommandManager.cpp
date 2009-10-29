@@ -307,31 +307,23 @@ void CommandManager::LoadCommands()
     m_bSaveEnabled = false;
     AddPluginCommands();
 
-    // Open file
-    StreamReader ^sr;
-    try 
+    String^ cmdPath = m_Path + String::Format(OrdersDir::Commands, GameData::CurrentTurn);
+    FileInfo ^fileInfo = gcnew FileInfo(cmdPath);
+
+    if( fileInfo->Exists )
     {
-        sr = File::OpenText( m_Path + String::Format(OrdersDir::Commands, GameData::CurrentTurn) );
+        // Open file
+        StreamReader ^sr = File::OpenText( cmdPath );
 
         RemoveGeneratedCommands(CommandOrigin::Auto, false, false);
         RemoveGeneratedCommands(CommandOrigin::Plugin, false, false);
 
         LoadCommandsGlobal(sr);
+
+        sr->Close();
     }
-    catch( DirectoryNotFoundException^ )
-    {
-        return;
-    }
-    catch( FileNotFoundException^ )
-    {
-        return;
-    }
-    finally
-    {
-        if( sr )
-            sr->Close();
-        m_bSaveEnabled = true;
-    }
+
+    m_bSaveEnabled = true;
 }
 
 void CommandManager::LoadCommandsGlobal(StreamReader ^sr)

@@ -3,6 +3,9 @@
 #include "stdafx.h"
 #include "Form1.h"
 
+#using <System.Xml.Dll>
+using namespace System::Diagnostics;
+using namespace System::IO;
 using namespace FHUI;
 
 [STAThreadAttribute]
@@ -14,6 +17,7 @@ int main(array<System::String ^> ^args)
 
     System::String^ dataDir = nullptr;
     bool plugins = true;
+    bool profile = false;
     for( int i = 0; i < args->Length; ++i )
     {
         if( args[i]->ToLower() == "-dir" && i < (args->Length - 1) )
@@ -30,14 +34,65 @@ int main(array<System::String ^> ^args)
         {
             plugins = false;
         }
+        if( args[i]->ToLower() == "-profile" )
+        {
+            profile = true;
+        }
     }
 
-    Form1 ^fhui = gcnew Form1;
-    fhui->DataDir = dataDir;
-    fhui->EnablePlugins = plugins;
-    fhui->Initialize();
+    if( profile )
+    {
+        DirectoryInfo ^dir = gcnew DirectoryInfo(dataDir);
+        Stopwatch^ timerSingle = gcnew Stopwatch();
+        Stopwatch^ timerComplete = gcnew Stopwatch();
 
-    // Create the main window and run it
-    Application::Run(fhui);
+        timerComplete->Start();
+
+        for each( DirectoryInfo ^subDir in dir->GetDirectories() )
+        {
+            timerSingle->Start();
+
+            Form1 ^fhui = gcnew Form1;
+            fhui->DataDir = subDir->FullName;
+            fhui->EnablePlugins = plugins;
+            fhui->Initialize();
+
+            timerSingle->Stop();
+
+            Debug::WriteLine(
+                String::Format("{0}: {1:00}:{2:00}.{3:000}",
+                subDir->Name,
+                timerSingle->Elapsed.Minutes,
+                timerSingle->Elapsed.Seconds,
+                timerSingle->Elapsed.Milliseconds) );
+
+            timerSingle->Reset();
+        }
+
+        timerComplete->Stop();
+
+        Debug::WriteLine(
+            String::Format("Total: {0:00}:{1:00}.{2:000}",
+            timerComplete->Elapsed.Minutes,
+            timerComplete->Elapsed.Seconds,
+            timerComplete->Elapsed.Milliseconds) );
+    }
+    else
+    {
+        Stopwatch^ timer = gcnew Stopwatch();
+        timer->Start();
+
+        Form1 ^fhui = gcnew Form1;
+        fhui->DataDir = dataDir;
+        fhui->EnablePlugins = plugins;
+        fhui->Initialize();
+
+        timer->Stop();
+        Debug::WriteLine( String::Format("Initialization took {0} ms", timer->Elapsed.Milliseconds) );
+
+        // Create the main window and run it
+        Application::Run(fhui);
+    }
+
     return 0;
 }
