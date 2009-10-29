@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1250"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="FHUI"
 	ProjectGUID="{4216ED73-322C-4030-BDEB-1580ABE843CF}"
 	RootNamespace="fhui"
@@ -97,7 +97,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy changelog to build output dir."
-				CommandLine="copy $(ProjectDir)\..\changelog.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy $(ProjectDir)\..\readme.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
+				CommandLine="copy &quot;$(ProjectDir)\..\changelog.txt&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy &quot;$(ProjectDir)\..\readme.txt&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -179,7 +179,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy changelog to build output dir."
-				CommandLine="copy $(ProjectDir)\..\changelog.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy $(ProjectDir)\..\readme.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
+				CommandLine="copy &quot;$(ProjectDir)\..\changelog.txt&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy &quot;$(ProjectDir)\..\readme.txt&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -261,7 +261,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy changelog to build output dir."
-				CommandLine="copy $(ProjectDir)\..\changelog.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy $(ProjectDir)\..\readme.txt &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
+				CommandLine="copy &quot;$(ProjectDir)\..\changelog.txt&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;copy &quot;$(ProjectDir)\..\readme.txt&quot; &quot;$(TargetDir)&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
