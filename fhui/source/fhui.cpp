@@ -88,8 +88,10 @@ int main(array<System::String ^> ^args)
         fhui->Initialize();
 
         timer->Stop();
-        Debug::WriteLine( String::Format("Initialization took {0} ms", timer->Elapsed.Milliseconds) );
-
+        Debug::WriteLine( String::Format("Initialization took {0}.{1:000} s",
+            timer->Elapsed.Seconds,
+            timer->Elapsed.Milliseconds) );
+        
         // Create the main window and run it
         Application::Run(fhui);
     }
