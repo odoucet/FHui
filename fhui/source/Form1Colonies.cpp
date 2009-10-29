@@ -290,8 +290,6 @@ void Form1::ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowInde
 
 ToolStripMenuItem^ Form1::ColoniesFillMenuAuto()
 {
-    Colony ^colony = m_ColoniesMenuRef;
-
     ToolStripMenuItem ^autoMenu = gcnew ToolStripMenuItem("Automation:");
 
     bool autoEnabled = m_CommandMgr->AutoEnabled;
@@ -352,15 +350,9 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuCommands(CommandPhase phase)
     switch( phase )
     {
     case CommandPhase::PreDeparture:
-        title = "Pre-Departure";
-        break;
-
     case CommandPhase::Production:
-        title = "Production";
-        break;
-
     case CommandPhase::PostArrival:
-        title = "Post-Arrival";
+        title = CmdCustom::PhaseAsString(phase);
         break;
 
     default:
@@ -841,8 +833,7 @@ void Form1::ColoniesMenuAutoDeleteAll(Object^, EventArgs^)
 {
     m_CommandMgr->RemoveGeneratedCommands(CommandOrigin::Auto, false, false);
     m_CommandMgr->SaveCommands();
-    ColoniesGrid->Filter->Update();
-    ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
+    UpdateAllGrids(false);
 }
 
 void Form1::ColoniesMenuAutoDeleteAllNonScouting(Object^, EventArgs^)
@@ -850,7 +841,6 @@ void Form1::ColoniesMenuAutoDeleteAllNonScouting(Object^, EventArgs^)
     m_CommandMgr->RemoveGeneratedCommands(CommandOrigin::Auto, false, true);
     m_CommandMgr->SaveCommands();
     UpdateAllGrids(false);
-    ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
 }
 
 void Form1::ColoniesMenuAutoDeleteAllProduction(Object^, EventArgs^)
@@ -858,7 +848,6 @@ void Form1::ColoniesMenuAutoDeleteAllProduction(Object^, EventArgs^)
     m_CommandMgr->RemoveGeneratedCommands(CommandOrigin::Auto, true, true);
     m_CommandMgr->SaveCommands();
     UpdateAllGrids(false);
-    ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
 }
 
 void Form1::ColoniesMenuCommandCustom(CustomCmdData ^data)

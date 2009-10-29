@@ -6,6 +6,9 @@ Minor changes are listed only if originally requested by player
 [P] denotes player requested features
 
 FHUI build ??
++ Commands management menu added to Systems tab. Custom orders
+  now possible for Combat, Pre-Departure, Post-Arrival and Strikes
+  phases independent of colonies and ships.
 
 FHUI build 251
 * [P] Fixed recycle command for ships.

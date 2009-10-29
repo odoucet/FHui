@@ -226,19 +226,10 @@ ToolStripMenuItem^ Form1::ShipsFillMenuCommands(CommandPhase phase)
     switch( phase )
     {
     case CommandPhase::PreDeparture:
-        title = "Pre-Departure";
-        break;
-
     case CommandPhase::Jump:
-        title = "Jumps";
-        break;
-
     case CommandPhase::Production:
-        title = "Production";
-        break;
-
     case CommandPhase::PostArrival:
-        title = "Post-Arrival";
+        title = CmdCustom::PhaseAsString(phase);
         break;
 
     default:

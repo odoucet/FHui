@@ -4,6 +4,8 @@
 #include "GridFilter.h"
 #include "GridSorter.h"
 
+#include "CmdCustomDlg.h"
+
 using namespace System::IO;
 
 ////////////////////////////////////////////////////////////////
@@ -245,6 +247,15 @@ void Form1::SystemsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex
         menu->Items->Add( jumpMenu );
     }
 
+    // Commands menus
+    menu->Items->Add( gcnew ToolStripSeparator );
+    menu->Items->Add( SystemsFillMenuCommands(CommandPhase::Combat) );
+    menu->Items->Add( SystemsFillMenuCommands(CommandPhase::PreDeparture) );
+    menu->Items->Add( SystemsFillMenuCommands(CommandPhase::PostArrival) );
+    menu->Items->Add( SystemsFillMenuCommands(CommandPhase::Strike) );
+    menu->Items->Add( ColoniesFillMenuAuto() );
+
+    menu->Items->Add( gcnew ToolStripSeparator );
     if( system->TurnScanned <= 0 && !system->IsMarkedVisited )
     {
         ToolStripMenuItem ^menuItem = gcnew ToolStripMenuItem(
@@ -265,13 +276,307 @@ void Form1::SystemsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex
     }
 
     // Export selected systems' scans
-    menu->Items->Add( gcnew ToolStripSeparator );
     menu->Items->Add(
         "Export Scans...",
         nullptr,
         gcnew EventHandler(this, &Form1::SystemsMenuExportScans));
     if( SystemsGrid->SelectionMode == System::Windows::Forms::DataGridViewSelectionMode::CellSelect )
         menu->Items[ menu->Items->Count - 1 ]->Enabled = false;
+}
+
+ToolStripMenuItem^ Form1::SystemsFillMenuCommands(CommandPhase phase)
+{
+    String ^title;
+    switch( phase )
+    {
+    case CommandPhase::Combat:
+    case CommandPhase::PreDeparture:
+    case CommandPhase::PostArrival:
+    case CommandPhase::Strike:
+        title = CmdCustom::PhaseAsString(phase);
+        break;
+
+    default:
+        throw gcnew FHUIDataImplException("Unsupported command phase: " + ((int)phase).ToString());
+    }
+
+    ToolStripMenuItem ^menu = gcnew ToolStripMenuItem(title + ":");
+
+    bool anyCommand = false;
+    for each( ICommand ^cmd in m_CommandMgr->GetCommands() )
+    {
+        if( cmd->GetPhase() == phase )
+        {
+            menu->DropDownItems->Add(
+                SystemsFillMenuCommandsOptions(cmd) );
+            anyCommand = true;
+        }
+    }
+    if( !anyCommand )
+    {
+        menu->DropDownItems->Add( "< No " + title + " orders >" );
+        menu->DropDownItems[0]->Enabled = false;
+    }
+
+    // Add new commands
+    menu->DropDownItems->Add( gcnew ToolStripSeparator );
+    switch( phase )
+    {
+    case CommandPhase::Combat:
+        menu->DropDownItems->Add( SystemsFillMenuCombatNew() );
+        break;
+
+    case CommandPhase::PreDeparture:
+        menu->DropDownItems->Add( SystemsFillMenuPreDepartureNew() );
+        break;
+
+    case CommandPhase::PostArrival:
+        menu->DropDownItems->Add( SystemsFillMenuPostArrivalNew() );
+        break;
+
+    case CommandPhase::Strike:
+        menu->DropDownItems->Add( SystemsFillMenuStrikesNew() );
+        break;
+    }
+
+    menu->DropDownItems->Add( gcnew ToolStripSeparator );
+    if( anyCommand )
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem(
+            "Cancel All " + CmdCustom::PhaseAsString(phase),
+            phase,
+            gcnew EventHandler1Arg<CommandPhase>(this, &Form1::SystemsMenuCommandDelAll) ) );
+    }
+    menu->DropDownItems->Add( CreateCustomMenuItem(
+        "Cancel ALL orders",
+        CommandPhase::Custom,
+        gcnew EventHandler1Arg<CommandPhase>(this, &Form1::SystemsMenuCommandDelAll) ) );
+
+    return menu;
+}
+
+ToolStripMenuItem^ Form1::SystemsFillMenuCombatNew()
+{
+    ToolStripMenuItem ^menu = gcnew ToolStripMenuItem("Add:");
+
+    // Custom command
+    menu->DropDownItems->Add( CreateCustomMenuItem<CustomCmdData^>(
+        "Custom Order...",
+        gcnew CustomCmdData(CommandPhase::Combat, nullptr),
+        gcnew EventHandler1Arg<CustomCmdData^>(this, &Form1::SystemsMenuCommandCustom) ) );
+
+    return menu;
+}
+
+ToolStripMenuItem^ Form1::SystemsFillMenuPreDepartureNew()
+{
+    ToolStripMenuItem ^menu = gcnew ToolStripMenuItem("Add:");
+
+    // Custom command
+    menu->DropDownItems->Add( CreateCustomMenuItem<CustomCmdData^>(
+        "Custom Order...",
+        gcnew CustomCmdData(CommandPhase::PreDeparture, nullptr),
+        gcnew EventHandler1Arg<CustomCmdData^>(this, &Form1::SystemsMenuCommandCustom) ) );
+
+    return menu;
+}
+
+ToolStripMenuItem^ Form1::SystemsFillMenuPostArrivalNew()
+{
+    ToolStripMenuItem ^menu = gcnew ToolStripMenuItem("Add:");
+
+    // Custom command
+    menu->DropDownItems->Add( CreateCustomMenuItem<CustomCmdData^>(
+        "Custom Order...",
+        gcnew CustomCmdData(CommandPhase::PostArrival, nullptr),
+        gcnew EventHandler1Arg<CustomCmdData^>(this, &Form1::SystemsMenuCommandCustom) ) );
+
+    return menu;
+}
+
+ToolStripMenuItem^ Form1::SystemsFillMenuStrikesNew()
+{
+    ToolStripMenuItem ^menu = gcnew ToolStripMenuItem("Add:");
+
+    // Custom command
+    menu->DropDownItems->Add( CreateCustomMenuItem<CustomCmdData^>(
+        "Custom Order...",
+        gcnew CustomCmdData(CommandPhase::Strike, nullptr),
+        gcnew EventHandler1Arg<CustomCmdData^>(this, &Form1::SystemsMenuCommandCustom) ) );
+
+    return menu;
+}
+
+ToolStripMenuItem^ Form1::SystemsFillMenuCommandsOptions(ICommand ^cmd)
+{
+    String ^cmdText;
+    if( cmd->GetCmdType() == CommandType::Message )
+        cmdText = "Message SP " + safe_cast<CmdMessage^>(cmd)->m_Alien->Name + " [...]";
+    else
+        cmdText = m_CommandMgr->PrintCommandWithInfo(cmd, 0);
+    ToolStripMenuItem ^menu = gcnew ToolStripMenuItem( cmdText );
+
+    ICommand ^cmdFirst = nullptr;
+    ICommand ^cmdLast = nullptr;
+    for each( ICommand ^iCmd in m_CommandMgr->GetCommands() )
+    {
+        if( iCmd->GetPhase() == cmd->GetPhase() )
+        {
+            if( cmdFirst == nullptr )
+                cmdFirst = iCmd;
+            cmdLast = iCmd;
+        }
+    }
+
+    bool needSeparator = false;
+    if( cmd != cmdFirst )
+    {
+        needSeparator = true;
+        menu->DropDownItems->Add( CreateCustomMenuItem(
+            "Move up",
+            gcnew MenuCommandUpDownData(m_CommandMgr->GetCommands(), cmd),
+            gcnew EventHandler1Arg<MenuCommandUpDownData^>(this, &Form1::MenuCommandMoveUp) ) );
+    }
+    if( cmd != cmdLast )
+    {
+        needSeparator = true;
+        menu->DropDownItems->Add( CreateCustomMenuItem(
+            "Move down",
+            gcnew MenuCommandUpDownData(m_CommandMgr->GetCommands(), cmd),
+            gcnew EventHandler1Arg<MenuCommandUpDownData^>(this, &Form1::MenuCommandMoveDown) ) );
+    }
+
+    if( needSeparator )
+        menu->DropDownItems->Add( gcnew ToolStripSeparator );
+
+    // Edit command
+    if( cmd->GetCmdType() == CommandType::Custom )
+    {
+        CmdCustom ^cmdCustom = safe_cast<CmdCustom^>(cmd);
+        menu->DropDownItems->Add( CreateCustomMenuItem<CustomCmdData^>(
+            "Edit...",
+            gcnew CustomCmdData(cmdCustom->GetPhase(), cmdCustom),
+            gcnew EventHandler1Arg<CustomCmdData^>(this, &Form1::SystemsMenuCommandCustom) ) );
+    }
+
+    // Cancel order
+    menu->DropDownItems->Add( CreateCustomMenuItem(
+        "Cancel",
+        cmd,
+        gcnew EventHandler1Arg<ICommand^>(this, &Form1::SystemsMenuCommandDel) ) );
+
+    return menu;
+}
+
+void Form1::SystemsMenuCommandAdd(ICommand ^cmd)
+{
+    if( cmd )
+        m_CommandMgr->AddCommand(cmd);
+    else
+        m_CommandMgr->SaveCommands();
+
+    ShowGridContextMenu(SystemsGrid, m_LastMenuEventArg);
+}
+
+void Form1::SystemsMenuCommandDel(ICommand ^cmd)
+{
+    // There are some special cases that must be treated differently
+    switch( cmd->GetCmdType() )
+    {
+    case CommandType::AlienRelation:
+        {
+            CmdAlienRelation ^rel = safe_cast<CmdAlienRelation^>(cmd);
+            AliensMenuSetRelation( gcnew AlienRelationData(rel->m_Alien, rel->m_Alien->RelationOriginal) );
+        }
+        break;
+
+    case CommandType::Teach:
+        {
+            CmdTeach ^teach = safe_cast<CmdTeach^>(cmd);
+            teach->m_Alien->TeachOrders &= ~(1 << teach->m_Tech);
+        }
+        m_CommandMgr->DelCommand(cmd);
+        break;
+
+    default:
+        m_CommandMgr->DelCommand(cmd);
+        break;
+    }
+
+    if( SystemsGrid->Filter->EnableUpdates )
+    {
+        UpdateAllGrids(false);
+        if( m_CommandMgr->GetCommands()->Count > 0 )
+            ShowGridContextMenu(SystemsGrid, m_LastMenuEventArg);
+    }
+}
+
+void Form1::SystemsMenuCommandDelAll(CommandPhase phase)
+{
+    String ^phaseStr = "";
+    if( phase != CommandPhase::Custom )
+        phaseStr = " " + CmdCustom::PhaseAsString(phase);
+
+    System::Windows::Forms::DialogResult result = MessageBox::Show(
+        this,
+        "Delete ALL" + phaseStr + " orders...\r\n"
+        "Are you SURE? Undo is NOT possible...",
+        "Delete All" + phaseStr,
+        MessageBoxButtons::YesNo,
+        MessageBoxIcon::Exclamation,
+        MessageBoxDefaultButton::Button2);
+    if( result != System::Windows::Forms::DialogResult::Yes )
+        return;
+
+    // Delete all confirmed
+    // Disable updates for SystemsMenuCommandDel
+    SystemsGrid->Filter->EnableUpdates = false;
+
+    if( phase == CommandPhase::Custom )
+    {
+
+        while( m_CommandMgr->GetCommands()->Count > 0 )
+            SystemsMenuCommandDel( m_CommandMgr->GetCommands()[0] );
+    }
+    else
+    {
+        bool repeat;
+        do
+        {
+            repeat = false;
+            for each( ICommand ^cmd in m_CommandMgr->GetCommands() )
+            {
+                if( cmd->GetPhase() == phase )
+                {
+                    SystemsMenuCommandDel(cmd);
+                    repeat = true;
+                    break;
+                }
+            }
+        } while( repeat );
+    }
+
+    // Enable updates and update all grids
+    SystemsGrid->Filter->EnableUpdates = true;
+    UpdateAllGrids(false);
+}
+
+void Form1::SystemsMenuCommandCustom(CustomCmdData ^data)
+{
+    CmdCustomDlg ^dlg = gcnew CmdCustomDlg( data->B );
+    if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
+    {
+        CmdCustom ^cmd = dlg->GetCommand( data->A );
+        if( data->B )
+        {
+            *data->B = cmd;
+            SystemsMenuCommandAdd( nullptr );
+        }
+        else
+            SystemsMenuCommandAdd( cmd );
+    }
+
+    delete dlg;
 }
 
 void Form1::SystemsMenuMarkVisited(Object^, EventArgs^)

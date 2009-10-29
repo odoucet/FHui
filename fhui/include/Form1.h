@@ -159,11 +159,23 @@ namespace FHUI {
         void        SystemsFillGrid();
         void        SystemsSelectPlanets( int rowIndex );
         void        SystemsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
+        ToolStripMenuItem^  SystemsFillMenuCommands(CommandPhase phase);
+        ToolStripMenuItem^  SystemsFillMenuCommandsOptions(ICommand ^cmd);
+        ToolStripMenuItem^  SystemsFillMenuCombatNew();
+        ToolStripMenuItem^  SystemsFillMenuPreDepartureNew();
+        ToolStripMenuItem^  SystemsFillMenuPostArrivalNew();
+        ToolStripMenuItem^  SystemsFillMenuStrikesNew();
+        void        SystemsMenuCommandAdd(ICommand ^cmd);
+        void        SystemsMenuCommandDel(ICommand ^cmd);
+        void        SystemsMenuCommandDelAll(CommandPhase phase);
         void        SystemsMenuMarkVisited(Object^, EventArgs^);
         void        SystemsMenuShowPlanets(Object^, EventArgs^);
         void        SystemsMenuShowColonies(Object^, EventArgs^);
         void        SystemsMenuSelectRef(Object^, EventArgs^);
         void        SystemsMenuExportScans(Object^, EventArgs^);
+
+        typedef Pair<CommandPhase, CmdCustom^>  CustomCmdData;
+        void        SystemsMenuCommandCustom(CustomCmdData ^data);
 
         value struct SystemsColumns
         {
@@ -257,8 +269,6 @@ namespace FHUI {
         void        ColoniesMenuAutoDeleteAll(Object^, EventArgs^);
         void        ColoniesMenuAutoDeleteAllNonScouting(Object^, EventArgs^);
         void        ColoniesMenuAutoDeleteAllProduction(Object^, EventArgs^);
-
-        typedef Pair<CommandPhase, CmdCustom^>  CustomCmdData;
         void        ColoniesMenuCommandCustom(CustomCmdData ^data);
 
         value struct ColoniesColumns
