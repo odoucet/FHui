@@ -381,12 +381,18 @@ void Form1::ShowReloadMenu()
         false,
         gcnew EventHandler1Arg<bool>(this, &Form1::TurnReload) ) );
 
-    // TDB...
-    //menu->Items->Add( "Reload Auto Orders from current turn" );
-    //if( m_PluginMgr->OrderPlugins->Count > 0 )
-    //{
-    //    menu->Items->Add( "Recreate Plugin orders" );
-    //}
+    //menu->Items->Add(
+    //    "Reload Auto Orders from current turn",
+    //    nullptr,
+    //    gcnew EventHandler(this, &Form1::ReloadAutoCommands) );
+
+    if( m_PluginMgr->OrderPlugins->Count > 0 )
+    {
+        menu->Items->Add(
+            "Recreate Plugin orders",
+            nullptr,
+            gcnew EventHandler(this, &Form1::RecreatePluginCommands) );
+    }
 
     // Show menu
     Rectangle r = TurnReloadBtn->DisplayRectangle;
@@ -422,6 +428,19 @@ void Form1::TurnReload(bool resetCommands)
     AliensGrid->Rows->Clear();
 
     InitGameData();
+}
+
+void Form1::ReloadAutoCommands(Object^, EventArgs^)
+{
+}
+
+void Form1::RecreatePluginCommands(Object^, EventArgs^)
+{
+    m_CommandMgr->RemoveGeneratedCommands(CommandOrigin::Plugin, false, false);
+    m_CommandMgr->AddPluginCommands();
+    m_CommandMgr->SaveCommands();
+
+    UpdateAllGrids(false);
 }
 
 void Form1::DisplayTurn()
@@ -561,6 +580,8 @@ void Form1::UpdateAllGrids( bool setRefSystems )
         ShipsGrid->Filter->Update();
     }
     AliensGrid->Filter->Update();
+
+    UpdateTabs();
 }
 
 void Form1::ApplyDataAndFormat(

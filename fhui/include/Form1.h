@@ -68,6 +68,8 @@ namespace FHUI {
         void        InitControls();
         void        ShowReloadMenu();
         void        TurnReload(bool resetCommands);
+        void        ReloadAutoCommands(Object^, EventArgs^);
+        void        RecreatePluginCommands(Object^, EventArgs^);
         void        UpdateControls();
         void        UpdateTabs();
 

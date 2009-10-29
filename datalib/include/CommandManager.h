@@ -60,6 +60,7 @@ public:
     List<ICommand^>^ GetCommands(Colony ^colony);
 
     void        GenerateTemplate(System::Windows::Forms::RichTextBox^);
+    void        AddPluginCommands();
 
     void        RemoveGeneratedCommands(CommandOrigin origin, bool productionOnly, bool preserveScouting);
 
@@ -83,7 +84,6 @@ private:
     String^     PrintCommandToFile(ICommand ^cmd);
 
     void        RemoveGeneratedCommandsFromList( List<ICommand^> ^orders, CommandOrigin origin, bool productionOnly, bool preserveScouting );
-    void        AddPluginCommands();
 
     void        GenerateCombat();
     void        GeneratePreDeparture();
