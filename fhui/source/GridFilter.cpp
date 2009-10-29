@@ -355,6 +355,7 @@ void GridFilter::SetRefHome()
     EnableUpdates       = false;
     CtrlRefXYZ->Text    = s_CaptionXYZ;
     CtrlRefColony->Text = s_CaptionColony;
+    CtrlRefShip->Text   = s_CaptionShip;
 
     RefSystem = sp->HomeSystem;
     OnGridSetup();
@@ -405,6 +406,7 @@ void GridFilter::SetRefColony()
     EnableUpdates       = false;
     CtrlRefXYZ->Text    = s_CaptionXYZ;
     CtrlRefHome->Text   = s_CaptionHome;
+    CtrlRefShip->Text   = s_CaptionShip;
 
     RefSystem = colony->System;
     OnGridSetup();
@@ -424,6 +426,7 @@ void GridFilter::SetRefSystem(StarSystem ^system)
             CtrlRefXYZ->Text    = s_CaptionXYZ;
             CtrlRefHome->Text   = s_CaptionHome;
             CtrlRefColony->Text = s_CaptionColony;
+            CtrlRefShip->Text   = s_CaptionShip;
 
             RefSystem = system;
             OnGridSetup();
