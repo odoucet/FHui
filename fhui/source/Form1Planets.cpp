@@ -134,21 +134,53 @@ void Form1::PlanetsFillGrid()
             cells[c.Scan]->Value    = system->PrintScanStatus();
             cells[c.Colonies]->Value= system->PrintColonies( planet->Number );
 
-            if( (planet->System->HomeSpecies != nullptr) )
+            String ^autoNote = "";
+            if( planet->System->HomeSpecies != nullptr )
             {
                 // A home planet exists in the system. Make a note about that
-                String ^note = planet->PrintComment();
-                if ( !String::IsNullOrEmpty(note) )
-                {
-                    note += "; ";
-                }
-                note += String::Format("SP {0} home system", planet->System->HomeSpecies->Name );
-                cells[c.Notes]->Value = note;
+                autoNote = String::Format("SP {0} home system", planet->System->HomeSpecies->Name );
             }
-            else
+            else if( (planet->Name == nullptr) && (planet->AlienName == nullptr) )
             {
-                cells[c.Notes]->Value    = planet->Comment;
+                for each( Colony ^colony in planet->System->ColoniesOwned )
+                {
+                    if( ! String::IsNullOrEmpty(autoNote) )
+                    {
+                        autoNote += ", ";
+                    }
+                    autoNote += String::Format("PL {0}", colony->Name );
+                }
+
+                List<Alien^>^ present = gcnew List<Alien^>;
+                for each( Colony ^colony in planet->System->ColoniesAlien )
+                {
+                    if( ! present->Contains(colony->Owner) )
+                    {
+                        present->Add(colony->Owner);
+                    }
+                }
+
+                for each( Alien^ alien in present )
+                {
+                    if( ! String::IsNullOrEmpty(autoNote) )
+                    {
+                        autoNote += ", ";
+                    }
+                    autoNote += String::Format("SP {0}", alien->Name );
+                }
+                
+                if( ! String::IsNullOrEmpty(autoNote) )
+                {
+                    autoNote = "In system: " + autoNote;
+                }
             }
+
+            String ^note = planet->PrintComment();
+            if ( !String::IsNullOrEmpty(note) && !String::IsNullOrEmpty(autoNote) )
+            {
+                note += "; ";
+            }
+            cells[c.Notes]->Value = note + autoNote;
 
             if( m_PlanetsAlienLSN )
                 cells[c.AlienLSN]->Value = Calculators::LSN(planet, m_PlanetsAlienLSN);
