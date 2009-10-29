@@ -52,12 +52,14 @@ namespace FHUI {
 
         void    InitAvailResources(Colony ^colony, ProdCmdBuildIUAU ^cmd);
         void    UpdateAmounts();
+        void    UpdateShipCapacity();
 
         ProdCmdBuildIUAU^   GetCommand(int amount, InventoryType inv);
 
         Colony^ m_Colony;
         int     m_AvailPop;
         int     m_AvailEU;
+        int     m_Capacity;
 
     private: System::Windows::Forms::Label^  AvailPop;
     private: System::Windows::Forms::NumericUpDown^  IUAmount;
@@ -69,6 +71,7 @@ namespace FHUI {
     private: System::Windows::Forms::Label^  AvailEU;
     private: System::Windows::Forms::ComboBox^  Target;
     private: System::Windows::Forms::Label^  InfoColony;
+    private: System::Windows::Forms::Label^  ShipCapacity;
 
 
 
@@ -94,6 +97,7 @@ namespace FHUI {
             System::Windows::Forms::Label^  label6;
             System::Windows::Forms::Label^  label7;
             System::Windows::Forms::Label^  label9;
+            System::Windows::Forms::Label^  label8;
             this->AvailPop = (gcnew System::Windows::Forms::Label());
             this->IUAmount = (gcnew System::Windows::Forms::NumericUpDown());
             this->AUAmount = (gcnew System::Windows::Forms::NumericUpDown());
@@ -104,6 +108,7 @@ namespace FHUI {
             this->CUAmount = (gcnew System::Windows::Forms::NumericUpDown());
             this->Target = (gcnew System::Windows::Forms::ComboBox());
             this->InfoColony = (gcnew System::Windows::Forms::Label());
+            this->ShipCapacity = (gcnew System::Windows::Forms::Label());
             label3 = (gcnew System::Windows::Forms::Label());
             label4 = (gcnew System::Windows::Forms::Label());
             label2 = (gcnew System::Windows::Forms::Label());
@@ -112,6 +117,7 @@ namespace FHUI {
             label6 = (gcnew System::Windows::Forms::Label());
             label7 = (gcnew System::Windows::Forms::Label());
             label9 = (gcnew System::Windows::Forms::Label());
+            label8 = (gcnew System::Windows::Forms::Label());
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->IUAmount))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->AUAmount))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->CUAmount))->BeginInit();
@@ -129,7 +135,7 @@ namespace FHUI {
             // label4
             // 
             label4->AutoSize = true;
-            label4->Location = System::Drawing::Point(12, 156);
+            label4->Location = System::Drawing::Point(12, 179);
             label4->Name = L"label4";
             label4->Size = System::Drawing::Size(57, 13);
             label4->TabIndex = 4;
@@ -218,7 +224,7 @@ namespace FHUI {
             // TotalCost
             // 
             this->TotalCost->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-            this->TotalCost->Location = System::Drawing::Point(81, 154);
+            this->TotalCost->Location = System::Drawing::Point(81, 177);
             this->TotalCost->Name = L"TotalCost";
             this->TotalCost->Size = System::Drawing::Size(60, 17);
             this->TotalCost->TabIndex = 5;
@@ -228,7 +234,7 @@ namespace FHUI {
             // BtnBuild
             // 
             this->BtnBuild->DialogResult = System::Windows::Forms::DialogResult::OK;
-            this->BtnBuild->Location = System::Drawing::Point(33, 187);
+            this->BtnBuild->Location = System::Drawing::Point(33, 210);
             this->BtnBuild->Name = L"BtnBuild";
             this->BtnBuild->Size = System::Drawing::Size(75, 23);
             this->BtnBuild->TabIndex = 2;
@@ -238,7 +244,7 @@ namespace FHUI {
             // BtnCancel
             // 
             this->BtnCancel->DialogResult = System::Windows::Forms::DialogResult::Cancel;
-            this->BtnCancel->Location = System::Drawing::Point(114, 187);
+            this->BtnCancel->Location = System::Drawing::Point(114, 210);
             this->BtnCancel->Name = L"BtnCancel";
             this->BtnCancel->Size = System::Drawing::Size(75, 23);
             this->BtnCancel->TabIndex = 3;
@@ -271,6 +277,7 @@ namespace FHUI {
             this->Target->Name = L"Target";
             this->Target->Size = System::Drawing::Size(126, 21);
             this->Target->TabIndex = 6;
+            this->Target->SelectedIndexChanged += gcnew System::EventHandler(this, &CmdBuildIuAu::Target_SelectedIndexChanged);
             // 
             // InfoColony
             // 
@@ -282,22 +289,43 @@ namespace FHUI {
             this->InfoColony->Text = L"0";
             this->InfoColony->TextAlign = System::Drawing::ContentAlignment::MiddleLeft;
             // 
+            // label8
+            // 
+            label8->AutoSize = true;
+            label8->Location = System::Drawing::Point(12, 154);
+            label8->Name = L"label8";
+            label8->Size = System::Drawing::Size(69, 13);
+            label8->TabIndex = 4;
+            label8->Text = L"TR Capacity:";
+            // 
+            // ShipCapacity
+            // 
+            this->ShipCapacity->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
+            this->ShipCapacity->Location = System::Drawing::Point(81, 152);
+            this->ShipCapacity->Name = L"ShipCapacity";
+            this->ShipCapacity->Size = System::Drawing::Size(60, 17);
+            this->ShipCapacity->TabIndex = 5;
+            this->ShipCapacity->Text = L"0";
+            this->ShipCapacity->TextAlign = System::Drawing::ContentAlignment::MiddleLeft;
+            // 
             // CmdBuildIuAu
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
             this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-            this->ClientSize = System::Drawing::Size(223, 223);
+            this->ClientSize = System::Drawing::Size(223, 246);
             this->Controls->Add(this->Target);
             this->Controls->Add(this->BtnCancel);
             this->Controls->Add(this->BtnBuild);
             this->Controls->Add(this->AUAmount);
             this->Controls->Add(this->CUAmount);
             this->Controls->Add(this->IUAmount);
+            this->Controls->Add(this->ShipCapacity);
             this->Controls->Add(this->TotalCost);
             this->Controls->Add(this->InfoColony);
             this->Controls->Add(this->AvailEU);
             this->Controls->Add(this->AvailPop);
             this->Controls->Add(label3);
+            this->Controls->Add(label8);
             this->Controls->Add(label4);
             this->Controls->Add(label7);
             this->Controls->Add(label9);
@@ -317,6 +345,9 @@ namespace FHUI {
 #pragma endregion
 private: System::Void Amount_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
              UpdateAmounts();
+         }
+private: System::Void Target_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
+             UpdateShipCapacity();
          }
 };
 }

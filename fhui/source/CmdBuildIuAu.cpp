@@ -64,9 +64,9 @@ void CmdBuildIuAu::InitAvailResources(Colony ^colony, ProdCmdBuildIUAU ^cmd)
         m_AvailPop += cmd->GetPopCost();
     }
 
-    InfoColony->Text = m_Colony->Name;
-    AvailPop->Text  = m_AvailPop.ToString();
-    AvailEU->Text   = m_AvailEU.ToString();
+    InfoColony->Text    = m_Colony->Name;
+    AvailPop->Text      = m_AvailPop.ToString();
+    AvailEU->Text       = m_AvailEU.ToString();
 
     CUAmount->Maximum = Math::Max(0, Math::Min(m_AvailPop, m_AvailEU));
     IUAmount->Maximum = Math::Max(0, m_AvailEU);
@@ -97,6 +97,7 @@ void CmdBuildIuAu::InitAvailResources(Colony ^colony, ProdCmdBuildIUAU ^cmd)
         targets->Add( ship->PrintRefListEntry() );
     }
     Target->DataSource = targets;
+    UpdateShipCapacity();
 
     if( cmd )
     {
@@ -128,6 +129,8 @@ void CmdBuildIuAu::InitAvailResources(Colony ^colony, ProdCmdBuildIUAU ^cmd)
             Target->Text = "PL " + cmd->m_Colony->Name;
         if( cmd->m_Ship )
             Target->Text = cmd->m_Ship->PrintRefListEntry();
+
+        UpdateShipCapacity();
     }
 }
 
@@ -142,6 +145,13 @@ void CmdBuildIuAu::UpdateAmounts()
     int iuNew = Math::Min(iu, m_AvailEU - cuNew);
     int auNew = Math::Min(au, m_AvailEU - cuNew - iuNew);
 
+    if( m_Capacity != -1 )
+    {
+        cuNew = Math::Min(cuNew, m_Capacity);
+        iuNew = Math::Min(iuNew, m_Capacity - cuNew);
+        auNew = Math::Min(auNew, m_Capacity - cuNew - iuNew);
+    }
+
     if( cu != cuNew )
         CUAmount->Value = cuNew;
     if( iu != iuNew )
@@ -152,6 +162,28 @@ void CmdBuildIuAu::UpdateAmounts()
     int sum = cuNew + iuNew + auNew;
     TotalCost->Text = sum.ToString();
     TotalCost->ForeColor = sum > m_AvailEU ? Color::Red : Color::Black;
+}
+
+void CmdBuildIuAu::UpdateShipCapacity()
+{
+    m_Capacity = -1;
+    if( Target->SelectedIndex != 0 )
+    {
+        String ^target = Target->Text;
+        if( target->Substring(0, 3) != "PL " )
+        {
+            Ship ^ship = Ship::FindRefListEntry( target );
+            m_Capacity = ship->Capacity;
+        }
+    }
+
+    if( m_Capacity == -1 )
+        ShipCapacity->Text = "N/A";
+    else
+    {
+        ShipCapacity->Text = m_Capacity.ToString();
+        UpdateAmounts();
+    }
 }
 
 } // end namespace FHUI
