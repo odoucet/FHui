@@ -1443,12 +1443,18 @@ void CommandManager::GeneratePostArrival()
 {
     m_OrderList->Add("START POST-ARRIVAL");
 
-    // Print UI commands
-    for each( ICommand ^cmd in GetCommands() )
+    for each( IOrdersPlugin ^plugin in PluginManager::OrderPlugins )
     {
-        if( cmd->GetPhase() == CommandPhase::PostArrival )
-            m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
+        for each( Ship ^ship in GameData::Player->Ships )
+            plugin->GeneratePostArrival(m_OrderList, ship);
     }
+
+    if ( AutoEnabled )
+    {
+        m_OrderList->Add( "  AUTO" );
+    }
+
+    // Print UI commands, ships first
     for each( Ship ^ship in GameData::Player->Ships )
     {
         for each( ICommand ^cmd in ship->Commands )
@@ -1457,6 +1463,7 @@ void CommandManager::GeneratePostArrival()
                 m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
         }
     }
+    // Then colonies
     for each( Colony ^colony in GameData::Player->Colonies )
     {
         for each( ICommand ^cmd in colony->Commands )
@@ -1465,16 +1472,23 @@ void CommandManager::GeneratePostArrival()
                 m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
         }
     }
-
-    if ( AutoEnabled )
+    // Global commands last, without messages
+    for each( ICommand ^cmd in GetCommands() )
     {
-        m_OrderList->Add( "  AUTO" );
+        if( cmd->GetPhase() == CommandPhase::PostArrival &&
+            cmd->GetCmdType() != CommandType::Message )
+        {
+            m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
+        }
     }
-
-    for each( IOrdersPlugin ^plugin in PluginManager::OrderPlugins )
+    // Messages at the end
+    for each( ICommand ^cmd in GetCommands() )
     {
-        for each( Ship ^ship in GameData::Player->Ships )
-            plugin->GeneratePostArrival(m_OrderList, ship);
+        if( cmd->GetPhase() == CommandPhase::PostArrival &&
+            cmd->GetCmdType() == CommandType::Message )
+        {
+            m_OrderList->Add( PrintCommandWithInfo(cmd, 0) );
+        }
     }
 
     m_OrderList->Add("END");
