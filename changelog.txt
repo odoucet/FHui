@@ -8,6 +8,10 @@ Minor changes are listed only if originally requested by player
 FHUI build ??
 * Fixed bug that did not allow custom pre-departure commands for
   ships without any cargo.
+* Fixed bug that did not allow FHUI to load custom commands with
+  negative cost (recycle).
+* Fixed bug that allowed exceeding colony planet budget after generating
+  many EUs by a big recycle command.
 + Commands management menu added to Systems tab. Custom orders
   now possible for Combat, Pre-Departure, Post-Arrival and Strikes
   phases independent of colonies and ships.

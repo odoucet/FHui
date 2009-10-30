@@ -176,6 +176,7 @@ public:
     public:
         int             TotalEU;
         int             AvailEU;
+        int             UsedEU;
         int             AvailPop;
         array<int>^     Inventory;
     };

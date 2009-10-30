@@ -175,18 +175,22 @@ void Form1::ColoniesFillGrid()
 
                 int prodSum;
                 String ^orders = colony->PrintCmdDetails(m_CommandMgr, prodSum);
-                cells[c.Budget]->Value = prodSum != 0
-                    ? String::Format("{0} ({1}{2})", colony->Res->TotalEU, prodSum < 0 ? "+" : "", -prodSum)
+                cells[c.Budget]->Value = (colony->Res->UsedEU != 0 || prodSum != 0)
+                    ? String::Format("{0} ({1}{2} : {3})",
+                        colony->Res->TotalEU,
+                        prodSum < 0 ? "+" : "",
+                        -prodSum,
+                        colony->Res->AvailEU)
                     :  colony->Res->TotalEU.ToString();
-                if( colony->Res->TotalEU < 0 )
+                if( colony->Res->TotalEU < 0 ||
+                    colony->Res->AvailEU < 0 )
                     cells[c.Budget]->Style->ForeColor = Color::Red;
+                if( colony->Res->AvailEU < 0 )
+                    cells[c.Prod]->Style->ForeColor = Color::Red;
 
                 cells[c.Prod]->ToolTipText      = orders;
                 cells[c.ProdOrder]->ToolTipText = orders;
                 cells[c.Budget]->ToolTipText    = orders;
-
-                if( colony->Res->AvailEU < 0 )
-                    cells[c.Prod]->Style->ForeColor = Color::Red;
             }
             else
             {

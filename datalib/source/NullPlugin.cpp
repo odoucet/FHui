@@ -39,6 +39,7 @@ void BudgetTracker::SetColony(Colony ^colony)
         m_Colony->ProductionReset();
         m_Colony->Res->TotalEU = m_BudgetTotal;
         m_Colony->Res->AvailEU = m_BudgetAvail;
+        m_Colony->Res->UsedEU  = 0;
 
         m_Orders = m_Colony->OrdersText;
     }
@@ -67,11 +68,20 @@ void BudgetTracker::EvalOrder(ICommand ^cmd)
 
 void BudgetTracker::UpdateEU(int eu)
 {
-    m_BudgetAvail -= eu;
+    if( eu < 0 && m_Colony->PlanetType != PLANET_HOME )
+    {   // For recycle-like commands avoid situation when available EUs
+        // exeed actual production limit for the planet
+        int limit = Math::Max(0, m_Colony->GetMaxProductionBudget() - m_Colony->Res->UsedEU);
+        m_BudgetAvail = Math::Min(limit, m_BudgetAvail - eu);
+    }
+    else
+        m_BudgetAvail -= eu;
     m_BudgetTotal -= eu;
 
     m_Colony->Res->TotalEU = m_BudgetTotal;
     m_Colony->Res->AvailEU = m_BudgetAvail;
+    if( eu > 0 )
+        m_Colony->Res->UsedEU += eu;
 
     if( m_BudgetAvail < 0 )
         AddComment( String::Format("; !!!!!! Production limit exceeded by {0} !!!!!!", -m_BudgetAvail) );
