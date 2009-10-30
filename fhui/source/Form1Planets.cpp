@@ -380,6 +380,7 @@ void Form1::PlanetsMenuAddName(DataGridViewCellEventArgs ^cell)
     m_CommandMgr->AddCommand( colony, 
         gcnew CmdPlanetName( m_PlanetsMenuRef->System, m_PlanetsMenuRef->Number, name ) );
 
+    SystemsGrid->Filter->Update();
     PlanetsGrid->Filter->Update();
     ColoniesGrid->Filter->Update();
 }

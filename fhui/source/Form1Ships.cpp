@@ -284,7 +284,7 @@ ToolStripMenuItem^ Form1::ShipsFillMenuCommands(CommandPhase phase)
             gcnew EventHandler1Arg<CommandPhase>(this, &Form1::ShipsMenuCommandDelAll) ) );
     }
     menu->DropDownItems->Add( CreateCustomMenuItem(
-        "Cancel ALL PL " + m_ShipsMenuRef->Name + " orders",
+        "Cancel ALL " + m_ShipsMenuRef->PrintClassWithName() + " orders",
         CommandPhase::Custom,
         gcnew EventHandler1Arg<CommandPhase>(this, &Form1::ShipsMenuCommandDelAll) ) );
 
