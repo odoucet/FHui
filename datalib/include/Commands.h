@@ -36,6 +36,7 @@ public enum class CommandType
     Install,
     Teach,
     Message,
+    Transfer,
     Custom,
     // Ship commands:
     Upgrade,
@@ -650,6 +651,66 @@ public:
     int         m_Amount;
     Colony^     m_Colony;
     Ship^       m_Ship;
+};
+
+////////////////////////////////////////////////////////////
+
+// Transfer
+public ref class CmdTransfer
+    : public CmdBase<CommandPhase::PreDeparture, CommandType::Transfer>
+{
+public:
+    CmdTransfer(InventoryType type, int amount, Colony ^from, Colony ^to)
+    {
+        Init(type, amount, from, nullptr, to, nullptr);
+    }
+
+    CmdTransfer(InventoryType type, int amount, Colony ^from, Ship ^to)
+    {
+        Init(type, amount, from, nullptr, nullptr, to);
+    }
+
+    CmdTransfer(InventoryType type, int amount, Ship ^from, Colony ^to)
+    {
+        Init(type, amount, nullptr, from, to, nullptr);
+    }
+
+    CmdTransfer(InventoryType type, int amount, Ship ^from, Ship ^to)
+    {
+        Init(type, amount, nullptr, from, nullptr, to);
+    }
+
+    CmdTransfer^ operator = (CmdTransfer ^cmd)
+    {
+        Origin          = cmd->Origin;
+        m_Type          = cmd->m_Type;
+        m_Amount        = cmd->m_Amount;
+        m_FromColony    = cmd->m_FromColony;
+        m_FromShip      = cmd->m_FromShip;
+        m_ToColony      = cmd->m_ToColony;
+        m_ToShip        = cmd->m_ToShip;
+        return this;
+    }
+
+    virtual String^ Print() override;
+
+    InventoryType   m_Type;
+    int             m_Amount;
+    Colony^         m_FromColony;
+    Ship^           m_FromShip;
+    Colony^         m_ToColony;
+    Ship^           m_ToShip;
+
+protected:
+    void    Init(InventoryType type, int amount, Colony ^fromColony, Ship ^fromShip, Colony ^toColony, Ship ^toShip)
+    {
+        m_Type = type;
+        m_Amount = amount;
+        m_FromColony = fromColony;
+        m_FromShip = fromShip;
+        m_ToColony = toColony;
+        m_ToShip = toShip;
+    }
 };
 
 ////////////////////////////////////////////////////////////

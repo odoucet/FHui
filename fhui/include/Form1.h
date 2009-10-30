@@ -56,8 +56,11 @@ namespace FHUI {
 
         String^     GetAboutText();
         void        CopyOrdersTemplateToClipboard();
+        void        SaveOrdersTemplateToFile();
 
         void        LoadOrders();
+    private: System::Windows::Forms::ToolStripMenuItem^  saveOrdersToolStripMenuItem;
+
 
         SortedList<String^, String^>^   m_OrderFiles;
 
@@ -763,6 +766,9 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->PlanetsGrid = (gcnew FHUI::DblBufDGV());
             this->TabColonies = (gcnew System::Windows::Forms::TabPage());
             this->splitContainer4 = (gcnew System::Windows::Forms::SplitContainer());
+            this->ColoniesFiltRelN = (gcnew System::Windows::Forms::CheckBox());
+            this->ColoniesFiltRelE = (gcnew System::Windows::Forms::CheckBox());
+            this->ColoniesFiltRelA = (gcnew System::Windows::Forms::CheckBox());
             this->ColoniesSelMode = (gcnew System::Windows::Forms::CheckBox());
             this->ColoniesNumRows = (gcnew System::Windows::Forms::Label());
             this->ColoniesFiltOwnN = (gcnew System::Windows::Forms::CheckBox());
@@ -854,9 +860,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->textBox1 = (gcnew System::Windows::Forms::TextBox());
             this->comboBox2 = (gcnew System::Windows::Forms::ComboBox());
             this->BtnTooltip = (gcnew System::Windows::Forms::ToolTip(this->components));
-            this->ColoniesFiltRelN = (gcnew System::Windows::Forms::CheckBox());
-            this->ColoniesFiltRelE = (gcnew System::Windows::Forms::CheckBox());
-            this->ColoniesFiltRelA = (gcnew System::Windows::Forms::CheckBox());
+            this->saveOrdersToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
             TopSplitCont = (gcnew System::Windows::Forms::SplitContainer());
             splitContainer7 = (gcnew System::Windows::Forms::SplitContainer());
             label25 = (gcnew System::Windows::Forms::Label());
@@ -2004,6 +2008,48 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->splitContainer4->SplitterWidth = 1;
             this->splitContainer4->TabIndex = 2;
             // 
+            // ColoniesFiltRelN
+            // 
+            this->ColoniesFiltRelN->Appearance = System::Windows::Forms::Appearance::Button;
+            this->ColoniesFiltRelN->Location = System::Drawing::Point(378, 51);
+            this->ColoniesFiltRelN->Margin = System::Windows::Forms::Padding(1);
+            this->ColoniesFiltRelN->Name = L"ColoniesFiltRelN";
+            this->ColoniesFiltRelN->Size = System::Drawing::Size(23, 23);
+            this->ColoniesFiltRelN->TabIndex = 84;
+            this->ColoniesFiltRelN->Text = L"N";
+            this->ColoniesFiltRelN->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->ColoniesFiltRelN, L"Show NEUTRAL ships.");
+            this->ColoniesFiltRelN->UseVisualStyleBackColor = true;
+            this->ColoniesFiltRelN->CheckedChanged += gcnew System::EventHandler(this, &Form1::Colonies_Update);
+            // 
+            // ColoniesFiltRelE
+            // 
+            this->ColoniesFiltRelE->Appearance = System::Windows::Forms::Appearance::Button;
+            this->ColoniesFiltRelE->Location = System::Drawing::Point(353, 51);
+            this->ColoniesFiltRelE->Margin = System::Windows::Forms::Padding(1);
+            this->ColoniesFiltRelE->Name = L"ColoniesFiltRelE";
+            this->ColoniesFiltRelE->Size = System::Drawing::Size(23, 23);
+            this->ColoniesFiltRelE->TabIndex = 82;
+            this->ColoniesFiltRelE->Text = L"E";
+            this->ColoniesFiltRelE->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->ColoniesFiltRelE, L"Show ENEMY ships.");
+            this->ColoniesFiltRelE->UseVisualStyleBackColor = true;
+            this->ColoniesFiltRelE->CheckedChanged += gcnew System::EventHandler(this, &Form1::Colonies_Update);
+            // 
+            // ColoniesFiltRelA
+            // 
+            this->ColoniesFiltRelA->Appearance = System::Windows::Forms::Appearance::Button;
+            this->ColoniesFiltRelA->Location = System::Drawing::Point(328, 51);
+            this->ColoniesFiltRelA->Margin = System::Windows::Forms::Padding(1);
+            this->ColoniesFiltRelA->Name = L"ColoniesFiltRelA";
+            this->ColoniesFiltRelA->Size = System::Drawing::Size(23, 23);
+            this->ColoniesFiltRelA->TabIndex = 83;
+            this->ColoniesFiltRelA->Text = L"A";
+            this->ColoniesFiltRelA->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->ColoniesFiltRelA, L"Show ALLIED ships.");
+            this->ColoniesFiltRelA->UseVisualStyleBackColor = true;
+            this->ColoniesFiltRelA->CheckedChanged += gcnew System::EventHandler(this, &Form1::Colonies_Update);
+            // 
             // ColoniesSelMode
             // 
             this->ColoniesSelMode->Appearance = System::Windows::Forms::Appearance::Button;
@@ -2838,9 +2884,10 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // OrdersCtxMenu
             // 
-            this->OrdersCtxMenu->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) {copyToClipboardToolStripMenuItem});
+            this->OrdersCtxMenu->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) {copyToClipboardToolStripMenuItem, 
+                this->saveOrdersToolStripMenuItem});
             this->OrdersCtxMenu->Name = L"OrdersCtxMenu";
-            this->OrdersCtxMenu->Size = System::Drawing::Size(170, 26);
+            this->OrdersCtxMenu->Size = System::Drawing::Size(170, 70);
             // 
             // copyToClipboardToolStripMenuItem
             // 
@@ -3522,47 +3569,12 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->comboBox2->Size = System::Drawing::Size(147, 21);
             this->comboBox2->TabIndex = 1;
             // 
-            // ColoniesFiltRelN
+            // saveOrdersToolStripMenuItem
             // 
-            this->ColoniesFiltRelN->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ColoniesFiltRelN->Location = System::Drawing::Point(378, 51);
-            this->ColoniesFiltRelN->Margin = System::Windows::Forms::Padding(1);
-            this->ColoniesFiltRelN->Name = L"ColoniesFiltRelN";
-            this->ColoniesFiltRelN->Size = System::Drawing::Size(23, 23);
-            this->ColoniesFiltRelN->TabIndex = 84;
-            this->ColoniesFiltRelN->Text = L"N";
-            this->ColoniesFiltRelN->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->BtnTooltip->SetToolTip(this->ColoniesFiltRelN, L"Show NEUTRAL ships.");
-            this->ColoniesFiltRelN->UseVisualStyleBackColor = true;
-            this->ColoniesFiltRelN->CheckedChanged += gcnew System::EventHandler(this, &Form1::Colonies_Update);
-            // 
-            // ColoniesFiltRelE
-            // 
-            this->ColoniesFiltRelE->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ColoniesFiltRelE->Location = System::Drawing::Point(353, 51);
-            this->ColoniesFiltRelE->Margin = System::Windows::Forms::Padding(1);
-            this->ColoniesFiltRelE->Name = L"ColoniesFiltRelE";
-            this->ColoniesFiltRelE->Size = System::Drawing::Size(23, 23);
-            this->ColoniesFiltRelE->TabIndex = 82;
-            this->ColoniesFiltRelE->Text = L"E";
-            this->ColoniesFiltRelE->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->BtnTooltip->SetToolTip(this->ColoniesFiltRelE, L"Show ENEMY ships.");
-            this->ColoniesFiltRelE->UseVisualStyleBackColor = true;
-            this->ColoniesFiltRelE->CheckedChanged += gcnew System::EventHandler(this, &Form1::Colonies_Update);
-            // 
-            // ColoniesFiltRelA
-            // 
-            this->ColoniesFiltRelA->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ColoniesFiltRelA->Location = System::Drawing::Point(328, 51);
-            this->ColoniesFiltRelA->Margin = System::Windows::Forms::Padding(1);
-            this->ColoniesFiltRelA->Name = L"ColoniesFiltRelA";
-            this->ColoniesFiltRelA->Size = System::Drawing::Size(23, 23);
-            this->ColoniesFiltRelA->TabIndex = 83;
-            this->ColoniesFiltRelA->Text = L"A";
-            this->ColoniesFiltRelA->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->BtnTooltip->SetToolTip(this->ColoniesFiltRelA, L"Show ALLIED ships.");
-            this->ColoniesFiltRelA->UseVisualStyleBackColor = true;
-            this->ColoniesFiltRelA->CheckedChanged += gcnew System::EventHandler(this, &Form1::Colonies_Update);
+            this->saveOrdersToolStripMenuItem->Name = L"saveOrdersToolStripMenuItem";
+            this->saveOrdersToolStripMenuItem->Size = System::Drawing::Size(169, 22);
+            this->saveOrdersToolStripMenuItem->Text = L"Save Orders";
+            this->saveOrdersToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::saveOrdersToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -3834,6 +3846,9 @@ private: System::Void ShipsSelMode_CheckedChanged(System::Object^  sender, Syste
          }
 private: System::Void Grid_SelectionChanged(System::Object^  sender, System::EventArgs^  e) {
              safe_cast<DblBufDGV^>(sender)->Filter->OnGridSelectionChanged();
+         }
+private: System::Void saveOrdersToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
+             SaveOrdersTemplateToFile();
          }
 };
 

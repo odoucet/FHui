@@ -228,4 +228,20 @@ String^ ProdCmdEstimate::Print()
     return "Estimate SP " + m_Alien->Name;
 }
 
+////////////////////////////////////////////////////////////
+// Transfer
+String^ CmdTransfer::Print()
+{
+    String ^from = m_FromColony ?
+        "PL " + m_FromColony->Name : m_FromShip->PrintClassWithName();
+    String ^to = m_ToColony ?
+        "PL " + m_ToColony->Name : m_ToShip->PrintClassWithName();
+
+    return String::Format("Transfer {0} {1} {2}, {3}",
+        FHStrings::InvToString(m_Type),
+        m_Amount,
+        from,
+        to );
+}
+
 } // end namespace FHUI

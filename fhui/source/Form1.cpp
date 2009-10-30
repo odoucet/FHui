@@ -889,6 +889,28 @@ void Form1::CopyOrdersTemplateToClipboard()
     Clipboard::SetText(OrderTemplate->Text, TextDataFormat::Text);
 }
 
+void Form1::SaveOrdersTemplateToFile()
+{
+    try
+    {
+        String^ filename = String::Format("orders\\FHUI_orders_t{0:000}.txt", GameData::CurrentTurn);
+        StreamWriter ^sw = File::CreateText( GetDataDir(filename) );
+
+        sw->WriteLine( OrderTemplate->Lines );
+
+        sw->Close();
+    }
+    catch( SystemException^ e )
+    {
+        MessageBox::Show(
+            this,
+            "Error generating scan file: " + e->Message,
+            "Export Scans",
+            MessageBoxButtons::OK,
+            MessageBoxIcon::Error);
+    }
+}
+
 ////////////////////////////////////////////////////////////////
 
 } // end namespace FHUI

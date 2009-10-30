@@ -38,10 +38,11 @@ RegexMatcher::RegexMatcher()
     ExpCmdShipOrbitPLName   = gcnew Regex("^Orbit\\s+[A-Z0-9]+\\s+([^,;]+)\\s*,\\s+PL\\s+([^,;]+)$");
     ExpCmdShipOrbitPLNum    = gcnew Regex("^Orbit\\s+[A-Z0-9]+\\s+([^,;]+)\\s*,\\s+(\\d+)$");
     ExpCmdVisited       = gcnew Regex("^Visited\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)$");
+    ExpCmdTransfer      = gcnew Regex("^Transfer\\s+(\\d+)\\s+(\\w+)\\s+");
     ExpCmdCustom        = gcnew Regex("^CUSTOM\\s+(\\d+)\\s+(.+)$");
 
-    ExpCmdTargetColony  = gcnew Regex("^PL\\s+([^,;]+)$");
-    ExpCmdTargetShip    = gcnew Regex("^[A-Z0-9]+\\s+([^,;]+)$");
+    ExpCmdTargetColony  = gcnew Regex("^PL\\s+([^,;]+)");
+    ExpCmdTargetShip    = gcnew Regex("^[A-Z0-9]+\\s+([^,;]+)");
 
     ExpCmdShipJump_Obsolete     = gcnew Regex("^SHIP [A-Z0-9]+ ([^,;]+) Jump to\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+([0-9-]+)$");
     ExpCmdShipWormhole_Obsolete = gcnew Regex("^SHIP [A-Z0-9]+ ([^,;]+) Wormhole\\s+([0-9-]+)$");

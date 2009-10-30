@@ -56,6 +56,7 @@ public:
     initonly Regex^     ExpCmdBuildShipTR;
     initonly Regex^     ExpCmdBuildShip;
     initonly Regex^     ExpCmdVisited;
+    initonly Regex^     ExpCmdTransfer;
     initonly Regex^     ExpCmdCustom;
 
     initonly Regex^     ExpCmdTargetColony;
