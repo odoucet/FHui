@@ -458,6 +458,13 @@ ToolStripMenuItem^ Form1::SystemsFillMenuCommandsOptions(ICommand ^cmd)
             gcnew CustomCmdData(cmdCustom->GetPhase(), cmdCustom),
             gcnew EventHandler1Arg<CustomCmdData^>(this, &Form1::SystemsMenuCommandCustom) ) );
     }
+    else
+    {   // Edit as custom
+        menu->DropDownItems->Add( CreateCustomMenuItem(
+            "Edit as Custom...",
+            cmd,
+            gcnew EventHandler1Arg<ICommand^>(this, &Form1::SystemsMenuCommandEditAsCustom) ) );
+    }
 
     // Cancel order
     menu->DropDownItems->Add( CreateCustomMenuItem(
@@ -574,6 +581,27 @@ void Form1::SystemsMenuCommandCustom(CustomCmdData ^data)
         }
         else
             SystemsMenuCommandAdd( cmd );
+    }
+
+    delete dlg;
+}
+
+void Form1::SystemsMenuCommandEditAsCustom(ICommand ^cmd)
+{
+    CmdCustom ^customCmd = gcnew CmdCustom(
+        cmd->GetPhase(),
+        cmd->Print(),
+        cmd->GetEUCost());
+    CmdCustomDlg ^dlg = gcnew CmdCustomDlg( customCmd );
+    if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
+    {
+        customCmd = dlg->GetCommand( cmd->GetPhase() );
+
+        m_CommandMgr->GetCommands()->Insert(
+            m_CommandMgr->GetCommands()->IndexOf(cmd),
+            customCmd );
+        m_CommandMgr->GetCommands()->Remove( cmd );
+        SystemsMenuCommandAdd( nullptr );
     }
 
     delete dlg;

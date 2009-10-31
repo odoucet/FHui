@@ -623,6 +623,13 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuCommandsOptions(ICommand ^cmd)
             gcnew CustomCmdData(cmdCustom->GetPhase(), cmdCustom),
             gcnew EventHandler1Arg<CustomCmdData^>(this, &Form1::ColoniesMenuCommandCustom) ) );
     }
+    else
+    {   // Edit as custom
+        menu->DropDownItems->Add( CreateCustomMenuItem(
+            "Edit as Custom...",
+            cmd,
+            gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuCommandEditAsCustom) ) );
+    }
 
     // Cancel order
     menu->DropDownItems->Add( CreateCustomMenuItem(
@@ -920,6 +927,27 @@ void Form1::ColoniesMenuCommandCustom(CustomCmdData ^data)
         }
         else
             ColoniesMenuCommandAdd( cmd );
+    }
+
+    delete dlg;
+}
+
+void Form1::ColoniesMenuCommandEditAsCustom(ICommand ^cmd)
+{
+    CmdCustom ^customCmd = gcnew CmdCustom(
+        cmd->GetPhase(),
+        cmd->Print(),
+        cmd->GetEUCost());
+    CmdCustomDlg ^dlg = gcnew CmdCustomDlg( customCmd );
+    if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
+    {
+        customCmd = dlg->GetCommand( cmd->GetPhase() );
+
+        m_ColoniesMenuRef->Commands->Insert(
+            m_ColoniesMenuRef->Commands->IndexOf(cmd),
+            customCmd );
+        m_ColoniesMenuRef->Commands->Remove( cmd );
+        ColoniesMenuCommandAdd( nullptr );
     }
 
     delete dlg;

@@ -181,6 +181,7 @@ namespace FHUI {
 
         typedef Pair<CommandPhase, CmdCustom^>  CustomCmdData;
         void        SystemsMenuCommandCustom(CustomCmdData ^data);
+        void        SystemsMenuCommandEditAsCustom(ICommand ^cmd);
 
         value struct SystemsColumns
         {
@@ -276,6 +277,7 @@ namespace FHUI {
         void        ColoniesMenuAutoDeleteAllNonScouting(Object^, EventArgs^);
         void        ColoniesMenuAutoDeleteAllProduction(Object^, EventArgs^);
         void        ColoniesMenuCommandCustom(CustomCmdData ^data);
+        void        ColoniesMenuCommandEditAsCustom(ICommand ^cmd);
 
         value struct ColoniesColumns
         {
@@ -321,6 +323,7 @@ namespace FHUI {
         void        ShipsMenuSelectRef(Object^, EventArgs^);
 
         void        ShipsMenuCommandCustom(CustomCmdData ^data);
+        void        ShipsMenuCommandEditAsCustom(ICommand ^cmd);
 
         typedef Pair<Ship^, ICommand^>  ShipCommandData;
         void        ShipsMenuCommandAdd(ShipCommandData ^data);

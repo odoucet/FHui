@@ -522,6 +522,13 @@ ToolStripMenuItem^ Form1::ShipsFillMenuCommandsOptions(ICommand ^cmd)
             gcnew CustomCmdData(cmdCustom->GetPhase(), cmdCustom),
             gcnew EventHandler1Arg<CustomCmdData^>(this, &Form1::ShipsMenuCommandCustom) ) );
     }
+    else if( cmd->GetPhase() != CommandPhase::Jump )
+    {   // Edit as custom
+        menu->DropDownItems->Add( CreateCustomMenuItem(
+            "Edit as Custom...",
+            cmd,
+            gcnew EventHandler1Arg<ICommand^>(this, &Form1::ShipsMenuCommandEditAsCustom) ) );
+    }
 
     // Cancel order
     menu->DropDownItems->Add( CreateCustomMenuItem(
@@ -694,6 +701,27 @@ void Form1::ShipsMenuCommandCustom(CustomCmdData ^data)
         }
         else
             ShipsMenuCommandAdd( gcnew ShipCommandData(m_ShipsMenuRef, cmd) );
+    }
+
+    delete dlg;
+}
+
+void Form1::ShipsMenuCommandEditAsCustom(ICommand ^cmd)
+{
+    CmdCustom ^customCmd = gcnew CmdCustom(
+        cmd->GetPhase(),
+        cmd->Print(),
+        cmd->GetEUCost());
+    CmdCustomDlg ^dlg = gcnew CmdCustomDlg( customCmd );
+    if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
+    {
+        customCmd = dlg->GetCommand( cmd->GetPhase() );
+
+        m_ShipsMenuRef->Commands->Insert(
+            m_ShipsMenuRef->Commands->IndexOf(cmd),
+            customCmd );
+        m_ShipsMenuRef->Commands->Remove( cmd );
+        ShipsMenuCommandAdd( nullptr );
     }
 
     delete dlg;
