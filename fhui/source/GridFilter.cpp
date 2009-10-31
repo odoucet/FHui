@@ -62,6 +62,7 @@ void GridFilter::Update(Object ^sender)
                 sender == CtrlFiltScanK ||
                 sender == CtrlFiltScanU ||
                 sender == CtrlFiltColC ||
+                sender == CtrlFiltColH ||
                 sender == CtrlFiltColN ||
                 sender == CtrlFiltOwnO ||
                 sender == CtrlFiltOwnN ||
@@ -80,7 +81,8 @@ void GridFilter::Update(Object ^sender)
                     ( CtrlFiltScanK ? (CtrlFiltScanK->Checked ? (1 << 17) : 0) : 0 ) +
                     ( CtrlFiltScanU ? (CtrlFiltScanU->Checked ? (1 << 18) : 0) : 0 ) +
                     ( CtrlFiltColC ? (CtrlFiltColC->Checked ? (1 << 20) : 0) : 0 ) +
-                    ( CtrlFiltColN ? (CtrlFiltColN->Checked ? (1 << 21) : 0) : 0 ) +
+                    ( CtrlFiltColH ? (CtrlFiltColH->Checked ? (1 << 21) : 0) : 0 ) +
+                    ( CtrlFiltColN ? (CtrlFiltColN->Checked ? (1 << 22) : 0) : 0 ) +
                     ( CtrlFiltOwnO ? (CtrlFiltOwnO->Checked ? (1 << 23) : 0) : 0 ) +
                     ( CtrlFiltOwnN ? (CtrlFiltOwnN->Checked ? (1 << 24) : 0) : 0 ) +
                     ( CtrlFiltRelA ? (CtrlFiltRelA->Checked ? (1 << 25) : 0) : 0 ) +
@@ -114,6 +116,12 @@ bool GridFilter::Filter(IGridDataSrc ^item)
         int numColonies = item->GetFilterNumColonies();
         if( (!CtrlFiltColN->Checked && numColonies == 0) ||
             (!CtrlFiltColC->Checked && numColonies > 0) )
+        {
+            return true;
+        }
+        if( CtrlFiltColH &&
+            CtrlFiltColH->Checked == false &&
+            item->GetFilterSystem()->HomeSpecies != nullptr )
         {
             return true;
         }
@@ -245,6 +253,8 @@ void GridFilter::ResetControls(bool doUpdate)
     {
         CtrlFiltColC->Checked = true;
         CtrlFiltColN->Checked = true;
+        if( CtrlFiltColH )
+            CtrlFiltColH->Checked = true;
     }
     if( CtrlFiltOwnO )
     {

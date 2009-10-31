@@ -77,6 +77,7 @@ public:
     CheckBox        ^CtrlFiltScanK;
     CheckBox        ^CtrlFiltScanU;
     CheckBox        ^CtrlFiltColC;
+    CheckBox        ^CtrlFiltColH;
     CheckBox        ^CtrlFiltColN;
     CheckBox        ^CtrlFiltOwnO;
     CheckBox        ^CtrlFiltOwnN;

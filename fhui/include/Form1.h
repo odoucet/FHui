@@ -60,6 +60,8 @@ namespace FHUI {
 
         void        LoadOrders();
     private: System::Windows::Forms::ToolStripMenuItem^  saveOrdersToolStripMenuItem;
+    private: System::Windows::Forms::CheckBox^  PlanetsFiltColH;
+
 
 
         SortedList<String^, String^>^   m_OrderFiles;
@@ -825,6 +827,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabOrders = (gcnew System::Windows::Forms::TabPage());
             this->OrderTemplate = (gcnew System::Windows::Forms::RichTextBox());
             this->OrdersCtxMenu = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
+            this->saveOrdersToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
             this->TabUtils = (gcnew System::Windows::Forms::TabPage());
             this->UtilProdPenalty = (gcnew System::Windows::Forms::Label());
             this->UtilProdPenaltyLS = (gcnew System::Windows::Forms::NumericUpDown());
@@ -864,7 +867,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->textBox1 = (gcnew System::Windows::Forms::TextBox());
             this->comboBox2 = (gcnew System::Windows::Forms::ComboBox());
             this->BtnTooltip = (gcnew System::Windows::Forms::ToolTip(this->components));
-            this->saveOrdersToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+            this->PlanetsFiltColH = (gcnew System::Windows::Forms::CheckBox());
             TopSplitCont = (gcnew System::Windows::Forms::SplitContainer());
             splitContainer7 = (gcnew System::Windows::Forms::SplitContainer());
             label25 = (gcnew System::Windows::Forms::Label());
@@ -1412,7 +1415,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // SystemsFiltScanU
             // 
             this->SystemsFiltScanU->Appearance = System::Windows::Forms::Appearance::Button;
-            this->SystemsFiltScanU->Location = System::Drawing::Point(296, 51);
+            this->SystemsFiltScanU->Location = System::Drawing::Point(278, 51);
             this->SystemsFiltScanU->Margin = System::Windows::Forms::Padding(1);
             this->SystemsFiltScanU->Name = L"SystemsFiltScanU";
             this->SystemsFiltScanU->Size = System::Drawing::Size(23, 23);
@@ -1426,7 +1429,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // SystemsFiltColN
             // 
             this->SystemsFiltColN->Appearance = System::Windows::Forms::Appearance::Button;
-            this->SystemsFiltColN->Location = System::Drawing::Point(368, 51);
+            this->SystemsFiltColN->Location = System::Drawing::Point(337, 51);
             this->SystemsFiltColN->Margin = System::Windows::Forms::Padding(1);
             this->SystemsFiltColN->Name = L"SystemsFiltColN";
             this->SystemsFiltColN->Size = System::Drawing::Size(23, 23);
@@ -1440,7 +1443,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // SystemsFiltScanK
             // 
             this->SystemsFiltScanK->Appearance = System::Windows::Forms::Appearance::Button;
-            this->SystemsFiltScanK->Location = System::Drawing::Point(271, 51);
+            this->SystemsFiltScanK->Location = System::Drawing::Point(253, 51);
             this->SystemsFiltScanK->Margin = System::Windows::Forms::Padding(1);
             this->SystemsFiltScanK->Name = L"SystemsFiltScanK";
             this->SystemsFiltScanK->Size = System::Drawing::Size(23, 23);
@@ -1454,7 +1457,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // SystemsFiltColC
             // 
             this->SystemsFiltColC->Appearance = System::Windows::Forms::Appearance::Button;
-            this->SystemsFiltColC->Location = System::Drawing::Point(343, 51);
+            this->SystemsFiltColC->Location = System::Drawing::Point(312, 51);
             this->SystemsFiltColC->Margin = System::Windows::Forms::Padding(1);
             this->SystemsFiltColC->Name = L"SystemsFiltColC";
             this->SystemsFiltColC->Size = System::Drawing::Size(23, 23);
@@ -1685,6 +1688,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             splitContainer3->Panel1->Controls->Add(this->PlanetsSelMode);
             splitContainer3->Panel1->Controls->Add(this->PlanetsNumRows);
+            splitContainer3->Panel1->Controls->Add(this->PlanetsFiltColH);
             splitContainer3->Panel1->Controls->Add(this->PlanetsFiltColN);
             splitContainer3->Panel1->Controls->Add(this->PlanetsFiltColC);
             splitContainer3->Panel1->Controls->Add(this->PlanetsFiltersReset);
@@ -1735,7 +1739,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // PlanetsFiltColN
             // 
             this->PlanetsFiltColN->Appearance = System::Windows::Forms::Appearance::Button;
-            this->PlanetsFiltColN->Location = System::Drawing::Point(288, 51);
+            this->PlanetsFiltColN->Location = System::Drawing::Point(303, 51);
             this->PlanetsFiltColN->Margin = System::Windows::Forms::Padding(1);
             this->PlanetsFiltColN->Name = L"PlanetsFiltColN";
             this->PlanetsFiltColN->Size = System::Drawing::Size(23, 23);
@@ -1749,7 +1753,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // PlanetsFiltColC
             // 
             this->PlanetsFiltColC->Appearance = System::Windows::Forms::Appearance::Button;
-            this->PlanetsFiltColC->Location = System::Drawing::Point(263, 51);
+            this->PlanetsFiltColC->Location = System::Drawing::Point(253, 51);
             this->PlanetsFiltColC->Margin = System::Windows::Forms::Padding(1);
             this->PlanetsFiltColC->Name = L"PlanetsFiltColC";
             this->PlanetsFiltColC->Size = System::Drawing::Size(23, 23);
@@ -2015,7 +2019,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // ColoniesFiltRelN
             // 
             this->ColoniesFiltRelN->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ColoniesFiltRelN->Location = System::Drawing::Point(378, 51);
+            this->ColoniesFiltRelN->Location = System::Drawing::Point(362, 51);
             this->ColoniesFiltRelN->Margin = System::Windows::Forms::Padding(1);
             this->ColoniesFiltRelN->Name = L"ColoniesFiltRelN";
             this->ColoniesFiltRelN->Size = System::Drawing::Size(23, 23);
@@ -2029,7 +2033,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // ColoniesFiltRelE
             // 
             this->ColoniesFiltRelE->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ColoniesFiltRelE->Location = System::Drawing::Point(353, 51);
+            this->ColoniesFiltRelE->Location = System::Drawing::Point(337, 51);
             this->ColoniesFiltRelE->Margin = System::Windows::Forms::Padding(1);
             this->ColoniesFiltRelE->Name = L"ColoniesFiltRelE";
             this->ColoniesFiltRelE->Size = System::Drawing::Size(23, 23);
@@ -2043,7 +2047,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // ColoniesFiltRelA
             // 
             this->ColoniesFiltRelA->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ColoniesFiltRelA->Location = System::Drawing::Point(328, 51);
+            this->ColoniesFiltRelA->Location = System::Drawing::Point(312, 51);
             this->ColoniesFiltRelA->Margin = System::Windows::Forms::Padding(1);
             this->ColoniesFiltRelA->Name = L"ColoniesFiltRelA";
             this->ColoniesFiltRelA->Size = System::Drawing::Size(23, 23);
@@ -2079,7 +2083,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // ColoniesFiltOwnN
             // 
             this->ColoniesFiltOwnN->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ColoniesFiltOwnN->Location = System::Drawing::Point(286, 51);
+            this->ColoniesFiltOwnN->Location = System::Drawing::Point(278, 51);
             this->ColoniesFiltOwnN->Margin = System::Windows::Forms::Padding(1);
             this->ColoniesFiltOwnN->Name = L"ColoniesFiltOwnN";
             this->ColoniesFiltOwnN->Size = System::Drawing::Size(23, 23);
@@ -2093,7 +2097,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // ColoniesFiltOwnO
             // 
             this->ColoniesFiltOwnO->Appearance = System::Windows::Forms::Appearance::Button;
-            this->ColoniesFiltOwnO->Location = System::Drawing::Point(261, 51);
+            this->ColoniesFiltOwnO->Location = System::Drawing::Point(253, 51);
             this->ColoniesFiltOwnO->Margin = System::Windows::Forms::Padding(1);
             this->ColoniesFiltOwnO->Name = L"ColoniesFiltOwnO";
             this->ColoniesFiltOwnO->Size = System::Drawing::Size(23, 23);
@@ -2891,7 +2895,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->OrdersCtxMenu->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) {copyToClipboardToolStripMenuItem, 
                 this->saveOrdersToolStripMenuItem});
             this->OrdersCtxMenu->Name = L"OrdersCtxMenu";
-            this->OrdersCtxMenu->Size = System::Drawing::Size(170, 70);
+            this->OrdersCtxMenu->Size = System::Drawing::Size(170, 48);
             // 
             // copyToClipboardToolStripMenuItem
             // 
@@ -2899,6 +2903,13 @@ private: System::Windows::Forms::Label^  SystemsRef;
             copyToClipboardToolStripMenuItem->Size = System::Drawing::Size(169, 22);
             copyToClipboardToolStripMenuItem->Text = L"Copy to clipboard";
             copyToClipboardToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::copyToClipboardToolStripMenuItem_Click);
+            // 
+            // saveOrdersToolStripMenuItem
+            // 
+            this->saveOrdersToolStripMenuItem->Name = L"saveOrdersToolStripMenuItem";
+            this->saveOrdersToolStripMenuItem->Size = System::Drawing::Size(169, 22);
+            this->saveOrdersToolStripMenuItem->Text = L"Save Orders";
+            this->saveOrdersToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::saveOrdersToolStripMenuItem_Click);
             // 
             // TabUtils
             // 
@@ -3573,12 +3584,19 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->comboBox2->Size = System::Drawing::Size(147, 21);
             this->comboBox2->TabIndex = 1;
             // 
-            // saveOrdersToolStripMenuItem
+            // PlanetsFiltColH
             // 
-            this->saveOrdersToolStripMenuItem->Name = L"saveOrdersToolStripMenuItem";
-            this->saveOrdersToolStripMenuItem->Size = System::Drawing::Size(169, 22);
-            this->saveOrdersToolStripMenuItem->Text = L"Save Orders";
-            this->saveOrdersToolStripMenuItem->Click += gcnew System::EventHandler(this, &Form1::saveOrdersToolStripMenuItem_Click);
+            this->PlanetsFiltColH->Appearance = System::Windows::Forms::Appearance::Button;
+            this->PlanetsFiltColH->Location = System::Drawing::Point(278, 51);
+            this->PlanetsFiltColH->Margin = System::Windows::Forms::Padding(1);
+            this->PlanetsFiltColH->Name = L"PlanetsFiltColH";
+            this->PlanetsFiltColH->Size = System::Drawing::Size(23, 23);
+            this->PlanetsFiltColH->TabIndex = 72;
+            this->PlanetsFiltColH->Text = L"H";
+            this->PlanetsFiltColH->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->PlanetsFiltColH, L"Show planets in alien home systems.");
+            this->PlanetsFiltColH->UseVisualStyleBackColor = true;
+            this->PlanetsFiltColH->CheckedChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
             // 
             // Form1
             // 

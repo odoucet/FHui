@@ -11,6 +11,7 @@ FHUI build ??
 + Additional reports now allowed for any turn, not only "turn 0".
   You can use it for example to store estimates aquired via diplomacy
   and still see valid turn number in FHUI.
++ Planets tab: "Show planets in alien home systems" filter added.
 
 FHUI build 267
 * Fixed bug that did not allow custom pre-departure commands for

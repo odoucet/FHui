@@ -73,6 +73,7 @@ void Form1::PlanetsInitControls()
     filter->CtrlMaxMishap   = PlanetsMaxMishap;
     filter->CtrlMaxLSN      = PlanetsMaxLSN;
     filter->CtrlFiltColC    = PlanetsFiltColC;
+    filter->CtrlFiltColH    = PlanetsFiltColH;
     filter->CtrlFiltColN    = PlanetsFiltColN;
     filter->CtrlNumRows     = PlanetsNumRows;
 
