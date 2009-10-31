@@ -204,7 +204,10 @@ StarSystem^ CmdInstall::GetRefSystem()
 
 String^ CmdInstall::Print()
 {
-    return String::Format("Install {0} {1} PL {2}", m_Amount, m_Unit, m_Colony->Name);
+    return String::Format("Install {0} {1} PL {2}",
+        m_Amount,
+        FHStrings::InvToString(m_Unit),
+        m_Colony->Name);
 }
 
 ////////////////////////////////////////////////////////////

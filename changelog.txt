@@ -15,7 +15,7 @@ FHUI build ??
 + Commands management menu added to Systems tab. Custom orders
   now possible for Combat, Pre-Departure, Post-Arrival and Strikes
   phases independent of colonies and ships.
-+ New commands supported: Orbit.
++ New commands supported: Install, Orbit.
 + Build CU/IU/AU with ship target: limit amount of units built
   to ship's capacity.
 + Option to save orders template directly to file from Orders tab

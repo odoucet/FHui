@@ -4,6 +4,7 @@
 #include "GridFilter.h"
 #include "GridSorter.h"
 
+#include "CmdInstallDlg.h"
 #include "CmdResearch.h"
 #include "CmdBuildShips.h"
 #include "CmdBuildIuAu.h"
@@ -419,6 +420,17 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuPreDepartureNew()
     Colony ^colony = m_ColoniesMenuRef;
     ToolStripMenuItem ^menu = gcnew ToolStripMenuItem("Add:");
 
+    // Install
+    if( colony->Res->Inventory[INV_CU] > 0 &&
+        (   colony->Res->Inventory[INV_IU] > 0 ||
+            colony->Res->Inventory[INV_AU] > 0 ) )
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem<CmdInstall^>(
+            "Install...",
+            safe_cast<CmdInstall^>(nullptr),
+            gcnew EventHandler1Arg<CmdInstall^>(this, &Form1::ColoniesMenuProdCommandAddInstall) ) );
+    }
+
     // Custom command
     menu->DropDownItems->Add( CreateCustomMenuItem<CustomCmdData^>(
         "Custom Order...",
@@ -575,6 +587,13 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuCommandsOptions(ICommand ^cmd)
         menu->DropDownItems->Add( gcnew ToolStripSeparator );
 
     // Edit command
+    if( cmd->GetCmdType() == CommandType::Install )
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem<CmdInstall^>(
+            "Edit...",
+            safe_cast<CmdInstall^>(cmd),
+            gcnew EventHandler1Arg<CmdInstall^>(this, &Form1::ColoniesMenuProdCommandAddInstall) ) );
+    }
     if( cmd->GetCmdType() == CommandType::Research )
     {
         menu->DropDownItems->Add( CreateCustomMenuItem<ProdCmdResearch^>(
@@ -660,6 +679,40 @@ void Form1::ColoniesMenuCommandAdd(ICommand ^cmd)
 
     ColoniesGrid->Filter->Update();
     ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
+}
+
+void Form1::ColoniesMenuProdCommandAddInstall(CmdInstall ^cmd)
+{
+    CmdInstallDlg ^dlg = gcnew CmdInstallDlg( m_ColoniesMenuRef, cmd );
+    if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
+    {
+        if( cmd )
+        {
+            int amount = dlg->GetAmount(cmd->m_Unit);
+            if( amount != cmd->m_Amount )
+            {
+                if( amount <= 0 )
+                    ColoniesMenuCommandDel(cmd);
+                else
+                {
+                    cmd->m_Amount = amount;
+                    ColoniesMenuCommandAdd(nullptr);
+                }
+            }
+        }
+        else
+        {
+            cmd = dlg->GetCommand(INV_IU);
+            if( cmd )
+                ColoniesMenuCommandAdd( cmd );
+
+            cmd = dlg->GetCommand(INV_AU);
+            if( cmd )
+                ColoniesMenuCommandAdd( cmd );
+        }
+    }
+
+    delete dlg;
 }
 
 void Form1::ColoniesMenuProdCommandAddResearch(ProdCmdResearch ^cmd)

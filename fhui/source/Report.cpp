@@ -1131,7 +1131,7 @@ void Report::MatchOrdersTemplate(String ^s)
 
         ICommand ^cmd = gcnew CmdInstall(
             m_RM->GetResultInt(0),
-            m_RM->Results[1],
+            FHStrings::InvFromString(m_RM->Results[1]),
             colony );
         cmd->Origin = CommandOrigin::Auto;
         colony->Commands->Add( cmd );

@@ -401,7 +401,7 @@ public ref class CmdInstall
     : public CmdBase<CommandPhase::PreDeparture, CommandType::Install>
 {
 public:
-    CmdInstall(int amount, String ^unit, Colony ^colony)
+    CmdInstall(int amount, InventoryType unit, Colony ^colony)
         : m_Amount(amount), m_Unit(unit), m_Colony(colony)
     {}
 
@@ -410,7 +410,7 @@ public:
     virtual String^ Print() override;
 
     int             m_Amount;
-    String^         m_Unit;
+    InventoryType   m_Unit;
     Colony^         m_Colony;
 };
 

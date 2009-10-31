@@ -464,6 +464,15 @@
 					</File>
 				</File>
 				<File
+					RelativePath=".\Include\CmdInstallDlg.h"
+					FileType="3"
+					>
+					<File
+						RelativePath=".\include\CmdInstallDlg.resx"
+						>
+					</File>
+				</File>
+				<File
 					RelativePath=".\include\CmdMessage.h"
 					FileType="3"
 					>

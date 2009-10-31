@@ -670,7 +670,7 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
 
         colony->Commands->Add( CmdSetOrigin(gcnew CmdInstall(
             m_RM->GetResultInt(0),
-            m_RM->Results[1],
+            FHStrings::InvFromString(m_RM->Results[1]),
             colony ) ) );
 
         return true;
