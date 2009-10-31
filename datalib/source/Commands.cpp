@@ -31,6 +31,26 @@ String^ ShipCmdJump::PrintForUI()
 }
 
 ////////////////////////////////////////////////////////////////
+// ShipCmdMove
+StarSystem^ ShipCmdMove::GetRefSystem()
+{
+    return GameData::GetStarSystem(m_X, m_Y, m_Z, true);
+}
+
+String^ ShipCmdMove::Print()
+{
+    return String::Format("Move {0}, {1} {2} {3}",
+        m_Ship->PrintClassWithName(),
+        m_X,
+        m_Y,
+        m_Z ); }
+
+String^ ShipCmdMove::PrintForUI()
+{
+    return "Move to " + m_Ship->PrintJumpDestination();
+}
+
+////////////////////////////////////////////////////////////////
 // Name
 
 String^ CmdPlanetName::Print()

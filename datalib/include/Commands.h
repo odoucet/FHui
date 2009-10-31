@@ -43,6 +43,7 @@ public enum class CommandType
     RecycleShip,
     Jump,
     Wormhole,
+    Move,
     Scan,
     Unload,
     Land,
@@ -339,6 +340,24 @@ public:
     Ship^       m_Ship;
     StarSystem^ m_JumpTarget;
     int         m_PlanetNum;
+};
+
+// Move
+public ref class ShipCmdMove
+    : public CmdBase<CommandPhase::Jump, CommandType::Move>
+{
+public:
+    ShipCmdMove(Ship ^ship, int x, int y, int z)
+        : m_Ship(ship), m_X(x), m_Y(y), m_Z(z)
+    {}
+
+    virtual StarSystem^ GetRefSystem() override;
+
+    virtual String^ Print() override;
+    virtual String^ PrintForUI() override;
+
+    Ship^       m_Ship;
+    int         m_X, m_Y, m_Z;
 };
 
 // Wormhole

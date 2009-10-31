@@ -12,7 +12,7 @@ FHUI build ??
   negative cost (recycle).
 * Fixed bug that allowed exceeding colony planet budget after generating
   many EUs by a big recycle command.
-+ New commands supported: Install, Orbit.
++ New commands supported: Install, Orbit, Move.
 + Commands management menu added to Systems tab. Custom orders
   now possible for Combat, Pre-Departure, Post-Arrival and Strikes
   phases independent of colonies and ships.

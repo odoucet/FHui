@@ -738,6 +738,20 @@ bool CommandManager::LoadCommandsShip(String ^line, Ship ^ship)
         ship->AddCommand( CmdSetOrigin(gcnew ShipCmdJump(ship, target, p)) );
         return true;
     }
+    // Move
+    if( m_RM->Match(line, m_RM->ExpCmdShipMove) )
+    {
+        int x = m_RM->GetResultInt(0);
+        int y = m_RM->GetResultInt(1);
+        int z = m_RM->GetResultInt(2);
+        ship->AddCommand( CmdSetOrigin(gcnew ShipCmdMove(ship, x, y, z)) );
+        // Get ref system just to add it to the systems list
+        // otherwise crash occurs while doing Form1::SystemsFillGrid() when
+        // iterating systems list and it gets modified by call to this command's
+        // GetRefSystem()
+        ship->GetJumpCommand()->GetRefSystem();
+        return true;
+    }
     // Wormhole
     if( m_RM->Match(line, m_RM->ExpCmdShipWormhole) )
     {
@@ -1172,9 +1186,10 @@ void CommandManager::GenerateJumps()
         ICommand ^jumpCmd = ship->GetJumpCommand();
         if( jumpCmd )
         {
-            if( jumpCmd->GetCmdType() == CommandType::Jump )
+            StarSystem ^jumpTarget = jumpCmd->GetRefSystem();
+            switch( jumpCmd->GetCmdType() )
             {
-                StarSystem ^jumpTarget = safe_cast<ShipCmdJump^>(jumpCmd)->m_JumpTarget;
+            case CommandType::Jump:
                 if( jumpTarget )
                 {
                     m_OrderList->Add( String::Format("  Jump {0}, {1}  ; ->[{3}]; Mishap:{4:F2}%{5}",
@@ -1194,11 +1209,11 @@ void CommandManager::GenerateJumps()
                         ship->PrintClassWithName(),
                         jumpCmd->PrintOriginSuffix() ) );
                 }
-            }
-            else if( jumpCmd->GetCmdType() == CommandType::Wormhole )
+                break;
+
+            case CommandType::Wormhole:
             {
                 String ^order = "  Wormhole " + ship->PrintClassWithName();
-                StarSystem ^jumpTarget = safe_cast<ShipCmdWormhole^>(jumpCmd)->m_JumpTarget;
                 int planetNum = safe_cast<ShipCmdWormhole^>(jumpCmd)->m_PlanetNum;
 
                 if( jumpTarget &&
@@ -1229,9 +1244,16 @@ void CommandManager::GenerateJumps()
                         target->Z).ToString("F1");
                 }
                 m_OrderList->Add( order );
+                break;
             }
-            else
+
+            case CommandType::Move:
+                m_OrderList->Add( PrintCommandWithInfo(jumpCmd, 2) );
+                break;
+
+            default:
                 throw gcnew FHUIDataImplException("Not supported ship jump command: " + ((int)jumpCmd->GetCmdType()).ToString());
+            }
         }
     }
 

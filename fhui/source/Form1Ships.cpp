@@ -402,6 +402,31 @@ ToolStripMenuItem^ Form1::ShipsFillMenuJumpsNew()
             menu->DropDownItems->Add( jumpMenu );
     }
 
+    // Move
+    ToolStripMenuItem ^menuMove = gcnew ToolStripMenuItem("Move:");
+    for( int x = -1; x < 2; ++x )
+    {
+        for( int y = -1; y < 2; ++y )
+        {
+            for( int z = -1; z < 2; ++z )
+            {
+                if( ( x == 0 && y == 0 && z != 0 ) ||
+                    ( x == 0 && y != 0 && z == 0 ) ||
+                    ( x != 0 && y == 0 && z == 0 ) )
+                {
+                    int mx = ship->System->X + x;
+                    int my = ship->System->Y + y;
+                    int mz = ship->System->Z + z;
+                    menuMove->DropDownItems->Add( CreateCustomMenuItem<ShipCommandData^>(
+                        String::Format("<{0} {1} {2}>", mx, my, mz),
+                        gcnew ShipCommandData(ship, gcnew ShipCmdMove(ship, mx, my, mz)),
+                        gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandAdd) ) );
+                }
+            }
+        }
+    }
+    menu->DropDownItems->Add( menuMove );
+
     return menu;
 }
 
@@ -438,7 +463,7 @@ ToolStripMenuItem^ Form1::ShipsFillMenuPostArrivalNew()
 
     StarSystem ^system = ship->System;
     ICommand ^jumpCmd = ship->GetJumpCommand();
-    if( jumpCmd->GetRefSystem() )
+    if( jumpCmd && jumpCmd->GetRefSystem() )
         system = jumpCmd->GetRefSystem();
 
     if( system->Planets->Count > 0 )

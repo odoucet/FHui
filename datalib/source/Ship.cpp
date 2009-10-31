@@ -247,6 +247,10 @@ String^ Ship::PrintJumpDestination()
         }
         break;
 
+    case CommandType::Move:
+        jumpTarget = cmdJump->GetRefSystem();
+        break;
+
     case CommandType::Wormhole:
         {
             ShipCmdWormhole ^cmd = safe_cast<ShipCmdWormhole^>(cmdJump);

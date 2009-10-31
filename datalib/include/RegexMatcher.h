@@ -29,6 +29,7 @@ public:
     initonly Regex^     ExpCmdColony;
     initonly Regex^     ExpCmdShip;
     initonly Regex^     ExpCmdShipJump;
+    initonly Regex^     ExpCmdShipMove;
     initonly Regex^     ExpCmdShipUpg;
     initonly Regex^     ExpCmdShipRec;
     initonly Regex^     ExpCmdShipWormhole;

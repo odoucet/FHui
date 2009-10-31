@@ -164,10 +164,12 @@ void Form1::SystemsFillGrid()
                 else
                     jumpsCell = ship->PrintClassWithName();
 
-                double mishap = ship->System->CalcMishap(
-                    jumpTarget,
-                    Decimal::ToInt32(TechGV->Value),
-                    ship->Age );
+                double mishap = 0.0;
+                if( cmd->GetCmdType() == CommandType::Jump )
+                    mishap = ship->System->CalcMishap(
+                        jumpTarget,
+                        Decimal::ToInt32(TechGV->Value),
+                        ship->Age );
                 
                 jumpsToolTip += String::Format("{0} from {1}; {2:F2}%\r\n",
                     ship->PrintClassWithName(),

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1250"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="DataLib"
 	ProjectGUID="{8DE8DB71-AE00-49E9-8603-8C021409F142}"
 	RootNamespace="DataLib"

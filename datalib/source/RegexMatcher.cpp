@@ -28,6 +28,7 @@ RegexMatcher::RegexMatcher()
     ExpCmdDevelopC      = gcnew Regex("^Develop\\s+(\\d+)\\s+PL\\s+([^,;]+)$");
     ExpCmdDevelop       = gcnew Regex("^Develop\\s+(\\d+)$");
     ExpCmdShipJump      = gcnew Regex("^Jump\\s+[A-Z0-9]+\\s+[^,;]+,\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+([0-9-]+)$");
+    ExpCmdShipMove      = gcnew Regex("^Move\\s+[A-Z0-9]+\\s+[^,;]+,\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)$");
     ExpCmdShipWormhole  = gcnew Regex("^Wormhole\\s+[A-Z0-9]+\\s+[^,;]+,\\s+([0-9-]+)$");
     ExpCmdShipUpg       = gcnew Regex("^Upgrade\\s+[A-Z0-9]+\\s+([^,;]+)$");
     ExpCmdShipRec       = gcnew Regex("^Recycle\\s+[A-Z0-9]+\\s+([^,;]+)$");
