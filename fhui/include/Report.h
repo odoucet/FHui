@@ -94,6 +94,8 @@ private:
     Ship^           m_ScanShip;
     int             m_PirateShipsCnt;
 
+    CommandPhase    m_TemplatePhase;
+
     Colony^         m_ColonyProduction;
     Alien^          m_EstimateAlien;
 };

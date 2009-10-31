@@ -27,14 +27,11 @@ public:
     TurnCommands()
         : Commands(gcnew List<ICommand^>)
         , AutoEnabled(false)
-        , AutoOrdersProduction(gcnew SortedList<Colony^, List<Pair<String^, int>^>^>)
     {
     }
 
-    List<ICommand^>^                                 Commands;
-
-    bool                                             AutoEnabled;
-    SortedList<Colony^, List<Pair<String^, int>^>^>^ AutoOrdersProduction;
+    List<ICommand^>^    Commands;
+    bool                AutoEnabled;
 };
 
 public ref class CommandManager
@@ -69,10 +66,6 @@ public:
         bool get() { return m_CommandData[m_CurrentTurn]->AutoEnabled; };
         void set(bool v) { m_CommandData[m_CurrentTurn]->AutoEnabled = v; };
     }
-
-    void        SetAutoOrderProduction(Colony^, String^, int);
-
-    List<Pair<String^, int>^>^  GetAutoOrdersProduction(Colony^);
 
 private:
     void        LoadCommandsGlobal(StreamReader ^sr);

@@ -181,7 +181,10 @@ bool Report::Parse(String ^s)
         else if( m_RM->Match(s, "^!!! [A-Za-z0-9]+ ([^,;]+) mis-jumped to \\d+ \\d+ \\d+!$") )
             m_GameData->AddMishap(m_RM->Results[0]);
         else if( Regex("^ORDER SECTION.").Match(s)->Success )
+        {
             m_Phase = PHASE_ORDERS_TEMPLATE;
+            m_TemplatePhase = CommandPhase::Custom;
+        }
         break;
 
     case PHASE_MESSAGE:
@@ -1122,7 +1125,57 @@ void Report::MatchAliensReport(String ^s)
 
 void Report::MatchOrdersTemplate(String ^s)
 {
-    String^ line = s->Replace("\t", " ");
+    if( String::IsNullOrEmpty(s) || s[0] == ';' )
+        return;
+    if( s == "END" )
+    {
+        m_TemplatePhase = CommandPhase::Custom;
+        m_ColonyProduction = nullptr;
+        return;
+    }
+
+    if( m_RM->Match(s, "^START ([A-Z-]+)$") )
+    {
+        String ^phase = m_RM->Results[0]->ToLower();
+        for( int i = 0; i < (int)CommandPhase::Custom; ++i )
+        {
+            CommandPhase newPhase = static_cast<CommandPhase>(i);
+            if( phase == CmdCustom::PhaseAsString(newPhase)->ToLower() )
+            {
+                m_TemplatePhase = newPhase;
+                break;
+            }
+        }
+
+        if( m_TemplatePhase == CommandPhase::Production )
+            m_ColonyProduction = nullptr;
+
+        return;
+    }
+
+    if( m_TemplatePhase == CommandPhase::Custom )
+        return;
+
+    if( m_TemplatePhase == CommandPhase::Production )
+    {
+        // START PRODUCTION
+        if( m_RM->Match(s, "^PRODUCTION\\s+PL\\s+([^,]+)$") )
+        {
+            Colony^ colony = m_GameData->GetColony(m_RM->Results[0]);
+            if ( colony )
+            {
+                m_ColonyProduction = colony;
+                return;
+            }
+            throw gcnew FHUIParsingException(
+                "PRODUCTION order for unknown colony: PL " + m_RM->Results[0] );
+        }
+
+        // Ignore any production command
+        // until production colony is initialized
+        if( m_ColonyProduction == nullptr )
+            return;
+    }
 
     // INSTALL
     if( m_RM->Match(s, m_RM->ExpCmdInstall) )
@@ -1192,19 +1245,6 @@ void Report::MatchOrdersTemplate(String ^s)
             String::Format("JUMP order for unknown ship: {0} {1}", m_RM->Results[0], m_RM->Results[1]) );
     }
 
-    // START PRODUCTION
-    if( m_RM->Match(s, "^PRODUCTION\\s+PL\\s+([^,]+)$") )
-    {
-        Colony^ colony = m_GameData->GetColony(m_RM->Results[0]);
-        if ( colony )
-        {
-            m_ColonyProduction = colony;
-            return;
-        }
-        throw gcnew FHUIParsingException(
-            "PRODUCTION order for unknown colony: PL " + m_RM->Results[0] );
-    }
-
     // DEVELOP
     if( m_RM->Match(s, m_RM->ExpCmdDevelopCS) )
     {
@@ -1245,7 +1285,7 @@ void Report::MatchOrdersTemplate(String ^s)
     }
 
     // Build CU/IU/AU
-    if( m_RM->Match(line, m_RM->ExpCmdBuildIUAU) )
+    if( m_RM->Match(s, m_RM->ExpCmdBuildIUAU) )
     {
         int amount = m_RM->GetResultInt(0);
         ICommand ^cmd = gcnew ProdCmdBuildIUAU(
@@ -1256,20 +1296,6 @@ void Report::MatchOrdersTemplate(String ^s)
         m_ColonyProduction->Commands->Add( cmd );
         cmd->Origin = CommandOrigin::Auto;
         return;
-    }
-
-    // CONTINUE
-    if( m_RM->Match(s, "^Continue\\s+(\\S+)\\s+([^,]+),\\s+(\\d+).*$") )
-    {
-        Ship^ ship = m_GameData->GetShip(m_RM->Results[1]);
-        if ( ship )
-        {
-            m_CommandMgr->SetAutoOrderProduction(
-                m_ColonyProduction, line, m_RM->GetResultInt(2) );
-            return;
-        }
-        throw gcnew FHUIParsingException(
-            String::Format("CONTINUE order for unknown ship: {0} {1}", m_RM->Results[0], m_RM->Results[1]) );
     }
 
     // RECYCLE
@@ -1308,6 +1334,18 @@ void Report::MatchOrdersTemplate(String ^s)
         ship->AddCommand( cmd );
         return;
     }
+
+    // ANY OTHER COMMAND -> CUSTOM COMMAND
+    // unless phase is Jumps - no custom orders here
+    if( m_TemplatePhase == CommandPhase::Jump )
+        return;
+
+    CmdCustom ^cmd = gcnew CmdCustom(m_TemplatePhase, s, 0);
+    cmd->Origin = CommandOrigin::Auto;
+    if( m_TemplatePhase == CommandPhase::Production )
+        m_CommandMgr->AddCommand(m_ColonyProduction, cmd);
+    else
+        m_CommandMgr->AddCommand(cmd);
 }
 
 void Report::StartLineAggregate(PhaseType phase, String ^s, int maxLines)

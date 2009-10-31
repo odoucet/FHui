@@ -43,6 +43,8 @@ void CommandManager::SelectTurn(int turn)
     if ( ! m_CommandData->ContainsKey(turn) )
     {
         m_CommandData[turn] = gcnew TurnCommands;
+        // Disable saves until commands file is loaded
+        m_bSaveEnabled = false;
     }
 }
 
@@ -304,7 +306,6 @@ ICommand^ CommandManager::CmdSetOrigin(ICommand ^cmd)
 
 void CommandManager::LoadCommands()
 {
-    m_bSaveEnabled = false;
     AddPluginCommands();
 
     String^ cmdPath = m_Path + String::Format(OrdersDir::Commands, GameData::CurrentTurn);
@@ -850,11 +851,6 @@ void CommandManager::RemoveGeneratedCommands(CommandOrigin origin, bool producti
         RemoveGeneratedCommandsFromList( ship->Commands, origin, productionOnly, preserveScouting );
 
     RemoveGeneratedCommandsFromList( GetCommands(), origin, productionOnly, preserveScouting );
-
-    if( origin == CommandOrigin::Auto )
-    {
-        m_CommandData[m_CurrentTurn]->AutoOrdersProduction->Clear();
-    }
 }
 
 void CommandManager::RemoveGeneratedCommandsFromList(List<ICommand^> ^orders, CommandOrigin origin, bool productionOnly, bool preserveScouting)
@@ -1336,20 +1332,6 @@ void CommandManager::GenerateProduction()
             }
         }
 
-        // Add auto orders
-        List<Pair<String^, int>^>^ autoOrders = GetAutoOrdersProduction( colony );
-        if ( autoOrders )
-        {
-            String ^prefix = "    ";
-            if( !useAuto )
-                prefix += "; ";
-            for each (Pair<String^, int>^ order in autoOrders )
-            {
-                orders->Add( prefix + order->A + String::Format(" ; [Auto] (cost {0})", order->B) );
-                m_Budget->UpdateEU(order->B);
-            }
-        }
-
         // Now try to CONTINUE or UPGRADE ships here
         GenerateProductionUpgrade(colony);
 
@@ -1530,24 +1512,6 @@ void CommandManager::GenerateStrikes()
 
     m_OrderList->Add("END");
     m_OrderList->Add("");
-}
-
-void CommandManager::SetAutoOrderProduction(Colony^ colony, String^ line, int cost)
-{
-    if( !m_CommandData[m_CurrentTurn]->AutoOrdersProduction->ContainsKey( colony ) )
-    {
-        m_CommandData[m_CurrentTurn]->AutoOrdersProduction->Add(colony, gcnew List<Pair<String^, int>^>);
-    }
-    m_CommandData[m_CurrentTurn]->AutoOrdersProduction[colony]->Add(gcnew Pair<String^, int>(line, cost));
-}
-
-List<Pair<String^, int>^>^ CommandManager::GetAutoOrdersProduction(Colony^ colony)
-{
-    if ( m_CommandData[m_CurrentTurn]->AutoOrdersProduction->ContainsKey( colony ) )
-    {
-        return m_CommandData[m_CurrentTurn]->AutoOrdersProduction[colony];
-    }
-    return nullptr;
 }
 
 } // end namespace FHUI
