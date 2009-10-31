@@ -58,7 +58,7 @@ void ReportParser::ScanReports()
 {
     DirectoryInfo ^dir = gcnew DirectoryInfo(m_ReportPath);
 
-    int minTurn = 100;
+    int minTurn = int::MaxValue;
     int maxTurn = 0;
 
     for each( FileInfo ^f in dir->GetFiles() )
@@ -68,14 +68,8 @@ void ReportParser::ScanReports()
         if( turn != -1 )
         {
             m_RepFiles->Add(f->FullName, turn);
-            if (minTurn > turn)
-            {
-                minTurn = turn;
-            }
-            if (maxTurn < turn)
-            {
-                maxTurn = turn;
-            }
+            minTurn = Math::Min(minTurn, turn);
+            maxTurn = Math::Max(maxTurn, turn);
         }
     }
 
@@ -122,8 +116,6 @@ int ReportParser::VerifyReport(String ^fileName)
         {
             if( false == report->Parse(line) )
                 break;
-            if( report->GetTurn() != -1 )
-                return report->GetTurn();
         }
     }
     catch( Exception ^ex )
@@ -140,13 +132,15 @@ int ReportParser::VerifyReport(String ^fileName)
     {
         sr->Close();
     }
-    return -1;
+
+    return report->GetTurn();
 }
 
 void ReportParser::LoadReports( int turn )
 {
-    Report ^report = gcnew Report(m_GameData, m_CommandMgr, m_RM);
     String ^content, ^line, ^fileName;
+
+    bool validReportFound = false;
 
     for( int i = 0; i < m_RepFiles->Count; i++ )
     {
@@ -155,6 +149,7 @@ void ReportParser::LoadReports( int turn )
             continue;
         }
 
+        Report ^report = gcnew Report(m_GameData, m_CommandMgr, m_RM);
         StreamReader ^sr;
 
         try
@@ -168,17 +163,12 @@ void ReportParser::LoadReports( int turn )
                     break;
             }
 
+            content +=
+                ";===========================================================================================\n"
+                "; Report File: " + fileName + "\n";
+            content += report->GetContent() + "\n";
             if( report->IsValid() )
-            {
-                content += report->GetContent() + "\n";
-            }
-            else
-            {
-                if( report->GetTurn() > 0 )
-                {
-                    throw gcnew FHUIParsingException("File is not a valid FH report.");
-                }
-            }
+                validReportFound = true;
         }
         catch( Exception ^ex )
         {
@@ -194,6 +184,11 @@ void ReportParser::LoadReports( int turn )
         {
             sr->Close();
         }
+    }
+
+    if( !validReportFound && turn > 0 )
+    {
+        throw gcnew FHUIParsingException("No complete report found for turn " + turn.ToString() );
     }
 
     m_Reports[turn] = content;

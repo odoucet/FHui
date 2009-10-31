@@ -59,16 +59,12 @@ bool Report::Parse(String ^s)
 
         if( m_RM->Match(s, "^EVENT LOG FOR TURN (\\d+)") )
         {
-            int turn = m_RM->GetResultInt(0);
-            if( turn == 0 )
-            {   // only turn 0 may be recognized by "event log..."
-                // because it can't contain meaningfull 'start of turn'
-                m_Turn = 0;
-            }
+            m_Turn = m_RM->GetResultInt(0);
         }
         if( m_RM->Match(s, "^START OF TURN (\\d+)") )
         {
             m_Turn = m_RM->GetResultInt(0);
+            return false;   // break file scanning on this line
         }
         return true;
     }

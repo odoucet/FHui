@@ -8,6 +8,9 @@ Minor changes are listed only if originally requested by player
 FHUI build ??
 + Any unrecognized order present in report's orders template section
   will be loaded as a custom order.
++ Additional reports now allowed for any turn, not only "turn 0".
+  You can use it for example to store estimates aquired via diplomacy
+  and still see valid turn number in FHUI.
 
 FHUI build 267
 * Fixed bug that did not allow custom pre-departure commands for
