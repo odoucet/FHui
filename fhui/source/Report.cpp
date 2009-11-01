@@ -93,40 +93,25 @@ String^ Report::GetText()
 bool Report::Verify(String^ fileName)
 {
     m_Input = File::OpenText(fileName);
+    m_Turn = -1;
 
-    try
+    while( String ^line = GetLine() ) 
     {
-        while( String ^line = GetLine() ) 
-        {
-            if( String::IsNullOrEmpty(line) )
-                continue;
+        if( String::IsNullOrEmpty(line) )
+            continue;
 
-            if( m_RM->Match(line, "^EVENT LOG FOR TURN (\\d+)") )
-            {
-                if( m_RM->GetResultInt(0) == 0 )
-                {   // only turn 0 may be recognized by "event log..."
-                    // because it can't contain meaningfull 'start of turn'
-                    m_Turn = 0;
-                }
-            }
-            else if( m_RM->Match(line, "^START OF TURN (\\d+)") )
-            {
-                m_Turn = m_RM->GetResultInt(0);
-            }
+        if( m_RM->Match(line, "^EVENT LOG FOR TURN (\\d+)") )
+        {   // String matched, but keep looking for "Start of turn..."
+            m_Turn = m_RM->GetResultInt(0);
         }
-        return true;
+        else if( m_RM->Match(line, "^START OF TURN (\\d+)") )
+        {
+            m_Turn = m_RM->GetResultInt(0);
+            break;  // We're satisfied now
+        }
     }
-    catch( Exception ^ )
-    {
-        return false;
-        //throw gcnew FHUIParsingException(
-        //    String::Format("Error occured while parsing report: {0}, line {1}:\r\n{2}\r\nError description:\r\n  {3}",
-        //        fileName,
-        //        m_LineCnt,
-        //        line,
-        //        ex->Message),
-        //    ex );
-    }
+
+    return m_Turn >= 0;
 }
 
 void Report::Parse(String^ fileName)
