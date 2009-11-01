@@ -353,6 +353,16 @@ String^ Ship::PrintCmdDetailsPhase(CommandPhase phase)
 {
     String ^ret = "";
 
+    if( phase == CommandPhase::PreDeparture ||
+        phase == CommandPhase::PostArrival )
+    {
+        for each( ICommand ^cmd in System->GetTransfers(this) )
+        {
+            if( cmd->GetPhase() == phase )
+                ret += cmd->Print() + "\r\n";
+        }
+    }
+
     for each( ICommand ^cmd in Commands )
     {
         if( cmd->GetPhase() == phase )
@@ -364,6 +374,12 @@ String^ Ship::PrintCmdDetailsPhase(CommandPhase phase)
 
 void Ship::AddCommand(ICommand ^cmd)
 {
+    if( cmd->GetCmdType() == CommandType::Transfer )
+    {
+        System->Transfers->Add( cmd );
+        return;
+    }
+
     if( cmd->GetPhase() == CommandPhase::Jump ||
         cmd->GetPhase() == CommandPhase::Production )
     {   // Remove old one

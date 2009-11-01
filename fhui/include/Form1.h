@@ -272,7 +272,7 @@ namespace FHUI {
         void        ColoniesMenuCommandDelAll(CommandPhase phase);
         void        ColoniesMenuCommandDelAllTransfers(CommandPhase phase);
         void        ColoniesMenuProdCommandAddInstall(CmdInstall ^cmd);
-        void        ColoniesMenuProdCommandAddTransfer(CmdTransfer ^data);
+        void        ColoniesMenuProdCommandAddTransfer(CmdTransfer ^cmd);
         void        ColoniesMenuProdCommandAddResearch(ProdCmdResearch ^cmd);
         void        ColoniesMenuProdCommandAddBuildIuAu(ProdCmdBuildIUAU ^cmd);
         void        ColoniesMenuProdCommandAddBuildShip(Object^, EventArgs^);
@@ -343,11 +343,13 @@ namespace FHUI {
 
         void        ShipsMenuCommandCustom(CustomCmdData ^data);
         void        ShipsMenuCommandEditAsCustom(ICommand ^cmd);
+        void        ShipsMenuProdCommandAddTransfer(CmdTransfer ^cmd);
 
         typedef Pair<Ship^, ICommand^>  ShipCommandData;
         void        ShipsMenuCommandAdd(ShipCommandData ^data);
         void        ShipsMenuCommandDel(ICommand ^cmd);
         void        ShipsMenuCommandDelAll(CommandPhase phase);
+        void        ShipsMenuCommandDelAllTransfers(CommandPhase phase);
 
         ToolStripMenuItem^ ShipsMenuAddJumpsHere(
                         StarSystem ^system, int planetNum );

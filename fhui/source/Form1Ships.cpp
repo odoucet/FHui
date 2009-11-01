@@ -5,6 +5,7 @@
 #include "GridSorter.h"
 
 #include "CmdCustomDlg.h"
+#include "CmdTransferDlg.h"
 
 ////////////////////////////////////////////////////////////////
 
@@ -143,7 +144,14 @@ void Form1::ShipsFillGrid()
 
             ICommand ^cmd = ship->GetJumpCommand();
             if( cmd )
+            {
                 cells[c.JumpTarget]->Value  = cmd->PrintForUI();
+                if( cmd->GetCmdType() == CommandType::Jump &&
+                    cmd->GetRefSystem() == nullptr )
+                {
+                    cells[c.JumpTarget]->Style->ForeColor = Color::Red;
+                }
+            }
             cells[c.Commands]->Value        = ship->PrintCmdSummary();
 
             String ^cmdDetails = ship->PrintCmdDetails();
@@ -239,10 +247,29 @@ ToolStripMenuItem^ Form1::ShipsFillMenuCommands(CommandPhase phase)
     ToolStripMenuItem ^menu = gcnew ToolStripMenuItem(title + ":");
 
     bool anyCommand = false;
+    bool needSeparator = false;
+    // Transfer commands
+    for each( ICommand ^cmd in m_ShipsMenuRef->System->GetTransfers(m_ShipsMenuRef) )
+    {
+        if( cmd->GetPhase() == phase )
+        {
+            menu->DropDownItems->Add(
+                ShipsFillMenuCommandsOptions(cmd) );
+            anyCommand = true;
+        }
+    }
+    if( anyCommand )
+        needSeparator = true;
+    // Colony commands
     for each( ICommand ^cmd in m_ShipsMenuRef->Commands )
     {
         if( cmd->GetPhase() == phase )
         {
+            if( needSeparator )
+            {
+                needSeparator = false;
+                menu->DropDownItems->Add( gcnew ToolStripSeparator() );
+            }
             menu->DropDownItems->Add(
                 ShipsFillMenuCommandsOptions(cmd) );
             anyCommand = true;
@@ -340,6 +367,19 @@ ToolStripMenuItem^ Form1::ShipsFillMenuPreDepartureNew()
             "Land",
             gcnew ShipCommandData(ship, gcnew CmdPhaseWrapper(CommandPhase::PreDeparture, gcnew ShipCmdLand(ship))),
             gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandAdd) ) );
+    }
+
+    // Transfer
+    if( true ) //TBD
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem<CmdTransfer^>(
+            "Transfer from " + ship->PrintClassWithName() + "...",
+            gcnew CmdTransfer(CommandPhase::PreDeparture, INV_MAX, 0, nullptr, ship, nullptr, nullptr),
+            gcnew EventHandler1Arg<CmdTransfer^>(this, &Form1::ShipsMenuProdCommandAddTransfer) ) );
+        menu->DropDownItems->Add( CreateCustomMenuItem<CmdTransfer^>(
+            "Transfer to " + ship->PrintClassWithName() + "...",
+            gcnew CmdTransfer(CommandPhase::PreDeparture, INV_MAX, 0, nullptr, nullptr, nullptr, ship),
+            gcnew EventHandler1Arg<CmdTransfer^>(this, &Form1::ShipsMenuProdCommandAddTransfer) ) );
     }
 
     // Custom command
@@ -490,6 +530,19 @@ ToolStripMenuItem^ Form1::ShipsFillMenuPostArrivalNew()
             gcnew EventHandler1Arg<ShipCommandData^>(this, &Form1::ShipsMenuCommandAdd) ) );
     }
 
+    // Transfer
+    if( true ) //TBD
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem<CmdTransfer^>(
+            "Transfer from " + ship->PrintClassWithName() + "...",
+            gcnew CmdTransfer(CommandPhase::PostArrival, INV_MAX, 0, nullptr, ship, nullptr, nullptr),
+            gcnew EventHandler1Arg<CmdTransfer^>(this, &Form1::ShipsMenuProdCommandAddTransfer) ) );
+        menu->DropDownItems->Add( CreateCustomMenuItem<CmdTransfer^>(
+            "Transfer to " + ship->PrintClassWithName() + "...",
+            gcnew CmdTransfer(CommandPhase::PostArrival, INV_MAX, 0, nullptr, nullptr, nullptr, ship),
+            gcnew EventHandler1Arg<CmdTransfer^>(this, &Form1::ShipsMenuProdCommandAddTransfer) ) );
+    }
+
     // Custom order
     menu->DropDownItems->Add( gcnew ToolStripSeparator );
     menu->DropDownItems->Add( CreateCustomMenuItem<CustomCmdData^>(
@@ -505,9 +558,13 @@ ToolStripMenuItem^ Form1::ShipsFillMenuCommandsOptions(ICommand ^cmd)
     Ship ^ship = m_ShipsMenuRef;
     ToolStripMenuItem ^menu = gcnew ToolStripMenuItem( m_CommandMgr->PrintCommandWithInfo(cmd, 0) );
 
+    List<ICommand^> ^cmdList = ship->Commands;
+    if( cmd->GetCmdType() == CommandType::Transfer )
+        cmdList = ship->System->Transfers;
+
     ICommand ^cmdFirst = nullptr;
     ICommand ^cmdLast = nullptr;
-    for each( ICommand ^iCmd in ship->Commands )
+    for each( ICommand ^iCmd in cmdList )
     {
         if( iCmd->GetPhase() == cmd->GetPhase() )
         {
@@ -523,7 +580,7 @@ ToolStripMenuItem^ Form1::ShipsFillMenuCommandsOptions(ICommand ^cmd)
         needSeparator = true;
         menu->DropDownItems->Add( CreateCustomMenuItem(
             "Move up",
-            gcnew MenuCommandUpDownData(ship->Commands, cmd),
+            gcnew MenuCommandUpDownData(cmdList, cmd),
             gcnew EventHandler1Arg<MenuCommandUpDownData^>(this, &Form1::MenuCommandMoveUp) ) );
     }
     if( cmd != cmdLast )
@@ -531,7 +588,7 @@ ToolStripMenuItem^ Form1::ShipsFillMenuCommandsOptions(ICommand ^cmd)
         needSeparator = true;
         menu->DropDownItems->Add( CreateCustomMenuItem(
             "Move down",
-            gcnew MenuCommandUpDownData(ship->Commands, cmd),
+            gcnew MenuCommandUpDownData(cmdList, cmd),
             gcnew EventHandler1Arg<MenuCommandUpDownData^>(this, &Form1::MenuCommandMoveDown) ) );
     }
 
@@ -539,6 +596,13 @@ ToolStripMenuItem^ Form1::ShipsFillMenuCommandsOptions(ICommand ^cmd)
         menu->DropDownItems->Add( gcnew ToolStripSeparator );
 
     // Edit command
+    if( cmd->GetCmdType() == CommandType::Transfer )
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem<CmdTransfer^>(
+            "Edit...",
+            safe_cast<CmdTransfer^>(cmd),
+            gcnew EventHandler1Arg<CmdTransfer^>(this, &Form1::ShipsMenuProdCommandAddTransfer) ) );
+    }
     if( cmd->GetCmdType() == CommandType::Custom )
     {
         CmdCustom ^cmdCustom = safe_cast<CmdCustom^>(cmd);
@@ -655,7 +719,10 @@ void Form1::ShipsMenuCommandAdd(ShipCommandData ^data)
 
 void Form1::ShipsMenuCommandDel(ICommand ^cmd)
 {
-    m_ShipsMenuRef->Commands->Remove( cmd );
+    if( cmd->GetCmdType() == CommandType::Transfer )
+        m_ShipsMenuRef->System->Transfers->Remove( cmd );
+    else
+        m_ShipsMenuRef->Commands->Remove( cmd );
 
     m_CommandMgr->SaveCommands();
 
@@ -687,7 +754,11 @@ void Form1::ShipsMenuCommandDelAll(CommandPhase phase)
 
     // Delete all confirmed
     if( phase == CommandPhase::Custom )
+    {
         m_ShipsMenuRef->Commands->Clear();
+        ShipsMenuCommandDelAllTransfers(CommandPhase::PreDeparture);
+        ShipsMenuCommandDelAllTransfers(CommandPhase::PostArrival);
+    }
     else
     {
         bool repeat;
@@ -704,6 +775,11 @@ void Form1::ShipsMenuCommandDelAll(CommandPhase phase)
                 }
             }
         } while( repeat );
+
+        if( phase == CommandPhase::PreDeparture )
+            ShipsMenuCommandDelAllTransfers(CommandPhase::PreDeparture);
+        if( phase == CommandPhase::PostArrival )
+            ShipsMenuCommandDelAllTransfers(CommandPhase::PostArrival);
     }
 
     m_CommandMgr->SaveCommands();
@@ -711,6 +787,49 @@ void Form1::ShipsMenuCommandDelAll(CommandPhase phase)
     SystemsGrid->Filter->Update();
     ColoniesGrid->Filter->Update();
     ShipsGrid->Filter->Update();
+}
+
+void Form1::ShipsMenuCommandDelAllTransfers(CommandPhase phase)
+{
+    for each( ICommand ^cmd in m_ShipsMenuRef->System->GetTransfers(m_ShipsMenuRef) )
+    {
+        if( cmd->GetPhase() == phase )
+            m_ShipsMenuRef->System->Transfers->Remove(cmd);
+    }
+}
+
+void Form1::ShipsMenuProdCommandAddTransfer(CmdTransfer ^cmd)
+{
+    CmdTransferDlg ^dlg = gcnew CmdTransferDlg( cmd );
+    if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
+    {
+        if( cmd->m_Type != INV_MAX )
+        {
+            int amount = dlg->GetAmount(cmd->m_Type);
+            if( amount != cmd->m_Amount )
+            {
+                if( amount <= 0 )
+                    ShipsMenuCommandDel(cmd);
+                else
+                {
+                    cmd->m_Amount = amount;
+                    ShipsMenuCommandAdd(nullptr);
+                }
+            }
+        }
+        else
+        {
+            for( int i = INV_RM; i < INV_MAX; ++i )
+            {
+                InventoryType inv = static_cast<InventoryType>(i);
+                cmd = dlg->GetCommand(inv);
+                if( cmd )
+                    ShipsMenuCommandAdd( gcnew ShipCommandData(m_ShipsMenuRef, cmd) );
+            }
+        }
+    }
+
+    delete dlg;
 }
 
 void Form1::ShipsMenuCommandCustom(CustomCmdData ^data)
