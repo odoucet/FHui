@@ -271,6 +271,7 @@ namespace FHUI {
         void        ColoniesMenuCommandDel(ICommand ^cmd);
         void        ColoniesMenuCommandDelAll(CommandPhase phase);
         void        ColoniesMenuProdCommandAddInstall(CmdInstall ^cmd);
+        void        ColoniesMenuProdCommandAddTransfer(CmdTransfer ^data);
         void        ColoniesMenuProdCommandAddResearch(ProdCmdResearch ^cmd);
         void        ColoniesMenuProdCommandAddBuildIuAu(ProdCmdBuildIUAU ^cmd);
         void        ColoniesMenuProdCommandAddBuildShip(Object^, EventArgs^);

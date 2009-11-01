@@ -253,6 +253,15 @@ String^ ProdCmdEstimate::Print()
 
 ////////////////////////////////////////////////////////////
 // Transfer
+StarSystem^ CmdTransfer::GetRefSystem()
+{
+    if( m_FromColony )  return m_FromColony->System;
+    if( m_FromShip )    return m_FromShip->System;
+    if( m_ToColony )    return m_ToColony->System;
+    if( m_ToShip )      return m_ToShip->System;
+    throw gcnew FHUIDataIntegrityException("Missing at least one from/to data in CmdTransfer!");
+}
+
 String^ CmdTransfer::Print()
 {
     String ^from = m_FromColony ?

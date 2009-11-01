@@ -1,12 +1,14 @@
 #pragma once
 #include "GridDataSrcBase.h"
 #include "Planet.h"
+#include "Commands.h"
 
 namespace FHUI
 {
 
 ref class Colony;
 ref class Ship;
+ref class CmdTransfer;
 
 // ---------------------------------------------------
 // Star system
@@ -35,6 +37,7 @@ public:
         m_ColoniesOwned = gcnew SortedList<int, Colony^>;
         m_ColoniesAlien = gcnew List<Colony^>;
         Planets = gcnew SortedList<int, Planet^>;
+        Transfers = gcnew List<CmdTransfer^>;
         IsVoid = true;
     }
     // --- copy constructor - does not perform full copy !!! ---
@@ -62,6 +65,7 @@ public:
         m_ColoniesOwned = gcnew SortedList<int, Colony^>;
         m_ColoniesAlien = gcnew List<Colony^>;
         Planets = gcnew SortedList<int, Planet^>;
+        Transfers = gcnew List<CmdTransfer^>;
 
         for each ( Planet^ planet in src->Planets->Values )
         {
@@ -115,6 +119,8 @@ public:
     String^         GenerateColoniesInfo();
     String^         GenerateShipsInfo();
 
+    List<Ship^>^    GetShipTargets(CommandPhase phase);
+
     void            SetWormhole(int targetId);
 
     int             X;
@@ -143,7 +149,9 @@ public:
     property IList<Colony^>^ ColoniesOwned { IList<Colony^>^ get() { return m_ColoniesOwned->Values; } }
     property IList<Colony^>^ ColoniesAlien { IList<Colony^>^ get() { return m_ColoniesAlien->AsReadOnly(); } }
 
-    property SortedList<int, Planet^>^ Planets;
+    SortedList<int, Planet^>^ Planets;
+
+    List<CmdTransfer^>^     Transfers;
 
 protected:
 

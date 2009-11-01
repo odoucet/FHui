@@ -5,6 +5,7 @@
 #include "GridSorter.h"
 
 #include "CmdInstallDlg.h"
+#include "CmdTransferDlg.h"
 #include "CmdResearch.h"
 #include "CmdBuildShips.h"
 #include "CmdBuildIuAu.h"
@@ -430,6 +431,21 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuCommands(CommandPhase phase)
     ToolStripMenuItem ^menu = gcnew ToolStripMenuItem(title + ":");
 
     bool anyCommand = false;
+    // Transfer commands
+    for each( CmdTransfer ^cmd in m_ColoniesMenuRef->System->Transfers )
+    {
+        if( cmd->GetPhase() == phase )
+        {
+            if( cmd->m_FromColony == m_ColoniesMenuRef ||
+                cmd->m_ToColony == m_ColoniesMenuRef )
+            {
+                menu->DropDownItems->Add(
+                    ColoniesFillMenuCommandsOptions(cmd) );
+                anyCommand = true;
+            }
+        }
+    }
+    // Colony commands
     for each( ICommand ^cmd in m_ColoniesMenuRef->Commands )
     {
         if( cmd->GetPhase() == phase )
@@ -494,6 +510,19 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuPreDepartureNew()
             gcnew EventHandler1Arg<CmdInstall^>(this, &Form1::ColoniesMenuProdCommandAddInstall) ) );
     }
 
+    // Transfer
+    if( true ) //TBD
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem<CmdTransfer^>(
+            "Transfer from PL " + colony->Name + "...",
+            gcnew CmdTransfer(CommandPhase::PreDeparture, INV_MAX, 0, colony, (Colony^)nullptr),
+            gcnew EventHandler1Arg<CmdTransfer^>(this, &Form1::ColoniesMenuProdCommandAddTransfer) ) );
+        menu->DropDownItems->Add( CreateCustomMenuItem<CmdTransfer^>(
+            "Transfer to PL " + colony->Name + "...",
+            gcnew CmdTransfer(CommandPhase::PreDeparture, INV_MAX, 0, (Colony^)nullptr, colony),
+            gcnew EventHandler1Arg<CmdTransfer^>(this, &Form1::ColoniesMenuProdCommandAddTransfer) ) );
+    }
+
     // Custom command
     menu->DropDownItems->Add( CreateCustomMenuItem<CustomCmdData^>(
         "Custom Order...",
@@ -507,6 +536,19 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuPostArrivalNew()
 {
     Colony ^colony = m_ColoniesMenuRef;
     ToolStripMenuItem ^menu = gcnew ToolStripMenuItem("Add:");
+
+    // Transfer
+    if( true ) //TBD
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem<CmdTransfer^>(
+            "Transfer from PL " + colony->Name + "...",
+            gcnew CmdTransfer(CommandPhase::PostArrival, INV_MAX, 0, colony, (Colony^)nullptr),
+            gcnew EventHandler1Arg<CmdTransfer^>(this, &Form1::ColoniesMenuProdCommandAddTransfer) ) );
+        menu->DropDownItems->Add( CreateCustomMenuItem<CmdTransfer^>(
+            "Transfer to PL " + colony->Name + "...",
+            gcnew CmdTransfer(CommandPhase::PostArrival, INV_MAX, 0, (Colony^)nullptr, colony),
+            gcnew EventHandler1Arg<CmdTransfer^>(this, &Form1::ColoniesMenuProdCommandAddTransfer) ) );
+    }
 
     // Custom command
     menu->DropDownItems->Add( CreateCustomMenuItem<CustomCmdData^>(
@@ -657,6 +699,13 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuCommandsOptions(ICommand ^cmd)
             safe_cast<CmdInstall^>(cmd),
             gcnew EventHandler1Arg<CmdInstall^>(this, &Form1::ColoniesMenuProdCommandAddInstall) ) );
     }
+    if( cmd->GetCmdType() == CommandType::Transfer )
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem<CmdTransfer^>(
+            "Edit...",
+            safe_cast<CmdTransfer^>(cmd),
+            gcnew EventHandler1Arg<CmdTransfer^>(this, &Form1::ColoniesMenuProdCommandAddTransfer) ) );
+    }
     if( cmd->GetCmdType() == CommandType::Research )
     {
         menu->DropDownItems->Add( CreateCustomMenuItem<ProdCmdResearch^>(
@@ -779,6 +828,40 @@ void Form1::ColoniesMenuProdCommandAddInstall(CmdInstall ^cmd)
             cmd = dlg->GetCommand(INV_AU);
             if( cmd )
                 ColoniesMenuCommandAdd( cmd );
+        }
+    }
+
+    delete dlg;
+}
+
+void Form1::ColoniesMenuProdCommandAddTransfer(CmdTransfer ^cmd)
+{
+    CmdTransferDlg ^dlg = gcnew CmdTransferDlg( cmd );
+    if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
+    {
+        if( cmd )
+        {
+            int amount = dlg->GetAmount(cmd->m_Type);
+            if( amount != cmd->m_Amount )
+            {
+                if( amount <= 0 )
+                    ColoniesMenuCommandDel(cmd);
+                else
+                {
+                    cmd->m_Amount = amount;
+                    ColoniesMenuCommandAdd(nullptr);
+                }
+            }
+        }
+        else
+        {
+            for( int i = INV_RM; i < INV_MAX; ++i )
+            {
+                InventoryType inv = static_cast<InventoryType>(i);
+                cmd = dlg->GetCommand(inv);
+                if( cmd )
+                    ColoniesMenuCommandAdd( cmd );
+            }
         }
     }
 

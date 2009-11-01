@@ -679,40 +679,33 @@ public ref class CmdTransfer
     : public CmdBase<CommandPhase::PreDeparture, CommandType::Transfer>
 {
 public:
-    CmdTransfer(InventoryType type, int amount, Colony ^from, Colony ^to)
+    CmdTransfer(CommandPhase phase, InventoryType type, int amount, Colony ^from, Colony ^to)
     {
-        Init(type, amount, from, nullptr, to, nullptr);
+        Init(phase, type, amount, from, nullptr, to, nullptr);
     }
 
-    CmdTransfer(InventoryType type, int amount, Colony ^from, Ship ^to)
+    CmdTransfer(CommandPhase phase, InventoryType type, int amount, Colony ^from, Ship ^to)
     {
-        Init(type, amount, from, nullptr, nullptr, to);
+        Init(phase, type, amount, from, nullptr, nullptr, to);
     }
 
-    CmdTransfer(InventoryType type, int amount, Ship ^from, Colony ^to)
+    CmdTransfer(CommandPhase phase, InventoryType type, int amount, Ship ^from, Colony ^to)
     {
-        Init(type, amount, nullptr, from, to, nullptr);
+        Init(phase, type, amount, nullptr, from, to, nullptr);
     }
 
-    CmdTransfer(InventoryType type, int amount, Ship ^from, Ship ^to)
+    CmdTransfer(CommandPhase phase, InventoryType type, int amount, Ship ^from, Ship ^to)
     {
-        Init(type, amount, nullptr, from, nullptr, to);
+        Init(phase, type, amount, nullptr, from, nullptr, to);
     }
 
-    CmdTransfer^ operator = (CmdTransfer ^cmd)
-    {
-        Origin          = cmd->Origin;
-        m_Type          = cmd->m_Type;
-        m_Amount        = cmd->m_Amount;
-        m_FromColony    = cmd->m_FromColony;
-        m_FromShip      = cmd->m_FromShip;
-        m_ToColony      = cmd->m_ToColony;
-        m_ToShip        = cmd->m_ToShip;
-        return this;
-    }
+    virtual CommandPhase    GetPhase() override     { return m_Phase; }
+
+    virtual StarSystem^     GetRefSystem() override;
 
     virtual String^ Print() override;
 
+    CommandPhase    m_Phase;
     InventoryType   m_Type;
     int             m_Amount;
     Colony^         m_FromColony;
@@ -721,8 +714,9 @@ public:
     Ship^           m_ToShip;
 
 protected:
-    void    Init(InventoryType type, int amount, Colony ^fromColony, Ship ^fromShip, Colony ^toColony, Ship ^toShip)
+    void    Init(CommandPhase phase, InventoryType type, int amount, Colony ^fromColony, Ship ^fromShip, Colony ^toColony, Ship ^toShip)
     {
+        m_Phase = phase;
         m_Type = type;
         m_Amount = amount;
         m_FromColony = fromColony;

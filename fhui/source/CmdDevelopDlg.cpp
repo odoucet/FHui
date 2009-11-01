@@ -44,7 +44,6 @@ void CmdDevelopDlg::InidDialog(Colony ^colony, ProdCmdDevelop ^cmd)
         ICommand ^cmd = ship->GetJumpCommand();
         if( ship->System != colony->System )
         {
-            ICommand ^cmd = ship->GetJumpCommand();
             if( cmd == nullptr ||
                 cmd->GetRefSystem() != colony->System )
                 continue;

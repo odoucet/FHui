@@ -906,6 +906,9 @@ void CommandManager::GenerateTemplate(System::Windows::Forms::RichTextBox^ targe
 
     m_Budget = gcnew BudgetTracker(m_OrderList, m_GameData->GetCarriedEU());
 
+    // Sort colonies for production
+    GameData::Player->SortColoniesByProdOrder();
+
     GenerateCombat();
     GeneratePreDeparture();
     GenerateJumps();
@@ -1284,9 +1287,6 @@ void CommandManager::GenerateProduction()
             ship->CommandProdPlanet = -1;
         }
     }
-
-    // Sort colonies for production
-    GameData::Player->SortColoniesByProdOrder();
 
     // Generate production template for each colony
     for each( Colony ^colony in GameData::Player->Colonies )

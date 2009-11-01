@@ -576,4 +576,36 @@ void StarSystem::SetWormhole(int targetId)
     }
 }
 
+List<Ship^>^ StarSystem::GetShipTargets(CommandPhase phase)
+{
+    List<Ship^> ^list = gcnew List<Ship^>;
+
+    for each( Ship ^ship in GameData::Player->Ships )
+    {
+        if( phase == CommandPhase::PreDeparture )
+        {
+            if( ship->System != this )
+                continue;
+        }
+        else if( phase == CommandPhase::PostArrival )
+        {
+            ICommand ^cmd = ship->GetJumpCommand();
+            if( ship->System != this )
+            {
+                if( cmd == nullptr ||
+                    cmd->GetRefSystem() != this )
+                    continue;
+            }
+            else if( cmd )
+                continue;
+        }
+        else
+            throw gcnew FHUIDataImplException("Invalid command phase for transfer command: " + ((int)phase).ToString());
+
+        list->Add(ship);
+    }
+
+    return list;
+}
+
 } // end namespace FHUI

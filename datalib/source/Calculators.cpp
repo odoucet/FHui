@@ -151,6 +151,48 @@ int Calculators::InventoryBuildCost(InventoryType inv)
     }
 }
 
+int Calculators::InventoryCarryCapacity(InventoryType inv, int amount)
+{
+    switch( inv )
+    {
+    case INV_RM:
+    case INV_CU:
+    case INV_IU:    
+    case INV_AU:
+    case INV_FD:
+    case INV_FS:
+    case INV_DR:    return amount;
+    case INV_PD:    return amount * 3;
+    case INV_FM:
+    case INV_FJ:    return amount * 5;
+    case INV_JP:    return amount * 10;
+    case INV_SU:
+    case INV_GT:    return amount * 20;
+    case INV_GW:
+    case INV_TP:    return amount * 100;
+    case INV_GU1:
+    case INV_GU2:   
+    case INV_GU3:
+    case INV_GU4:
+    case INV_GU5:
+    case INV_GU6:
+    case INV_GU7:
+    case INV_GU8:
+    case INV_GU9:   return amount * (5 * (1 + ((int)inv - (int)INV_GU1)));
+    case INV_SG1:
+    case INV_SG2:
+    case INV_SG3:
+    case INV_SG4:
+    case INV_SG5:
+    case INV_SG6:
+    case INV_SG7:
+    case INV_SG8:
+    case INV_SG9:   return amount * (5 * (1 + ((int)inv - (int)INV_SG1)));
+    default:
+        throw gcnew FHUIDataImplException("Invalid inventory for build value calculation: " + ((int)inv).ToString());
+    }
+}
+
 int Calculators::RecycleValue(InventoryType inv, int amount)
 {
     switch( inv )

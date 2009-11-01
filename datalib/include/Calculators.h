@@ -21,6 +21,7 @@ public:
     static int      ShipUpgradeCost(int age, int originalCost);
     static int      ShipRecycleValue(int age, int originalCost);
     static int      InventoryBuildCost(InventoryType inv);
+    static int      InventoryCarryCapacity(InventoryType inv, int amount);
     static int      RecycleValue(InventoryType inv, int amount);
     static int      RecycleValuePop(InventoryType inv, int amount);
     static double   ShipMaintenanceDiscount(int mlLevel);
