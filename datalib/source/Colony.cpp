@@ -155,6 +155,16 @@ String^ Colony::PrintCmdDetailsPhase(CommandPhase phase)
 {
     String ^ret = "";
 
+    if( phase == CommandPhase::PreDeparture ||
+        phase == CommandPhase::PostArrival )
+    {
+        for each( ICommand ^cmd in System->GetTransfers(this) )
+        {
+            if( cmd->GetPhase() == phase )
+                ret += cmd->Print() + "\r\n";
+        }
+    }
+
     for each( ICommand ^cmd in Commands )
     {
         if( cmd->GetPhase() == phase )

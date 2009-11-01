@@ -679,24 +679,17 @@ public ref class CmdTransfer
     : public CmdBase<CommandPhase::PreDeparture, CommandType::Transfer>
 {
 public:
-    CmdTransfer(CommandPhase phase, InventoryType type, int amount, Colony ^from, Colony ^to)
+    CmdTransfer(CommandPhase phase, InventoryType type, int amount, Colony ^fromColony, Ship ^fromShip, Colony ^toColony, Ship ^toShip)
     {
-        Init(phase, type, amount, from, nullptr, to, nullptr);
-    }
+        m_Phase = phase;
+        m_Type = type;
+        m_Amount = amount;
+        m_FromColony = fromColony;
+        m_FromShip = fromShip;
+        m_ToColony = toColony;
+        m_ToShip = toShip;
 
-    CmdTransfer(CommandPhase phase, InventoryType type, int amount, Colony ^from, Ship ^to)
-    {
-        Init(phase, type, amount, from, nullptr, nullptr, to);
-    }
-
-    CmdTransfer(CommandPhase phase, InventoryType type, int amount, Ship ^from, Colony ^to)
-    {
-        Init(phase, type, amount, nullptr, from, to, nullptr);
-    }
-
-    CmdTransfer(CommandPhase phase, InventoryType type, int amount, Ship ^from, Ship ^to)
-    {
-        Init(phase, type, amount, nullptr, from, nullptr, to);
+        RequiresPhasePrefix = true;
     }
 
     virtual CommandPhase    GetPhase() override     { return m_Phase; }
@@ -712,18 +705,6 @@ public:
     Ship^           m_FromShip;
     Colony^         m_ToColony;
     Ship^           m_ToShip;
-
-protected:
-    void    Init(CommandPhase phase, InventoryType type, int amount, Colony ^fromColony, Ship ^fromShip, Colony ^toColony, Ship ^toShip)
-    {
-        m_Phase = phase;
-        m_Type = type;
-        m_Amount = amount;
-        m_FromColony = fromColony;
-        m_FromShip = fromShip;
-        m_ToColony = toColony;
-        m_ToShip = toShip;
-    }
 };
 
 ////////////////////////////////////////////////////////////

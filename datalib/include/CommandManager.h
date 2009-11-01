@@ -71,7 +71,6 @@ private:
     void        LoadCommandsGlobal(StreamReader ^sr);
     bool        LoadCommandsColony(String ^line, Colony ^colony);
     bool        LoadCommandsShip(String ^line, Ship ^ship);
-    void        SortCommands();
 
     ICommand^   CmdSetOrigin(ICommand ^cmd);
     String^     PrintCommandToFile(ICommand ^cmd);

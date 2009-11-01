@@ -83,7 +83,7 @@ void Form1::LoadUISettings()
     sr = File::OpenText( path );
 
     String ^line;
-    DblBufDGV ^grid;
+    DblBufDGV ^grid = nullptr;
     int sortIndex;
     bool sortAscending;
 

@@ -15,7 +15,14 @@ CmdTransfer^ CmdTransferDlg::GetCommand(InventoryType inv)
     if( amount == 0 )
         return nullptr;
 
-    return nullptr;
+    return gcnew CmdTransfer(
+        m_Cmd->m_Phase,
+        inv,
+        amount,
+        m_Cmd->m_FromColony,
+        m_Cmd->m_FromShip,
+        m_Cmd->m_ToColony,
+        m_Cmd->m_ToShip );
 }
 
 void CmdTransferDlg::InitArray()
@@ -163,7 +170,7 @@ void CmdTransferDlg::InitControls(CmdTransfer ^cmd)
 
 void CmdTransferDlg::InitControlsUnits()
 {
-    ComboBox ^combo;
+    ComboBox ^combo = nullptr;
     if( TransFrom->Enabled )
         combo = TransFrom;
     else if( TransTo->Enabled )
@@ -176,8 +183,8 @@ void CmdTransferDlg::InitControlsUnits()
 
         combo->Enabled = false;
 
-        Colony ^selColony;
-        Ship ^selShip;
+        Colony ^selColony = nullptr;
+        Ship ^selShip = nullptr;
 
         String ^sel = combo->Text;
         if( sel->Substring(0, 3) == "PL " )

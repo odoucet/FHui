@@ -270,6 +270,7 @@ namespace FHUI {
         void        ColoniesMenuCommandAdd(ICommand ^cmd);
         void        ColoniesMenuCommandDel(ICommand ^cmd);
         void        ColoniesMenuCommandDelAll(CommandPhase phase);
+        void        ColoniesMenuCommandDelAllTransfers(CommandPhase phase);
         void        ColoniesMenuProdCommandAddInstall(CmdInstall ^cmd);
         void        ColoniesMenuProdCommandAddTransfer(CmdTransfer ^data);
         void        ColoniesMenuProdCommandAddResearch(ProdCmdResearch ^cmd);

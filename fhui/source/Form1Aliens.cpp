@@ -308,7 +308,7 @@ void Form1::AliensMenuMessageAdd(Object^, EventArgs^)
 {
     Alien ^alien = m_AliensMenuRef;
 
-    CmdMessage ^cmdMsg;
+    CmdMessage ^cmdMsg = nullptr;
 
     for each( ICommand ^cmd in m_CommandMgr->GetCommands() )
     {

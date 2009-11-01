@@ -270,8 +270,8 @@ String^ CmdTransfer::Print()
         "PL " + m_ToColony->Name : m_ToShip->PrintClassWithName();
 
     return String::Format("Transfer {0} {1} {2}, {3}",
-        FHStrings::InvToString(m_Type),
         m_Amount,
+        FHStrings::InvToString(m_Type),
         from,
         to );
 }

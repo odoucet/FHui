@@ -196,6 +196,7 @@ void Form1::ColoniesFillGrid()
 
                 int prodSum;
                 String ^orders = colony->PrintCmdDetails(m_CommandMgr, prodSum);
+
                 cells[c.Budget]->Value = (colony->Res->UsedEU != 0 || prodSum != 0)
                     ? String::Format("{0} ({1}{2} : {3})",
                         colony->Res->TotalEU,
@@ -431,25 +432,29 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuCommands(CommandPhase phase)
     ToolStripMenuItem ^menu = gcnew ToolStripMenuItem(title + ":");
 
     bool anyCommand = false;
+    bool needSeparator = false;
     // Transfer commands
-    for each( CmdTransfer ^cmd in m_ColoniesMenuRef->System->Transfers )
+    for each( ICommand ^cmd in m_ColoniesMenuRef->System->GetTransfers(m_ColoniesMenuRef) )
     {
         if( cmd->GetPhase() == phase )
         {
-            if( cmd->m_FromColony == m_ColoniesMenuRef ||
-                cmd->m_ToColony == m_ColoniesMenuRef )
-            {
-                menu->DropDownItems->Add(
-                    ColoniesFillMenuCommandsOptions(cmd) );
-                anyCommand = true;
-            }
+            menu->DropDownItems->Add(
+                ColoniesFillMenuCommandsOptions(cmd) );
+            anyCommand = true;
         }
     }
+    if( anyCommand )
+        needSeparator = true;
     // Colony commands
     for each( ICommand ^cmd in m_ColoniesMenuRef->Commands )
     {
         if( cmd->GetPhase() == phase )
         {
+            if( needSeparator )
+            {
+                needSeparator = false;
+                menu->DropDownItems->Add( gcnew ToolStripSeparator() );
+            }
             menu->DropDownItems->Add(
                 ColoniesFillMenuCommandsOptions(cmd) );
             anyCommand = true;
@@ -515,11 +520,11 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuPreDepartureNew()
     {
         menu->DropDownItems->Add( CreateCustomMenuItem<CmdTransfer^>(
             "Transfer from PL " + colony->Name + "...",
-            gcnew CmdTransfer(CommandPhase::PreDeparture, INV_MAX, 0, colony, (Colony^)nullptr),
+            gcnew CmdTransfer(CommandPhase::PreDeparture, INV_MAX, 0, colony, nullptr, nullptr, nullptr),
             gcnew EventHandler1Arg<CmdTransfer^>(this, &Form1::ColoniesMenuProdCommandAddTransfer) ) );
         menu->DropDownItems->Add( CreateCustomMenuItem<CmdTransfer^>(
             "Transfer to PL " + colony->Name + "...",
-            gcnew CmdTransfer(CommandPhase::PreDeparture, INV_MAX, 0, (Colony^)nullptr, colony),
+            gcnew CmdTransfer(CommandPhase::PreDeparture, INV_MAX, 0, nullptr, nullptr, colony, nullptr),
             gcnew EventHandler1Arg<CmdTransfer^>(this, &Form1::ColoniesMenuProdCommandAddTransfer) ) );
     }
 
@@ -542,11 +547,11 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuPostArrivalNew()
     {
         menu->DropDownItems->Add( CreateCustomMenuItem<CmdTransfer^>(
             "Transfer from PL " + colony->Name + "...",
-            gcnew CmdTransfer(CommandPhase::PostArrival, INV_MAX, 0, colony, (Colony^)nullptr),
+            gcnew CmdTransfer(CommandPhase::PostArrival, INV_MAX, 0, colony, nullptr, nullptr, nullptr),
             gcnew EventHandler1Arg<CmdTransfer^>(this, &Form1::ColoniesMenuProdCommandAddTransfer) ) );
         menu->DropDownItems->Add( CreateCustomMenuItem<CmdTransfer^>(
             "Transfer to PL " + colony->Name + "...",
-            gcnew CmdTransfer(CommandPhase::PostArrival, INV_MAX, 0, (Colony^)nullptr, colony),
+            gcnew CmdTransfer(CommandPhase::PostArrival, INV_MAX, 0, nullptr, nullptr, colony, nullptr),
             gcnew EventHandler1Arg<CmdTransfer^>(this, &Form1::ColoniesMenuProdCommandAddTransfer) ) );
     }
 
@@ -658,9 +663,13 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuCommandsOptions(ICommand ^cmd)
 {
     ToolStripMenuItem ^menu = gcnew ToolStripMenuItem( m_CommandMgr->PrintCommandWithInfo(cmd, 0) );
 
+    List<ICommand^> ^cmdList = m_ColoniesMenuRef->Commands;
+    if( cmd->GetCmdType() == CommandType::Transfer )
+        cmdList = m_ColoniesMenuRef->System->Transfers;
+
     ICommand ^cmdFirst = nullptr;
     ICommand ^cmdLast = nullptr;
-    for each( ICommand ^iCmd in m_ColoniesMenuRef->Commands )
+    for each( ICommand ^iCmd in cmdList )
     {
         if( iCmd->GetPhase() == cmd->GetPhase() )
         {
@@ -676,7 +685,7 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuCommandsOptions(ICommand ^cmd)
         needSeparator = true;
         menu->DropDownItems->Add( CreateCustomMenuItem(
             "Move up",
-            gcnew MenuCommandUpDownData(m_ColoniesMenuRef->Commands, cmd),
+            gcnew MenuCommandUpDownData(cmdList, cmd),
             gcnew EventHandler1Arg<MenuCommandUpDownData^>(this, &Form1::MenuCommandMoveUp) ) );
     }
     if( cmd != cmdLast )
@@ -684,7 +693,7 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuCommandsOptions(ICommand ^cmd)
         needSeparator = true;
         menu->DropDownItems->Add( CreateCustomMenuItem(
             "Move down",
-            gcnew MenuCommandUpDownData(m_ColoniesMenuRef->Commands, cmd),
+            gcnew MenuCommandUpDownData(cmdList, cmd),
             gcnew EventHandler1Arg<MenuCommandUpDownData^>(this, &Form1::MenuCommandMoveDown) ) );
     }
 
@@ -839,7 +848,7 @@ void Form1::ColoniesMenuProdCommandAddTransfer(CmdTransfer ^cmd)
     CmdTransferDlg ^dlg = gcnew CmdTransferDlg( cmd );
     if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
     {
-        if( cmd )
+        if( cmd->m_Type != INV_MAX )
         {
             int amount = dlg->GetAmount(cmd->m_Type);
             if( amount != cmd->m_Amount )
@@ -1011,7 +1020,11 @@ void Form1::ColoniesMenuCommandDelAll(CommandPhase phase)
 
     // Delete all confirmed
     if( phase == CommandPhase::Custom )
+    {
         m_ColoniesMenuRef->Commands->Clear();
+        ColoniesMenuCommandDelAllTransfers(CommandPhase::PreDeparture);
+        ColoniesMenuCommandDelAllTransfers(CommandPhase::PostArrival);
+    }
     else
     {
         bool repeat;
@@ -1028,10 +1041,24 @@ void Form1::ColoniesMenuCommandDelAll(CommandPhase phase)
                 }
             }
         } while( repeat );
+
+        if( phase == CommandPhase::PreDeparture )
+            ColoniesMenuCommandDelAllTransfers(CommandPhase::PreDeparture);
+        if( phase == CommandPhase::PostArrival )
+            ColoniesMenuCommandDelAllTransfers(CommandPhase::PostArrival);
     }
     m_CommandMgr->SaveCommands();
 
     ColoniesGrid->Filter->Update();
+}
+
+void Form1::ColoniesMenuCommandDelAllTransfers(CommandPhase phase)
+{
+    for each( ICommand ^cmd in m_ColoniesMenuRef->System->GetTransfers(m_ColoniesMenuRef) )
+    {
+        if( cmd->GetPhase() == phase )
+            m_ColoniesMenuRef->System->Transfers->Remove(cmd);
+    }
 }
 
 void Form1::ColoniesMenuAutoToggle(Object^, EventArgs^)

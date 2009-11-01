@@ -37,7 +37,7 @@ public:
         m_ColoniesOwned = gcnew SortedList<int, Colony^>;
         m_ColoniesAlien = gcnew List<Colony^>;
         Planets = gcnew SortedList<int, Planet^>;
-        Transfers = gcnew List<CmdTransfer^>;
+        Transfers = gcnew List<ICommand^>;
         IsVoid = true;
     }
     // --- copy constructor - does not perform full copy !!! ---
@@ -65,7 +65,7 @@ public:
         m_ColoniesOwned = gcnew SortedList<int, Colony^>;
         m_ColoniesAlien = gcnew List<Colony^>;
         Planets = gcnew SortedList<int, Planet^>;
-        Transfers = gcnew List<CmdTransfer^>;
+        Transfers = gcnew List<ICommand^>;
 
         for each ( Planet^ planet in src->Planets->Values )
         {
@@ -151,7 +151,9 @@ public:
 
     SortedList<int, Planet^>^ Planets;
 
-    List<CmdTransfer^>^     Transfers;
+    List<ICommand^>^        GetTransfers(Colony ^colony);
+    List<ICommand^>^        GetTransfers(Ship ^ship);
+    List<ICommand^>^        Transfers;
 
 protected:
 

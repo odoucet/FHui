@@ -93,18 +93,15 @@ String^ CommandManager::PrintCommandWithInfo(ICommand ^cmd, int indent)
 
 // ---------------------------------------------------------
 
-void CommandManager::SortCommands()
-{
-    m_CommandData[m_CurrentTurn]->Commands->Sort( gcnew CommandComparer );
-}
-
 void CommandManager::AddCommand(ICommand ^cmd)
 {
     if( cmd->GetPhase() == CommandPhase::Production )
         throw gcnew FHUIDataImplException("AddCommand: Wrong interface for production command!");
 
-    m_CommandData[m_CurrentTurn]->Commands->Add(cmd);
-    SortCommands();
+    if( cmd->GetCmdType() == CommandType::Transfer )
+        cmd->GetRefSystem()->Transfers->Add( cmd );
+    else
+        m_CommandData[m_CurrentTurn]->Commands->Add(cmd);
 
     if( m_bSaveEnabled )
         SaveCommands();
@@ -114,6 +111,13 @@ void CommandManager::DelCommand(ICommand ^cmd)
 {
     if( cmd->GetPhase() == CommandPhase::Production )
         throw gcnew FHUIDataImplException("DelCommand: Wrong interface for production command!");
+
+    if( cmd->GetCmdType() == CommandType::Transfer )
+    {
+        cmd->GetRefSystem()->Transfers->Remove( cmd );
+        SaveCommands();
+        return;
+    }
 
     for each( ICommand ^iCmd in m_CommandData[m_CurrentTurn]->Commands )
     {
@@ -129,15 +133,24 @@ void CommandManager::DelCommand(ICommand ^cmd)
 
 void CommandManager::AddCommand(Colony ^colony, ICommand ^cmd)
 {
-    colony->Commands->Add(cmd);
-    if( m_bSaveEnabled )
+    if( cmd->GetCmdType() == CommandType::Transfer )
+        AddCommand(cmd);
+    else
     {
-        SaveCommands();
+        colony->Commands->Add(cmd);
+        if( m_bSaveEnabled )
+            SaveCommands();
     }
 }
 
 void CommandManager::DelCommand(Colony ^colony, ICommand ^cmd)
 {
+    if( cmd->GetCmdType() == CommandType::Transfer )
+    {
+        DelCommand(cmd);
+        return;
+    }
+
     for each( ICommand ^iCmd in colony->Commands )
     {
         if( iCmd == cmd ||
@@ -269,6 +282,13 @@ void CommandManager::SaveCommands()
         commandList->Add( "END_SHIP" );
     }
 
+    // -- Transfers
+    for each( StarSystem ^system in GameData::GetStarSystems() )
+    {
+        for each( CmdTransfer ^cmd in system->Transfers )
+            commandList->Add( PrintCommandToFile(cmd) );
+    }
+
     // -- Commands
     for each( ICommand ^cmd in GetCommands() )
     {
@@ -333,7 +353,7 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
     Colony^ refColony = nullptr;
     Ship^ refShip = nullptr;
     String ^messageText = "";
-    Alien ^messageTarget;
+    Alien ^messageTarget = nullptr;
 
     int colonyProdOrder = 1;
     while( (line = sr->ReadLine()) != nullptr ) 
@@ -557,6 +577,36 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
                 m_RM->GetResultInt(2),
                 false ) ) ) );
         }
+        else if( m_RM->Match(line, m_RM->ExpCmdTransfer) )
+        {
+            int amount = m_RM->GetResultInt(0);
+            InventoryType inv = FHStrings::InvFromString(m_RM->Results[1]);
+
+            Colony  ^fromColony = nullptr;
+            Ship    ^fromShip = nullptr;
+            Colony  ^toColony = nullptr;
+            Ship    ^toShip = nullptr;
+            // Parse source
+            if( m_RM->Match(line, m_RM->ExpCmdTargetColony) )
+                fromColony = GameData::GetColony(m_RM->Results[0]->Trim());
+            else if( m_RM->Match(line, m_RM->ExpCmdTargetShip) )
+                fromShip = GameData::GetShip(m_RM->Results[0]->Trim());
+            else
+                throw gcnew FHUIParsingException("Unrecognized source for transfer command: " + line);
+            // Skip ","
+            if( m_RM->Match(line, "\\s*,\\s*") == false )
+                throw gcnew FHUIParsingException("Missing source/target separator for transfer command: " + line);
+            // Parse target
+            if( m_RM->Match(line, m_RM->ExpCmdTargetColony) )
+                toColony = GameData::GetColony(m_RM->Results[0]->Trim());
+            else if( m_RM->Match(line, m_RM->ExpCmdTargetShip) )
+                toShip = GameData::GetShip(m_RM->Results[0]->Trim());
+            else
+                throw gcnew FHUIParsingException("Unrecognized target for transfer command: " + line);
+
+            AddCommand( CmdSetOrigin(
+                gcnew CmdTransfer(m_CmdPhase, inv, amount, fromColony, fromShip, toColony, toShip) ) );
+        }
         else if( m_RM->Match(line, m_RM->ExpCmdCustom) )
         {
             AddCommand( CmdSetOrigin(
@@ -598,8 +648,8 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
         int amount = m_RM->GetResultInt(0);
         InventoryType inv = FHStrings::InvFromString(m_RM->Results[1]);
 
-        Colony ^targetColony;
-        Ship ^targetShip;
+        Colony ^targetColony = nullptr;
+        Ship ^targetShip = nullptr;
         line = line->Trim();
         if( !String::IsNullOrEmpty(line) )
         {
@@ -1109,7 +1159,7 @@ void CommandManager::GeneratePreDeparture()
     {
         if ( system->ShipsOwned->Count == 0 )
         {
-            if ( system->ColoniesOwned->Count == 0)
+            if ( system->ColoniesOwned->Count == 0 )
             {
                 continue;
             }
@@ -1124,6 +1174,11 @@ void CommandManager::GeneratePreDeparture()
         GeneratePreDepartureInfo( system );
 
         // Print UI commands
+        for each( CmdTransfer ^cmd in system->Transfers )
+        {
+            if( cmd->GetPhase() == CommandPhase::PreDeparture )
+                m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
+        }
         for each( Ship ^ship in system->ShipsOwned )
         {
             for each( ICommand ^cmd in ship->Commands )
@@ -1459,6 +1514,14 @@ void CommandManager::GeneratePostArrival()
     }
 
     // Print UI commands, ships first
+    for each( StarSystem ^system in GameData::GetStarSystems() )
+    {
+        for each( CmdTransfer ^cmd in system->Transfers )
+        {
+            if( cmd->GetPhase() == CommandPhase::PostArrival )
+                m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
+        }
+    }
     for each( Ship ^ship in GameData::Player->Ships )
     {
         for each( ICommand ^cmd in ship->Commands )

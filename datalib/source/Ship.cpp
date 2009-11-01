@@ -76,8 +76,8 @@ String^ Ship::PrintLocationShort()
 
 String^ Ship::PrintLocation()
 {
-    String ^location;
-    String ^nearColony;
+    String ^location = nullptr;
+    String ^nearColony = nullptr;
 
     // First see if ship is orbiting owned colony
     if( PlanetNum != -1 )

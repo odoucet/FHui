@@ -608,4 +608,38 @@ List<Ship^>^ StarSystem::GetShipTargets(CommandPhase phase)
     return list;
 }
 
+List<ICommand^>^ StarSystem::GetTransfers(Colony ^colony)
+{
+    List<ICommand^> ^ret = gcnew List<ICommand^>;
+
+    for each( ICommand ^cmd in Transfers )
+    {
+        CmdTransfer ^cmdTr = safe_cast<CmdTransfer^>(cmd);
+        if( cmdTr->m_FromColony == colony ||
+            cmdTr->m_ToColony == colony )
+        {
+            ret->Add( cmd );
+        }
+    }
+
+    return ret;
+}
+
+List<ICommand^>^ StarSystem::GetTransfers(Ship ^ship)
+{
+    List<ICommand^> ^ret = gcnew List<ICommand^>;
+
+    for each( ICommand ^cmd in Transfers )
+    {
+        CmdTransfer ^cmdTr = safe_cast<CmdTransfer^>(cmd);
+        if( cmdTr->m_FromShip == ship ||
+            cmdTr->m_ToShip == ship )
+        {
+            ret->Add( cmd );
+        }
+    }
+
+    return ret;
+}
+
 } // end namespace FHUI
