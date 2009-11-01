@@ -107,6 +107,9 @@ void ReportParser::ScanReports()
                 ex );
         }
     }
+
+    Debug::WriteLine( String::Format("Regexp stats: {0,6} matches, {1,6} misses", 
+        m_RM->HitCount, m_RM->MissCount ) );
 }
 
 int ReportParser::VerifyReport(String ^fileName)

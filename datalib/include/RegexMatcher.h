@@ -15,6 +15,9 @@ public:
     bool        Match(String ^%s, Regex ^exp);
     bool        MatchList(String ^s, String ^prefix, String ^exp);
 
+    property int HitCount;
+    property int MissCount;
+
     int         GetResultInt(int arg);
     //float       GetResultFloat(int arg);
 

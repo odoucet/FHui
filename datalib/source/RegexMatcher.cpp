@@ -6,6 +6,9 @@ namespace FHUI
 
 RegexMatcher::RegexMatcher()
 {
+    HitCount = 0;
+    MissCount = 0;
+
     m_Results = gcnew array<String^>(1);
 
     ExpCmdColony        = gcnew Regex("^COLONY ([^,;]+)$");
@@ -75,6 +78,7 @@ bool RegexMatcher::Match(String ^%s, Regex ^exp)
     System::Text::RegularExpressions::Match ^m = exp->Match(s);
     if( m->Success )
     {
+        ++ HitCount;
         String ^g = m->Groups[0]->ToString();
         s = s->Substring( s->IndexOf(g) + g->Length );
 
@@ -87,6 +91,7 @@ bool RegexMatcher::Match(String ^%s, Regex ^exp)
         return true;
     }
 
+    ++ MissCount;
     return false;
 }
 
