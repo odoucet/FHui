@@ -13,6 +13,9 @@ namespace FHUI
 
 void Form1::SaveUISettings()
 {
+    if( m_bUISaveEnabled == false )
+        return;
+
     String ^path = GetDataDir("fhui.ini");
 
     // Create stream
@@ -44,6 +47,10 @@ void Form1::SaveUIGrid(List<String^> ^settings, DblBufDGV ^grid, String ^tab)
     settings->Add("Select "
         + ( grid->SelectionMode == System::Windows::Forms::DataGridViewSelectionMode::CellSelect
             ? "cells" : "rows"));
+
+    if( grid == ColoniesGrid )
+        settings->Add("Summary " + (ColoniesSummaryRow->Checked ? "on" : "off"));
+
     for each( DataGridViewColumn ^column in grid->Columns )
     {
         if( column->Index == 0 )
@@ -132,6 +139,16 @@ void Form1::LoadUISettings()
         {
             grid->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::FullRowSelect;
             continue;
+        }
+        if( line == "Summary on" )
+        {
+            if( grid == ColoniesGrid )
+                ColoniesSummaryRow->Checked = true;
+        }
+        if( line == "Summary off" )
+        {
+            if( grid == ColoniesGrid )
+                ColoniesSummaryRow->Checked = false;
         }
 
         bool sort = false;

@@ -59,10 +59,6 @@ namespace FHUI {
         void        SaveOrdersTemplateToFile();
 
         void        LoadOrders();
-    private: System::Windows::Forms::ToolStripMenuItem^  saveOrdersToolStripMenuItem;
-    private: System::Windows::Forms::CheckBox^  PlanetsFiltColH;
-
-
 
         SortedList<String^, String^>^   m_OrderFiles;
 
@@ -154,9 +150,11 @@ namespace FHUI {
 
         bool                m_bHadException;
         bool               ^m_bGridUpdateEnabled;
+        bool                m_bUISaveEnabled;
 
         System::Windows::Forms::ToolTip^    m_GridToolTip;
         System::Drawing::Font^              m_GridFontSmall;
+        System::Drawing::Font^              m_GridFontSummary;
         DataGridViewCellMouseEventArgs^     m_LastMenuEventArg;
 
         // ==================================================
@@ -255,6 +253,7 @@ namespace FHUI {
         void        ColoniesInitControls();
         void        ColoniesUpdateControls();
         void        ColoniesFillGrid();
+        void        ColoniesFillSummary(int summaryCount);
         void        ColoniesSetRef( int rowIndex );
         void        ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
         ToolStripMenuItem^  ColoniesFillMenuAuto();
@@ -306,8 +305,22 @@ namespace FHUI {
             int Notes;
         };
 
+        value struct ColoniesSummary
+        {
+            int     Size;
+            int     Prod;
+            int     Shipyards;
+            int     MD;
+            int     Grav;
+            int     LSN;
+            double  Dist;
+            double  DistSec;
+            int     ProdPerc;
+        };
+
         Colony             ^m_ColoniesMenuRef;
         ColoniesColumns     m_ColoniesColumns;
+        ColoniesSummary     m_ColoniesSummary;
 
         // ==================================================
         // --- SHIPS ---
@@ -442,6 +455,9 @@ namespace FHUI {
         // Auto-generated code below this point
         // --------------------------------------------------
 
+    private: System::Windows::Forms::ToolStripMenuItem^  saveOrdersToolStripMenuItem;
+    private: System::Windows::Forms::CheckBox^  PlanetsFiltColH;
+    private: System::Windows::Forms::CheckBox^  ColoniesSummaryRow;
     private: System::Windows::Forms::CheckBox^  ColoniesFiltRelN;
     private: System::Windows::Forms::CheckBox^  ColoniesFiltRelE;
     private: System::Windows::Forms::CheckBox^  ColoniesFiltRelA;
@@ -757,6 +773,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->TabPlanets = (gcnew System::Windows::Forms::TabPage());
             this->PlanetsSelMode = (gcnew System::Windows::Forms::CheckBox());
             this->PlanetsNumRows = (gcnew System::Windows::Forms::Label());
+            this->PlanetsFiltColH = (gcnew System::Windows::Forms::CheckBox());
             this->PlanetsFiltColN = (gcnew System::Windows::Forms::CheckBox());
             this->PlanetsFiltColC = (gcnew System::Windows::Forms::CheckBox());
             this->PlanetsFiltersReset = (gcnew System::Windows::Forms::Button());
@@ -779,6 +796,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ColoniesNumRows = (gcnew System::Windows::Forms::Label());
             this->ColoniesFiltOwnN = (gcnew System::Windows::Forms::CheckBox());
             this->ColoniesFiltOwnO = (gcnew System::Windows::Forms::CheckBox());
+            this->ColoniesSummaryRow = (gcnew System::Windows::Forms::CheckBox());
             this->ColoniesGroupByOwner = (gcnew System::Windows::Forms::CheckBox());
             this->ColoniesMiMaBalanced = (gcnew System::Windows::Forms::CheckBox());
             this->ColoniesRefHome = (gcnew System::Windows::Forms::ComboBox());
@@ -867,7 +885,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->textBox1 = (gcnew System::Windows::Forms::TextBox());
             this->comboBox2 = (gcnew System::Windows::Forms::ComboBox());
             this->BtnTooltip = (gcnew System::Windows::Forms::ToolTip(this->components));
-            this->PlanetsFiltColH = (gcnew System::Windows::Forms::CheckBox());
             TopSplitCont = (gcnew System::Windows::Forms::SplitContainer());
             splitContainer7 = (gcnew System::Windows::Forms::SplitContainer());
             label25 = (gcnew System::Windows::Forms::Label());
@@ -1736,6 +1753,20 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->PlanetsNumRows->TabIndex = 79;
             this->PlanetsNumRows->Text = L"num rows";
             // 
+            // PlanetsFiltColH
+            // 
+            this->PlanetsFiltColH->Appearance = System::Windows::Forms::Appearance::Button;
+            this->PlanetsFiltColH->Location = System::Drawing::Point(278, 51);
+            this->PlanetsFiltColH->Margin = System::Windows::Forms::Padding(1);
+            this->PlanetsFiltColH->Name = L"PlanetsFiltColH";
+            this->PlanetsFiltColH->Size = System::Drawing::Size(23, 23);
+            this->PlanetsFiltColH->TabIndex = 72;
+            this->PlanetsFiltColH->Text = L"H";
+            this->PlanetsFiltColH->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
+            this->BtnTooltip->SetToolTip(this->PlanetsFiltColH, L"Show planets in alien home systems.");
+            this->PlanetsFiltColH->UseVisualStyleBackColor = true;
+            this->PlanetsFiltColH->CheckedChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
+            // 
             // PlanetsFiltColN
             // 
             this->PlanetsFiltColN->Appearance = System::Windows::Forms::Appearance::Button;
@@ -1991,6 +2022,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesNumRows);
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesFiltOwnN);
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesFiltOwnO);
+            this->splitContainer4->Panel1->Controls->Add(this->ColoniesSummaryRow);
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesGroupByOwner);
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesMiMaBalanced);
             this->splitContainer4->Panel1->Controls->Add(this->ColoniesRefHome);
@@ -2108,27 +2140,42 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->ColoniesFiltOwnO->UseVisualStyleBackColor = true;
             this->ColoniesFiltOwnO->CheckedChanged += gcnew System::EventHandler(this, &Form1::Colonies_Update);
             // 
+            // ColoniesSummaryRow
+            // 
+            this->ColoniesSummaryRow->AutoSize = true;
+            this->ColoniesSummaryRow->Checked = true;
+            this->ColoniesSummaryRow->CheckState = System::Windows::Forms::CheckState::Checked;
+            this->ColoniesSummaryRow->Location = System::Drawing::Point(460, 55);
+            this->ColoniesSummaryRow->Name = L"ColoniesSummaryRow";
+            this->ColoniesSummaryRow->Size = System::Drawing::Size(69, 17);
+            this->ColoniesSummaryRow->TabIndex = 50;
+            this->ColoniesSummaryRow->Text = L"Summary";
+            this->BtnTooltip->SetToolTip(this->ColoniesSummaryRow, L"Show summary row for your colonies.");
+            this->ColoniesSummaryRow->UseVisualStyleBackColor = true;
+            this->ColoniesSummaryRow->CheckedChanged += gcnew System::EventHandler(this, &Form1::Colonies_Update);
+            // 
             // ColoniesGroupByOwner
             // 
             this->ColoniesGroupByOwner->AutoSize = true;
             this->ColoniesGroupByOwner->Checked = true;
             this->ColoniesGroupByOwner->CheckState = System::Windows::Forms::CheckState::Checked;
-            this->ColoniesGroupByOwner->Location = System::Drawing::Point(429, 55);
+            this->ColoniesGroupByOwner->Location = System::Drawing::Point(399, 55);
             this->ColoniesGroupByOwner->Name = L"ColoniesGroupByOwner";
-            this->ColoniesGroupByOwner->Size = System::Drawing::Size(103, 17);
+            this->ColoniesGroupByOwner->Size = System::Drawing::Size(55, 17);
             this->ColoniesGroupByOwner->TabIndex = 50;
-            this->ColoniesGroupByOwner->Text = L"Group by Owner";
+            this->ColoniesGroupByOwner->Text = L"Group";
+            this->BtnTooltip->SetToolTip(this->ColoniesGroupByOwner, L"Group colonies by owner");
             this->ColoniesGroupByOwner->UseVisualStyleBackColor = true;
             this->ColoniesGroupByOwner->CheckedChanged += gcnew System::EventHandler(this, &Form1::ColoniesGroupByOwner_CheckedChanged);
             // 
             // ColoniesMiMaBalanced
             // 
             this->ColoniesMiMaBalanced->AutoSize = true;
-            this->ColoniesMiMaBalanced->Location = System::Drawing::Point(624, 55);
+            this->ColoniesMiMaBalanced->Location = System::Drawing::Point(537, 55);
             this->ColoniesMiMaBalanced->Name = L"ColoniesMiMaBalanced";
-            this->ColoniesMiMaBalanced->Size = System::Drawing::Size(107, 17);
+            this->ColoniesMiMaBalanced->Size = System::Drawing::Size(80, 17);
             this->ColoniesMiMaBalanced->TabIndex = 50;
-            this->ColoniesMiMaBalanced->Text = L"Balanced MI/MA";
+            this->ColoniesMiMaBalanced->Text = L"MI/MA Bal.";
             this->BtnTooltip->SetToolTip(this->ColoniesMiMaBalanced, L"If your MI and MA levels are not equal, calculate colony balance as if they were " 
                 L"equal.");
             this->ColoniesMiMaBalanced->UseVisualStyleBackColor = true;
@@ -2147,7 +2194,7 @@ private: System::Windows::Forms::Label^  SystemsRef;
             // 
             // ColoniesFiltersReset
             // 
-            this->ColoniesFiltersReset->Location = System::Drawing::Point(558, 51);
+            this->ColoniesFiltersReset->Location = System::Drawing::Point(624, 51);
             this->ColoniesFiltersReset->Name = L"ColoniesFiltersReset";
             this->ColoniesFiltersReset->Size = System::Drawing::Size(59, 23);
             this->ColoniesFiltersReset->TabIndex = 48;
@@ -3584,20 +3631,6 @@ private: System::Windows::Forms::Label^  SystemsRef;
             this->comboBox2->Size = System::Drawing::Size(147, 21);
             this->comboBox2->TabIndex = 1;
             // 
-            // PlanetsFiltColH
-            // 
-            this->PlanetsFiltColH->Appearance = System::Windows::Forms::Appearance::Button;
-            this->PlanetsFiltColH->Location = System::Drawing::Point(278, 51);
-            this->PlanetsFiltColH->Margin = System::Windows::Forms::Padding(1);
-            this->PlanetsFiltColH->Name = L"PlanetsFiltColH";
-            this->PlanetsFiltColH->Size = System::Drawing::Size(23, 23);
-            this->PlanetsFiltColH->TabIndex = 72;
-            this->PlanetsFiltColH->Text = L"H";
-            this->PlanetsFiltColH->TextAlign = System::Drawing::ContentAlignment::MiddleCenter;
-            this->BtnTooltip->SetToolTip(this->PlanetsFiltColH, L"Show planets in alien home systems.");
-            this->PlanetsFiltColH->UseVisualStyleBackColor = true;
-            this->PlanetsFiltColH->CheckedChanged += gcnew System::EventHandler(this, &Form1::Planets_Update);
-            // 
             // Form1
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -3751,10 +3784,19 @@ private: System::Void PlanetsGrid_CellMouseDoubleClick(System::Object^  sender, 
                  Grid_CellMouseDoubleClick(sender, e);
          }
 private: System::Void Colonies_Update(System::Object^  sender, System::EventArgs^  e) {
-             ColoniesGrid->Filter->Update(sender);
+             if( sender == ColoniesSummaryRow )
+             {
+                 ColoniesGrid->Filter->Update();
+                 SaveUISettings();
+             }
+             else
+                 ColoniesGrid->Filter->Update(sender);
          }
 private: System::Void ColoniesFiltersReset_Click(System::Object^  sender, System::EventArgs^  e) {
              ColoniesGrid->Filter->ResetControls(true);
+             ColoniesGroupByOwner->Checked  = true;
+             ColoniesSummaryRow->Checked    = true;
+             ColoniesMiMaBalanced->Checked  = false;
          }
 private: System::Void ColoniesGrid_CellMouseDoubleClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellMouseEventArgs^  e) {
              if( e->Button == Windows::Forms::MouseButtons::Left )

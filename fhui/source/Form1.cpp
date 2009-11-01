@@ -52,10 +52,13 @@ void Form1::Initialize()
 
 void Form1::InitControls()
 {
+    m_bUISaveEnabled    = false;
+
     System::Text::RegularExpressions::Regex::CacheSize = 500;
 
-    m_GridToolTip = gcnew ToolTip;
-    m_GridFontSmall = gcnew System::Drawing::Font(L"Tahoma", 6.75F);
+    m_GridToolTip       = gcnew ToolTip;
+    m_GridFontSmall     = gcnew System::Drawing::Font(L"Tahoma", 6.75F);
+    m_GridFontSummary   = gcnew System::Drawing::Font(L"Tahoma", 8.0F, FontStyle::Italic);
 
     TextAbout->Text = GetAboutText();
 
@@ -69,6 +72,8 @@ void Form1::InitControls()
 
     LoadUISettings();
     ApplyUISettings();
+
+    m_bUISaveEnabled    = true;
 }
 
 void Form1::ApplyUISettings()

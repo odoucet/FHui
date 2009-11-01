@@ -117,6 +117,12 @@ int GridSorterBase::Compare( Object^ obj1, Object^ obj2 )
     DataGridViewRow ^r1 = safe_cast<DataGridViewRow^>( obj1 );
     DataGridViewRow ^r2 = safe_cast<DataGridViewRow^>( obj2 );
 
+    // Summary row support: make it always first
+    if( r1->Cells[0]->Value == nullptr )
+        return -1;
+    if( r2->Cells[0]->Value == nullptr )
+        return 1;
+
     IGridDataSrc ^o1 = safe_cast<IGridDataSrc^>( r1->Cells[0]->Value );
     IGridDataSrc ^o2 = safe_cast<IGridDataSrc^>( r2->Cells[0]->Value );
 

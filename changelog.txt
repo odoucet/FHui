@@ -12,6 +12,9 @@ FHUI build ??
   You can use it for example to store estimates aquired via diplomacy
   and still see valid turn number in FHUI.
 + Planets tab: "Show planets in alien home systems" filter added.
++ Colonies tab: Summary row added that displays summaries for owned colonies.
+  See tooltip for each cell for details. Summary row may be disabled
+  by a checkbox on toolbar.
 
 FHUI build 267
 * Fixed bug that did not allow custom pre-departure commands for

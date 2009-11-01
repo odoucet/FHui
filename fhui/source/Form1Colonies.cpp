@@ -46,7 +46,7 @@ void Form1::ColoniesInitControls()
     c.Dist      = ADD_COLUMN("Distance",    "Distance to ref system and mishap chance [%]", String, Ascending, Distance);
     c.DistSec   = ADD_COLUMN("Dist Prev",   "Distance to previous ref system and mishap chance [%]", String, Ascending, DistanceSec);
     c.Inventory = ADD_COLUMN("Inventory",   "Planetary inventory",          String, Ascending, Default);
-    c.ProdPerc  = ADD_COLUMN("Eff",         "Production effectiveness",     int,    Descending, Default);
+    c.ProdPerc  = ADD_COLUMN("Pr %",        "Production left after applying LSN penalty", int, Descending, Default);
     c.Seen      = ADD_COLUMN("Seen",        "Last seen turn",               int,    Descending, Default);
 
     for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
@@ -62,6 +62,7 @@ void Form1::ColoniesInitControls()
 
     ColoniesGrid->Columns[c.Size]->DefaultCellStyle->Format = "F1";
     ColoniesGrid->Columns[c.Dist]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
+    ColoniesGrid->Columns[c.DistSec]->DefaultCellStyle->Alignment = DataGridViewContentAlignment::MiddleRight;
     ColoniesGrid->Columns[c.Inventory]->DefaultCellStyle->Font = m_GridFontSmall;
     ColoniesGrid->Columns[c.Notes]->DefaultCellStyle->Font     = m_GridFontSmall;
     ColoniesGrid->Columns[c.MD]->Visible = false;
@@ -127,6 +128,10 @@ void Form1::ColoniesFillGrid()
     int age = Decimal::ToInt32(ColoniesShipAge->Value);
     Alien ^sp = GameData::Player;
 
+    ColoniesSummary %s = m_ColoniesSummary;
+    s = ColoniesSummary();
+    int summaryCount = 0;
+
     for each( Colony ^colony in m_GameData->GetColonies() )
     {
         if( ColoniesGrid->Filter->Filter(colony) )
@@ -161,10 +166,24 @@ void Form1::ColoniesFillGrid()
                     sp->TechLevelsAssumed[TECH_MA],
                     sp->TechLevelsAssumed[TECH_LS],
                     m_GameData->GetFleetPercentCost() );
+                int prodPerc = 100 - Calculators::ProductionPenalty(colony->LSN, sp->TechLevelsAssumed[TECH_LS]);
+
+                // -- Summary update
+                ++summaryCount;
+                s.Size      += Math::Max(0, colony->EconomicBase);
+                s.Shipyards += Math::Max(0, colony->Shipyards);
+                s.MD        += colony->MiDiff;
+                s.Grav      += colony->Planet->Grav;
+                s.LSN       += colony->LSN;
+                s.Dist      += colony->System->CalcDistance(ColoniesGrid->Filter->RefSystem);
+                s.DistSec   += colony->System->CalcDistance(ColoniesGrid->Filter->RefSystemPrev);
+                s.Prod      += prodCalculated;
+                s.ProdPerc  += prodPerc;
+                // -- summary update end
 
                 cells[c.Prod]->Value        = prodCalculated;
                 cells[c.ProdOrder]->Value   = colony->ProductionOrder;
-                cells[c.ProdPerc]->Value    = 100 - Calculators::ProductionPenalty(colony->LSN, sp->TechLevelsAssumed[TECH_LS]);
+                cells[c.ProdPerc]->Value    = prodPerc;
                 cells[c.Pop]->Value         = colony->AvailPop;
 
                 if( colony->PlanetType == PLANET_HOME ||
@@ -237,7 +256,51 @@ void Form1::ColoniesFillGrid()
     // Setup tooltips
     SetGridBgAndTooltip(ColoniesGrid);
 
+    // Add summary row
+    ColoniesFillSummary(summaryCount);
+
     ColoniesGrid->FullUpdateEnd();
+}
+
+void Form1::ColoniesFillSummary(int sumCnt)
+{
+    if( sumCnt == 0 ||
+        ColoniesSummaryRow->Checked == false )
+        return;
+
+    DataGridViewRow ^row = ColoniesGrid->Rows[ ColoniesGrid->Rows->Add() ];
+    DataGridViewCellCollection ^cells = row->Cells;
+
+    ColoniesColumns %c = m_ColoniesColumns;
+    ColoniesSummary %s = m_ColoniesSummary;
+
+    cells[c.Object]->Value      = nullptr;
+    cells[c.Owner]->Value        = "-- Summary --";
+    cells[c.Size]->Value        = (s.Size / (double)sumCnt / 10.0).ToString("F1");
+    cells[c.Prod]->Value        = s.Prod;
+    cells[c.Shipyards]->Value   = (s.Shipyards / (double)sumCnt).ToString("F2");
+    cells[c.MD]->Value          = (s.MD / (double)sumCnt / 100.0).ToString("F2");
+    cells[c.LSN]->Value         = (s.LSN / (double)sumCnt).ToString("F2");
+    cells[c.Dist]->Value        = (s.Dist / sumCnt).ToString("F1");
+    cells[c.DistSec]->Value     = (s.Dist / sumCnt).ToString("F1");
+    cells[c.ProdPerc]->Value    = (s.ProdPerc / (double)sumCnt).ToString("F1");
+
+    cells[c.Owner]->ToolTipText     = "This row displays summary of your colonies";
+    cells[c.Size]->ToolTipText      = "Average size of your colonies";
+    cells[c.Prod]->ToolTipText      = "Sum of production on your colonies";
+    cells[c.Shipyards]->ToolTipText = "Average number of shipyards per colony";
+    cells[c.MD]->ToolTipText        = "Average Mining Difficulty per colony";
+    cells[c.LSN]->ToolTipText       = "Average LSN per colony";
+    cells[c.Dist]->ToolTipText      = "Average colony distance to reference system";
+    cells[c.DistSec]->ToolTipText   = "Average colony distance to previous reference system";
+    cells[c.ProdPerc]->ToolTipText  = "Average production % after LSN penalties";
+
+    for each( DataGridViewCell ^cell in row->Cells )
+    {
+        cell->Style->Font = m_GridFontSummary;
+        cell->Style->ForeColor = Color::White;
+        cell->Style->BackColor = Color::Navy;
+    }
 }
 
 void Form1::ColoniesSetRef( int rowIndex )
