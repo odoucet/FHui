@@ -52,10 +52,6 @@ void Form1::Initialize()
 
 void Form1::InitControls()
 {
-    m_bUISaveEnabled    = false;
-
-    System::Text::RegularExpressions::Regex::CacheSize = 500;
-
     m_GridToolTip       = gcnew ToolTip;
     m_GridFontSmall     = gcnew System::Drawing::Font(L"Tahoma", 6.75F);
     m_GridFontSummary   = gcnew System::Drawing::Font(L"Tahoma", 8.0F, FontStyle::Italic);
@@ -529,7 +525,7 @@ void Form1::DisplayReport()
         String ^sel = RepTurnNr->SelectedItem->ToString();
         int key = int::Parse(sel->Substring(5));    // Skip 'Turn '
 
-        RepText->Text = m_ReportParser->Reports[key];
+        RepText->Text = m_ReportParser->Reports[key]->GetText();
     }
     else if( RepModeCommands->Checked )
     {

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Report.h"
+
 using namespace System::Collections::Generic;
 
 namespace FHUI
@@ -16,9 +18,9 @@ public:
     property bool Verbose;
     property bool Stats;
 
-    property SortedList<int, String^>^ Reports
+    property SortedList<int, Report^>^ Reports
     {
-        SortedList<int, String^>^ get() { return m_Reports; }
+        SortedList<int, Report^>^ get() { return m_Reports; }
     }
 
     void        ScanReports();
@@ -26,16 +28,14 @@ public:
 private:
     void        LoadGalaxy();
     void        LoadReports( int turn );
-    int         VerifyReport( String ^fileName );
 
     String^                         m_GalaxyPath;
     String^                         m_ReportPath;
     RegexMatcher^                   m_RM;
     GameData^                       m_GameData;
     CommandManager^                 m_CommandMgr;
-    SortedList<int, String^>^       m_Reports;
+    SortedList<int, Report^>^       m_Reports;
     SortedList<String^, int>^       m_RepFiles;
-
 };
 
 } // end namespace FHUI

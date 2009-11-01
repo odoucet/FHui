@@ -13,7 +13,7 @@ ReportParser::ReportParser(GameData^ gd, CommandManager^ cm, String^ galaxyPath,
     , m_GalaxyPath(galaxyPath)
     , m_ReportPath(reportPath)
     , m_RM(gcnew RegexMatcher)
-    , m_Reports(gcnew SortedList<int, String^>)
+    , m_Reports(gcnew SortedList<int, Report^>)
     , m_RepFiles(gcnew SortedList<String^, int>)
 {
 }
@@ -64,10 +64,12 @@ void ReportParser::ScanReports()
     for each( FileInfo ^f in dir->GetFiles() )
     {   // First check each file if it is a report and find out for which turn.
         // Then reports will be loaded in chronological order.
-        int turn = VerifyReport(f->FullName);
-        if( turn != -1 )
+
+        Report ^report = gcnew Report(nullptr, nullptr, m_RM, false);
+        if( report->Verify(f->FullName) )
         {
-            m_RepFiles->Add(f->FullName, turn);
+            int turn = report->GetTurn();
+            m_RepFiles->Add( f->FullName, turn );
             minTurn = Math::Min(minTurn, turn);
             maxTurn = Math::Max(maxTurn, turn);
         }
@@ -91,20 +93,9 @@ void ReportParser::ScanReports()
             m_GameData->PrintStats( true );
         }
 
-        try
+        if( currTurn > 0 )
         {
-            if( currTurn > 0 )
-            {
-                m_CommandMgr->LoadCommands();
-            }
-        }
-        catch( FHUIParsingException ^ex )
-        {
-            throw gcnew FHUIParsingException(
-                String::Format("Error occured while parsing FHUI orders: turn {0}\r\nError description:\r\n  {1}",
-                    currTurn,
-                    ex->Message),
-                ex );
+            m_CommandMgr->LoadCommands();
         }
     }
 
@@ -112,44 +103,11 @@ void ReportParser::ScanReports()
         m_RM->HitCount, m_RM->MissCount ) );
 }
 
-int ReportParser::VerifyReport(String ^fileName)
-{
-    Report ^report = gcnew Report(nullptr, nullptr, m_RM, false); // turn scan mode
-
-    StreamReader ^sr = File::OpenText(fileName);
-    String ^line;
-
-    try
-    {
-        while( (line = sr->ReadLine()) != nullptr ) 
-        {
-            if( false == report->Parse(line) )
-                break;
-        }
-    }
-    catch( Exception ^ex )
-    {
-        throw gcnew FHUIParsingException(
-            String::Format("Error occured while parsing report: {0}, line {1}:\r\n{2}\r\nError description:\r\n  {3}",
-                fileName,
-                report->GetLineCount(),
-                line,
-                ex->Message),
-            ex );
-    }
-    finally
-    {
-        sr->Close();
-    }
-
-    return report->GetTurn();
-}
-
 void ReportParser::LoadReports( int turn )
 {
-    String ^content, ^line, ^fileName;
+    Report ^report = gcnew Report(m_GameData, m_CommandMgr, m_RM, Verbose);
 
-    bool validReportFound = false;
+    Debug::WriteLineIf( Verbose || Stats, String::Format( "=== TURN {0}", turn ) );
 
     for( int i = 0; i < m_RepFiles->Count; i++ )
     {
@@ -158,51 +116,11 @@ void ReportParser::LoadReports( int turn )
             continue;
         }
 
-        Report ^report = gcnew Report(m_GameData, m_CommandMgr, m_RM, Verbose);
-        StreamReader ^sr;
+        Debug::WriteLineIf( Verbose || Stats, m_RepFiles->Keys[i] );
 
-        try
-        {
-            fileName = m_RepFiles->Keys[i];
-            sr = File::OpenText( fileName );
-
-            Debug::WriteLineIf( Verbose, fileName );
-
-            while( (line = sr->ReadLine()) != nullptr ) 
-            {
-                if( false == report->Parse(line) )
-                    break;
-            }
-
-            content +=
-                ";===========================================================================================\n"
-                "; Report File: " + fileName + "\n";
-            content += report->GetContent() + "\n";
-            if( report->IsValid() )
-                validReportFound = true;
-        }
-        catch( Exception ^ex )
-        {
-            throw gcnew FHUIParsingException(
-                String::Format("Error occured while parsing report: {0}, line {1}:\r\n{2}\r\nError description:\r\n  {3}",
-                    fileName,
-                    report->GetLineCount(),
-                    line,
-                    ex->Message),
-                ex );
-        }
-        finally
-        {
-            sr->Close();
-        }
+        report->Parse( m_RepFiles->Keys[i] );
     }
-
-    if( !validReportFound && turn > 0 )
-    {
-        throw gcnew FHUIParsingException("No complete report found for turn " + turn.ToString() );
-    }
-
-    m_Reports[turn] = content;
+    m_Reports[turn] = report;
 }
 
 } // end namespace FHUI

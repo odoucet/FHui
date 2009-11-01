@@ -3,7 +3,9 @@
 #include "enums.h"
 
 using namespace System;
+using namespace System::IO;
 using namespace System::Diagnostics;
+using namespace System::Collections::Generic;
 using namespace System::Text::RegularExpressions;
 
 namespace FHUI
@@ -14,7 +16,7 @@ ref class CommandManager;
 
 enum PhaseType
 {
-    PHASE_FILE_DETECT,
+    PHASE_INIT = 0,
     PHASE_GLOBAL,
     PHASE_ORDERS_COMBAT,
     PHASE_ORDERS_PRE_DEP,
@@ -47,12 +49,39 @@ public:
 
     bool            IsValid();
     int             GetTurn()       { return m_Turn; }
-    String^         GetContent()    { return m_Content; }
+    int             GetLineCount()  { return m_Content->Count; }
+    String^         GetText();
 
-    bool            Parse(String ^s);
-    int             GetLineCount()  { return m_LineCnt; }
+    bool            Verify(String ^filename);
+    void            Parse(String ^filename);
 
 private:
+
+    bool            ParseInternal(String^ s);
+
+    String^         GetLine();
+
+    bool            MatchPhaseGlobal(String ^s);
+    bool            MatchPhaseMessage(String ^s);
+    bool            MatchPhaseSpeciesMet(String ^s);
+    bool            MatchPhaseSpeciesAllies(String ^s);
+    bool            MatchPhaseSpeciesEnemies(String ^s);
+    bool            MatchPhaseOrdersCombat(String ^s);
+    bool            MatchPhaseOrdersPreDep(String ^s);
+    bool            MatchPhaseOrdersJump(String ^s);
+    bool            MatchPhaseOrdersProd(String ^s);
+    bool            MatchPhaseOrdersPostArr(String ^s);
+    bool            MatchPhaseOrdersStrike(String ^s);
+    bool            MatchPhaseTechLevels(String ^s);
+    bool            MatchPhaseAlienEstimate(String ^s);
+    bool            MatchPhaseSystemScan(String ^s);
+    bool            MatchPhaseColony(String ^s);
+    bool            MatchPhaseColonyInventory(String ^s);
+    bool            MatchPhaseColonyShips(String ^s);
+    bool            MatchPhaseOtherPlanetsShips(String ^s);
+    bool            MatchPhaseAliensReport(String ^s);
+    bool            MatchPhaseOrdersTemplate(String ^s);
+
     bool            m_Verbose;
 
     void            StartLineAggregate(PhaseType, String ^s, int aggrMaxLines);
@@ -75,9 +104,8 @@ private:
     GameData^       m_GameData;
     CommandManager^ m_CommandMgr;
     RegexMatcher^   m_RM;
-    String^         m_Content;
+    List<String^>^  m_Content;
     int             m_Turn;
-    int             m_LineCnt;
 
     PhaseType       m_Phase;
     PhaseType       m_PhasePreScan;
@@ -102,6 +130,8 @@ private:
 
     Colony^         m_ColonyProduction;
     Alien^          m_EstimateAlien;
+
+    StreamReader^   m_Input;
 
     String^         PhaseToString(PhaseType phase);
 };

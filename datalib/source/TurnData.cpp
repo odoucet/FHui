@@ -31,8 +31,6 @@ void TurnData::PrintStats(bool debug)
 #define STAT(descr, num) \
     stats->Add( String::Format( "{0,-20} {1}", descr, num ) );
 
-    stats->Add( String::Format( "=== TURN {0}", m_Turn ) );
-
     int knownSystems = 0;
     int knownPlanets = 0;
     int playerColonies = 0;
@@ -479,10 +477,14 @@ Colony^ TurnData::AddColony(Alien ^sp, String ^name, StarSystem ^system, int plN
             system->Planets->Add(plNum, Planet::Default(system, plNum) );
         }
         colony->Planet = system->Planets[plNum];
-        if( sp == GameData::Player )
+        if( GameData::Player && ( sp == GameData::Player ) )
+        {
             colony->Planet->Name = name;
+        }
         else
+        {
             colony->Planet->AlienName = name;
+        }
 
         //TODO: WTF? WHY DOES IT CRASH???
         //if( colony->Planet->SuspectedColonies->ContainsKey(sp) )
