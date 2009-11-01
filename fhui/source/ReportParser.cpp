@@ -85,7 +85,12 @@ void ReportParser::ScanReports()
 
         LoadReports( currTurn );
         m_GameData->Update();
-        m_GameData->PrintStats(true);
+
+        if( Stats )
+        {
+            m_GameData->PrintStats( true );
+        }
+
         try
         {
             if( currTurn > 0 )

@@ -14,6 +14,7 @@ public:
     ReportParser(GameData^, CommandManager^, String^, String^);
 
     property bool Verbose;
+    property bool Stats;
 
     property SortedList<int, String^>^ Reports
     {
