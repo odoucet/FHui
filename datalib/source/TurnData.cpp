@@ -4,6 +4,8 @@
 
 #include "Commands.h"
 
+using namespace System::Diagnostics;
+
 namespace FHUI
 {
 
@@ -20,6 +22,53 @@ TurnData::TurnData(int turn)
     , m_WormholeJumps(gcnew List<WormholeJump^>)
     , m_Misjumps(gcnew List<String^>)
 {
+}
+
+void TurnData::PrintStats(bool debug)
+{
+    List<String^>^ stats = gcnew List<String^>;
+
+#define STAT(descr, num) \
+    stats->Add( String::Format( "{0,-20} {1}", descr, num ) );
+
+    stats->Add( String::Format( "=== TURN {0}", m_Turn ) );
+
+    int knownSystems = 0;
+    int knownPlanets = 0;
+    int playerColonies = 0;
+    int alienColonies = 0;
+    int wormholes = 0;
+
+    for each (StarSystem^ system in GetStarSystems() )
+    {
+        knownSystems += system->IsExplored() ? 1 : 0;
+        wormholes += system->HasWormhole ? 1 : 0;
+        knownPlanets += system->Planets->Count;
+        playerColonies += system->ColoniesOwned->Count;
+        alienColonies += system->ColoniesAlien->Count;
+    }
+
+    STAT( "Aliens", m_Aliens->Count );
+    STAT( "Systems", m_Systems->Count );
+    STAT( "  Known", knownSystems );
+    STAT( "  Planets", knownPlanets );
+    STAT( "  With Wormhole", wormholes );
+    STAT( "Colonies", playerColonies + alienColonies );
+    STAT( "  Player", playerColonies );
+    STAT( "  Alien", alienColonies );
+    STAT( "Ships", m_Ships->Count );
+
+    for each (String^ line in stats)
+    {
+        if( debug )
+        {
+            Debug::WriteLine( line );
+        }
+        else
+        {
+            Console::WriteLine( line );
+        }
+    }
 }
 
 String^ TurnData::GetSummary()

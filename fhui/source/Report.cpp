@@ -4,7 +4,50 @@
 namespace FHUI
 {
 
-Report::Report(GameData ^gd, CommandManager^ cm, RegexMatcher ^rm)
+struct ReportPhaseStr
+{
+    PhaseType    type;
+    const char  *str;
+};
+
+static ReportPhaseStr s_ReportPhaseStrings[PHASE_MAX] =
+{
+    { PHASE_FILE_DETECT,         "FILE_DETECT" },
+    { PHASE_GLOBAL,              "GLOBAL" },
+    { PHASE_ORDERS_COMBAT,       "ORDERS_COMBAT" },
+    { PHASE_ORDERS_PRE_DEP,      "ORDERS_PRE_DEP" },
+    { PHASE_ORDERS_JUMP,         "ORDERS_JUMP" },
+    { PHASE_ORDERS_PROD,         "ORDERS_PROD" },
+    { PHASE_ORDERS_POST_ARRIVAL, "ORDERS_POST_ARRIVAL" },
+    { PHASE_ORDERS_STRIKE,       "ORDERS_STRIKE" },
+    { PHASE_MESSAGE,             "MESSAGE" },
+    { PHASE_SPECIES_MET,         "SPECIES_MET" },
+    { PHASE_SPECIES_ALLIES,      "SPECIES_ALLIES" },
+    { PHASE_SPECIES_ENEMIES,     "SPECIES_ENEMIES" },
+    { PHASE_SYSTEM_SCAN,         "SYSTEM_SCAN" },
+    { PHASE_ALIEN_ESTIMATE,      "ALIEN_ESTIMATE" },
+    { PHASE_COLONY,              "COLONY" },
+    { PHASE_COLONY_INVENTORY,    "COLONY_INVENTORY" },
+    { PHASE_COLONY_SHIPS,        "COLONY_SHIPS" },
+    { PHASE_OTHER_PLANETS_SHIPS, "OTHER_PLANETS_SHIPS" },
+    { PHASE_ALIENS_REPORT,       "ALIENS_REPORT" },
+    { PHASE_ORDERS_TEMPLATE,     "ORDERS_TEMPLATE" },
+    { PHASE_TECH_LEVELS,         "TECH_LEVELS" }
+};
+
+String^ Report::PhaseToString(PhaseType phase)
+{
+    if( phase >= PHASE_MAX )
+        return "???";
+    for( int i = 0; i < PHASE_MAX; ++i )
+        if( s_ReportPhaseStrings[i].type == phase )
+            return gcnew String(s_ReportPhaseStrings[i].str);
+
+    throw gcnew FHUIDataIntegrityException(
+        String::Format("Invalid ship type: {0}.", (int)phase) );
+}
+
+Report::Report(GameData ^gd, CommandManager^ cm, RegexMatcher ^rm, bool verbose)
     : m_GameData(gd)
     , m_CommandMgr(cm)
     , m_RM(rm)
@@ -24,6 +67,7 @@ Report::Report(GameData ^gd, CommandManager^ cm, RegexMatcher ^rm)
     , m_ScanShip(nullptr)
     , m_PirateShipsCnt(0)
     , m_EstimateAlien(nullptr)
+    , m_Verbose(verbose)
 {
     m_Content           = gcnew String("");
 }
@@ -43,6 +87,8 @@ bool Report::IsValid()
 bool Report::Parse(String ^s)
 {
     ++m_LineCnt;
+
+    Debug::WriteLineIf( m_Verbose, String::Format( "{0,-20} \"{1}\"", PhaseToString(m_Phase), s) );
 
     if( m_GameData != nullptr )
     {

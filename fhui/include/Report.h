@@ -3,6 +3,7 @@
 #include "enums.h"
 
 using namespace System;
+using namespace System::Diagnostics;
 using namespace System::Text::RegularExpressions;
 
 namespace FHUI
@@ -34,6 +35,7 @@ enum PhaseType
     PHASE_ALIENS_REPORT,
     PHASE_ORDERS_TEMPLATE,
     PHASE_TECH_LEVELS,
+    PHASE_MAX
 };
 
 #define AGGREGATE_LINES_MAX  -1
@@ -41,7 +43,7 @@ enum PhaseType
 private ref class Report
 {
 public:
-    Report(GameData^, CommandManager^, RegexMatcher^);
+    Report(GameData^, CommandManager^, RegexMatcher^, bool);
 
     bool            IsValid();
     int             GetTurn()       { return m_Turn; }
@@ -51,6 +53,8 @@ public:
     int             GetLineCount()  { return m_LineCnt; }
 
 private:
+    bool            m_Verbose;
+
     void            StartLineAggregate(PhaseType, String ^s, int aggrMaxLines);
     String^         FinishLineAggregate(bool resetPhase);
 
@@ -98,6 +102,8 @@ private:
 
     Colony^         m_ColonyProduction;
     Alien^          m_EstimateAlien;
+
+    String^         PhaseToString(PhaseType phase);
 };
 
 } // end namespace FHUI

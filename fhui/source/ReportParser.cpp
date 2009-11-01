@@ -85,6 +85,7 @@ void ReportParser::ScanReports()
 
         LoadReports( currTurn );
         m_GameData->Update();
+        m_GameData->PrintStats(true);
         try
         {
             if( currTurn > 0 )
@@ -105,7 +106,7 @@ void ReportParser::ScanReports()
 
 int ReportParser::VerifyReport(String ^fileName)
 {
-    Report ^report = gcnew Report(nullptr, nullptr, m_RM); // turn scan mode
+    Report ^report = gcnew Report(nullptr, nullptr, m_RM, false); // turn scan mode
 
     StreamReader ^sr = File::OpenText(fileName);
     String ^line;
@@ -149,13 +150,15 @@ void ReportParser::LoadReports( int turn )
             continue;
         }
 
-        Report ^report = gcnew Report(m_GameData, m_CommandMgr, m_RM);
+        Report ^report = gcnew Report(m_GameData, m_CommandMgr, m_RM, Verbose);
         StreamReader ^sr;
 
         try
         {
             fileName = m_RepFiles->Keys[i];
             sr = File::OpenText( fileName );
+
+            Debug::WriteLineIf( Verbose, fileName );
 
             while( (line = sr->ReadLine()) != nullptr ) 
             {

@@ -40,6 +40,8 @@ namespace FHUI {
         // -- Config properties --
         property String^    DataDir;
         property bool       EnablePlugins;
+        property bool       Verbose;\
+        property bool       Stats;
 
         // ==================================================
     private:

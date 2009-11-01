@@ -120,6 +120,7 @@ void Form1::InitData()
     m_CommandMgr    = gcnew CommandManager(m_GameData, GetDataDir(OrdersDir::Folder));
     m_ReportParser  = gcnew ReportParser(m_GameData, m_CommandMgr, GetDataDir("galaxy_list.txt"), GetDataDir("reports"));
 
+    m_ReportParser->Verbose = Verbose;
     m_ReportParser->ScanReports();
 
     if( m_ReportParser->Reports->Count > 0 )

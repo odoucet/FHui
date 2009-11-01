@@ -13,6 +13,8 @@ private ref class ReportParser
 public:
     ReportParser(GameData^, CommandManager^, String^, String^);
 
+    property bool Verbose;
+
     property SortedList<int, String^>^ Reports
     {
         SortedList<int, String^>^ get() { return m_Reports; }

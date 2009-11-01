@@ -2,6 +2,7 @@
 
 #include "stdafx.h"
 #include "Form1.h"
+#include "BuildInfo.h"
 
 #using <System.Xml.Dll>
 using namespace System::Diagnostics;
@@ -11,6 +12,8 @@ using namespace FHUI;
 [STAThreadAttribute]
 int main(array<System::String ^> ^args)
 {
+    Debug::WriteLine( String::Format("FHUI build {0} starting...", BuildInfo::Version ) );
+
     // Enabling Windows XP visual effects before any controls are created
     Application::EnableVisualStyles();
     Application::SetCompatibleTextRenderingDefault(false); 
@@ -18,6 +21,9 @@ int main(array<System::String ^> ^args)
     System::String^ dataDir = nullptr;
     bool plugins = true;
     bool profile = false;
+    bool verbose = false;
+    bool stats = false;
+
     for( int i = 0; i < args->Length; ++i )
     {
         if( args[i]->ToLower() == "-dir" && i < (args->Length - 1) )
@@ -38,6 +44,14 @@ int main(array<System::String ^> ^args)
         {
             profile = true;
         }
+        if( args[i]->ToLower() == "-verbose" )
+        {
+            verbose = true;
+        }
+        if( args[i]->ToLower() == "-stats" )
+        {
+            stats = true;
+        }
     }
 
     if( profile )
@@ -55,6 +69,8 @@ int main(array<System::String ^> ^args)
             Form1 ^fhui = gcnew Form1;
             fhui->DataDir = subDir->FullName;
             fhui->EnablePlugins = plugins;
+            fhui->Verbose = verbose;
+            fhui->Stats = stats;
             fhui->Initialize();
 
             timerSingle->Stop();
@@ -85,6 +101,8 @@ int main(array<System::String ^> ^args)
         Form1 ^fhui = gcnew Form1;
         fhui->DataDir = dataDir;
         fhui->EnablePlugins = plugins;
+        fhui->Verbose = verbose;
+        fhui->Stats = stats;
         fhui->Initialize();
 
         timer->Stop();

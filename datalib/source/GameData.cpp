@@ -115,6 +115,11 @@ void GameData::InitTurn()
     }
 }
 
+void GameData::PrintStats( bool debug )
+{
+    m_CurrentTurnData->PrintStats(debug);
+}
+
 int GameData::GetSystemId(int x, int y, int z)
 {
     return (x * MaxGalaxyDiameter + y) * MaxGalaxyDiameter + z;

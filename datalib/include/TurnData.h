@@ -61,6 +61,8 @@ public:
     void            AddWormholeJump(String ^shipName, int fromSystemId);
     void            AddMishap(String ^shipName);
 
+    void            PrintStats(bool debug);
+
 protected:
 
     void            DeleteAlienColonies(StarSystem^ system);
