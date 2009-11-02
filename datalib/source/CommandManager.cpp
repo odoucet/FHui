@@ -237,7 +237,8 @@ void CommandManager::SaveCommands()
             // Put the NAME command outside of section
             for each( ICommand ^cmd in colony->Commands )
             {
-                if( cmd->GetCmdType() == CommandType::Name )
+                if( cmd->GetCmdType() == CommandType::Name ||
+                    cmd->GetCmdType() == CommandType::Disband )
                 {
                     commandList->Add( PrintCommandToFile(cmd) );
                 }

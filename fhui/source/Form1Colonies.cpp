@@ -448,6 +448,10 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuCommands(CommandPhase phase)
     // Colony commands
     for each( ICommand ^cmd in m_ColoniesMenuRef->Commands )
     {
+        if( cmd->GetCmdType() == CommandType::Name ||
+            cmd->GetCmdType() == CommandType::Disband )
+            continue;   // skip name/disband commands
+
         if( cmd->GetPhase() == phase )
         {
             if( needSeparator )
