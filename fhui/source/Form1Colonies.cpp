@@ -319,6 +319,9 @@ void Form1::ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowInde
 {
     int index = ColoniesGrid->Columns[0]->Index;
     Colony ^colony = safe_cast<Colony^>(ColoniesGrid->Rows[ rowIndex ]->Cells[index]->Value);
+    if( colony == nullptr )
+        return; // Summary row
+
     m_ColoniesMenuRef = colony;
 
     menu->Items->Add(
