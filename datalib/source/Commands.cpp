@@ -222,6 +222,13 @@ StarSystem^ CmdInstall::GetRefSystem()
     return m_Colony->System;
 }
 
+int CmdInstall::GetInvMod(InventoryType inv)
+{
+    if( inv == INV_CU || inv == m_Unit )
+        return -m_Amount;
+    return 0;
+}
+
 String^ CmdInstall::Print()
 {
     return String::Format("Install {0} {1} PL {2}",
@@ -255,6 +262,13 @@ String^ ProdCmdEstimate::Print()
 // Transfer
 StarSystem^ CmdTransfer::GetRefSystem()
 {
+    if( GetPhase() == CommandPhase::PostArrival &&
+        ( m_FromShip || m_ToShip ) )
+    {
+        Ship ^ship = m_FromShip ? m_FromShip : m_ToShip;
+        return ship->GetPostArrivalSystem();
+    }
+
     if( m_FromColony )  return m_FromColony->System;
     if( m_FromShip )    return m_FromShip->System;
     if( m_ToColony )    return m_ToColony->System;
@@ -274,6 +288,34 @@ String^ CmdTransfer::Print()
         FHStrings::InvToString(m_Type),
         from,
         to );
+}
+
+array<int>^ CmdTransfer::GetFromInventory()
+{
+    if( m_Phase == CommandPhase::PostArrival )
+    {
+        return m_FromColony
+            ? m_FromColony->InventoryPostArrival
+            : m_FromShip->CargoPostArrival;
+    }
+
+    return m_FromColony
+        ? m_FromColony->Res->Inventory
+        : m_FromShip->Cargo;
+}
+
+array<int>^ CmdTransfer::GetToInventory()
+{
+    if( m_Phase == CommandPhase::PostArrival )
+    {
+        return m_ToColony
+            ? m_ToColony->InventoryPostArrival
+            : m_ToShip->CargoPostArrival;
+    }
+
+    return m_ToColony
+        ? m_ToColony->Res->Inventory
+        : m_ToShip->Cargo;
 }
 
 } // end namespace FHUI

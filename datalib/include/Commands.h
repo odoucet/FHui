@@ -426,6 +426,8 @@ public:
 
     virtual StarSystem^ GetRefSystem() override;
 
+    virtual int     GetInvMod(InventoryType inv) override;
+
     virtual String^ Print() override;
 
     int             m_Amount;
@@ -697,6 +699,9 @@ public:
     virtual StarSystem^     GetRefSystem() override;
 
     virtual String^ Print() override;
+
+    array<int>^     GetFromInventory();
+    array<int>^     GetToInventory();
 
     CommandPhase    m_Phase;
     InventoryType   m_Type;

@@ -40,6 +40,7 @@ public:
         Shipyards = -1;
         LastSeen = -1;
         Inventory = gcnew array<int>(INV_MAX){0};
+        InventoryPostArrival = gcnew array<int>(INV_MAX){0};
         RMProduced = 0;
         RMUsed = 0;
         Hidden = false;
@@ -72,6 +73,7 @@ public:
         Shipyards = src->Shipyards;
         LastSeen = src->LastSeen;
         Inventory = gcnew array<int>(INV_MAX){0};
+        InventoryPostArrival = gcnew array<int>(INV_MAX){0};
         src->Inventory->CopyTo(Inventory, 0);
         RMProduced = 0;
         RMUsed = 0;
@@ -104,7 +106,7 @@ public:
     // --------------------------------------------------
 
     String^         PrintLocation() { return String::Format("{0} {1}", System->PrintLocation(), PlanetNum); }
-    String^         PrintInventory();
+    String^         PrintInventory(bool original);
     String^         PrintRefListEntry();
     String^         PrintBalance();
     String^         PrintSize();
@@ -156,7 +158,8 @@ public:
     property int EconomicBase { int get() { return Math::Max(-1, MiBase + MaBase); } }
     property int EUAvail { int get() { return EUProd - EUFleet; } }
 
-    property array<int>^    Inventory;
+    array<int>^             Inventory;
+    array<int>^             InventoryPostArrival;
     property bool           HasInventory 
     {
         bool get()

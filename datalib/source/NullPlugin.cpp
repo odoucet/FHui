@@ -27,19 +27,21 @@ BudgetTracker::BudgetTracker(List<String^>^ orders, int euCarried)
 {
 }
 
-void BudgetTracker::SetColony(Colony ^colony)
+void BudgetTracker::SetColony(Colony ^colony, CommandPhase phase)
 {
     m_Colony = colony;
 
     if( m_Colony )
     {
-        m_BudgetTotal += colony->EUAvail;
-        m_BudgetAvail = Math::Min(m_BudgetTotal, colony->GetMaxProductionBudget());
+        if( phase == CommandPhase::Production )
+        {
+            m_BudgetTotal += colony->EUAvail;
+            m_BudgetAvail = Math::Min(m_BudgetTotal, colony->GetMaxProductionBudget());
 
-        m_Colony->ProductionReset();
-        m_Colony->Res->TotalEU = m_BudgetTotal;
-        m_Colony->Res->AvailEU = m_BudgetAvail;
-        m_Colony->Res->UsedEU  = 0;
+            m_Colony->Res->TotalEU = m_BudgetTotal;
+            m_Colony->Res->AvailEU = m_BudgetAvail;
+            m_Colony->Res->UsedEU  = 0;
+        }
 
         m_Orders = m_Colony->OrdersText;
     }
@@ -63,6 +65,50 @@ void BudgetTracker::EvalOrder(ICommand ^cmd)
     {
         InventoryType it = static_cast<InventoryType>(i);
         UpdateInventory( it, cmd->GetInvMod(it) );
+    }
+}
+
+void BudgetTracker::EvalOrderTransfer(ICommand ^cmd)
+{
+    CmdTransfer ^cmdTr = safe_cast<CmdTransfer^>(cmd);
+
+    if( cmd->GetPhase() == CommandPhase::PostArrival )
+        GameData::EvalPostArrivalInventory(cmd->GetRefSystem(), cmd);
+
+    array<int> ^invFrom = cmdTr->GetFromInventory();
+    array<int> ^invTo = cmdTr->GetToInventory();
+
+    // Track Inventory
+    InventoryType inv = cmdTr->m_Type;
+    int amount = cmdTr->m_Amount;
+
+    if( amount > invFrom[inv] )
+    {
+        AddComment( String::Format(
+            "; !!!!!! NOT ENOUGH Inventory available ({0} {1} left) !!!!!!",
+            invFrom[inv],
+            FHStrings::InvToString(inv) ) );
+        amount = invFrom[inv];
+    }
+    invFrom[inv] -= amount;
+
+    invTo[inv] += amount;
+    if( cmdTr->m_ToShip )
+    {
+        int sumCapacity = 0;
+        for( int i = 0; i < INV_MAX; ++i )
+        {
+            sumCapacity += Calculators::InventoryCarryCapacity(
+                static_cast<InventoryType>(i),
+                invTo[i] );
+        }
+        if( sumCapacity > cmdTr->m_ToShip->Capacity )
+        {
+            AddComment( String::Format(
+                "; !!!!!! NOT ENOUGH transport capacity available ({0} / {1} used) !!!!!!",
+                sumCapacity,
+                cmdTr->m_ToShip->Capacity ) );
+        }
     }
 }
 
@@ -95,7 +141,7 @@ void BudgetTracker::UpdatePop(int pop)
     m_Colony->Res->AvailPop -= pop;
     if( m_Colony->Res->AvailPop < 0 )
     {
-        AddComment( String::Format("; !!!!!! NOT ENOUGH Population Available ({0} left) !!!!!!", m_Colony->Res->AvailPop + pop) );
+        AddComment( String::Format("; !!!!!! NOT ENOUGH Population available ({0} left) !!!!!!", m_Colony->Res->AvailPop + pop) );
         m_Colony->Res->AvailPop = 0;
     }
 }
@@ -106,7 +152,7 @@ void BudgetTracker::UpdateInventory(InventoryType it, int mod)
     if( m_Colony->Res->Inventory[it] < 0 )
     {
         AddComment( String::Format(
-            "; !!!!!! NOT ENOUGH Inventory Available ({0} {1} left) !!!!!!",
+            "; !!!!!! NOT ENOUGH Inventory available ({0} {1} left) !!!!!!",
             m_Colony->Res->Inventory[it] - mod,
             FHStrings::InvToString(it) ) );
         m_Colony->Res->Inventory[it] = 0;

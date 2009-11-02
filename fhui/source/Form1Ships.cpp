@@ -105,6 +105,8 @@ void Form1::ShipsUpdateControls()
 
 void Form1::ShipsFillGrid()
 {
+    m_CommandMgr->GenerateTemplate(nullptr);
+
     ShipsGrid->FullUpdateBegin();
 
     ShipsColumns %c = m_ShipsColumns;
@@ -137,7 +139,7 @@ void Form1::ShipsFillGrid()
         cells[c.DistSec]->Value     = GridPrintDistance(ship->System, ShipsGrid->Filter->RefSystemPrev, gv, ship->Age);
         if( sp == ship->Owner )
         {
-            cells[c.Cargo]->Value   = ship->PrintCargo();
+            cells[c.Cargo]->Value   = ship->PrintCargo(false);
             cells[c.Maint]->Value   = Calculators::ShipMaintenanceCost(ship->Type, ship->Size, ship->SubLight) * discount;
             cells[c.UpgCost]->Value = ship->GetUpgradeCost();
             cells[c.RecVal]->Value  = ship->GetRecycleValue();
@@ -260,7 +262,7 @@ ToolStripMenuItem^ Form1::ShipsFillMenuCommands(CommandPhase phase)
     }
     if( anyCommand )
         needSeparator = true;
-    // Colony commands
+    // Ship commands
     for each( ICommand ^cmd in m_ShipsMenuRef->Commands )
     {
         if( cmd->GetPhase() == phase )
@@ -638,7 +640,9 @@ ToolStripMenuItem^ Form1::ShipsMenuCreateJumpItem(
 
     String ^itemText;
     ICommand ^cmd;
-    String ^cargo = String::IsNullOrEmpty( ship->PrintCargo() ) ? "" : "; " + ship->PrintCargo();
+    String ^cargo = ship->PrintCargo(false);
+    if( !String::IsNullOrEmpty(cargo) )
+        cargo = "; " + cargo;
     if( ship->System->IsWormholeTarget(system) )
     {
         itemText = String::Format("{0}   (Wormhole) (A{2}{3}) From {1}",
@@ -722,7 +726,7 @@ void Form1::ShipsMenuCommandDel(ICommand ^cmd)
     if( cmd->GetCmdType() == CommandType::Transfer )
         m_ShipsMenuRef->System->Transfers->Remove( cmd );
     else
-        m_ShipsMenuRef->Commands->Remove( cmd );
+        m_ShipsMenuRef->DelCommand( cmd );
 
     m_CommandMgr->SaveCommands();
 
@@ -732,7 +736,7 @@ void Form1::ShipsMenuCommandDel(ICommand ^cmd)
         ColoniesGrid->Filter->Update();
 
     if( m_ShipsMenuRef->Commands->Count > 0 )
-        ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
+        ShowGridContextMenu(ShipsGrid, m_LastMenuEventArg);
 }
 
 void Form1::ShipsMenuCommandDelAll(CommandPhase phase)
@@ -755,9 +759,10 @@ void Form1::ShipsMenuCommandDelAll(CommandPhase phase)
     // Delete all confirmed
     if( phase == CommandPhase::Custom )
     {
-        m_ShipsMenuRef->Commands->Clear();
         ShipsMenuCommandDelAllTransfers(CommandPhase::PreDeparture);
         ShipsMenuCommandDelAllTransfers(CommandPhase::PostArrival);
+        while( m_ShipsMenuRef->Commands->Count > 0 )
+            m_ShipsMenuRef->DelCommand( m_ShipsMenuRef->Commands[0] );
     }
     else
     {
@@ -769,7 +774,7 @@ void Form1::ShipsMenuCommandDelAll(CommandPhase phase)
             {
                 if( cmd->GetPhase() == phase )
                 {
-                    m_ShipsMenuRef->Commands->Remove(cmd);
+                    m_ShipsMenuRef->DelCommand(cmd);
                     repeat = true;
                     break;
                 }
@@ -800,6 +805,9 @@ void Form1::ShipsMenuCommandDelAllTransfers(CommandPhase phase)
 
 void Form1::ShipsMenuProdCommandAddTransfer(CmdTransfer ^cmd)
 {
+    if( cmd->GetPhase() == CommandPhase::PostArrival )
+        GameData::EvalPostArrivalInventory(cmd->GetRefSystem(), cmd);
+
     CmdTransferDlg ^dlg = gcnew CmdTransferDlg( cmd );
     if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
     {
@@ -813,6 +821,7 @@ void Form1::ShipsMenuProdCommandAddTransfer(CmdTransfer ^cmd)
                 else
                 {
                     cmd->m_Amount = amount;
+                    cmd->Origin = CommandOrigin::GUI;
                     ShipsMenuCommandAdd(nullptr);
                 }
             }
@@ -864,7 +873,7 @@ void Form1::ShipsMenuCommandEditAsCustom(ICommand ^cmd)
         m_ShipsMenuRef->Commands->Insert(
             m_ShipsMenuRef->Commands->IndexOf(cmd),
             customCmd );
-        m_ShipsMenuRef->Commands->Remove( cmd );
+        m_ShipsMenuRef->DelCommand( cmd );
         ShipsMenuCommandAdd( nullptr );
     }
 

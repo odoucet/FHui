@@ -8,6 +8,32 @@ namespace FHUI
 
 // ---------------------------------------------------------
 
+void GameData::EvalPostArrivalInventory(StarSystem ^system, ICommand ^cmdEnd)
+{
+    // Copy initial data at the beginning of Post-Arrival phase
+    for each( Colony ^colony in GameData::Player->Colonies )
+        colony->Res->Inventory->CopyTo(colony->InventoryPostArrival, 0);
+    for each( Ship ^ship in GameData::Player->Ships )
+        ship->Cargo->CopyTo(ship->CargoPostArrival, 0);
+
+    for each( ICommand ^cmd in system->Transfers )
+    {
+        if( cmd->GetPhase() != CommandPhase::PostArrival )
+            continue;
+        if( cmd == cmdEnd )
+            break;
+
+        CmdTransfer ^cmdTr = safe_cast<CmdTransfer^>(cmd);
+        array<int> ^invFrom = cmdTr->GetFromInventory();
+        array<int> ^invTo = cmdTr->GetToInventory();
+
+        int inv = (int)cmdTr->m_Type;
+        int amount = Math::Min(cmdTr->m_Amount, invFrom[inv]);
+        invFrom[inv] -= amount;
+        invTo[inv] += amount;
+    }
+}
+
 String^ GameData::PrintInventory(array<int> ^inv)
 {
     String ^ret = "";

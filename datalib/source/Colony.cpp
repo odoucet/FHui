@@ -11,9 +11,11 @@ Int32 Colony::CompareTo( Object^ obj )
     return Name->CompareTo( colony->Name );
 }
 
-String^ Colony::PrintInventory()
+String^ Colony::PrintInventory(bool original)
 {
-    return GameData::PrintInventory(Inventory);
+    if( Owner != GameData::Player )
+        original = true;
+    return GameData::PrintInventory(original ? Inventory : Res->Inventory);
 }
 
 String^ Colony::PrintRefListEntry()
@@ -103,8 +105,7 @@ void Colony::ProductionReset()
     Res->AvailEU = 0;
     Res->AvailPop = AvailPop;
     Res->Inventory = gcnew array<int>(INV_MAX){0};
-    for( int i = 0; i < INV_MAX; ++i )
-        Res->Inventory[i] = Inventory[i];
+    Inventory->CopyTo(Res->Inventory, 0);
 }
 
 bool Colony::IsDisbandCommandPending()

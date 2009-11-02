@@ -5,6 +5,8 @@ using namespace System::Data;
 using namespace System::Windows::Forms;
 using namespace System::Collections::Generic;
 
+#include "Commands.h"
+
 namespace FHUI
 {
 
@@ -16,7 +18,6 @@ ref class Ship;
 ref class GameData;
 interface class IGridFilter;
 interface class IGridSorter;
-interface class ICommand;
 ref class BudgetTracker;
 ref class CommandManager;
 
@@ -83,9 +84,10 @@ public ref class BudgetTracker
 public:
     BudgetTracker(List<String^>^ orders, int euCarried);
 
-    void        SetColony(Colony ^colony);
+    void        SetColony(Colony ^colony, CommandPhase phase);
 
     void        EvalOrder(ICommand ^cmd);
+    void        EvalOrderTransfer(ICommand ^cmd);
 
     void        UpdateEU(int eu);
     void        UpdatePop(int pop);

@@ -958,6 +958,10 @@ void CommandManager::GenerateTemplate(System::Windows::Forms::RichTextBox^ targe
 
     // Sort colonies for production
     GameData::Player->SortColoniesByProdOrder();
+    for each( Colony ^colony in GameData::Player->Colonies )
+        colony->ProductionReset();
+    for each( Ship ^ship in GameData::Player->Ships )
+        ship->StoreOriginalCargo();
 
     GenerateCombat();
     GeneratePreDeparture();
@@ -1050,14 +1054,14 @@ void CommandManager::GenerateCombat()
     m_OrderList->Add("");
 }
 
-List<String^>^ CommandManager::PrintSystemStatus(StarSystem^ system, bool listIncomplete)
+List<String^>^ CommandManager::PrintSystemStatus(StarSystem^ system, bool listIncomplete, bool originalInventory)
 {
     List<String^>^ status = gcnew List<String^>;
 
     // list own colonies
     for each ( Colony^ colony in system->ColoniesOwned )
     {
-        String^ inv = colony->PrintInventory();
+        String^ inv = colony->PrintInventory(originalInventory);
         // Flags -> String
         String^ flags = "";
         if (colony->Hidden) 
@@ -1111,7 +1115,7 @@ List<String^>^ CommandManager::PrintSystemStatus(StarSystem^ system, bool listIn
         // Skip incomplete ships
         if( (listIncomplete == false) && (ship->EUToComplete > 0) ) continue;
 
-        String^ inv = ship->PrintCargo();
+        String^ inv = ship->PrintCargo(originalInventory);
         status->Add( String::Format("  ;   {0} {1}{2}{3}", 
             ship->PrintClassWithName(),
             ship->Type == SHIP_BAS ? String::Format("({0}k)", ship->Size / 1000) : "",
@@ -1132,15 +1136,15 @@ List<String^>^ CommandManager::PrintSystemStatus(StarSystem^ system, bool listIn
 void CommandManager::GenerateCombatInfo(StarSystem^ system)
 {
     m_OrderList->Add( String::Format("  ; Battle location: {0}", system->PrintLocation() ) );
-    m_OrderList->AddRange( PrintSystemStatus(system, false) );
+    m_OrderList->AddRange( PrintSystemStatus(system, false, true) );
 }
 
 void CommandManager::GeneratePreDeparture()
 {
     m_OrderList->Add("START PRE-DEPARTURE");
 
-    // Print UI commands
-    for each( Colony ^colony in m_GameData->GetColonies() )
+    // Print UI commands: NAME
+    for each( Colony ^colony in GameData::Player->Colonies )
     {
         for each( ICommand ^cmd in colony->Commands )
         {
@@ -1149,6 +1153,7 @@ void CommandManager::GeneratePreDeparture()
         }
     }
 
+    // Print UI commands global
     for each( ICommand ^cmd in GetCommands() )
     {
         if( cmd->GetPhase() == CommandPhase::PreDeparture )
@@ -1177,7 +1182,10 @@ void CommandManager::GeneratePreDeparture()
         for each( CmdTransfer ^cmd in system->Transfers )
         {
             if( cmd->GetPhase() == CommandPhase::PreDeparture )
+            {
                 m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
+                m_Budget->EvalOrderTransfer(cmd);
+            }
         }
         for each( Ship ^ship in system->ShipsOwned )
         {
@@ -1189,12 +1197,17 @@ void CommandManager::GeneratePreDeparture()
         }
         for each( Colony ^colony in system->ColoniesOwned )
         {
+            m_Budget->SetColony(colony, CommandPhase::PreDeparture);
             for each( ICommand ^cmd in colony->Commands )
             {
                 if( cmd->GetPhase() == CommandPhase::PreDeparture )
+                {
                     m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
+                    m_Budget->EvalOrder(cmd);
+                }
             }
         }
+        m_Budget->SetColony(nullptr, CommandPhase::PreDeparture);
 
         for each( IOrdersPlugin ^plugin in PluginManager::OrderPlugins )
         {
@@ -1209,7 +1222,7 @@ void CommandManager::GeneratePreDeparture()
 void CommandManager::GeneratePreDepartureInfo(StarSystem^ system)
 {
     m_OrderList->Add(String::Format("  ; Location: {0}", system->PrintLocation() ) );
-    m_OrderList->AddRange( PrintSystemStatus(system, false) );
+    m_OrderList->AddRange( PrintSystemStatus(system, false, true) );
 }
 
 void CommandManager::GenerateJumps()
@@ -1326,7 +1339,7 @@ void CommandManager::GenerateJumpInfo(Ship^ ship)
             ship->PrintClassWithName(),
             ship->Age,
             ship->PrintLocation(),
-            ship->PrintCargo() ) );
+            ship->PrintCargo(false) ) );
 }
 
 void CommandManager::GenerateProduction()
@@ -1352,13 +1365,13 @@ void CommandManager::GenerateProduction()
         // Section header
         m_OrderList->Add("");
         m_OrderList->Add("  PRODUCTION PL " + colony->Name);
-        m_OrderList->AddRange( PrintSystemStatus(colony->System, true) );
+        m_OrderList->AddRange( PrintSystemStatus(colony->System, true, false) );
 
         // Remember EUs available before this colony contributes
         int euCarried = m_Budget->GetTotalBudget();
 
         // Set budget tracker for this colony
-        m_Budget->SetColony(colony);
+        m_Budget->SetColony(colony, CommandPhase::Production);
         List<String^> ^orders = colony->OrdersText;
 
         // Production summary
@@ -1404,6 +1417,7 @@ void CommandManager::GenerateProduction()
 
         m_OrderList->AddRange(orders);
     }
+    m_Budget->SetColony(nullptr, CommandPhase::Production);
 
     m_OrderList->Add("");
     m_OrderList->Add("END");
@@ -1513,15 +1527,19 @@ void CommandManager::GeneratePostArrival()
         m_OrderList->Add( "  AUTO" );
     }
 
-    // Print UI commands, ships first
+    // Print UI commands, transfers first
     for each( StarSystem ^system in GameData::GetStarSystems() )
     {
         for each( CmdTransfer ^cmd in system->Transfers )
         {
             if( cmd->GetPhase() == CommandPhase::PostArrival )
+            {
                 m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
+                m_Budget->EvalOrderTransfer(cmd);
+            }
         }
     }
+    // Then ships
     for each( Ship ^ship in GameData::Player->Ships )
     {
         for each( ICommand ^cmd in ship->Commands )
@@ -1533,12 +1551,18 @@ void CommandManager::GeneratePostArrival()
     // Then colonies
     for each( Colony ^colony in GameData::Player->Colonies )
     {
+        m_Budget->SetColony(colony, CommandPhase::PostArrival);
         for each( ICommand ^cmd in colony->Commands )
         {
             if( cmd->GetPhase() == CommandPhase::PostArrival )
+            {
                 m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
+                m_Budget->EvalOrder(cmd);
+            }
         }
     }
+    m_Budget->SetColony(nullptr, CommandPhase::PostArrival);
+
     // Global commands last, without messages
     for each( ICommand ^cmd in GetCommands() )
     {

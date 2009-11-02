@@ -55,7 +55,7 @@ public:
     static void         SetAtmosphereNeutral(GasType gas);
     static void         SetAtmospherePoisonous(GasType gas);
 
-    static int          GetSystemId(int, int, int);
+    static int          GetSystemId(int x, int y, int z);
     static property int CurrentTurn { int get() { return m_CurrentTurn; } }
     static property Alien^ Player
     {
@@ -81,7 +81,8 @@ public:
     static const int MaxGalaxyDiameter = 100;
     static int GalaxyDiameter = MaxGalaxyDiameter;
 
-    static String^ PrintInventory(array<int> ^inv);
+    static void     EvalPostArrivalInventory(StarSystem ^system, ICommand ^cmdEnd);
+    static String^  PrintInventory(array<int> ^inv);
 
     bool SelectTurn(int turn);
 

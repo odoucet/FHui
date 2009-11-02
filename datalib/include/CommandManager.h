@@ -84,7 +84,7 @@ private:
     void        GeneratePostArrival();
     void        GenerateStrikes();
 
-    List<String^>^ PrintSystemStatus(StarSystem^ system, bool listIncomplete);
+    List<String^>^ PrintSystemStatus(StarSystem^ system, bool listIncomplete, bool originalInventory);
 
     void        GenerateCombatInfo(StarSystem^);
     void        GeneratePreDepartureInfo(StarSystem^);

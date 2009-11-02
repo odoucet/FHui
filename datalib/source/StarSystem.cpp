@@ -157,7 +157,7 @@ String^ StarSystem::GenerateColoniesInfo()
                 FHStrings::PlTypeToString(colony->PlanetType),
                 colony->Owner == player ? (" " + colony->Name) : "",
                 colony->PrintSize(),
-                colony->Owner == player ? (" [" + colony->PrintInventory()) + "]" : "" );
+                colony->Owner == player ? (" [" + colony->PrintInventory(true)) + "]" : "" );
         }
     }
 
@@ -188,7 +188,7 @@ String^ StarSystem::GenerateShipsInfo()
             if( ship->EUToComplete > 0 )
                 continue;
 
-            String^ inv = ship->PrintCargo();
+            String^ inv = ship->PrintCargo(true);
             m_TooltipShips += String::Format("{0}{1} {2} {3}{4}{5}\r\n",
                 ship->HadMishap ? "[MISJUMPED] " : "",
                 ship->Owner->Name,

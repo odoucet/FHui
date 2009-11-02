@@ -170,9 +170,9 @@ String^ Ship::PrintLocation()
     return location;
 }
 
-String^ Ship::PrintCargo()
+String^ Ship::PrintCargo(bool original)
 {
-    return GameData::PrintInventory(Cargo);
+    return GameData::PrintInventory(original ? CargoOriginal : Cargo);
 }
 
 void Ship::CalculateCapacity()
@@ -197,6 +197,18 @@ void Ship::CalculateCapacity()
     case SHIP_BM:   Capacity = 60;      break;
     case SHIP_BW:   Capacity = 65;      break;
     case SHIP_BR:   Capacity = 70;      break;
+    }
+}
+
+void Ship::StoreOriginalCargo()
+{
+    if( Owner == GameData::Player )
+    {   // Make a copy
+        CargoOriginal->CopyTo(Cargo, 0);
+    }
+    else
+    {   // Just link
+        Cargo = CargoOriginal;
     }
 }
 
@@ -309,6 +321,24 @@ String^ Ship::PrintCmdSummary()
     int cnt = 0;
     ICommand ^lastCmd = nullptr;
 
+    for each( ICommand ^cmd in System->GetTransfers(this) )
+    {
+        if( cmd->GetPhase() != CommandPhase::PreDeparture )
+            continue;
+        ++cnt;
+        lastCmd = cmd;
+    }
+    if( GetPostArrivalSystem() )
+    {
+        for each( ICommand ^cmd in GetPostArrivalSystem()->GetTransfers(this) )
+        {
+            if( cmd->GetPhase() != CommandPhase::PostArrival )
+                continue;
+            ++cnt;
+            lastCmd = cmd;
+        }
+    }
+
     for each( ICommand ^cmd in Commands )
     {
         if( cmd->GetPhase() == CommandPhase::Jump )
@@ -356,10 +386,16 @@ String^ Ship::PrintCmdDetailsPhase(CommandPhase phase)
     if( phase == CommandPhase::PreDeparture ||
         phase == CommandPhase::PostArrival )
     {
-        for each( ICommand ^cmd in System->GetTransfers(this) )
+        StarSystem ^system = System;
+        if( phase == CommandPhase::PostArrival )
+            system = GetPostArrivalSystem();
+        if( system )
         {
-            if( cmd->GetPhase() == phase )
-                ret += cmd->Print() + "\r\n";
+            for each( ICommand ^cmd in system->GetTransfers(this) )
+            {
+                if( cmd->GetPhase() == phase )
+                    ret += cmd->Print() + "\r\n";
+            }
         }
     }
 
@@ -378,6 +414,19 @@ void Ship::AddCommand(ICommand ^cmd)
     {
         System->Transfers->Add( cmd );
         return;
+    }
+
+    if( cmd->GetPhase() == CommandPhase::Jump )
+    {   // If changing jump destination,
+        // remove all transfers schduled in post-arrival
+        StarSystem ^dstOld = GetPostArrivalSystem();
+        StarSystem ^dstNew = cmd->GetRefSystem();
+
+        if( dstOld != dstNew )
+        {
+            for each( ICommand ^cmd in dstOld->GetTransfers(this) )
+                dstOld->Transfers->Remove(cmd);
+        }
     }
 
     if( cmd->GetPhase() == CommandPhase::Jump ||
@@ -408,6 +457,30 @@ void Ship::AddCommand(ICommand ^cmd)
     }
 
     Commands->Add(cmd);
+}
+
+void Ship::DelCommand(ICommand ^cmd)
+{
+    if( cmd->GetPhase() == CommandPhase::Jump )
+    {   // Removing jump command
+        // remove all transfers schduled in post-arrival
+        StarSystem ^system = cmd->GetRefSystem();
+        if( system )
+        {
+            for each( ICommand ^cmd in system->GetTransfers(this) )
+                system->Transfers->Remove(cmd);
+        }
+    }
+
+    Commands->Remove(cmd);
+}
+
+StarSystem^ Ship::GetPostArrivalSystem()
+{
+    ICommand ^jumpCmd = GetJumpCommand();
+    if( jumpCmd )
+        return jumpCmd->GetRefSystem();
+    return System;
 }
 
 } // end namespace FHUI

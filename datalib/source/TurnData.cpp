@@ -531,6 +531,13 @@ void TurnData::UpdateShips()
     m_ShipsByTonnage->AddRange(m_Ships->Values);
     m_ShipsByTonnage->Sort( gcnew Ship::WarTonnageComparer );
 
+    // Back up original cargo
+    for each( Ship ^ship in GameData::GetShips() )
+    {
+        if( ship->Owner == GameData::Player )
+            ship->Cargo->CopyTo(ship->CargoOriginal, 0);
+    }
+
     // Update wormhole targets
     for each( WormholeJump ^jump in m_WormholeJumps )
     {

@@ -147,7 +147,7 @@ void Form1::ColoniesFillGrid()
         cells[c.Location]->Value    = colony->PrintLocation();
         cells[c.Dist]->Value        = GridPrintDistance(colony->System, ColoniesGrid->Filter->RefSystem, gv, age);
         cells[c.DistSec]->Value     = GridPrintDistance(colony->System, ColoniesGrid->Filter->RefSystemPrev, gv, age);
-        cells[c.Inventory]->Value   = colony->PrintInventory();
+        cells[c.Inventory]->Value   = colony->PrintInventory(false);
         if( colony->Planet )
         {
             cells[c.LSN]->Value     = colony->Planet->LSN;
@@ -806,6 +806,7 @@ void Form1::ColoniesMenuCommandAdd(ICommand ^cmd)
         m_CommandMgr->SaveCommands();
 
     ColoniesGrid->Filter->Update();
+    ShipsGrid->Filter->Update();
     ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
 }
 
@@ -824,6 +825,7 @@ void Form1::ColoniesMenuProdCommandAddInstall(CmdInstall ^cmd)
                 else
                 {
                     cmd->m_Amount = amount;
+                    cmd->Origin = CommandOrigin::GUI;
                     ColoniesMenuCommandAdd(nullptr);
                 }
             }
@@ -845,6 +847,9 @@ void Form1::ColoniesMenuProdCommandAddInstall(CmdInstall ^cmd)
 
 void Form1::ColoniesMenuProdCommandAddTransfer(CmdTransfer ^cmd)
 {
+    if( cmd->GetPhase() == CommandPhase::PostArrival )
+        GameData::EvalPostArrivalInventory(cmd->GetRefSystem(), cmd);
+
     CmdTransferDlg ^dlg = gcnew CmdTransferDlg( cmd );
     if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
     {
@@ -858,6 +863,7 @@ void Form1::ColoniesMenuProdCommandAddTransfer(CmdTransfer ^cmd)
                 else
                 {
                     cmd->m_Amount = amount;
+                    cmd->Origin = CommandOrigin::GUI;
                     ColoniesMenuCommandAdd(nullptr);
                 }
             }
@@ -894,6 +900,7 @@ void Form1::ColoniesMenuProdCommandAddResearch(ProdCmdResearch ^cmd)
                     else
                     {
                         cmd->m_Amount = amount;
+                        cmd->Origin = CommandOrigin::GUI;
                         ColoniesMenuCommandAdd(nullptr);
                     }
                 }

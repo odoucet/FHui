@@ -29,6 +29,8 @@ public:
         IsPirate = false;
         HadMishap = false;
         Cargo = gcnew array<int>(INV_MAX){0};
+        CargoOriginal = gcnew array<int>(INV_MAX){0};
+        CargoPostArrival = gcnew array<int>(INV_MAX){0};
         DidWormholeJump = false;
         Commands = gcnew List<ICommand^>;
     }
@@ -94,13 +96,16 @@ public:
     String^         PrintLocation();
     String^         PrintLocationShort();
     String^         PrintAgeLocation();
-    String^         PrintCargo();
+    String^         PrintCargo(bool original);
     String^         PrintRefListEntry();
+
+    StarSystem^     GetPostArrivalSystem();
 
     int             GetUpgradeCost();
     int             GetRecycleValue();
 
     void            CalculateCapacity();
+    void            StoreOriginalCargo();
 
     Alien^          Owner;
     ShipType        Type;
@@ -120,18 +125,20 @@ public:
     int             EUToComplete;
     bool            DidWormholeJump;
     array<int>^     Cargo;
+    array<int>^     CargoOriginal;
+    array<int>^     CargoPostArrival;
 
     property int            Size {
         int get() { return m_Size; }
         void set(int val) { m_Size = val; SetupTonnage(); }
     }
 
-
     // ---- Ship orders ----
     List<ICommand^>^        Commands;
     int                     CommandProdPlanet;
 
     void            AddCommand(ICommand ^cmd);
+    void            DelCommand(ICommand ^cmd);
 
     String^         PrintJumpDestination();
     ICommand^       GetJumpCommand();

@@ -212,16 +212,20 @@ void CmdTransferDlg::InitControlsUnits()
     else
         m_CapacityLimit = 0;
 
-    if( m_Cmd->m_FromColony )
-        m_Inv = m_Cmd->m_FromColony->Inventory;
-    else
-        m_Inv = m_Cmd->m_FromShip->Cargo;
+    m_Inv = m_Cmd->GetFromInventory();
 
     for( int i = 0; i < INV_MAX; ++i )
     {
         InventoryType inv = static_cast<InventoryType>(i);
 
         int cnt = m_Inv[i];
+        if( m_Cmd->GetPhase() != CommandPhase::PostArrival &&
+            m_Cmd->m_Type != INV_MAX &&
+            m_Cmd->m_Type == inv )
+        {
+            cnt += m_Cmd->m_Amount;
+        }
+
         m_UnitControls[i].Info->Text = cnt.ToString();
 
         if( m_Cmd->m_Type != INV_MAX && m_Cmd->m_Type != inv )
