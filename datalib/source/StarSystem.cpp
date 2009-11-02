@@ -642,4 +642,30 @@ List<ICommand^>^ StarSystem::GetTransfers(Ship ^ship)
     return ret;
 }
 
+bool StarSystem::IsTransferPossible(CommandPhase phase, Colony ^colony, Ship ^ship)
+{
+    int numColonies = ColoniesOwned->Count;
+    int numShips = 0;
+
+    if( colony )
+        --numColonies;
+
+    if( phase == CommandPhase::PreDeparture )
+    {
+        numShips = ShipsOwned->Count;
+        if( ship )
+            --numShips;
+    }
+    else
+    {
+        for each( Ship ^iShip in GameData::Player->Ships )
+        {
+            if( ship != iShip && iShip->GetPostArrivalSystem() == this )
+                ++numShips;
+        }
+    }
+
+    return (numColonies + numShips) > 0;
+}
+
 } // end namespace FHUI

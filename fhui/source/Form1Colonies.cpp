@@ -516,7 +516,7 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuPreDepartureNew()
     }
 
     // Transfer
-    if( true ) //TBD
+    if( colony->System->IsTransferPossible(CommandPhase::PreDeparture, colony, nullptr) )
     {
         menu->DropDownItems->Add( CreateCustomMenuItem<CmdTransfer^>(
             "Transfer from PL " + colony->Name + "...",
@@ -543,7 +543,7 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuPostArrivalNew()
     ToolStripMenuItem ^menu = gcnew ToolStripMenuItem("Add:");
 
     // Transfer
-    if( true ) //TBD
+    if( colony->System->IsTransferPossible(CommandPhase::PostArrival, colony, nullptr) )
     {
         menu->DropDownItems->Add( CreateCustomMenuItem<CmdTransfer^>(
             "Transfer from PL " + colony->Name + "...",

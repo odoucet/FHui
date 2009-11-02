@@ -372,7 +372,7 @@ ToolStripMenuItem^ Form1::ShipsFillMenuPreDepartureNew()
     }
 
     // Transfer
-    if( true ) //TBD
+    if( ship->System->IsTransferPossible(CommandPhase::PreDeparture, nullptr, ship) )
     {
         menu->DropDownItems->Add( CreateCustomMenuItem<CmdTransfer^>(
             "Transfer from " + ship->PrintClassWithName() + "...",
@@ -533,7 +533,9 @@ ToolStripMenuItem^ Form1::ShipsFillMenuPostArrivalNew()
     }
 
     // Transfer
-    if( true ) //TBD
+    StarSystem ^postArrivalSystem = ship->GetPostArrivalSystem();
+    if( postArrivalSystem &&
+        postArrivalSystem->IsTransferPossible(CommandPhase::PostArrival, nullptr, ship) )
     {
         menu->DropDownItems->Add( CreateCustomMenuItem<CmdTransfer^>(
             "Transfer from " + ship->PrintClassWithName() + "...",

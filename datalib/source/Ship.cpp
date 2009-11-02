@@ -425,7 +425,8 @@ void Ship::AddCommand(ICommand ^cmd)
         if( dstOld != dstNew )
         {
             for each( ICommand ^cmd in dstOld->GetTransfers(this) )
-                dstOld->Transfers->Remove(cmd);
+                if( cmd->GetPhase() == CommandPhase::PostArrival )
+                    dstOld->Transfers->Remove(cmd);
         }
     }
 
@@ -468,7 +469,8 @@ void Ship::DelCommand(ICommand ^cmd)
         if( system )
         {
             for each( ICommand ^cmd in system->GetTransfers(this) )
-                system->Transfers->Remove(cmd);
+                if( cmd->GetPhase() == CommandPhase::PostArrival )
+                    system->Transfers->Remove(cmd);
         }
     }
 

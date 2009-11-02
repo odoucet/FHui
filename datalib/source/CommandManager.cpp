@@ -456,7 +456,7 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
             int p = m_RM->GetResultInt(4);
             StarSystem ^target = nullptr;
             if( x != 0 || y != 0 || z != 0 )
-                target = m_GameData->GetStarSystem(x, y, z, false);
+                target = m_GameData->GetStarSystem(x, y, z, true);
             ship->AddCommand( CmdSetOrigin(gcnew ShipCmdJump(ship, target, p)) );
         }
         else if( m_RM->Match(line, m_RM->ExpCmdShipWormhole_Obsolete) )
@@ -785,7 +785,7 @@ bool CommandManager::LoadCommandsShip(String ^line, Ship ^ship)
         int p = m_RM->GetResultInt(3);
         StarSystem ^target = nullptr;
         if( x != 0 || y != 0 || z != 0 )
-            target = m_GameData->GetStarSystem(x, y, z, false);
+            target = m_GameData->GetStarSystem(x, y, z, true);
         ship->AddCommand( CmdSetOrigin(gcnew ShipCmdJump(ship, target, p)) );
         return true;
     }

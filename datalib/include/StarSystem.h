@@ -153,6 +153,9 @@ public:
 
     List<ICommand^>^        GetTransfers(Colony ^colony);
     List<ICommand^>^        GetTransfers(Ship ^ship);
+    // Returns true when transfer to or from colony/ship is possible in this system
+    // Colony and Ship args should never be both set in single call
+    bool                    IsTransferPossible(CommandPhase phase, Colony ^colony, Ship ^ship);
     List<ICommand^>^        Transfers;
 
 protected:
