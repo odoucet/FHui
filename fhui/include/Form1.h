@@ -35,12 +35,16 @@ namespace FHUI {
         }
 
         void Initialize();
+        void SetRM(RegexMatcher^ rm)
+        {
+            m_RegexMatcher = rm;
+        }
 
         // ==================================================
         // -- Config properties --
         property String^    DataDir;
         property bool       EnablePlugins;
-        property bool       Verbose;\
+        property bool       Verbose;
         property bool       Stats;
 
         // ==================================================
@@ -140,6 +144,7 @@ namespace FHUI {
 
         GameData^           m_GameData;
         ReportParser^       m_ReportParser;
+        RegexMatcher^       m_RegexMatcher;
         PluginManager^      m_PluginMgr;
         CommandManager^     m_CommandMgr;
 

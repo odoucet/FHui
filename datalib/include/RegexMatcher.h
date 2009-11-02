@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Utils.h"
+
 using namespace System;
 using namespace System::Text::RegularExpressions;
 
@@ -15,8 +17,8 @@ public:
     bool        Match(String ^%s, Regex ^exp);
     bool        MatchList(String ^s, String ^prefix, String ^exp);
 
-    property int HitCount;
-    property int MissCount;
+    property bool CollectStats;
+    void        PrintDebugStats();
 
     int         GetResultInt(int arg);
     //float       GetResultFloat(int arg);
@@ -25,6 +27,8 @@ public:
 
 private:
     array<String^>^     m_Results;
+
+    SortedList<String^, Pair<int,int>^>^ m_Stats;
 
 public:
     // --------------------------

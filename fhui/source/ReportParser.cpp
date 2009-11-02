@@ -7,15 +7,17 @@ using namespace System::IO;
 namespace FHUI
 {
 
-ReportParser::ReportParser(GameData^ gd, CommandManager^ cm, String^ galaxyPath, String^ reportPath)
+ReportParser::ReportParser(GameData^ gd, CommandManager^ cm, RegexMatcher ^rm, String^ galaxyPath, String^ reportPath)
     : m_GameData(gd)
     , m_CommandMgr(cm)
     , m_GalaxyPath(galaxyPath)
     , m_ReportPath(reportPath)
-    , m_RM(gcnew RegexMatcher)
+    , m_RM(rm)
     , m_Reports(gcnew SortedList<int, Report^>)
     , m_RepFiles(gcnew SortedList<String^, int>)
 {
+    if( rm == nullptr)
+        m_RM = gcnew RegexMatcher;
 }
 
 void ReportParser::LoadGalaxy()
@@ -98,9 +100,6 @@ void ReportParser::ScanReports()
             m_CommandMgr->LoadCommands();
         }
     }
-
-    Debug::WriteLine( String::Format("Regexp stats: {0,6} matches, {1,6} misses", 
-        m_RM->HitCount, m_RM->MissCount ) );
 }
 
 void ReportParser::LoadReports( int turn )

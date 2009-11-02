@@ -13,7 +13,7 @@ ref class RegexMatcher;
 private ref class ReportParser
 {
 public:
-    ReportParser(GameData^, CommandManager^, String^, String^);
+    ReportParser(GameData^, CommandManager^, RegexMatcher^, String^, String^);
 
     property bool Verbose;
     property bool Stats;

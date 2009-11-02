@@ -1,15 +1,16 @@
 #include "StdAfx.h"
 #include "RegexMatcher.h"
 
+using namespace System::Diagnostics;
+
 namespace FHUI
 {
 
 RegexMatcher::RegexMatcher()
 {
-    HitCount = 0;
-    MissCount = 0;
-
     m_Results = gcnew array<String^>(1);
+
+    m_Stats = gcnew SortedList<String^, Pair<int, int>^>;
 
     ExpCmdColony        = gcnew Regex("^COLONY ([^,;]+)$");
     ExpCmdShip          = gcnew Regex("^SHIP ([^,;]+)$");
@@ -73,12 +74,12 @@ bool RegexMatcher::Match(String ^%s, String ^exp)
 
 bool RegexMatcher::Match(String ^%s, Regex ^exp)
 {
+    bool retVal = false;
     Array::Clear(m_Results, 0, m_Results->Length);
 
     System::Text::RegularExpressions::Match ^m = exp->Match(s);
     if( m->Success )
     {
-        ++ HitCount;
         String ^g = m->Groups[0]->ToString();
         s = s->Substring( s->IndexOf(g) + g->Length );
 
@@ -88,11 +89,23 @@ bool RegexMatcher::Match(String ^%s, Regex ^exp)
         {
             m_Results[i] = m->Groups[i + 1]->ToString();
         }
-        return true;
+        retVal = true;
     }
 
-    ++ MissCount;
-    return false;
+    if( CollectStats )
+    {
+        String^ key = exp->ToString();
+        if( m_Stats->ContainsKey( key ) )
+        {
+            retVal ? ( m_Stats[key]->A ++ ) : ( m_Stats[key]->B ++ );
+        }
+        else
+        {
+            m_Stats->Add( exp->ToString(), gcnew Pair<int,int>(retVal ? 1 : 0, retVal ? 0 : 1) );
+        }
+    }
+
+    return retVal;
 }
 
 bool RegexMatcher::MatchList(String ^s, String ^prefix, String ^exp)
@@ -117,6 +130,27 @@ bool RegexMatcher::MatchList(String ^s, String ^prefix, String ^exp)
     }
 
     return cnt > 0;
+}
+
+void RegexMatcher::PrintDebugStats()
+{
+    int totalHits = 0;
+    int totalMisses = 0;
+
+    for( int i = 0; i < m_Stats->Count; i++)
+    {
+        int hits = m_Stats->Values[i]->A;
+        int misses = m_Stats->Values[i]->B;
+        double ratio = (double)misses / hits;
+        totalHits += hits;
+        totalMisses += misses;
+
+        Debug::WriteLine( String::Format("H:{0,6} M:{1,6} \"{2}\"", hits, misses, m_Stats->Keys[i] ) );
+    }
+
+    Debug::WriteLine( 
+        String::Format("Regular expressions used: {0}, Hits: {1}, Misses: {2} (ratio 1:{3:F0})",
+        m_Stats->Count, totalHits, totalMisses, (double)totalMisses / totalHits ) );
 }
 
 } // end namespace FHUI

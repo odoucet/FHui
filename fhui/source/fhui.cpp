@@ -18,6 +18,8 @@ int main(array<System::String ^> ^args)
     Application::EnableVisualStyles();
     Application::SetCompatibleTextRenderingDefault(false); 
 
+    RegexMatcher^ GlobalRegexMatcher = gcnew RegexMatcher;
+
     System::String^ dataDir = nullptr;
     bool plugins = true;
     bool profile = false;
@@ -52,6 +54,10 @@ int main(array<System::String ^> ^args)
         {
             stats = true;
         }
+        if( args[i]->ToLower() == "-regexp" )
+        {
+            GlobalRegexMatcher->CollectStats = true;
+        }
     }
 
     if( profile )
@@ -71,6 +77,7 @@ int main(array<System::String ^> ^args)
             fhui->EnablePlugins = plugins;
             fhui->Verbose = verbose;
             fhui->Stats = stats;
+            fhui->SetRM( GlobalRegexMatcher );
             fhui->Initialize();
 
             timerSingle->Stop();
@@ -92,6 +99,9 @@ int main(array<System::String ^> ^args)
             timerComplete->Elapsed.Minutes,
             timerComplete->Elapsed.Seconds,
             timerComplete->Elapsed.Milliseconds) );
+
+        if( GlobalRegexMatcher->CollectStats )
+            GlobalRegexMatcher->PrintDebugStats();
     }
     else
     {
@@ -103,6 +113,7 @@ int main(array<System::String ^> ^args)
         fhui->EnablePlugins = plugins;
         fhui->Verbose = verbose;
         fhui->Stats = stats;
+
         fhui->Initialize();
 
         timer->Stop();
