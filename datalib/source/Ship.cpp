@@ -412,7 +412,16 @@ void Ship::AddCommand(ICommand ^cmd)
 {
     if( cmd->GetCmdType() == CommandType::Transfer )
     {
-        System->Transfers->Add( cmd );
+        if( cmd->GetPhase() == CommandPhase::PreDeparture )
+            System->Transfers->Add( cmd );
+        else
+        {
+            StarSystem ^system = GetPostArrivalSystem();
+            if( system )
+                system->Transfers->Add( cmd );
+            else
+                throw gcnew FHUIDataIntegrityException("Unable to add ship transfer command while ship is jumping to unknown location!");
+        }
         return;
     }
 
