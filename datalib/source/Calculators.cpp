@@ -293,7 +293,7 @@ int Calculators::TransportCapacity(int size)
 
 int Calculators::ColonyHideCost(Colony ^colony)
 {
-    return colony->EconomicBase;
+    return colony->EconomicBase / 10;
 }
 
 

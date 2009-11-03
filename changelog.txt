@@ -8,6 +8,7 @@ Minor changes are listed only if originally requested by player
 FHUI build ??
 * [P] Fixed crash when displaying context menu for newly named planet
   on Colonies tab.
+* [P] Fixed cost of Hide command.
 * Fixed possible crash or incorrect menu update when deleting ship commands.
 + New commands supported: Transfer.
 + Any unrecognized order present in report's orders template section
