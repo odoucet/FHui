@@ -247,21 +247,29 @@ ToolStripMenuItem^ Form1::ShipsFillMenuCommands(CommandPhase phase)
     }
 
     ToolStripMenuItem ^menu = gcnew ToolStripMenuItem(title + ":");
+    Ship ^ship = m_ShipsMenuRef;
 
     bool anyCommand = false;
     bool needSeparator = false;
+
     // Transfer commands
-    for each( ICommand ^cmd in m_ShipsMenuRef->System->GetTransfers(m_ShipsMenuRef) )
+    StarSystem ^system = ship->System;
+    if( phase == CommandPhase::PostArrival )
+        system = ship->GetPostArrivalSystem();
+    if( system )
     {
-        if( cmd->GetPhase() == phase )
+        for each( ICommand ^cmd in system->GetTransfers(m_ShipsMenuRef) )
         {
-            menu->DropDownItems->Add(
-                ShipsFillMenuCommandsOptions(cmd) );
-            anyCommand = true;
+            if( cmd->GetPhase() == phase )
+            {
+                menu->DropDownItems->Add(
+                    ShipsFillMenuCommandsOptions(cmd) );
+                anyCommand = true;
+            }
         }
+        if( anyCommand )
+            needSeparator = true;
     }
-    if( anyCommand )
-        needSeparator = true;
     // Ship commands
     for each( ICommand ^cmd in m_ShipsMenuRef->Commands )
     {

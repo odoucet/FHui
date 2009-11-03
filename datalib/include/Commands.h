@@ -166,6 +166,7 @@ public:
     CmdPhaseWrapper(CommandPhase phase, ICommand ^command)
         : m_Phase(phase), m_Command(command)
     {
+        Origin = command->Origin;
         RequiresPhasePrefix = true;
     }
 

@@ -14,17 +14,6 @@ namespace FHUI
 
 // ---------------------------------------------------------
 
-private ref class CommandComparer : public IComparer<ICommand^>
-{
-public:
-    virtual int Compare(ICommand ^c1, ICommand ^c2)
-    {
-        return (int)c1->GetCmdType() - (int)c2->GetCmdType();
-    }
-};
-
-// ---------------------------------------------------------
-
 CommandManager::CommandManager(GameData^ gd, String^ path)
     : m_RM(gcnew RegexMatcher)
     , m_bSaveEnabled(true)
@@ -182,8 +171,8 @@ String^ CommandManager::PrintCommandToFile(ICommand ^cmd)
 
     switch( cmd->Origin )
     {
-    case CommandOrigin::Auto:   prefix = "[A] "; break;
-    case CommandOrigin::Plugin: prefix = "[P] "; break;
+    case CommandOrigin::Auto:   prefix += "[A] "; break;
+    case CommandOrigin::Plugin: prefix += "[P] "; break;
     default:
         break;
     }
@@ -192,12 +181,12 @@ String^ CommandManager::PrintCommandToFile(ICommand ^cmd)
     {
         switch( cmd->GetPhase() )
         {
-        case CommandPhase::Combat:          prefix = "{C} "; break;
-        case CommandPhase::PreDeparture:    prefix = "{D} "; break;
-        case CommandPhase::Jump:            prefix = "{J} "; break;
-        case CommandPhase::Production:      prefix = "{P} "; break;
-        case CommandPhase::PostArrival:     prefix = "{A} "; break;
-        case CommandPhase::Strike:          prefix = "{S} "; break;
+        case CommandPhase::Combat:          prefix += "{C} "; break;
+        case CommandPhase::PreDeparture:    prefix += "{D} "; break;
+        case CommandPhase::Jump:            prefix += "{J} "; break;
+        case CommandPhase::Production:      prefix += "{P} "; break;
+        case CommandPhase::PostArrival:     prefix += "{A} "; break;
+        case CommandPhase::Strike:          prefix += "{S} "; break;
         default:
             throw gcnew FHUIDataIntegrityException("Invalid command phase: " + ((int)cmd->GetPhase()).ToString());
         }

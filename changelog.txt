@@ -5,7 +5,10 @@ Minor changes are listed only if originally requested by player
 + New features
 [P] denotes player requested features
 
-FHUI build ??
+FHUI build 288
+* Issued post-arrival transfer commands did not appear in ships' context menu.
+
+FHUI build 287
 * [P] Fixed crash when displaying context menu for newly named planet
   on Colonies tab.
 * [P] Fixed cost of Hide command.
