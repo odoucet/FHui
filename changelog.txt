@@ -6,6 +6,8 @@ Minor changes are listed only if originally requested by player
 [P] denotes player requested features
 
 FHUI build ??
+* [P] Fixed crash when displaying context menu for newly named planet
+  on Colonies tab.
 * Fixed possible crash or incorrect menu update when deleting ship commands.
 + New commands supported: Transfer.
 + Any unrecognized order present in report's orders template section
@@ -17,6 +19,11 @@ FHUI build ??
 + Colonies tab: Summary row added that displays summaries for owned colonies.
   See tooltip for each cell for details. Summary row may be disabled
   by a checkbox on toolbar.
++ Colonies/Ships inventory display: now the inventory/cargo columns show
+  inv/cargo state for the end of production turn. It means it includes any changes
+  caused by recycle/production and pre-departure transfer commands.
+  Original colony inventory/ship cargo from the status report is always available
+  via the tooltip.
 
 FHUI build 267
 * Fixed bug that did not allow custom pre-departure commands for

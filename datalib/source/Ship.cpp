@@ -422,7 +422,7 @@ void Ship::AddCommand(ICommand ^cmd)
         StarSystem ^dstOld = GetPostArrivalSystem();
         StarSystem ^dstNew = cmd->GetRefSystem();
 
-        if( dstOld != dstNew )
+        if( dstOld && dstOld != dstNew )
         {
             for each( ICommand ^cmd in dstOld->GetTransfers(this) )
                 if( cmd->GetPhase() == CommandPhase::PostArrival )

@@ -382,8 +382,10 @@ void Form1::PlanetsMenuAddName(DataGridViewCellEventArgs ^cell)
         gcnew CmdPlanetName( m_PlanetsMenuRef->System, m_PlanetsMenuRef->Number, name ) );
 
     SystemsGrid->Filter->Update();
-    PlanetsGrid->Filter->Update();
     ColoniesGrid->Filter->Update();
+    // TBD: can't update planets grid here - it causes exception
+    // Find out a better way to do this...
+    //PlanetsGrid->Filter->Update();
 }
 
 void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
