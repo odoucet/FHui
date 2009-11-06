@@ -10,6 +10,7 @@ FHUI build ??
 
 FHUI build 288
 * Issued post-arrival transfer commands did not appear in ships' context menu.
+* Update tooltip after changing commands order for any phase.
 
 FHUI build 287
 * [P] Fixed crash when displaying context menu for newly named planet

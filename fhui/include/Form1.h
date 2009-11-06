@@ -163,6 +163,7 @@ namespace FHUI {
         System::Drawing::Font^              m_GridFontSmall;
         System::Drawing::Font^              m_GridFontSummary;
         DataGridViewCellMouseEventArgs^     m_LastMenuEventArg;
+        DblBufDGV^                          m_LastMenuGrid;
 
         // ==================================================
         // --- SYSTEMS ---

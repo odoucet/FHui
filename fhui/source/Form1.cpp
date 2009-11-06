@@ -819,6 +819,7 @@ void Form1::ShowGridContextMenu(DataGridView^ grid, DataGridViewCellMouseEventAr
 
     // Remember if menu respawn needed
     m_LastMenuEventArg = e;
+    m_LastMenuGrid = safe_cast<DblBufDGV^>(grid);
 
     // Show menu
     Rectangle r = grid->GetCellDisplayRectangle(e->ColumnIndex, e->RowIndex, false);
@@ -863,6 +864,7 @@ void Form1::MenuCommandMoveUp(MenuCommandUpDownData ^data)
         commands->RemoveAt(i);
         commands->Insert(newPos, cmd);
         m_CommandMgr->SaveCommands();
+        m_LastMenuGrid->Filter->Update();
     }
 }
 
@@ -881,6 +883,7 @@ void Form1::MenuCommandMoveDown(MenuCommandUpDownData ^data)
         commands->RemoveAt(i);
         commands->Insert(newPos, cmd);
         m_CommandMgr->SaveCommands();
+        m_LastMenuGrid->Filter->Update();
     }
 }
 
