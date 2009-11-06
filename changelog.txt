@@ -6,6 +6,7 @@ Minor changes are listed only if originally requested by player
 [P] denotes player requested features
 
 FHUI build ??
+* Fixed saving orders template to file.
 
 FHUI build 288
 * Issued post-arrival transfer commands did not appear in ships' context menu.

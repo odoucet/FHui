@@ -899,7 +899,8 @@ void Form1::SaveOrdersTemplateToFile()
         String^ filename = String::Format("orders\\FHUI_orders_t{0:000}.txt", GameData::CurrentTurn);
         StreamWriter ^sw = File::CreateText( GetDataDir(filename) );
 
-        sw->WriteLine( OrderTemplate->Lines );
+        for each( String ^line in OrderTemplate->Lines )
+            sw->WriteLine(line);
 
         sw->Close();
     }
@@ -907,8 +908,8 @@ void Form1::SaveOrdersTemplateToFile()
     {
         MessageBox::Show(
             this,
-            "Error generating scan file: " + e->Message,
-            "Export Scans",
+            "Error generating orders template file: " + e->Message,
+            "Save orders",
             MessageBoxButtons::OK,
             MessageBoxIcon::Error);
     }
