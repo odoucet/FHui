@@ -34,9 +34,9 @@ namespace FHUI
             InfoMD->Text = (colony->MiDiff / 100.0).ToString("F2");
             InfoMABase->Text = (Math::Max(0, colony->MaBase) / 10.0).ToString("F2");
             InfoMIBase->Text = (Math::Max(0, colony->MiBase) / 10.0).ToString("F2");
-            InfoCU->Text = colony->Res->Inventory[INV_CU].ToString();
-            InfoIU->Text = colony->Res->Inventory[INV_IU].ToString();
-            InfoAU->Text = colony->Res->Inventory[INV_AU].ToString();
+            InfoCU->Text = colony->Inventory[INV_CU].ToString();
+            InfoIU->Text = colony->Inventory[INV_IU].ToString();
+            InfoAU->Text = colony->Inventory[INV_AU].ToString();
 
             if( cmd )
             {
@@ -362,9 +362,9 @@ namespace FHUI
 private: System::Void UpdateAmounts(System::Object^  sender, System::EventArgs^  e) {
              int iu = Decimal::ToInt32(InstIU->Value);
              int au = Decimal::ToInt32(InstAU->Value);
-             int cu = m_Colony->Res->Inventory[INV_CU];
-             int iuNew = Math::Min( Math::Min(iu, m_Colony->Res->Inventory[INV_IU]), cu );
-             int auNew = Math::Min( Math::Min(au, m_Colony->Res->Inventory[INV_AU]), cu - iuNew );
+             int cu = m_Colony->Inventory[INV_CU];
+             int iuNew = Math::Min( Math::Min(iu, m_Colony->Inventory[INV_IU]), cu );
+             int auNew = Math::Min( Math::Min(au, m_Colony->Inventory[INV_AU]), cu - iuNew );
              if( iuNew != iu )
                  InstIU->Value = iuNew;
              if( auNew != au )
