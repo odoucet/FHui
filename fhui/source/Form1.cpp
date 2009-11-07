@@ -459,12 +459,11 @@ void Form1::DisplayTurn()
             throw gcnew FHUIDataIntegrityException(String::Format("No information about selected turn #{0}.", turn));
         }
         RepModeChanged();
-        m_PluginMgr->UpdatePlugins();
-        UpdateControls();
-
         m_CommandMgr->SelectTurn(turn);
-        //TODO: Set it properly. What should it be ?
-        //m_ColoniesMenuRef = 
+        m_PluginMgr->UpdatePlugins();
+
+        // Refresh grids and others
+        UpdateControls();
 
         // Display summary
         Summary->Text = m_GameData->GetSummary();
