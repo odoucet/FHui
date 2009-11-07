@@ -571,21 +571,54 @@ void StarSystem::SetWormhole(int targetId)
         }
 
         // Generate random color for wormhole
-        WormholeColor = System::Drawing::Color::Gold;
+        if( WormholeColor != System::Drawing::Color::White )
+            return;
+
         Random ^rnd = gcnew Random;
         bool r,g,b;
-        do
+        int failedColors = 0;
+        while( true )
         {
-            r = rnd->Next(0, 3) == 0;
-            g = rnd->Next(0, 3) == 0;
-            b = rnd->Next(0, 3) == 0;
-        } while ( !r && !g && !b );
-        WormholeColor = System::Drawing::Color::FromArgb(
-            0xff,
-            r ? rnd->Next(0x50, 0xd0) : 0xff,
-            g ? rnd->Next(0x50, 0xd0) : 0xff,
-            b ? rnd->Next(0x50, 0xd0) : 0xff );
+            do
+            {
+                r = rnd->Next(0, 3) == 0;
+                g = rnd->Next(0, 3) == 0;
+                b = rnd->Next(0, 3) == 0;
+            } while( !r && !g && !b );
+            WormholeColor = System::Drawing::Color::FromArgb(
+                0xff,
+                r ? rnd->Next(0x50, 0xd0) : 0xff,
+                g ? rnd->Next(0x50, 0xd0) : 0xff,
+                b ? rnd->Next(0x50, 0xd0) : 0xff );
+
+            // Check if wormhole color is unique enough
+            if( s_WHColorsUsed && failedColors < 100 )
+            {
+                bool fail = false;
+                for each( System::Drawing::Color color in s_WHColorsUsed )
+                {
+                    int diff =
+                        Math::Abs(color.R - WormholeColor.R) +
+                        Math::Abs(color.G - WormholeColor.G) +
+                        Math::Abs(color.B - WormholeColor.B);
+                    if( diff < 80 )
+                    {
+                        fail = true;
+                        ++failedColors;
+                        break;
+                    }
+                }
+                if( fail )
+                    continue;
+            }
+            break;
+        }
+
         target->WormholeColor = WormholeColor;
+
+        if( s_WHColorsUsed == nullptr )
+            s_WHColorsUsed = gcnew List<System::Drawing::Color>;
+        s_WHColorsUsed->Add( WormholeColor );
     }
 }
 

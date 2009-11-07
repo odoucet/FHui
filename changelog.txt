@@ -18,6 +18,7 @@ FHUI build ??
 + "Jump here" context menu available for any planet (previously only named planets).
 + In row selection mode selected rows are preserved after sorting, filters, tech
   levels or reference system change.
++ Improved color generator for wormhole endpoints for Systems tab.
 
 FHUI build 288
 * Issued post-arrival transfer commands did not appear in ships' context menu.

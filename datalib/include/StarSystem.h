@@ -178,6 +178,8 @@ protected:
     initonly static String^ s_ScanDipl = "Received";
     initonly static String^ s_ScanDiplVisited = "Recv/Vis";
     initonly static String^ s_ScanSelf = "Scanned";
+
+    static List<System::Drawing::Color>^    s_WHColorsUsed;
 };
 
 } // end namespace FHUI
