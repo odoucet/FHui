@@ -103,8 +103,9 @@ public:
     void            UpdateMaster();
     void            UpdateTooltip();
 
-    void            AddShip(Ship^);
-    void            AddColony(Colony^);
+    void            AddShip(Ship ^ship);
+    void            RemoveShip(Ship ^ship);
+    void            AddColony(Colony ^colony);
 
     String^         PrintLocation() { return String::Format("{0} {1} {2}", X, Y, Z); }
     String^         PrintWormholeTarget();

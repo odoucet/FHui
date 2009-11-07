@@ -19,6 +19,7 @@ public:
         Name = name;
         SubLight = subLight;
         CanJump = !subLight && type != SHIP_BAS;
+        BuiltThisTurn = false;
         Age = 0;
         Size = 0;
         EUToComplete = 0;
@@ -112,6 +113,7 @@ public:
     String^         Name;
     bool            SubLight;
     bool            CanJump;
+    bool            BuiltThisTurn;
     int             Age;
     ShipLocType     Location;
     int             PlanetNum;

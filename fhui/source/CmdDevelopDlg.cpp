@@ -36,22 +36,10 @@ void CmdDevelopDlg::InidDialog(Colony ^colony, ProdCmdDevelop ^cmd)
         }
     }
 
-    for each( Ship ^ship in GameData::Player->Ships )
+    for each( Ship ^ship in colony->System->GetShipTargets(CommandPhase::Production) )
     {
-        if( ship->Type != SHIP_TR ||
-            ship->SubLight )
-            continue;
-        ICommand ^cmd = ship->GetJumpCommand();
-        if( ship->System != colony->System )
-        {
-            if( cmd == nullptr ||
-                cmd->GetRefSystem() != colony->System )
-                continue;
-        }
-        else if( cmd )
-            continue;
-        
-        ships->Add( ship->PrintRefListEntry() );
+        if( ship->Type == SHIP_TR && !ship->SubLight )
+            ships->Add( ship->PrintRefListEntry() );
     }
 
 

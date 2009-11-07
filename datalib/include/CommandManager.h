@@ -77,6 +77,9 @@ private:
 
     void        RemoveGeneratedCommandsFromList( List<ICommand^> ^orders, CommandOrigin origin, bool productionOnly, bool preserveScouting );
 
+    void        RemoveShipDependentCommands(Ship ^ship);
+    void        RemoveShipDependentCommands(Ship ^ship, List<ICommand^> ^commands);
+
     void        GenerateCombat();
     void        GeneratePreDeparture();
     void        GenerateJumps();
@@ -101,6 +104,9 @@ private:
     CommandOrigin           m_CmdOrigin;
     CommandPhase            m_CmdPhase;
     bool                    m_bSaveEnabled;
+
+    int                     m_LastLineNr;
+    String^                 m_LastLine;
 
     int                     m_CurrentTurn;
     SortedList<int, TurnCommands^>^ m_CommandData;

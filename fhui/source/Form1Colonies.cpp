@@ -1013,6 +1013,7 @@ void Form1::ColoniesMenuCommandDel(ICommand ^cmd)
     m_CommandMgr->DelCommand(m_ColoniesMenuRef, cmd);
 
     ColoniesGrid->Filter->Update();
+    ShipsGrid->Filter->Update();
 
     if( m_ColoniesMenuRef->Commands->Count > 0 )
         ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
@@ -1067,6 +1068,7 @@ void Form1::ColoniesMenuCommandDelAll(CommandPhase phase)
     m_CommandMgr->SaveCommands();
 
     ColoniesGrid->Filter->Update();
+    ShipsGrid->Filter->Update();
 }
 
 void Form1::ColoniesMenuCommandDelAllTransfers(CommandPhase phase)

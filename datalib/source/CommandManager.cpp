@@ -129,6 +129,24 @@ void CommandManager::AddCommand(Colony ^colony, ICommand ^cmd)
         colony->Commands->Add(cmd);
         if( m_bSaveEnabled )
             SaveCommands();
+
+        if( cmd->GetCmdType() == CommandType::BuildShip )
+        {
+            ProdCmdBuildShip ^shipCmd = safe_cast<ProdCmdBuildShip^>(cmd);
+            Ship ^ship = GameData::AddShip(
+                GameData::Player,
+                shipCmd->m_Type,
+                shipCmd->m_Name,
+                shipCmd->m_Sublight,
+                colony->System );
+            ship->Location = SHIP_LOC_LANDED;
+            ship->PlanetNum = colony->PlanetNum;
+            ship->CanJump = false;
+            ship->BuiltThisTurn = true;
+            if( ship->Type == SHIP_TR || ship->Type == SHIP_BAS )
+                ship->Size = shipCmd->m_Size;
+            ship->CalculateCapacity();
+        }
     }
 }
 
@@ -146,10 +164,57 @@ void CommandManager::DelCommand(Colony ^colony, ICommand ^cmd)
             iCmd->CompareTo(cmd) == 0 )
         {
             colony->Commands->Remove(iCmd);
+
+            if( cmd->GetCmdType() == CommandType::BuildShip )
+            {
+                ProdCmdBuildShip ^shipCmd = safe_cast<ProdCmdBuildShip^>(cmd);
+                Ship ^ship = nullptr;
+                for each( Ship ^iShip in GameData::Player->Ships )
+                {
+                    if( iShip->Name == shipCmd->m_Name )
+                    {
+                        if( iShip->BuiltThisTurn == false )
+                            throw gcnew FHUIDataIntegrityException("Deleting build ship command, but ship is not marked as BuiltThisTurn!");
+                        ship = iShip;
+                        break;
+                    }
+                }
+
+                if( ship )
+                {
+                    GameData::RemoveShip( ship );
+                    RemoveShipDependentCommands(ship);
+                }
+            }
+
             SaveCommands();
+
             return;
         }
     }
+}
+
+void CommandManager::RemoveShipDependentCommands(Ship ^ship)
+{
+    // Global commands
+    RemoveShipDependentCommands(ship, GetCommands());
+    // Systems: transfers
+    for each( StarSystem ^system in GameData::GetStarSystems() )
+        RemoveShipDependentCommands(ship, system->Transfers);
+    // Colonies
+    for each( Colony ^colony in GameData::Player->Colonies )
+        RemoveShipDependentCommands(ship, colony->Commands);
+}
+
+void CommandManager::RemoveShipDependentCommands(Ship ^ship, List<ICommand^> ^commands)
+{
+    List<ICommand^> ^rmCmds = gcnew List<ICommand^>;
+    for each( ICommand ^cmd in commands )
+        if( cmd->IsUsingShip(ship) )
+            rmCmds->Add(cmd);
+
+    for each( ICommand ^cmd in rmCmds )
+        commands->Remove(cmd);
 }
 
 List<ICommand^>^ CommandManager::GetCommands(Colony ^colony)
@@ -329,9 +394,25 @@ void CommandManager::LoadCommands()
         RemoveGeneratedCommands(CommandOrigin::Auto, false, false);
         RemoveGeneratedCommands(CommandOrigin::Plugin, false, false);
 
-        LoadCommandsGlobal(sr);
-
-        sr->Close();
+        try
+        {
+            LoadCommandsGlobal(sr);
+        }
+        catch( Exception ^e )
+        {
+            throw gcnew FHUIParsingException( String::Format(
+                    "Failed loading internal commands file.\n"
+                    "File: {0}\n"
+                    "Line {1}: {2}\n",
+                    cmdPath,
+                    m_LastLineNr,
+                    m_LastLine ),
+                e );
+        }
+        finally
+        {
+            sr->Close();
+        }
     }
 
     m_bSaveEnabled = true;
@@ -345,10 +426,14 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
     String ^messageText = "";
     Alien ^messageTarget = nullptr;
 
+    m_LastLineNr = 0;
+
     int colonyProdOrder = 1;
-    while( (line = sr->ReadLine()) != nullptr ) 
+    while( (m_LastLine = sr->ReadLine()) != nullptr ) 
     {
-        line = line->Trim();
+        ++m_LastLineNr;
+
+        line = m_LastLine->Trim();
         if( String::IsNullOrEmpty(line) ||
             line[0] == ';' )
             continue;
@@ -612,13 +697,13 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
     // Shipyard
     if( line == "Shipyard" )
     {
-        colony->Commands->Add( CmdSetOrigin(gcnew ProdCmdShipyard) );
+        AddCommand(colony, CmdSetOrigin(gcnew ProdCmdShipyard) );
         return true;
     }
     // Hide
     if( line == "Hide" )
     {
-        colony->Commands->Add( CmdSetOrigin(gcnew ProdCmdHide(colony)) );
+        AddCommand(colony, CmdSetOrigin(gcnew ProdCmdHide(colony)) );
         return true;
     }
 
@@ -628,7 +713,7 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
         int amount = m_RM->GetResultInt(0);
         TechType tech = FHStrings::TechFromString(m_RM->Results[1]);
 
-        colony->Commands->Add( CmdSetOrigin(gcnew ProdCmdResearch(tech, amount)) );
+        AddCommand(colony, CmdSetOrigin(gcnew ProdCmdResearch(tech, amount)) );
         return true;
     }
 
@@ -656,7 +741,7 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
                 throw gcnew FHUIParsingException("Invalid build target: " + line);
             }
         }
-        colony->Commands->Add( CmdSetOrigin(
+        AddCommand(colony, CmdSetOrigin(
             gcnew ProdCmdBuildIUAU(
                 amount,
                 inv,
@@ -668,7 +753,7 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
     // Build warship
     if( m_RM->Match(line, m_RM->ExpCmdBuildShip) )
     {
-        colony->Commands->Add( CmdSetOrigin(gcnew ProdCmdBuildShip(
+        AddCommand(colony, CmdSetOrigin(gcnew ProdCmdBuildShip(
             FHStrings::ShipFromString(m_RM->Results[0]),
             0,
             String::IsNullOrEmpty(m_RM->Results[1]) == false,
@@ -679,7 +764,7 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
     // Build transport ship
     if( m_RM->Match(line, m_RM->ExpCmdBuildShipTR) )
     {
-        colony->Commands->Add( CmdSetOrigin(gcnew ProdCmdBuildShip(
+        AddCommand(colony, CmdSetOrigin(gcnew ProdCmdBuildShip(
             SHIP_TR,
             m_RM->GetResultInt(0),
             String::IsNullOrEmpty(m_RM->Results[1]) == false,
@@ -690,7 +775,7 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
     // Recycle
     if( m_RM->Match(line, m_RM->ExpCmdRecycle) )
     {
-        colony->Commands->Add( CmdSetOrigin(gcnew ProdCmdRecycle(
+        AddCommand(colony, CmdSetOrigin(gcnew ProdCmdRecycle(
             FHStrings::InvFromString( m_RM->Results[1] ),
             m_RM->GetResultInt(0) ) ) );
         return true;
@@ -699,7 +784,7 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
     // Estimate
     if( m_RM->Match(line, m_RM->ExpCmdEstimate) )
     {
-        colony->Commands->Add( CmdSetOrigin(gcnew ProdCmdEstimate(
+        AddCommand(colony, CmdSetOrigin(gcnew ProdCmdEstimate(
             GameData::GetAlien(m_RM->Results[0]) ) ) );
         return true;
     }
@@ -709,7 +794,7 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
     {
         Colony ^colony = GameData::GetColony( m_RM->Results[2] );
 
-        colony->Commands->Add( CmdSetOrigin(gcnew CmdInstall(
+        AddCommand(colony, CmdSetOrigin(gcnew CmdInstall(
             m_RM->GetResultInt(0),
             FHStrings::InvFromString(m_RM->Results[1]),
             colony ) ) );
@@ -725,7 +810,7 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
         if( !ship )
             throw gcnew FHUIParsingException("JUMP order for unknown ship: {1}" + m_RM->Results[2]);
 
-        colony->Commands->Add( CmdSetOrigin(gcnew ProdCmdDevelop(
+        AddCommand(colony, CmdSetOrigin(gcnew ProdCmdDevelop(
             m_RM->GetResultInt(0),
             devColony,
             ship ) ) );
@@ -736,7 +821,7 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
     {
         Colony ^devColony = m_GameData->GetColony(m_RM->Results[1]);
 
-        colony->Commands->Add( CmdSetOrigin(gcnew ProdCmdDevelop(
+        AddCommand(colony, CmdSetOrigin(gcnew ProdCmdDevelop(
             m_RM->GetResultInt(0),
             devColony,
             nullptr ) ) );
@@ -745,7 +830,7 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
     }
     if( m_RM->Match(line, m_RM->ExpCmdDevelop) )
     {
-        colony->Commands->Add( CmdSetOrigin(gcnew ProdCmdDevelop(
+        AddCommand(colony, CmdSetOrigin(gcnew ProdCmdDevelop(
             m_RM->GetResultInt(0),
             nullptr,
             nullptr ) ) );
@@ -756,7 +841,7 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
     // Custom
     if( m_RM->Match(line, m_RM->ExpCmdCustom) )
     {
-        colony->Commands->Add( CmdSetOrigin(
+        AddCommand(colony, CmdSetOrigin(
             gcnew CmdCustom(m_CmdPhase, m_RM->Results[1], m_RM->GetResultInt(0))) );
         return true;
     }

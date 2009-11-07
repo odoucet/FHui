@@ -35,6 +35,8 @@ public:
     static IList<Ship^>^           GetShips()           { return m_CurrentTurnData->GetShips(); }
     static IList<Colony^>^         GetColonies()        { return m_CurrentTurnData->GetColonies(); }
 
+    static bool         IsParsingFinished()             { return m_CurrentTurnData->IsParsingFinished(); }
+
     static void         Update();
     static void         SetTechLevel(Alien ^sp, TechType, int, int);
     static void         SetFleetCost(int, int);
@@ -47,6 +49,7 @@ public:
     static Colony^      AddColony(Alien ^sp, String ^name, StarSystem ^system, int plNum, bool);
     static void         DelColony(String ^name);
     static Ship^        AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);
+    static void         RemoveShip(Ship ^ship)          { m_CurrentTurnData->RemoveShip(ship); }
     static void         AddWormholeJump(String ^shipName, int fromSystemId);
     static void         AddMishap(String ^shipName);
 

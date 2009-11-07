@@ -41,6 +41,8 @@ public:
     IList<Ship^>^           GetShips()                          { return m_ShipsByTonnage; }
     IList<Colony^>^         GetColonies()                       { return m_Colonies->Values; }
 
+    bool            IsParsingFinished()                         { return m_bParsingFinished; }
+
     // ------------------------------------------
     void            Update();
     void            SetSpecies(String ^sp);
@@ -58,6 +60,7 @@ public:
     void            DelColony(String ^name);
     Colony^         AddColony(Alien ^sp, String ^name, StarSystem ^system, int plNum, bool);
     Ship^           AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);
+    void            RemoveShip(Ship ^ship);
     void            AddWormholeJump(String ^shipName, int fromSystemId);
     void            AddMishap(String ^shipName);
 
@@ -103,6 +106,7 @@ protected:
     List<String^>^                      m_Misjumps;
 
     initonly int        m_Turn;
+    bool                m_bParsingFinished;
 };
 
 } // end namespace FHUI

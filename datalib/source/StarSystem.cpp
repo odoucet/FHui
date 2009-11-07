@@ -48,6 +48,19 @@ void StarSystem::AddShip(Ship^ ship)
     }
 }
 
+void StarSystem::RemoveShip(Ship^ ship)
+{
+    m_Ships->Remove(ship);
+    if (ship->Owner == GameData::Player)
+    {
+        m_ShipsOwned->Remove(ship);
+    }
+    else
+    {
+        m_ShipsAlien->Remove(ship);
+    }
+}
+
 void StarSystem::AddColony(Colony^ colony)
 {
     // Keep the list sorted - insert new elements in the proper place
@@ -582,25 +595,44 @@ List<Ship^>^ StarSystem::GetShipTargets(CommandPhase phase)
 
     for each( Ship ^ship in GameData::Player->Ships )
     {
-        if( phase == CommandPhase::PreDeparture )
+        switch( phase )
         {
+        case CommandPhase::PreDeparture:
             if( ship->System != this )
                 continue;
-        }
-        else if( phase == CommandPhase::PostArrival )
-        {
-            ICommand ^cmd = ship->GetJumpCommand();
+            // In pre-departure skip any incomplete or being built ship
+            if( ship->EUToComplete > 0 || ship->BuiltThisTurn )
+                continue;
+            break;
+
+        case CommandPhase::Production:
             if( ship->System != this )
+                continue;
+            // Skip incomplete ships
+            if( ship->EUToComplete > 0 )
+                continue;
+            break;
+
+        case CommandPhase::PostArrival:
             {
-                if( cmd == nullptr ||
-                    cmd->GetRefSystem() != this )
+                ICommand ^cmd = ship->GetJumpCommand();
+                if( ship->System != this )
+                {
+                    if( cmd == nullptr ||
+                        cmd->GetRefSystem() != this )
+                        continue;
+                }
+                else if( cmd )
                     continue;
             }
-            else if( cmd )
+            // Skip incomplete ships
+            if( ship->EUToComplete > 0 )
                 continue;
+            break;
+
+        default:
+            throw gcnew FHUIDataImplException("Unsupported command phase: " + ((int)phase).ToString());
         }
-        else
-            throw gcnew FHUIDataImplException("Invalid command phase for transfer command: " + ((int)phase).ToString());
 
         list->Add(ship);
     }

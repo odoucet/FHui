@@ -21,6 +21,8 @@ TurnData::TurnData(int turn)
     , m_Ships(gcnew SortedList<String^, Ship^>)
     , m_WormholeJumps(gcnew List<WormholeJump^>)
     , m_Misjumps(gcnew List<String^>)
+    , m_bParsingFinished(false)
+    , m_ShipsByTonnage(gcnew List<Ship^>)
 {
 }
 
@@ -517,6 +519,8 @@ void TurnData::Update()
     // are not yet initialized
     if( m_Turn > 0 )
     {
+        m_bParsingFinished = true;
+
         UpdateShips();
         UpdateAliens();
         UpdateSystems();
@@ -527,10 +531,6 @@ void TurnData::Update()
 
 void TurnData::UpdateShips()
 {
-    m_ShipsByTonnage = gcnew List<Ship^>;
-    m_ShipsByTonnage->AddRange(m_Ships->Values);
-    m_ShipsByTonnage->Sort( gcnew Ship::WarTonnageComparer );
-
     // Back up original cargo
     for each( Ship ^ship in GameData::GetShips() )
     {
@@ -567,8 +567,6 @@ void TurnData::UpdateAliens()
     for each( Alien ^alien in GetAliens() )
     {
         alien->RelationOriginal = alien->Relation;
-
-        alien->Ships    = GetShips(nullptr, alien);
     }
 }
 
@@ -585,11 +583,6 @@ void TurnData::UpdateSystems()
     for each( Colony ^colony in GetColonies() )
     {
         colony->System->AddColony(colony);
-    }
-
-    for each( Ship ^ship in GetShips() )
-    {
-        ship->System->AddShip(ship);
     }
 
     for each( StarSystem ^system in GetStarSystems() )
@@ -729,11 +722,27 @@ Ship^ TurnData::AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, S
     ship->System = system;
     m_Ships[name->ToLower()] = ship;
 
+    m_ShipsByTonnage->Add( ship );
+    m_ShipsByTonnage->Sort( gcnew Ship::WarTonnageComparer );
+
+    system->AddShip( ship );
+    sp->Ships->Add( ship );
+
     if( sp == GameData::Player )
     {
-        DeleteAlienColonies(system);
+        if( IsParsingFinished() == false )
+            DeleteAlienColonies(system);
     }
+
     return ship;
+}
+
+void TurnData::RemoveShip(Ship ^ship)
+{
+    m_Ships->Remove(ship->Name->ToLower());
+    m_ShipsByTonnage->Remove( ship );
+    ship->System->RemoveShip( ship );
+    GameData::Player->Ships->Remove( ship );
 }
 
 void TurnData::AddWormholeJump(String ^shipName, int fromSystemId)

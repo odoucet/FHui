@@ -77,6 +77,7 @@ public interface class ICommand : public IComparable
     property bool           RequiresPhasePrefix;
 
     StarSystem^     GetRefSystem();
+    bool            IsUsingShip(Ship ^ship);
 
     // EU/CU/Inventory modifiers to budget / colony inventory
     // POSITIVE value mean:
@@ -113,6 +114,7 @@ public:
     virtual property bool           RequiresPhasePrefix;
 
     virtual StarSystem^     GetRefSystem()              { return nullptr; }
+    virtual bool            IsUsingShip(Ship ^ship)     { return false; }
 
     virtual int             GetEUCost()                 { return 0; }
     virtual int             GetPopCost()                { return 0; }
@@ -159,6 +161,19 @@ public ref class CmdProdBase abstract
 
 ////////////////////////////////////////////////////////////
 
+template<CommandPhase Phase, CommandType CmdType>
+public ref class ShipCmdBase abstract : public CmdBase<Phase, CmdType>
+{
+public:
+    ShipCmdBase(Ship ^ship) : m_Ship(ship) {}
+
+    virtual bool            IsUsingShip(Ship ^ship) override    { return ship == m_Ship; }
+
+    Ship^   m_Ship;
+};
+
+////////////////////////////////////////////////////////////
+
 public ref class CmdPhaseWrapper
     : public CmdBase<CommandPhase::Custom, CommandType::Custom>
 {
@@ -174,6 +189,7 @@ public:
     virtual CommandType     GetCmdType() override               { return m_Command->GetCmdType(); }
 
     virtual StarSystem^     GetRefSystem() override             { return m_Command->GetRefSystem(); }
+    virtual bool            IsUsingShip(Ship ^ship) override    { return m_Command->IsUsingShip(ship); }
 
     virtual int             GetEUCost() override                { return m_Command->GetEUCost(); }
     virtual int             GetPopCost() override               { return m_Command->GetPopCost(); }
@@ -241,6 +257,8 @@ public ref class ShipCmdUpgrade : public CmdProdBase<CommandType::Upgrade>
 public:
     ShipCmdUpgrade(Ship ^ship) : m_Ship(ship) {}
 
+    virtual bool            IsUsingShip(Ship ^ship) override    { return ship == m_Ship; }
+
     virtual int     GetEUCost() override;
     virtual String^ Print() override;
     virtual String^ PrintForUI() override   { return "Upgrade"; }
@@ -254,6 +272,8 @@ public ref class ShipCmdRecycle : public CmdProdBase<CommandType::RecycleShip>
 public:
     ShipCmdRecycle(Ship ^ship) : m_Ship(ship) {}
 
+    virtual bool            IsUsingShip(Ship ^ship) override    { return ship == m_Ship; }
+
     virtual int     GetEUCost() override;
     virtual String^ Print() override;
     virtual String^ PrintForUI() override   { return "Recycle"; }
@@ -262,75 +282,66 @@ public:
 };
 
 // Unload
-public ref class ShipCmdUnload : public CmdBase<CommandPhase::PreDeparture, CommandType::Unload>
+public ref class ShipCmdUnload : public ShipCmdBase<CommandPhase::PreDeparture, CommandType::Unload>
 {
 public:
-    ShipCmdUnload(Ship ^ship) : m_Ship(ship) {}
+    ShipCmdUnload(Ship ^ship) : ShipCmdBase(ship) {}
 
     virtual String^ Print() override;
     virtual String^ PrintForUI() override   { return "Unload"; }
-
-    Ship^   m_Ship;
 };
 
 // Land
-public ref class ShipCmdLand : public CmdBase<CommandPhase::PreDeparture, CommandType::Land>
+public ref class ShipCmdLand : public ShipCmdBase<CommandPhase::PreDeparture, CommandType::Land>
 {
 public:
-    ShipCmdLand(Ship ^ship) : m_Ship(ship) {}
+    ShipCmdLand(Ship ^ship) : ShipCmdBase(ship) {}
 
     virtual String^ Print() override;
     virtual String^ PrintForUI() override   { return "Land"; }
-
-    Ship^   m_Ship;
 };
 
 // Deep
-public ref class ShipCmdDeep : public CmdBase<CommandPhase::PreDeparture, CommandType::Deep>
+public ref class ShipCmdDeep : public ShipCmdBase<CommandPhase::PreDeparture, CommandType::Deep>
 {
 public:
-    ShipCmdDeep(Ship ^ship) : m_Ship(ship) {}
+    ShipCmdDeep(Ship ^ship) : ShipCmdBase(ship) {}
 
     virtual String^ Print() override;
     virtual String^ PrintForUI() override   { return "Deep"; }
-
-    Ship^   m_Ship;
 };
 
 // Orbit
-public ref class ShipCmdOrbit : public CmdBase<CommandPhase::PreDeparture, CommandType::Orbit>
+public ref class ShipCmdOrbit : public ShipCmdBase<CommandPhase::PreDeparture, CommandType::Orbit>
 {
 public:
-    ShipCmdOrbit(Ship ^ship, Planet ^planet) : m_Ship(ship), m_Planet(planet) {}
+    ShipCmdOrbit(Ship ^ship, Planet ^planet) : ShipCmdBase(ship), m_Planet(planet) {}
 
     virtual String^ Print() override;
     virtual String^ PrintForUI() override   { return "Orbit " + GetOrbitTarget(); }
 
     virtual String^ GetOrbitTarget();
 
-    Ship^   m_Ship;
     Planet^ m_Planet;
 };
 
 // Scan
-public ref class ShipCmdScan : public CmdBase<CommandPhase::PostArrival, CommandType::Scan>
+public ref class ShipCmdScan : public ShipCmdBase<CommandPhase::PostArrival, CommandType::Scan>
 {
 public:
-    ShipCmdScan(Ship ^ship) : m_Ship(ship) {}
+    ShipCmdScan(Ship ^ship) : ShipCmdBase(ship) {}
 
     virtual String^ Print() override;
     virtual String^ PrintForUI() override   { return "Scan"; }
-
-    Ship^   m_Ship;
 };
 
 // Jump
 public ref class ShipCmdJump
-    : public CmdBase<CommandPhase::Jump, CommandType::Jump>
+    : public ShipCmdBase<CommandPhase::Jump, CommandType::Jump>
 {
 public:
     ShipCmdJump(Ship ^ship, StarSystem ^target, int planetNum)
-        : m_Ship(ship), m_JumpTarget(target), m_PlanetNum(planetNum)
+        : ShipCmdBase(ship), m_JumpTarget(target), m_PlanetNum(planetNum)
     {}
 
     virtual StarSystem^ GetRefSystem() override { return m_JumpTarget; }
@@ -338,18 +349,17 @@ public:
     virtual String^ Print() override;
     virtual String^ PrintForUI() override;
 
-    Ship^       m_Ship;
     StarSystem^ m_JumpTarget;
     int         m_PlanetNum;
 };
 
 // Move
 public ref class ShipCmdMove
-    : public CmdBase<CommandPhase::Jump, CommandType::Move>
+    : public ShipCmdBase<CommandPhase::Jump, CommandType::Move>
 {
 public:
     ShipCmdMove(Ship ^ship, int x, int y, int z)
-        : m_Ship(ship), m_X(x), m_Y(y), m_Z(z)
+        : ShipCmdBase(ship), m_X(x), m_Y(y), m_Z(z)
     {}
 
     virtual StarSystem^ GetRefSystem() override;
@@ -357,17 +367,16 @@ public:
     virtual String^ Print() override;
     virtual String^ PrintForUI() override;
 
-    Ship^       m_Ship;
     int         m_X, m_Y, m_Z;
 };
 
 // Wormhole
 public ref class ShipCmdWormhole
-    : public CmdBase<CommandPhase::Jump, CommandType::Wormhole>
+    : public ShipCmdBase<CommandPhase::Jump, CommandType::Wormhole>
 {
 public:
     ShipCmdWormhole(Ship ^ship, StarSystem ^target, int planetNum)
-        : m_Ship(ship), m_JumpTarget(target), m_PlanetNum(planetNum)
+        : ShipCmdBase(ship), m_JumpTarget(target), m_PlanetNum(planetNum)
     {}
 
     virtual StarSystem^ GetRefSystem() override { return m_JumpTarget; }
@@ -375,7 +384,6 @@ public:
     virtual String^ Print() override;
     virtual String^ PrintForUI() override;
 
-    Ship^       m_Ship;
     StarSystem^ m_JumpTarget;
     int         m_PlanetNum;
 };
@@ -591,6 +599,8 @@ public:
         return this;
     }
 
+    virtual bool    IsUsingShip(Ship ^ship) override { return m_Ship == ship; }
+
     virtual int     GetEUCost() override    { return m_Amount; }
     virtual int     GetPopCost() override   { return m_PopCost; }
     virtual int     GetInvMod(InventoryType i) override { return (i == m_Unit && m_Colony == nullptr && m_Ship == nullptr) ? m_Amount : 0; }
@@ -665,6 +675,8 @@ public:
         return this;
     }
 
+    virtual bool    IsUsingShip(Ship ^ship) override { return m_Ship == ship; }
+
     virtual int     GetEUCost() override    { return m_Amount; }
     virtual int     GetPopCost() override   { return m_Ship ? m_Amount : ((m_Amount / 2) + (m_Amount % 1)); }
 
@@ -698,6 +710,7 @@ public:
     virtual CommandPhase    GetPhase() override     { return m_Phase; }
 
     virtual StarSystem^     GetRefSystem() override;
+    virtual bool            IsUsingShip(Ship ^ship) override { return m_FromShip == ship || m_ToShip == ship; }
 
     virtual String^ Print() override;
 

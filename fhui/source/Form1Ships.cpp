@@ -127,6 +127,8 @@ void Form1::ShipsFillGrid()
         cells[c.Owner]->Value       = ship->Owner == sp ? String::Format("* {0}", sp->Name) : ship->Owner->Name;
         cells[c.Class]->Value       = ship->PrintClass();
         cells[c.Name]->Value        = ship->Name;
+        if( ship->BuiltThisTurn )
+            cells[c.Name]->Value    = ship->Name + " (new)";
         if( ship->EUToComplete > 0 )
             cells[c.Name]->Value    = ship->Name + " (incomplete)";
         cells[c.Location]->Value    = ship->PrintLocation();
@@ -222,10 +224,13 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
             }
         }
 
-        menu->Items->Add( ShipsFillMenuCommands(CommandPhase::PreDeparture) );
-        menu->Items->Add( ShipsFillMenuCommands(CommandPhase::Jump) );
-        if( prodOrderPossible )
-            menu->Items->Add( ShipsFillMenuCommands(CommandPhase::Production) );
+        if( ship->BuiltThisTurn == false )
+        {
+            menu->Items->Add( ShipsFillMenuCommands(CommandPhase::PreDeparture) );
+            menu->Items->Add( ShipsFillMenuCommands(CommandPhase::Jump) );
+            if( prodOrderPossible )
+                menu->Items->Add( ShipsFillMenuCommands(CommandPhase::Production) );
+        }
         menu->Items->Add( ShipsFillMenuCommands(CommandPhase::PostArrival) );
     }
 }

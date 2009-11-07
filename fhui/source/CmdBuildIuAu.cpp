@@ -79,22 +79,10 @@ void CmdBuildIuAu::InitAvailResources(Colony ^colony, ProdCmdBuildIUAU ^cmd)
         if( iCol != colony )
             targets->Add( "PL " + iCol->Name );
     }
-    for each( Ship ^ship in GameData::Player->Ships )
+    for each( Ship ^ship in colony->System->GetShipTargets(CommandPhase::Production) )
     {
-        if( ship->Type != SHIP_TR )
-            continue;
-        ICommand ^cmd = ship->GetJumpCommand();
-        if( ship->System != colony->System )
-        {
-            ICommand ^cmd = ship->GetJumpCommand();
-            if( cmd == nullptr ||
-                cmd->GetRefSystem() != colony->System )
-                continue;
-        }
-        else if( cmd )
-            continue;
-        
-        targets->Add( ship->PrintRefListEntry() );
+        if( ship->Type == SHIP_TR )
+            targets->Add( ship->PrintRefListEntry() );
     }
     Target->DataSource = targets;
     UpdateShipCapacity();
@@ -150,6 +138,10 @@ void CmdBuildIuAu::UpdateAmounts()
         cuNew = Math::Min(cuNew, m_Capacity);
         iuNew = Math::Min(iuNew, m_Capacity - cuNew);
         auNew = Math::Min(auNew, m_Capacity - cuNew - iuNew);
+
+        cuNew = Math::Max(cuNew, 0);
+        iuNew = Math::Max(iuNew, 0);
+        auNew = Math::Max(auNew, 0);
     }
 
     if( cu != cuNew )
