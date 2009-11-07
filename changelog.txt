@@ -16,6 +16,8 @@ FHUI build ??
   instead of average size. LSN and PR% columns show weighted average so bigger
   colonies have stronger impact on calculation.
 + "Jump here" context menu available for any planet (previously only named planets).
++ In row selection mode selected rows are preserved after sorting, filters, tech
+  levels or reference system change.
 
 FHUI build 288
 * Issued post-arrival transfer commands did not appear in ships' context menu.

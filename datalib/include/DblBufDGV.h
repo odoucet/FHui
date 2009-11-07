@@ -22,6 +22,10 @@ public:
     {
         // Disable header size updates
         AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode::None;
+
+        // Store selected rows
+        StoreSelection();
+
         // Remove all data
         Rows->Clear();
     }
@@ -38,7 +42,45 @@ public:
 
         // Enable header size updates
         AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode::AllCells;
+
+        RestoreSelection();
     }
+
+protected:
+    void StoreSelection()
+    {
+        if( SelectedRows->Count > 0 )
+        {
+            m_StoredSelection = gcnew List<Object^>;
+            for each( DataGridViewRow ^r in SelectedRows )
+            {
+                Object ^o = r->Cells[0]->Value;
+                m_StoredSelection->Add( o );
+            }
+        }
+        else
+            m_StoredSelection = nullptr;
+    }
+
+    void RestoreSelection()
+    {
+        ClearSelection();
+        if( m_StoredSelection == nullptr )
+            return;
+
+        for each( DataGridViewRow ^row in Rows )
+        {
+            Object ^o = row->Cells[0]->Value;
+            for each( Object ^oSel in m_StoredSelection )
+                if( oSel == o )
+                {
+                    row->Selected = true;
+                    break;
+                }
+        }
+    }
+
+    List<Object^>^  m_StoredSelection;
 };
 
 }
