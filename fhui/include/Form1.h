@@ -413,6 +413,7 @@ namespace FHUI {
             int Object;
             int Name;
             int Relation;
+            int TurnMet;
             int Home;
             int Dist;
             int TechLev;

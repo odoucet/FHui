@@ -709,9 +709,9 @@ Color Form1::GetAlienColor(Alien ^sp)
     switch( sp->Relation )
     {
     case SP_PLAYER:     return Color::FromArgb(210, 245, 245);
-    case SP_NEUTRAL:    return Color::FromArgb(245, 245, 195);
+    case SP_NEUTRAL:    return sp->TurnMet > 0 ? Color::FromArgb(245, 245, 195) : Color::FromArgb(235, 235, 190);
     case SP_ALLY:       return Color::FromArgb(220, 245, 200);
-    case SP_ENEMY:      return Color::FromArgb(245, 210, 210);
+    case SP_ENEMY:      return sp->TurnMet > 0 ? Color::FromArgb(245, 210, 210) : Color::FromArgb(235, 205, 205);
     case SP_PIRATE:     return Color::FromArgb(230, 230, 230);
     case SP_MIXED:      return Color::FromArgb(235, 235, 235);
     }

@@ -26,7 +26,7 @@ void Form1::AliensInitControls()
     c.Object    = ADD_COLUMN(nullptr,       nullptr,                    Alien,  None,       Default);
     c.Name      = ADD_COLUMN("Name",        "Species name",             String, Ascending,  Default);
     c.Relation  = ADD_COLUMN("Relation",    "Current relation",         String, Ascending,  Relation);
-    //c.LastSeen  = ADD_COLUMN("Seen",        "Turn number when you last seen this species", int,  Ascending,  Default);
+    c.TurnMet   = ADD_COLUMN("Met",         "Turn number when you have met this species for the first time", int,  Ascending,  Default);
     c.Home      = ADD_COLUMN("Home",        "Home planet location",     String, Ascending,  Location);
     c.Dist      = ADD_COLUMN("Dist",        "Home distance from your home system", double, Ascending, Default);
     c.TechLev   = ADD_COLUMN("Tech Levels", "Estimated technology levels", String, Ascending, Default);
@@ -92,6 +92,8 @@ void Form1::AliensFillGrid()
         cells[c.Object]->Value      = alien;
         cells[c.Name]->Value        = alien->Name;
         cells[c.Relation]->Value    = alien->PrintRelation();
+        if( alien->TurnMet > 0 )
+            cells[c.TurnMet]->Value = alien->TurnMet;
         cells[c.Home]->Value        = alien->PrintHome();
         cells[c.TechLev]->Value     = alien->PrintTechLevels();
         if( alien->HomeSystem )
@@ -209,6 +211,9 @@ void Form1::AliensFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
         "Reset Filters",
         nullptr,
         gcnew EventHandler(this, &Form1::AliensFiltersReset_Click));
+
+    if( alien->TurnMet == 0 )
+        return;
 
     if( alien->Relation == SP_NEUTRAL ||
         alien->Relation == SP_ENEMY ||

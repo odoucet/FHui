@@ -20,6 +20,9 @@ FHUI build ??
 + In row selection mode selected rows are preserved after sorting, filters, tech
   levels or reference system change.
 + Improved color generator for wormhole endpoints for Systems tab.
++ New column "Met" on Aliens tab showing in which turn you met this species.
+  There may be species known only via diplomacy (turn 0) and for such aliens
+  context menu doesn't show command options.
 
 FHUI build 288
 * Issued post-arrival transfer commands did not appear in ships' context menu.

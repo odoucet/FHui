@@ -329,7 +329,10 @@ Alien^ TurnData::AddAlien(String ^sp)
     String ^spKey = sp->ToLower();
     if( m_Aliens->ContainsKey(spKey) )
     {
-        return m_Aliens[spKey];
+        Alien ^sp = m_Aliens[spKey];
+        if( sp->TurnMet == 0 )
+            sp->TurnMet = m_Turn;
+        return sp;
     }
     Alien ^alien = gcnew Alien(sp, m_Turn);
     m_Aliens->Add(spKey, alien);
