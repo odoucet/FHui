@@ -7,10 +7,13 @@ Minor changes are listed only if originally requested by player
 
 FHUI build ??
 * Fixed saving orders template to file.
+* Update tooltip after changing commands order for any phase.
++ Changes to colonies summary row: Size column now shows sum of colony sizes
+  instead of average size. LSN and PR% columns show weighted average so bigger
+  colonies have stronger impact on calculation.
 
 FHUI build 288
 * Issued post-arrival transfer commands did not appear in ships' context menu.
-* Update tooltip after changing commands order for any phase.
 
 FHUI build 287
 * [P] Fixed crash when displaying context menu for newly named planet

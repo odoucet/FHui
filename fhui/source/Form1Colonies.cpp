@@ -131,7 +131,6 @@ void Form1::ColoniesFillGrid()
 
     ColoniesSummary %s = m_ColoniesSummary;
     s = ColoniesSummary();
-    int summaryCount = 0;
 
     for each( Colony ^colony in m_GameData->GetColonies() )
     {
@@ -170,16 +169,17 @@ void Form1::ColoniesFillGrid()
                 int prodPerc = 100 - Calculators::ProductionPenalty(colony->LSN, sp->TechLevelsAssumed[TECH_LS]);
 
                 // -- Summary update
-                ++summaryCount;
-                s.Size      += Math::Max(0, colony->EconomicBase);
+                int size = Math::Max(0, colony->EconomicBase);
+                ++s.Count;
+                s.Size      += size;
                 s.Shipyards += Math::Max(0, colony->Shipyards);
                 s.MD        += colony->MiDiff;
                 s.Grav      += colony->Planet->Grav;
-                s.LSN       += colony->LSN;
+                s.LSN       += colony->LSN * size;
                 s.Dist      += colony->System->CalcDistance(ColoniesGrid->Filter->RefSystem);
                 s.DistSec   += colony->System->CalcDistance(ColoniesGrid->Filter->RefSystemPrev);
                 s.Prod      += prodCalculated;
-                s.ProdPerc  += prodPerc;
+                s.ProdPerc  += prodPerc * size;
                 // -- summary update end
 
                 cells[c.Prod]->Value        = prodCalculated;
@@ -259,14 +259,15 @@ void Form1::ColoniesFillGrid()
     SetGridBgAndTooltip(ColoniesGrid);
 
     // Add summary row
-    ColoniesFillSummary(summaryCount);
+    ColoniesFillSummary();
 
     ColoniesGrid->FullUpdateEnd();
 }
 
-void Form1::ColoniesFillSummary(int sumCnt)
+void Form1::ColoniesFillSummary()
 {
-    if( sumCnt == 0 ||
+    ColoniesSummary %s = m_ColoniesSummary;
+    if( s.Count == 0 ||
         ColoniesSummaryRow->Checked == false )
         return;
 
@@ -274,28 +275,30 @@ void Form1::ColoniesFillSummary(int sumCnt)
     DataGridViewCellCollection ^cells = row->Cells;
 
     ColoniesColumns %c = m_ColoniesColumns;
-    ColoniesSummary %s = m_ColoniesSummary;
+
+    double avgDivider = (double)s.Count;
+    double weightDivider = (double)s.Size;
 
     cells[c.Object]->Value      = nullptr;
     cells[c.Owner]->Value        = "-- Summary --";
-    cells[c.Size]->Value        = (s.Size / (double)sumCnt / 10.0).ToString("F1");
+    cells[c.Size]->Value        = (s.Size / 10.0).ToString("F1");
     cells[c.Prod]->Value        = s.Prod;
-    cells[c.Shipyards]->Value   = (s.Shipyards / (double)sumCnt).ToString("F2");
-    cells[c.MD]->Value          = (s.MD / (double)sumCnt / 100.0).ToString("F2");
-    cells[c.LSN]->Value         = (s.LSN / (double)sumCnt).ToString("F2");
-    cells[c.Dist]->Value        = (s.Dist / sumCnt).ToString("F1");
-    cells[c.DistSec]->Value     = (s.Dist / sumCnt).ToString("F1");
-    cells[c.ProdPerc]->Value    = (s.ProdPerc / (double)sumCnt).ToString("F1");
+    cells[c.Shipyards]->Value   = (s.Shipyards / avgDivider).ToString("F2");
+    cells[c.MD]->Value          = (s.MD / avgDivider / 100.0).ToString("F2");
+    cells[c.LSN]->Value         = (s.LSN / weightDivider).ToString("F2");
+    cells[c.Dist]->Value        = (s.Dist / avgDivider).ToString("F1");
+    cells[c.DistSec]->Value     = (s.Dist / avgDivider).ToString("F1");
+    cells[c.ProdPerc]->Value    = (s.ProdPerc / weightDivider).ToString("F1");
 
     cells[c.Owner]->ToolTipText     = "This row displays summary of your colonies";
-    cells[c.Size]->ToolTipText      = "Average size of your colonies";
+    cells[c.Size]->ToolTipText      = "Total size of all your colonies";
     cells[c.Prod]->ToolTipText      = "Sum of production on your colonies";
     cells[c.Shipyards]->ToolTipText = "Average number of shipyards per colony";
     cells[c.MD]->ToolTipText        = "Average Mining Difficulty per colony";
-    cells[c.LSN]->ToolTipText       = "Average LSN per colony";
+    cells[c.LSN]->ToolTipText       = "Weighted average LSN per colony";
     cells[c.Dist]->ToolTipText      = "Average colony distance to reference system";
     cells[c.DistSec]->ToolTipText   = "Average colony distance to previous reference system";
-    cells[c.ProdPerc]->ToolTipText  = "Average production % after LSN penalties";
+    cells[c.ProdPerc]->ToolTipText  = "Weighted average production % after LSN penalties";
 
     for each( DataGridViewCell ^cell in row->Cells )
     {

@@ -261,7 +261,7 @@ namespace FHUI {
         void        ColoniesInitControls();
         void        ColoniesUpdateControls();
         void        ColoniesFillGrid();
-        void        ColoniesFillSummary(int summaryCount);
+        void        ColoniesFillSummary();
         void        ColoniesSetRef( int rowIndex );
         void        ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex);
         ToolStripMenuItem^  ColoniesFillMenuAuto();
@@ -326,6 +326,8 @@ namespace FHUI {
             double  Dist;
             double  DistSec;
             int     ProdPerc;
+
+            int     Count;
         };
 
         Colony             ^m_ColoniesMenuRef;
