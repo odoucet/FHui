@@ -589,10 +589,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\VTune\FHUI.vpj"
-			>
-		</File>
-		<File
 			RelativePath="..\ReadMe.txt"
 			>
 		</File>

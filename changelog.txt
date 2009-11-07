@@ -11,6 +11,7 @@ FHUI build ??
 + Changes to colonies summary row: Size column now shows sum of colony sizes
   instead of average size. LSN and PR% columns show weighted average so bigger
   colonies have stronger impact on calculation.
++ "Jump here" context menu available for any planet (previously only named planets).
 
 FHUI build 288
 * Issued post-arrival transfer commands did not appear in ships' context menu.

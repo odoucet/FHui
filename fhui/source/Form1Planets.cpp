@@ -276,14 +276,14 @@ void Form1::PlanetsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex
                 nullptr,
                 gcnew EventHandler(this, &Form1::PlanetsMenuRemoveName) );
         }
+    }
 
-        // Ship jumps to this planet
-        ToolStripMenuItem ^jumpMenu = ShipsMenuAddJumpsHere( planet->System, planet->Number );
-        if( jumpMenu )
-        {
-            menu->Items->Add( gcnew ToolStripSeparator );
-            menu->Items->Add( jumpMenu );
-        }
+    // Ship jumps to this planet
+    ToolStripMenuItem ^jumpMenu = ShipsMenuAddJumpsHere( planet->System, planet->Number );
+    if( jumpMenu )
+    {
+        menu->Items->Add( gcnew ToolStripSeparator );
+        menu->Items->Add( jumpMenu );
     }
 
     menu->Items->Add( PlanetsMenuFillAlienLSN() );
