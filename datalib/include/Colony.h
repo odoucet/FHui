@@ -181,6 +181,7 @@ public:
         int             AvailEU;
         int             UsedEU;
         int             AvailPop;
+        int             AvailShipyards;
         array<int>^     Inventory;
     };
 

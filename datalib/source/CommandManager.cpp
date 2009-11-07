@@ -1080,15 +1080,22 @@ void CommandManager::GenerateTemplate(System::Windows::Forms::RichTextBox^ targe
             if( s->IndexOf("; [Plugin]") != -1 )
             {
                 target->Select(start, s->Length + 1);
+                target->SelectionColor = Color::Purple;
+            }
+            // Comment warning
+            if( s->IndexOf("; !!!!!! ") != -1 )
+            {
+                target->Select(start, s->Length + 1);
                 target->SelectionColor = Color::Red;
             }
-
-            // comments
-            int commentStart = s->IndexOf(L';');
-            if( commentStart != -1 )
-            {
-                target->Select(start + commentStart, (s->Length - commentStart) + 1);
-                target->SelectionColor = Color::Green;
+            else
+            {   // Regular comments
+                int commentStart = s->IndexOf(L';');
+                if( commentStart != -1 )
+                {
+                    target->Select(start + commentStart, (s->Length - commentStart) + 1);
+                    target->SelectionColor = Color::Green;
+                }
             }
         }
 

@@ -87,6 +87,7 @@ public interface class ICommand : public IComparable
     int             GetEUCost();
     int             GetPopCost();
     int             GetInvMod(InventoryType);
+    bool            RequiresShipyard();
 
     String^         Print();
     String^         PrintForUI();
@@ -119,6 +120,7 @@ public:
     virtual int             GetEUCost()                 { return 0; }
     virtual int             GetPopCost()                { return 0; }
     virtual int             GetInvMod(InventoryType)    { return 0; }
+    virtual bool            RequiresShipyard()          { return false; }
 
     virtual String^         Print() abstract;
     virtual String^         PrintForUI()                { return Print(); }
@@ -624,6 +626,7 @@ public:
         : m_Type(type), m_Size(size), m_Sublight(sublight), m_Name(name) {}
 
     virtual int     GetEUCost() override    { return Calculators::ShipBuildCost(m_Type, m_Size, m_Sublight); }
+    virtual bool    RequiresShipyard() override { return true; }
     virtual String^ Print() override        { return String::Format("Build {0}{1}{2} {3}",
                                                     FHStrings::ShipToString(m_Type),
                                                     m_Type == SHIP_TR ? m_Size.ToString() : "",

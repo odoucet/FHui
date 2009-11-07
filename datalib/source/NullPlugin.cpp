@@ -66,6 +66,15 @@ void BudgetTracker::EvalOrder(ICommand ^cmd)
         InventoryType it = static_cast<InventoryType>(i);
         UpdateInventory( it, cmd->GetInvMod(it) );
     }
+
+    // Track shipyards
+    if( cmd->RequiresShipyard() && m_Colony )
+    {
+        if( m_Colony->Res->AvailShipyards == 0 )
+            AddComment( "; !!!!!! NOT ENOUGH SHIPYARD capacity available!!!!!!" );
+        else
+            --m_Colony->Res->AvailShipyards;
+    }
 }
 
 void BudgetTracker::EvalOrderTransfer(ICommand ^cmd)

@@ -23,6 +23,8 @@ FHUI build ??
 + New column "Met" on Aliens tab showing in which turn you met this species.
   There may be species known only via diplomacy (turn 0) and for such aliens
   context menu doesn't show command options.
++ Number of used shipyards tracking added to orders template generator.
+  Budget/resources/shipyards warnings are displayed in red color.
 
 FHUI build 288
 * Issued post-arrival transfer commands did not appear in ships' context menu.
