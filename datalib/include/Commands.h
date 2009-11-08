@@ -54,6 +54,7 @@ public enum class CommandType
     Shipyard,
     Research,
     BuildIuAu,
+    BuildInv,
     BuildShip,
     Recycle,
     Estimate,
@@ -612,6 +613,31 @@ public:
     int             m_Amount;
     int             m_PopCost;
     InventoryType   m_Unit;
+    Colony^         m_Colony;
+    Ship^           m_Ship;
+};
+
+////////////////////////////////////////////////////////////
+
+// Build Inventory
+public ref class ProdCmdBuildInv : public CmdProdBase<CommandType::BuildInv>
+{
+public:
+    ProdCmdBuildInv(int amount, InventoryType type, Colony ^colony, Ship ^ship)
+        : m_Amount(amount), m_Type(type), m_Colony(colony), m_Ship(ship)
+    {
+    }
+
+    virtual bool    IsUsingShip(Ship ^ship) override { return m_Ship == ship; }
+
+    virtual int     GetEUCost() override    { return m_Amount * Calculators::InventoryBuildCost(m_Type); }
+    virtual int     GetPopCost() override   { return m_Type == INV_PD ? m_Amount : 0; }
+    virtual int     GetInvMod(InventoryType i) override { return i == m_Type ? m_Amount : 0; }
+
+    virtual String^ Print() override;
+
+    int             m_Amount;
+    InventoryType   m_Type;
     Colony^         m_Colony;
     Ship^           m_Ship;
 };

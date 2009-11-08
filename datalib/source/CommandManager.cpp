@@ -750,6 +750,39 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
         return true;
     }
 
+    // Build Inventory
+    if( m_RM->Match(line, m_RM->ExpCmdBuildInv) )
+    {
+        int amount = m_RM->GetResultInt(0);
+        InventoryType inv = FHStrings::InvFromString(m_RM->Results[1]);
+
+        Colony ^targetColony = nullptr;
+        Ship ^targetShip = nullptr;
+        line = line->Trim();
+        if( !String::IsNullOrEmpty(line) )
+        {
+            if( m_RM->Match(line, m_RM->ExpCmdTargetColony) )
+            {
+                targetColony = GameData::GetColony( m_RM->Results[0] );
+            }
+            else if( m_RM->Match(line, m_RM->ExpCmdTargetShip) )
+            {
+                targetShip = GameData::GetShip( m_RM->Results[0] );
+            }
+            else
+            {
+                throw gcnew FHUIParsingException("Invalid inventory build target: " + line);
+            }
+        }
+        AddCommand(colony, CmdSetOrigin(
+            gcnew ProdCmdBuildInv(
+                amount,
+                inv,
+                targetColony,
+                targetShip) ) );
+        return true;
+    }
+
     // Build warship
     if( m_RM->Match(line, m_RM->ExpCmdBuildShip) )
     {

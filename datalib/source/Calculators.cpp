@@ -26,6 +26,49 @@ double Calculators::Mishap(int xFrom, int yFrom, int zFrom, int xTo, int yTo, in
     return (dist * dist) / gv + (age * 2.0);
 }
 
+bool Calculators::InventoryTechAvailable(InventoryType inv)
+{
+    array<int> ^techLevels = GameData::Player->TechLevels;
+
+    switch( inv )
+    {
+    case INV_CU:
+    case INV_IU:    
+    case INV_AU:
+    case INV_PD:    return true;
+    case INV_SU:    return techLevels[TECH_MA] >= 20;
+    case INV_FD:    return techLevels[TECH_LS] >= 20;
+    case INV_FS:    return techLevels[TECH_GV] >= 20;
+    case INV_DR:    return techLevels[TECH_MA] >= 30;
+    case INV_FM:    return techLevels[TECH_GV] >= 30;
+    case INV_FJ:    return techLevels[TECH_GV] >= 40;
+    case INV_GW:    return techLevels[TECH_BI] >= 50;
+    case INV_GT:    return techLevels[TECH_GV] >= 50;
+    case INV_JP:    return techLevels[TECH_GV] >= 25;
+    case INV_TP:    return techLevels[TECH_BI] >= 40;
+    case INV_GU1:
+    case INV_GU2:   
+    case INV_GU3:
+    case INV_GU4:
+    case INV_GU5:
+    case INV_GU6:
+    case INV_GU7:
+    case INV_GU8:
+    case INV_GU9:   return techLevels[TECH_ML] >= (10 * (1 + ((int)inv - (int)INV_GU1)));
+    case INV_SG1:
+    case INV_SG2:
+    case INV_SG3:
+    case INV_SG4:
+    case INV_SG5:
+    case INV_SG6:
+    case INV_SG7:
+    case INV_SG8:
+    case INV_SG9:   return techLevels[TECH_LS] >= (10 * (1 + ((int)inv - (int)INV_SG1)));
+    default:
+        throw gcnew FHUIDataImplException("Invalid inventory for technology estimation: " + ((int)inv).ToString());
+    }
+}
+
 int Calculators::ShipTonnage(ShipType type, int size)
 {
     switch( type )

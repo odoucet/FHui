@@ -186,6 +186,7 @@ namespace FHUI
             this->NamesColonies->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->NamesColonies->FormattingEnabled = true;
             this->NamesColonies->Location = System::Drawing::Point(80, 67);
+            this->NamesColonies->MaxDropDownItems = 20;
             this->NamesColonies->Name = L"NamesColonies";
             this->NamesColonies->Size = System::Drawing::Size(131, 21);
             this->NamesColonies->TabIndex = 4;
@@ -196,6 +197,7 @@ namespace FHUI
             this->NamesShips->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->NamesShips->FormattingEnabled = true;
             this->NamesShips->Location = System::Drawing::Point(215, 67);
+            this->NamesShips->MaxDropDownItems = 20;
             this->NamesShips->Name = L"NamesShips";
             this->NamesShips->Size = System::Drawing::Size(131, 21);
             this->NamesShips->TabIndex = 4;
@@ -206,6 +208,7 @@ namespace FHUI
             this->NamesAliens->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->NamesAliens->FormattingEnabled = true;
             this->NamesAliens->Location = System::Drawing::Point(350, 67);
+            this->NamesAliens->MaxDropDownItems = 20;
             this->NamesAliens->Name = L"NamesAliens";
             this->NamesAliens->Size = System::Drawing::Size(131, 21);
             this->NamesAliens->TabIndex = 4;

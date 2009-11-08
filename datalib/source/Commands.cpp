@@ -129,6 +129,22 @@ String^ ProdCmdBuildIUAU::Print()
 }
 
 ////////////////////////////////////////////////////////////////
+// Build Inventory
+String^ ProdCmdBuildInv::Print()
+{
+    String ^target = "";
+    if( m_Colony )
+        target = " PL " + m_Colony->Name;
+    else if( m_Ship )
+        target = " " + m_Ship->PrintClassWithName();
+
+    return String::Format("Build {0} {1}{2}",
+        m_Amount,
+        FHStrings::InvToString(m_Type),
+        target);
+}
+
+////////////////////////////////////////////////////////////////
 // Ship upgrade
 int ShipCmdUpgrade::GetEUCost()
 {

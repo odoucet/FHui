@@ -9,6 +9,7 @@
 #include "CmdResearch.h"
 #include "CmdBuildShips.h"
 #include "CmdBuildIuAu.h"
+#include "CmdBuildInvDlg.h"
 #include "CmdDevelopDlg.h"
 #include "CmdCustomDlg.h"
 
@@ -606,18 +607,6 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuProductionNew()
             gcnew EventHandler1Arg<ICommand^>(this, &Form1::ColoniesMenuCommandAdd) ) );
     }
 
-    // Develop
-    menu->DropDownItems->Add( CreateCustomMenuItem<ProdCmdDevelop^>(
-        "Develop...",
-        nullptr,
-        gcnew EventHandler1Arg<ProdCmdDevelop^>(this, &Form1::ColoniesMenuProdCommandAddDevelop) ) );
-
-    // Build CU/IU/AU
-    menu->DropDownItems->Add( CreateCustomMenuItem<ProdCmdBuildIUAU^>(
-        "Build CU/IU/AU...",
-        nullptr,
-        gcnew EventHandler1Arg<ProdCmdBuildIUAU^>(this, &Form1::ColoniesMenuProdCommandAddBuildIuAu) ) );
-
     // Research
     menu->DropDownItems->Add( CreateCustomMenuItem<ProdCmdResearch^>(
         "Research...",
@@ -629,6 +618,24 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuProductionNew()
         "Build Ship...",
         nullptr,
         gcnew EventHandler(this, &Form1::ColoniesMenuProdCommandAddBuildShip) );
+
+    // Build CU/IU/AU
+    menu->DropDownItems->Add( CreateCustomMenuItem<ProdCmdBuildIUAU^>(
+        "Build CU/IU/AU...",
+        nullptr,
+        gcnew EventHandler1Arg<ProdCmdBuildIUAU^>(this, &Form1::ColoniesMenuProdCommandAddBuildIuAu) ) );
+
+    // Build Inventory
+    menu->DropDownItems->Add( CreateCustomMenuItem<ProdCmdBuildInv^>(
+        "Build Inventory...",
+        nullptr,
+        gcnew EventHandler1Arg<ProdCmdBuildInv^>(this, &Form1::ColoniesMenuProdCommandAddBuildInventory) ) );
+
+    // Develop
+    menu->DropDownItems->Add( CreateCustomMenuItem<ProdCmdDevelop^>(
+        "Develop...",
+        nullptr,
+        gcnew EventHandler1Arg<ProdCmdDevelop^>(this, &Form1::ColoniesMenuProdCommandAddDevelop) ) );
 
     // Shipyard
     if( bShipyard &&
@@ -645,6 +652,9 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuProductionNew()
     bool estimateAny = false;
     for each( Alien ^alien in GameData::GetAliens() )
     {
+        if( alien->TurnMet == 0 )
+            continue;
+
         if( alien->Relation == SP_ALLY ||
             alien->Relation == SP_NEUTRAL ||
             alien->Relation == SP_ENEMY )
@@ -745,6 +755,13 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuCommandsOptions(ICommand ^cmd)
             "Edit...",
             safe_cast<ProdCmdBuildIUAU^>(cmd),
             gcnew EventHandler1Arg<ProdCmdBuildIUAU^>(this, &Form1::ColoniesMenuProdCommandAddBuildIuAu) ) );
+    }
+    if( cmd->GetCmdType() == CommandType::BuildInv )
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem<ProdCmdBuildInv^>(
+            "Edit...",
+            safe_cast<ProdCmdBuildInv^>(cmd),
+            gcnew EventHandler1Arg<ProdCmdBuildInv^>(this, &Form1::ColoniesMenuProdCommandAddBuildInventory) ) );
     }
     if( cmd->GetCmdType() == CommandType::Custom )
     {
@@ -990,6 +1007,29 @@ void Form1::ColoniesMenuProdCommandAddBuildIuAu(ProdCmdBuildIUAU ^cmd)
             if( newCmd )
                 ColoniesMenuCommandAdd( newCmd );
         }
+    }
+
+    delete dlg;
+}
+
+void Form1::ColoniesMenuProdCommandAddBuildInventory(ProdCmdBuildInv ^cmd)
+{
+    CmdBuildInvDlg ^dlg = gcnew CmdBuildInvDlg(m_ColoniesMenuRef, cmd);
+    if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
+    {
+        if( cmd )
+        {
+            int amount = dlg->GetAmount();
+            if( amount >= 0 )
+            {
+                cmd->m_Amount = amount;
+                ColoniesMenuCommandAdd(nullptr);
+            }
+            else
+                ColoniesMenuCommandDel(cmd);
+        }
+        else
+            ColoniesMenuCommandAdd( dlg->GetCommand() );
     }
 
     delete dlg;

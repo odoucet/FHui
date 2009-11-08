@@ -246,6 +246,7 @@ namespace FHUI
                 L"CC: Command Cruiser  [70]", L"BC: Battlecruiser  [80]", L"BS: Battleship  [90]", L"DN: Dreadnought  [100]", L"SD: Super Dreadnought  [110]", 
                 L"BM: Battlemoon  [120]", L"BW: Battleworld  [130]", L"BR: Battlestar  [140]"});
             this->ShipClass->Location = System::Drawing::Point(61, 94);
+            this->ShipClass->MaxDropDownItems = 20;
             this->ShipClass->Name = L"ShipClass";
             this->ShipClass->Size = System::Drawing::Size(182, 21);
             this->ShipClass->TabIndex = 2;

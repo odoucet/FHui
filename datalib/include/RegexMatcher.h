@@ -61,6 +61,7 @@ public:
     initonly Regex^     ExpCmdDevelop;
     initonly Regex^     ExpCmdInstall;
     initonly Regex^     ExpCmdBuildIUAU;
+    initonly Regex^     ExpCmdBuildInv;
     initonly Regex^     ExpCmdBuildShipTR;
     initonly Regex^     ExpCmdBuildShip;
     initonly Regex^     ExpCmdVisited;

@@ -159,6 +159,7 @@ namespace FHUI
             this->DevColony->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->DevColony->FormattingEnabled = true;
             this->DevColony->Location = System::Drawing::Point(92, 86);
+            this->DevColony->MaxDropDownItems = 20;
             this->DevColony->Name = L"DevColony";
             this->DevColony->Size = System::Drawing::Size(115, 21);
             this->DevColony->TabIndex = 2;
@@ -180,6 +181,7 @@ namespace FHUI
             this->DevShip->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->DevShip->FormattingEnabled = true;
             this->DevShip->Location = System::Drawing::Point(213, 86);
+            this->DevShip->MaxDropDownItems = 20;
             this->DevShip->Name = L"DevShip";
             this->DevShip->Size = System::Drawing::Size(115, 21);
             this->DevShip->TabIndex = 3;

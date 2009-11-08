@@ -322,6 +322,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\source\CmdBuildInvDlg.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\source\CmdBuildIuAu.cpp"
 					>
 				</File>
@@ -434,6 +438,15 @@
 				<File
 					RelativePath=".\include\BuildInfo.h"
 					>
+				</File>
+				<File
+					RelativePath=".\include\CmdBuildInvDlg.h"
+					FileType="3"
+					>
+					<File
+						RelativePath=".\include\CmdBuildInvDlg.resx"
+						>
+					</File>
 				</File>
 				<File
 					RelativePath=".\include\CmdBuildIuAu.h"

@@ -195,6 +195,15 @@ namespace FHUI {
             label9->TabIndex = 2;
             label9->Text = L"Build on colony:";
             // 
+            // label8
+            // 
+            label8->AutoSize = true;
+            label8->Location = System::Drawing::Point(12, 154);
+            label8->Name = L"label8";
+            label8->Size = System::Drawing::Size(69, 13);
+            label8->TabIndex = 4;
+            label8->Text = L"TR Capacity:";
+            // 
             // AvailPop
             // 
             this->AvailPop->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
@@ -274,6 +283,7 @@ namespace FHUI {
             this->Target->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
             this->Target->FormattingEnabled = true;
             this->Target->Location = System::Drawing::Point(81, 124);
+            this->Target->MaxDropDownItems = 20;
             this->Target->Name = L"Target";
             this->Target->Size = System::Drawing::Size(126, 21);
             this->Target->TabIndex = 6;
@@ -288,15 +298,6 @@ namespace FHUI {
             this->InfoColony->TabIndex = 5;
             this->InfoColony->Text = L"0";
             this->InfoColony->TextAlign = System::Drawing::ContentAlignment::MiddleLeft;
-            // 
-            // label8
-            // 
-            label8->AutoSize = true;
-            label8->Location = System::Drawing::Point(12, 154);
-            label8->Name = L"label8";
-            label8->Size = System::Drawing::Size(69, 13);
-            label8->TabIndex = 4;
-            label8->Text = L"TR Capacity:";
             // 
             // ShipCapacity
             // 

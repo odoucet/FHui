@@ -10,6 +10,7 @@ FHUI build ??
 * Update tooltip after changing commands order for any phase.
 * Fixed CU/IU/AU values for Install command edit.
 * Fixed some grids and commands update issues when changing current turn display.
++ New commands supported: Build Inventory (PD, Hi-Tech items).
 + Ships built in given turn may be immediately used as targets for
   building iu/cu/au, develop and transfer commands. Post-arrival orders
   for such ships are also available.

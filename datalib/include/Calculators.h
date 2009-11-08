@@ -14,6 +14,8 @@ public:
     static double   Distance(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo);
     static double   Mishap(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo, int gv, int age);
 
+    static bool     InventoryTechAvailable(InventoryType inv);
+
     static int      ShipTonnage(ShipType type, int size);
     static int      ShipMARequired(ShipType type, int size);
     static int      ShipBuildCost(ShipType type, int size, bool sublight);
