@@ -27,7 +27,7 @@ void Form1::AliensInitControls()
     c.Name      = ADD_COLUMN("Name",        "Species name",             String, Ascending,  Default);
     c.Relation  = ADD_COLUMN("Relation",    "Current relation",         String, Ascending,  Relation);
     c.TurnMet   = ADD_COLUMN("Met",         "Turn number when you have met this species for the first time", int,  Ascending,  Default);
-    c.Home      = ADD_COLUMN("Home",        "Home planet location",     String, Ascending,  Location);
+    c.Home      = ADD_COLUMN("Home",        "Home planet location",     String, Ascending,  Default);
     c.Dist      = ADD_COLUMN("Dist",        "Home distance from your home system", double, Ascending, Default);
     c.TechLev   = ADD_COLUMN("Tech Levels", "Estimated technology levels", String, Ascending, Default);
     c.TC        = ADD_COLUMN("TC",          "Temperature class of their home planet", int,  Ascending,  Default);

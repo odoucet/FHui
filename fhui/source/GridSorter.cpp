@@ -251,14 +251,28 @@ int GridSorterBase::CompareType(IGridDataSrc ^o1, IGridDataSrc ^o2)
 
 int GridSorterBase::CompareLocation(IGridDataSrc ^o1, IGridDataSrc ^o2)
 {
+    StarSystem ^s1 = o1->GetFilterSystem();
+    StarSystem ^s2 = o2->GetFilterSystem();
+
     // Detect wormholes
-    if( o1->GetFilterSystem()->IsWormholeTarget( o2->GetFilterSystem() ) )
+    if( s1 && s2 && s1->IsWormholeTarget( s2 ) )
         return 0;
 
+    int result = 0;
     int p1, p2;
-    int result = o1->GetFilterLocation(p1)->CompareLocation(o2->GetFilterLocation(p2));
-    if( result == 0 )
-        result = p1 - p2;
+    s1 = o1->GetFilterLocation(p1);
+    s2 = o2->GetFilterLocation(p2);
+    if( s1 && s2 )
+    {
+        result = s1->CompareLocation(s2);
+        if( result == 0 )
+            result = p1 - p2;
+    }
+    else if( s1 )
+        result = -1;
+    else if ( s2 )
+        result = 1;
+
     return result;
 }
 
@@ -436,7 +450,9 @@ int AliensGridSorter::BackupCompare(DataGridViewRow ^r1, DataGridViewRow ^r2)
     result = CompareRelation(a1, a2) * GetForcedDirectionModifier(SortOrder::Ascending);
 
     // Step 2: by home system distance
-    if( result == 0 )
+    if( result == 0 &&
+        a1->HomeSystem &&
+        a2->HomeSystem )
     {
         double dist1 = 999999.9;
         double dist2 = 999999.9;

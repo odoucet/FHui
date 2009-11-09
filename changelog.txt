@@ -5,7 +5,8 @@ Minor changes are listed only if originally requested by player
 + New features
 [P] denotes player requested features
 
-FHUI build ??
+FHUI build 302
+* [P] Fixed crashes while sorting Aliens tab.
 * Fixed saving orders template to file.
 * Update tooltip after changing commands order for any phase.
 * Fixed CU/IU/AU values for Install command edit.
