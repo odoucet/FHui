@@ -316,8 +316,8 @@ array<int>^ CmdTransfer::GetFromInventory()
     }
 
     return m_FromColony
-        ? m_FromColony->Res->Inventory
-        : m_FromShip->Cargo;
+        ? m_FromColony->Inventory
+        : m_FromShip->CargoOriginal;
 }
 
 array<int>^ CmdTransfer::GetToInventory()
