@@ -110,8 +110,7 @@ void CmdBuildInvDlg::InitAvailResources(Colony ^colony, ProdCmdBuildInv ^cmd)
     }
     for each( Ship ^ship in colony->System->GetShipTargets(CommandPhase::Production) )
     {
-        if( ship->Type == SHIP_TR )
-            targets->Add( ship->PrintRefListEntry() );
+        targets->Add( ship->PrintRefListEntry() );
     }
     Target->DataSource = targets;
     UpdateShipCapacity();

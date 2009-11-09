@@ -632,7 +632,8 @@ public:
 
     virtual int     GetEUCost() override    { return m_Amount * Calculators::InventoryBuildCost(m_Type); }
     virtual int     GetPopCost() override   { return m_Type == INV_PD ? m_Amount : 0; }
-    virtual int     GetInvMod(InventoryType i) override { return i == m_Type ? m_Amount : 0; }
+    //virtual int     GetInvMod(InventoryType i) override { return i == m_Type ? m_Amount : 0; }
+    virtual int     GetInvMod(InventoryType i) override { return (i == m_Type && m_Colony == nullptr && m_Ship == nullptr) ? m_Amount : 0; }
 
     virtual String^ Print() override;
 

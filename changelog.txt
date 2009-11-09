@@ -5,6 +5,9 @@ Minor changes are listed only if originally requested by player
 + New features
 [P] denotes player requested features
 
+FHUI build 303
+* Emergency fix for ship build targets.
+
 FHUI build 302
 * [P] Fixed crashes while sorting Aliens tab.
 * Fixed saving orders template to file.

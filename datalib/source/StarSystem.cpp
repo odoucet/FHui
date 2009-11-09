@@ -639,13 +639,6 @@ List<Ship^>^ StarSystem::GetShipTargets(CommandPhase phase)
             break;
 
         case CommandPhase::Production:
-            if( ship->System != this )
-                continue;
-            // Skip incomplete ships
-            if( ship->EUToComplete > 0 )
-                continue;
-            break;
-
         case CommandPhase::PostArrival:
             {
                 ICommand ^cmd = ship->GetJumpCommand();
