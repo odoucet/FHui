@@ -631,8 +631,9 @@ void TurnData::UpdateColonies()
 
     // Mining and resort colonies first
     for each( Colony ^colony in GameData::Player->Colonies )
-        if( colony->PlanetType == PLANET_COLONY_MINING ||
-            colony->PlanetType == PLANET_COLONY_RESORT )
+        if( ( colony->PlanetType == PLANET_COLONY_MINING ||
+              colony->PlanetType == PLANET_COLONY_RESORT ) &&
+            ( colony->EconomicBase > 0 ) )
         {
             colony->ProductionOrder = ++order;
             colony->CanProduce = false;
@@ -641,7 +642,8 @@ void TurnData::UpdateColonies()
 
     // Colony planets
     for each( Colony ^colony in GameData::Player->Colonies )
-        if( colony->PlanetType == PLANET_COLONY )
+        if( colony->PlanetType == PLANET_COLONY &&
+            colony->EconomicBase > 0 )
         {
             colony->ProductionOrder = ++order;
             colony->CanProduce = true;
@@ -650,11 +652,13 @@ void TurnData::UpdateColonies()
 
     // Home planet
     for each( Colony ^colony in GameData::Player->Colonies )
-        if( colony->PlanetType == PLANET_HOME )
+        if( colony->PlanetType == PLANET_HOME &&
+            colony->EconomicBase > 0 )
         {
             colony->ProductionOrder = ++order;
             colony->CanProduce = true;
             colony->ProductionReset();
+            break;
         }
 
     GameData::Player->SortColoniesByProdOrder();

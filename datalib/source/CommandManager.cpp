@@ -506,7 +506,7 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
             if( colony->Owner == GameData::Player)
             {
                 refColony = colony;
-                if( colony->EconomicBase > 0 || colony->HasInventory )
+                if( colony->EconomicBase > 0 )
                 {
                     colony->ProductionOrder = colonyProdOrder++;
                 }

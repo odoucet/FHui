@@ -46,6 +46,7 @@ public:
         Hidden = false;
         UnderSiege = false;
         Shared = false;
+        ProductionOrder = 0;
         Commands = gcnew List<ICommand^>;
     }
     // --- copy constructor - does not perform full copy !!! ---
@@ -80,6 +81,7 @@ public:
         Hidden = false;
         UnderSiege = false;
         Shared = false;
+        ProductionOrder = src->ProductionOrder;
         Commands = gcnew List<ICommand^>;
     }
     // -------- IComparable -----------------------------
