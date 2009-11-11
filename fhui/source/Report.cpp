@@ -352,6 +352,12 @@ bool Report::MatchPhaseLogUser(String ^s)
         return true;
     }
 
+    // Received message
+    if ( MatchMessageReceived(s) )
+    {
+        return true;
+    }
+
     // TODO: Parse user log contents
     return false;
 }

@@ -1141,24 +1141,17 @@ bool Report::MatchTemplateEntry(String ^s)
             String::Format("JUMP order for unknown ship: {0} {1}", m_RM->Results[0], m_RM->Results[1]) );
     }
 
-    // TODO: "Continue" command parsing
-    if ( s->StartsWith("Continue") )
-    {
-        return true;
-    }
-
     // DEVELOP
     if( m_RM->Match(s, m_RM->ExpCmdDevelopCS) )
     {
         Colony ^colony = m_GameData->GetColony(m_RM->Results[1]);
         Ship^ ship = m_GameData->GetShip(m_RM->Results[2]);
         if( !ship )
-            throw gcnew FHUIParsingException("JUMP order for unknown ship: {1}" + m_RM->Results[2]);
+            throw gcnew FHUIParsingException("JUMP order for unknown ship: {0}" + m_RM->Results[2]);
 
-        ICommand ^cmd = gcnew ProdCmdDevelop(
-            m_RM->GetResultInt(0),
-            colony,
-            ship );
+        int cost = m_RM->GetResultInt(0) ? m_RM->GetResultInt(0) : ship->Capacity;
+
+        ICommand ^cmd = gcnew ProdCmdDevelop( cost, colony, ship );
         m_TemplateColony->Commands->Add( cmd );
         cmd->Origin = CommandOrigin::Auto;
         return true;
@@ -1221,7 +1214,7 @@ bool Report::MatchTemplateEntry(String ^s)
     }
 
     // AUTO
-    if( m_RM->Match(s, "^Auto$") )
+    if( s == "Auto" )
     {
         m_CommandMgr->AutoEnabled = true;
         return true;
@@ -1239,16 +1232,20 @@ bool Report::MatchTemplateEntry(String ^s)
 
     // ANY OTHER COMMAND -> CUSTOM COMMAND
     // unless phase is Jumps - no custom orders here
-    if( m_TemplatePhase == CommandPhase::Jump )
+    if( m_TemplatePhase != CommandPhase::Jump )
+    {
+        CmdCustom ^cmd = gcnew CmdCustom(m_TemplatePhase, s, 0);
+        cmd->Origin = CommandOrigin::Auto;
+        if( m_TemplatePhase == CommandPhase::Production )
+        {
+            m_CommandMgr->AddCommand(m_TemplateColony, cmd);
+        }
+        else
+        {
+            m_CommandMgr->AddCommand(cmd);
+        }
         return true;
-
-    CmdCustom ^cmd = gcnew CmdCustom(m_TemplatePhase, s, 0);
-    cmd->Origin = CommandOrigin::Auto;
-    if( m_TemplatePhase == CommandPhase::Production )
-        m_CommandMgr->AddCommand(m_TemplateColony, cmd);
-    else
-        m_CommandMgr->AddCommand(cmd);
-
+    }
     return false;
 }
 
