@@ -665,8 +665,6 @@ Ship^ TurnData::CreateShip(Alien ^sp, ShipType type, String ^name, bool subLight
     Ship ^ship = gcnew Ship(sp, type, name, subLight);
     ship->System = system;
 
-    //m_ShipsByTonnage->Sort( gcnew Ship::WarTonnageComparer );
-
     system->AddShip( ship );
     sp->Ships->Add( ship );
 

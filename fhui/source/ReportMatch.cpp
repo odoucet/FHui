@@ -360,11 +360,13 @@ bool Report::MatchColonyInfo(String ^s)
             m_RM->GetResultInt(2),
             m_RM->GetResultInt(3),
             false );
+        int plNum = m_RM->GetResultInt(4);
 
         if( planetType == PLANET_HOME )
+        {
             GameData::Player->HomeSystem = system;
-
-        int plNum = m_RM->GetResultInt(4);
+            GameData::Player->HomePlanet = plNum;
+        }
 
         colony = m_GameData->CreateColony(
             GameData::Player,
