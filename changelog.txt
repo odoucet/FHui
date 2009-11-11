@@ -6,7 +6,8 @@ Minor changes are listed only if originally requested by player
 [P] denotes player requested features
 
 FHUI build ??
-
++ Improved report parser -  about 3 times faster
+* [P] "Enmity/neutrality towards ALL species" is now correctly handled
 
 FHUI build 303
 * Emergency fix for ship build targets.
