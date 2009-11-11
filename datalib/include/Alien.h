@@ -50,14 +50,14 @@ protected:
 public ref class Alien : public GridDataSrcBase
 {
 public:
-    Alien(String ^name, int turnMet)
+    Alien(String ^name)
     {
         Name = name;
         GovName = nullptr;
         GovType = nullptr;
         Relation = SP_NEUTRAL;
         RelationOriginal = SP_NEUTRAL;
-        TurnMet = turnMet;
+        TurnMet = 0;
         Email = nullptr;
         HomeSystem = nullptr;
         HomePlanet = -1;

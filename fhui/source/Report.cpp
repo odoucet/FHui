@@ -109,6 +109,8 @@ void Report::Parse(String^ fileName)
         {
             ParseInternal( line );
         }
+        if( m_Phase == PHASE_LOG_USER )
+            GameData::SetParsingUserContent(false);
         m_Phase = PHASE_NONE;
     }
     catch( Exception ^ex )
@@ -268,21 +270,21 @@ bool Report::MatchPhaseNone(String ^s)
     }
 
     // Turn number
-    if( s->StartsWith("EVENT LOG FOR TURN") &&
-        m_RM->Match(s, "^EVENT LOG FOR TURN (\\d+)" ) )
+    if( s->StartsWith("EVENT") && m_RM->Match(s, "^EVENT LOG FOR TURN (\\d+)" ) )
     {
         m_Turn = m_RM->GetResultInt(0);
         if( m_Turn == 0 )
         {
             m_Phase = PHASE_LOG_USER;
+            GameData::SetParsingUserContent(true);
         }
         return true;
     }
-    else if( s->StartsWith("START OF TURN") &&
-        m_RM->Match(s, "^START OF TURN (\\d+)" ) )
+    else if( s->StartsWith("START") && m_RM->Match(s, "^START OF TURN (\\d+)" ) )
     {
         m_Turn = m_RM->GetResultInt(0);
         m_Phase = PHASE_LOG_USER;
+        GameData::SetParsingUserContent(true);
         return true;
     }
 

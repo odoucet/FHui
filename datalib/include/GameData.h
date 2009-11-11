@@ -31,7 +31,7 @@ public:
     static IList<Alien^>^          GetAliens()          { return m_CurrentTurnData->GetAliens(); }
     static IList<StarSystem^>^     GetStarSystems()     { return m_CurrentTurnData->GetStarSystems(); }
 
-    static bool         IsParsingFinished()             { return m_CurrentTurnData->IsParsingFinished(); }
+    static void         SetParsingUserContent(bool state)      { return m_CurrentTurnData->SetParsingUserContent(state); }
 
     static void         Update();
     static void         SetTechLevel(Alien ^sp, TechType, int, int);

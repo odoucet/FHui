@@ -37,8 +37,6 @@ public:
     IList<Alien^>^          GetAliens()                         { return m_Aliens->Values; }
     IList<StarSystem^>^     GetStarSystems()                    { return m_Systems->Values; }
 
-    bool            IsParsingFinished()                         { return m_bParsingFinished; }
-
     // ------------------------------------------
     void            Update();
     void            SetSpecies(String ^sp);
@@ -61,6 +59,8 @@ public:
     void            AddMishap(String ^shipName);
 
     void            PrintDebugStats();
+
+    void            SetParsingUserContent(bool state) { m_bParsingUserContent = state; };
 
 protected:
     void            UpdateShips();
@@ -90,6 +90,7 @@ protected:
 
     initonly int        m_Turn;
     bool                m_bParsingFinished;
+    bool                m_bParsingUserContent;
 };
 
 } // end namespace FHUI

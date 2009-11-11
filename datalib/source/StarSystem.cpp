@@ -543,7 +543,7 @@ void StarSystem::UpdateMaster()
         else if( Master != colony->Owner &&
                  Master->Relation != SP_MIXED )
         {
-            Master = gcnew Alien("", 0);
+            Master = gcnew Alien("");
             Master->Relation = SP_MIXED;
         }
 

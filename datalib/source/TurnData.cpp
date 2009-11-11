@@ -272,15 +272,20 @@ void TurnData::SetSpecies(String ^sp)
 Alien^ TurnData::AddAlien(String ^sp)
 {
     String ^spKey = sp->ToLower();
+    Alien ^alien;
     if( m_Aliens->ContainsKey(spKey) )
     {
-        Alien ^sp = m_Aliens[spKey];
-        if( sp->TurnMet == 0 )
-            sp->TurnMet = m_Turn;
-        return sp;
+        alien = m_Aliens[spKey];
     }
-    Alien ^alien = gcnew Alien(sp, m_Turn);
-    m_Aliens->Add(spKey, alien);
+    else
+    {
+        alien = gcnew Alien(sp);
+        m_Aliens->Add(spKey, alien);
+    }
+
+    if( m_bParsingUserContent == false && alien->TurnMet == 0 )
+        alien->TurnMet = m_Turn;
+
     return alien;
 }
 
@@ -672,10 +677,10 @@ Ship^ TurnData::CreateShip(Alien ^sp, ShipType type, String ^name, bool subLight
     system->AddShip( ship );
     sp->Ships->Add( ship );
 
-    if( sp == GameData::Player )
+    if( ( sp == GameData::Player ) &&
+        ( m_bParsingFinished == false ) )
     {
-        if( IsParsingFinished() == false )
-            system->DeleteAlienColonies();
+        system->DeleteAlienColonies();
     }
 
     return ship;
