@@ -258,7 +258,7 @@ void Form1::PlanetsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex
     }
     else
     {
-        Colony ^colony = GameData::GetColony(planet->Name);
+        Colony ^colony = GameData::Player->FindColony(planet->Name, false);
 
         if( colony->IsDisband )
         {
@@ -325,13 +325,9 @@ void Form1::PlanetsMenuSelectRef(Object^, EventArgs^)
 {
     if( !String::IsNullOrEmpty(m_PlanetsMenuRef->Name) )
     {
-        for each( Colony ^colony in m_GameData->GetColonies() )
-            if( colony->Owner == GameData::Player &&
-                colony->Name == m_PlanetsMenuRef->Name )
-            {
-                PlanetsGrid->Filter->SetRefSystem(colony);
-                return;
-            }
+        PlanetsGrid->Filter->SetRefSystem(
+            GameData::Player->FindColony(m_PlanetsMenuRef->Name, false) );
+        return;
     }
 
     PlanetsGrid->Filter->SetRefSystem(m_PlanetsMenuRef->System);
@@ -358,7 +354,7 @@ void Form1::PlanetsMenuAddName(DataGridViewCellEventArgs ^cell)
         return;
 
     // Check for duplicate name
-    if( GameData::GetColony( name->ToLower() ) )
+    if( GameData::Player->FindColony( name, true ) )
     {
         MessageBox::Show(
             this,
@@ -369,7 +365,7 @@ void Form1::PlanetsMenuAddName(DataGridViewCellEventArgs ^cell)
         return;
     }
 
-    Colony ^colony = m_GameData->AddColony(
+    Colony ^colony = m_GameData->CreateColony(
         GameData::Player,
         name,
         m_PlanetsMenuRef->System,
@@ -390,7 +386,7 @@ void Form1::PlanetsMenuAddName(DataGridViewCellEventArgs ^cell)
 
 void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
 {
-    Colony ^colony = GameData::GetColony( m_PlanetsMenuRef->Name );
+    Colony ^colony = GameData::Player->FindColony( m_PlanetsMenuRef->Name, false );
 
     if( colony->IsNew )
     {   // Remove Name command
@@ -400,7 +396,7 @@ void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
             m_PlanetsMenuRef->Name);
 
         // Delete the token colony
-        GameData::DelColony( m_PlanetsMenuRef->Name );
+        GameData::RemoveColony( m_PlanetsMenuRef->Name );
 
         m_CommandMgr->DelCommand( colony, cmdDup );
         m_PlanetsMenuRef->Name = nullptr;
@@ -418,7 +414,7 @@ void Form1::PlanetsMenuRemoveNameCancel(Object^, EventArgs^)
 {
     // Remove Disband command
     m_CommandMgr->DelCommand(
-        GameData::GetColony( m_PlanetsMenuRef->Name ),
+        GameData::Player->FindColony( m_PlanetsMenuRef->Name, false ),
         gcnew CmdDisband( m_PlanetsMenuRef->Name ) );
 
     PlanetsGrid->Filter->Update();

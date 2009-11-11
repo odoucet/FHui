@@ -63,7 +63,7 @@ bool CmdDevelopDlg::GenerateCommand(bool validate)
 {
     m_Command->m_Amount = Decimal::ToInt32(DevAmount->Value);
     if( DevColony->SelectedIndex != 0 )
-        m_Command->m_Colony = GameData::GetColony( DevColony->Text );
+        m_Command->m_Colony = GameData::Player->FindColony( DevColony->Text, false );
     else
         m_Command->m_Colony = nullptr;
     if( DevShip->SelectedIndex != 0 )

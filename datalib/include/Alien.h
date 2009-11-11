@@ -123,6 +123,9 @@ public:
     String^         PrintHome();
     String^         PrintTechLevels();
 
+    Colony^         FindColony(String ^name, bool allowMissing);
+    Ship^           FindShip(String ^name, bool allowMissing);
+
     String^             Name;
     String^             GovName;
     String^             GovType;

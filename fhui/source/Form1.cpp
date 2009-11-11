@@ -172,8 +172,8 @@ void Form1::InitRefLists()
     for each( Colony ^colony in sp->Colonies )
         m_RefListColonies->Add( colony->PrintRefListEntry() );
     // then alien
-    for each( Colony ^colony in m_GameData->GetColonies() )
-        if( colony->Owner != sp )
+    for each( Alien ^alien in GameData::GetAliens() )
+        for each( Colony ^colony in alien->Colonies )
             m_RefListColonies->Add( colony->PrintRefListEntry() );
 
     // -- ref ship age:

@@ -75,6 +75,20 @@ void StarSystem::AddColony(Colony^ colony)
     }
 }
 
+void StarSystem::DeleteAlienColonies()
+{
+    // Remove alien colonies from this system.
+    // They'll be restored by 'Aliens at...' parsing. If not - it means that alien
+    // colony was destroyed, assimilated or it is hiding. Add a note.
+    for each( Colony ^colony in m_ColoniesAlien )
+    {
+        m_Colonies->Remove( colony );
+        colony->Owner->Colonies->Remove( colony );
+    }
+
+    m_ColoniesAlien->Clear();
+}
+
 double StarSystem::CalcDistance(StarSystem ^s)
 {
     return IsWormholeTarget(s)

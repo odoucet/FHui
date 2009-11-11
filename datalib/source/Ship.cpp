@@ -43,7 +43,8 @@ Ship^ Ship::FindRefListEntry(String ^entry)
     if( space == -1 || age == -1 )
         throw gcnew FHUIDataIntegrityException("Invalid ship ref entry: " + entry);
 
-    return GameData::GetShip( entry->Substring(space + 1, age - (space + 1)) );
+    String ^shipName = entry->Substring(space + 1, age - (space + 1));
+    return GameData::Player->FindShip(shipName, false);
 }
 
 String^ Ship::PrintAgeLocation()

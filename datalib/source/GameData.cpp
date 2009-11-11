@@ -126,9 +126,9 @@ void GameData::InitTurn()
         }
     }
 
-    for each ( Colony^ srcColony in srcTurn->GetColonies() )
+    for each ( StarSystem^ srcSystem in srcTurn->GetStarSystems() )
     {
-        if ( srcColony->Owner->Name != m_PlayerName )
+        for each ( Colony^ srcColony in srcSystem->ColoniesAlien )
         {
             StarSystem^ system = m_CurrentTurnData->GetStarSystem(
                 srcColony->System->X,
@@ -196,19 +196,19 @@ void GameData::AddTurnProducedEU(int eu)
     m_CurrentTurnData->AddTurnProducedEU(eu);
 }
 
-Colony^ GameData::AddColony(Alien ^sp, String ^name, StarSystem ^system, int plNum, bool isObserver)
+Colony^ GameData::CreateColony(Alien ^sp, String ^name, StarSystem ^system, int plNum, bool isObserver)
 {
-    return m_CurrentTurnData->AddColony(sp, name, system, plNum, isObserver);
+    return m_CurrentTurnData->CreateColony(sp, name, system, plNum, isObserver);
 }
 
-void GameData::DelColony(String ^name)
+void GameData::RemoveColony(String ^name)
 {
-    return m_CurrentTurnData->DelColony(name);
+    return m_CurrentTurnData->RemoveColony(name);
 }
 
-Ship^ GameData::AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system)
+Ship^ GameData::CreateShip(Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system)
 {
-    return m_CurrentTurnData->AddShip(sp, type, name, subLight, system);
+    return m_CurrentTurnData->CreateShip(sp, type, name, subLight, system);
 }
 
 void GameData::AddWormholeJump(String ^shipName, int fromSystemId)

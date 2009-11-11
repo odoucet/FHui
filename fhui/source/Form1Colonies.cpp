@@ -133,127 +133,130 @@ void Form1::ColoniesFillGrid()
     ColoniesSummary %s = m_ColoniesSummary;
     s = ColoniesSummary();
 
-    for each( Colony ^colony in m_GameData->GetColonies() )
+    for each( Alien ^alien in GameData::GetAliens() )
     {
-        if( ColoniesGrid->Filter->Filter(colony) )
-            continue;
-
-        DataGridViewRow ^row = ColoniesGrid->Rows[ ColoniesGrid->Rows->Add() ];
-        DataGridViewCellCollection ^cells = row->Cells;
-        cells[c.Object]->Value      = colony;
-        cells[c.Owner]->Value       = colony->Owner == sp ? String::Format("* {0}", sp->Name) : colony->Owner->Name;
-        cells[c.Name]->Value        = colony->Name;
-        cells[c.Type]->Value        = FHStrings::PlTypeToString(colony->PlanetType);
-        cells[c.Location]->Value    = colony->PrintLocation();
-        cells[c.Dist]->Value        = GridPrintDistance(colony->System, ColoniesGrid->Filter->RefSystem, gv, age);
-        cells[c.DistSec]->Value     = GridPrintDistance(colony->System, ColoniesGrid->Filter->RefSystemPrev, gv, age);
-        cells[c.Inventory]->Value   = colony->PrintInventory(false);
-        if( colony->Planet )
+        for each( Colony ^colony in alien->Colonies )
         {
-            cells[c.LSN]->Value     = colony->Planet->LSN;
-            cells[c.MD]->Value      = (double)colony->Planet->MiDiff / 100.0;
-            cells[c.Grav]->Value    = (double)colony->Planet->Grav / 100.0;
-        }
+            if( ColoniesGrid->Filter->Filter(colony) )
+                continue;
 
-        if( colony->EconomicBase > 0 )
-        {
-            cells[c.Size]->Value    = (double)colony->EconomicBase / 10.0;
-
-            if( colony->Owner == sp )
+            DataGridViewRow ^row = ColoniesGrid->Rows[ ColoniesGrid->Rows->Add() ];
+            DataGridViewCellCollection ^cells = row->Cells;
+            cells[c.Object]->Value      = colony;
+            cells[c.Owner]->Value       = colony->Owner == sp ? String::Format("* {0}", sp->Name) : colony->Owner->Name;
+            cells[c.Name]->Value        = colony->Name;
+            cells[c.Type]->Value        = FHStrings::PlTypeToString(colony->PlanetType);
+            cells[c.Location]->Value    = colony->PrintLocation();
+            cells[c.Dist]->Value        = GridPrintDistance(colony->System, ColoniesGrid->Filter->RefSystem, gv, age);
+            cells[c.DistSec]->Value     = GridPrintDistance(colony->System, ColoniesGrid->Filter->RefSystemPrev, gv, age);
+            cells[c.Inventory]->Value   = colony->PrintInventory(false);
+            if( colony->Planet )
             {
-                int prodCalculated = Calculators::ColonyProduction(
-                    colony,
-                    sp->TechLevelsAssumed[TECH_MI],
-                    sp->TechLevelsAssumed[TECH_MA],
-                    sp->TechLevelsAssumed[TECH_LS],
-                    m_GameData->GetFleetPercentCost() );
-                int prodPerc = 100 - Calculators::ProductionPenalty(colony->LSN, sp->TechLevelsAssumed[TECH_LS]);
+                cells[c.LSN]->Value     = colony->Planet->LSN;
+                cells[c.MD]->Value      = (double)colony->Planet->MiDiff / 100.0;
+                cells[c.Grav]->Value    = (double)colony->Planet->Grav / 100.0;
+            }
 
-                // -- Summary update
-                int size = Math::Max(0, colony->EconomicBase);
-                ++s.Count;
-                s.Size      += size;
-                s.Shipyards += Math::Max(0, colony->Shipyards);
-                s.MD        += colony->MiDiff;
-                s.Grav      += colony->Planet->Grav;
-                s.LSN       += colony->LSN * size;
-                s.Dist      += colony->System->CalcDistance(ColoniesGrid->Filter->RefSystem);
-                s.DistSec   += colony->System->CalcDistance(ColoniesGrid->Filter->RefSystemPrev);
-                s.Prod      += prodCalculated;
-                s.ProdPerc  += prodPerc * size;
-                // -- summary update end
+            if( colony->EconomicBase > 0 )
+            {
+                cells[c.Size]->Value    = (double)colony->EconomicBase / 10.0;
 
-                cells[c.Prod]->Value        = prodCalculated;
-                cells[c.ProdOrder]->Value   = colony->ProductionOrder;
-                cells[c.ProdPerc]->Value    = prodPerc;
-                cells[c.Pop]->Value         = colony->AvailPop;
-
-                if( colony->PlanetType == PLANET_HOME ||
-                    colony->PlanetType == PLANET_COLONY )
+                if( colony->Owner == sp )
                 {
-                    colony->CalculateBalance(ColoniesGrid->Filter->MiMaBalanced);
-                    cells[c.Balance]->Value = colony->PrintBalance();
+                    int prodCalculated = Calculators::ColonyProduction(
+                        colony,
+                        sp->TechLevelsAssumed[TECH_MI],
+                        sp->TechLevelsAssumed[TECH_MA],
+                        sp->TechLevelsAssumed[TECH_LS],
+                        m_GameData->GetFleetPercentCost() );
+                    int prodPerc = 100 - Calculators::ProductionPenalty(colony->LSN, sp->TechLevelsAssumed[TECH_LS]);
+
+                    // -- Summary update
+                    int size = Math::Max(0, colony->EconomicBase);
+                    ++s.Count;
+                    s.Size      += size;
+                    s.Shipyards += Math::Max(0, colony->Shipyards);
+                    s.MD        += colony->MiDiff;
+                    s.Grav      += colony->Planet->Grav;
+                    s.LSN       += colony->LSN * size;
+                    s.Dist      += colony->System->CalcDistance(ColoniesGrid->Filter->RefSystem);
+                    s.DistSec   += colony->System->CalcDistance(ColoniesGrid->Filter->RefSystemPrev);
+                    s.Prod      += prodCalculated;
+                    s.ProdPerc  += prodPerc * size;
+                    // -- summary update end
+
+                    cells[c.Prod]->Value        = prodCalculated;
+                    cells[c.ProdOrder]->Value   = colony->ProductionOrder;
+                    cells[c.ProdPerc]->Value    = prodPerc;
+                    cells[c.Pop]->Value         = colony->AvailPop;
+
+                    if( colony->PlanetType == PLANET_HOME ||
+                        colony->PlanetType == PLANET_COLONY )
+                    {
+                        colony->CalculateBalance(ColoniesGrid->Filter->MiMaBalanced);
+                        cells[c.Balance]->Value = colony->PrintBalance();
+                    }
+
+                    int prodSum;
+                    String ^orders = colony->PrintCmdDetails(m_CommandMgr, prodSum);
+
+                    cells[c.Budget]->Value = (colony->Res->UsedEU != 0 || prodSum != 0)
+                        ? String::Format("{0} ({1}{2} : {3})",
+                            colony->Res->TotalEU,
+                            prodSum < 0 ? "+" : "",
+                            -prodSum,
+                            colony->Res->AvailEU)
+                        :  colony->Res->TotalEU.ToString();
+                    if( colony->Res->TotalEU < 0 ||
+                        colony->Res->AvailEU < 0 )
+                        cells[c.Budget]->Style->ForeColor = Color::Red;
+                    if( colony->Res->AvailEU < 0 )
+                        cells[c.Prod]->Style->ForeColor = Color::Red;
+
+                    cells[c.Prod]->ToolTipText      = orders;
+                    cells[c.ProdOrder]->ToolTipText = orders;
+                    cells[c.Budget]->ToolTipText    = orders;
+                }
+                else
+                {
+                    if( colony->LastSeen > 0 )
+                        cells[c.Seen]->Value = colony->LastSeen;
                 }
 
-                int prodSum;
-                String ^orders = colony->PrintCmdDetails(m_CommandMgr, prodSum);
-
-                cells[c.Budget]->Value = (colony->Res->UsedEU != 0 || prodSum != 0)
-                    ? String::Format("{0} ({1}{2} : {3})",
-                        colony->Res->TotalEU,
-                        prodSum < 0 ? "+" : "",
-                        -prodSum,
-                        colony->Res->AvailEU)
-                    :  colony->Res->TotalEU.ToString();
-                if( colony->Res->TotalEU < 0 ||
-                    colony->Res->AvailEU < 0 )
-                    cells[c.Budget]->Style->ForeColor = Color::Red;
-                if( colony->Res->AvailEU < 0 )
-                    cells[c.Prod]->Style->ForeColor = Color::Red;
-
-                cells[c.Prod]->ToolTipText      = orders;
-                cells[c.ProdOrder]->ToolTipText = orders;
-                cells[c.Budget]->ToolTipText    = orders;
+                if( colony->Shipyards != -1 )
+                {
+                    cells[c.Shipyards]->Value = colony->Shipyards;
+                }
             }
-            else
+
+            String^ notes = gcnew String("");
+            if( colony->Hidden )
             {
-                if( colony->LastSeen > 0 )
-                    cells[c.Seen]->Value = colony->LastSeen;
+                if ( ! String::IsNullOrEmpty(notes) ) notes += ", ";
+                notes += "Hidden";
             }
 
-            if( colony->Shipyards != -1 )
+            if( colony->UnderSiege )
             {
-                cells[c.Shipyards]->Value = colony->Shipyards;
+                if ( ! String::IsNullOrEmpty(notes) ) notes += ", ";
+                notes += "Under siege";
+                cells[c.Prod]->Style->ForeColor = Color::Red;
+                cells[c.Notes]->Style->ForeColor = Color::Red;
             }
+
+            if( colony->RecoveryIU + colony->RecoveryAU > 0 )
+            {
+                if ( ! String::IsNullOrEmpty(notes) ) notes += ", ";
+                notes += String::Format("Recovery: {0} IU, {1} AU", colony->RecoveryIU, colony->RecoveryAU);
+                cells[c.Prod]->Style->ForeColor = Color::Red;
+                cells[c.Notes]->Style->ForeColor = Color::Red;
+            }
+
+            cells[c.Notes]->Value = notes;
+
+            for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
+                plugin->AddRowData(row, ColoniesGrid->Filter, colony);
         }
-
-        String^ notes = gcnew String("");
-        if( colony->Hidden )
-        {
-            if ( ! String::IsNullOrEmpty(notes) ) notes += ", ";
-            notes += "Hidden";
-        }
-
-        if( colony->UnderSiege )
-        {
-            if ( ! String::IsNullOrEmpty(notes) ) notes += ", ";
-            notes += "Under siege";
-            cells[c.Prod]->Style->ForeColor = Color::Red;
-            cells[c.Notes]->Style->ForeColor = Color::Red;
-        }
-
-        if( colony->RecoveryIU + colony->RecoveryAU > 0 )
-        {
-            if ( ! String::IsNullOrEmpty(notes) ) notes += ", ";
-            notes += String::Format("Recovery: {0} IU, {1} AU", colony->RecoveryIU, colony->RecoveryAU);
-            cells[c.Prod]->Style->ForeColor = Color::Red;
-            cells[c.Notes]->Style->ForeColor = Color::Red;
-        }
-
-        cells[c.Notes]->Value = notes;
-
-        for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
-            plugin->AddRowData(row, ColoniesGrid->Filter, colony);
     }
 
     // Setup tooltips

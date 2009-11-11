@@ -17,12 +17,12 @@ TurnData::TurnData(int turn)
     , m_FleetCostPercent(0)
     , m_Aliens(gcnew SortedList<String^, Alien^>)
     , m_Systems(gcnew SortedList<int, StarSystem^>)
-    , m_Colonies(gcnew SortedList<String^, Colony^>)
-    , m_Ships(gcnew SortedList<String^, Ship^>)
+    //, m_Colonies(gcnew SortedList<String^, Colony^>)
+    //, m_Ships(gcnew SortedList<String^, Ship^>)
     , m_WormholeJumps(gcnew List<WormholeJump^>)
     , m_Misjumps(gcnew List<String^>)
     , m_bParsingFinished(false)
-    , m_ShipsByTonnage(gcnew List<Ship^>)
+    //, m_ShipsByTonnage(gcnew List<Ship^>)
 {
 }
 
@@ -38,6 +38,7 @@ void TurnData::PrintDebugStats()
     int playerColonies = 0;
     int alienColonies = 0;
     int wormholes = 0;
+    int ships = 0;
 
     for each (StarSystem^ system in GetStarSystems() )
     {
@@ -46,6 +47,7 @@ void TurnData::PrintDebugStats()
         knownPlanets += system->Planets->Count;
         playerColonies += system->ColoniesOwned->Count;
         alienColonies += system->ColoniesAlien->Count;
+        ships += system->Ships->Count;
     }
 
     STAT( "Aliens", m_Aliens->Count );
@@ -56,7 +58,7 @@ void TurnData::PrintDebugStats()
     STAT( "Colonies", playerColonies + alienColonies );
     STAT( "  Player", playerColonies );
     STAT( "  Alien", alienColonies );
-    STAT( "Ships", m_Ships->Count );
+    STAT( "Ships", ships );
 
     for each (String^ line in stats)
     {
@@ -206,14 +208,13 @@ String^ TurnData::GetPlanetsSummary()
 
 String^ TurnData::GetShipsSummary()
 {
-    List<Ship^> ^ships = GetShips(GameData::Player);
-    if( ships->Count == 0 )
+    if( GameData::Player->Ships->Count == 0 )
         return "You have no ships\r\n";
 
-    ships->Sort( gcnew Ship::LocationComparer );
+    GameData::Player->Ships->Sort( gcnew Ship::LocationComparer );
 
     String ^ret = "";
-    for each( Ship ^ship in ships )
+    for each( Ship ^ship in GameData::Player->Ships )
         ret += String::Format("{0} {1} @{2}\r\n",
             ship->PrintClass(),
             ship->Name,
@@ -242,65 +243,16 @@ Alien^ TurnData::GetAlien(String ^sp)
         String::Format("Species not found: {0}", sp));
 }
 
-Ship^ TurnData::GetShip(String ^name)
-{
-    return m_Ships[name->ToLower()];
-}
-
-List<Ship^>^ TurnData::GetShips(StarSystem ^sys, Alien ^sp)
-{
-    List<Ship^> ^ret = gcnew List<Ship^>; 
-
-    for each( Ship ^ship in GetShips() )
-    {
-        if( sp && ship->Owner != sp )
-            continue;
-        if( sys && ship->System != sys )
-            continue;
-        ret->Add(ship);
-    }
-
-    return ret;
-}
-
 StarSystem^ TurnData::GetStarSystem(String ^name)
 {
-    if ( m_Colonies->ContainsKey( name->ToLower() ) )
-    {
-        return m_Colonies[name->ToLower()]->System;
-    }
-    else
-    {
-        return nullptr;
-    }
-}
-
-Colony^ TurnData::GetColony(String ^name)
-{
-    if( m_Colonies->ContainsKey( name->ToLower() ) )
-    {
-        return m_Colonies[ name->ToLower() ];
-    }
-    else
+    //if ( m_Colonies->ContainsKey( name->ToLower() ) )
+    //{
+    //    return m_Colonies[name->ToLower()]->System;
+    //}
+    //else
     {
         return nullptr;
     }
-}
-
-List<Colony^>^ TurnData::GetColonies(StarSystem ^sys, Alien ^sp)
-{
-    List<Colony^> ^ret = gcnew List<Colony^>; 
-
-    for each( Colony ^colony in GetColonies() )
-    {
-        if( sp && colony->Owner != sp )
-            continue;
-        if( sys && colony->System != sys )
-            continue;
-        ret->Add(colony);
-    }
-
-    return ret;
 }
 
 void TurnData::SetSpecies(String ^sp)
@@ -399,7 +351,8 @@ void TurnData::AddAlien(Alien^ alien)
 
 void TurnData::AddColony(Colony^ colony)
 {
-    m_Colonies->Add( colony->Name->ToLower(), colony );
+    colony->Owner->Colonies->Add( colony );
+    colony->System->AddColony( colony );
 }
 
 StarSystem^ TurnData::AddStarSystem(int x, int y, int z, String ^type, String ^comment)
@@ -433,10 +386,11 @@ void TurnData::AddPlanetScan(StarSystem ^system, Planet ^planet)
             else
                 planet->Comment += "; " + plExisting->Comment;
         }
-        //TODO: WTF? WHY DOES IT CRASH???
-        //planet->SuspectedColonies = plExisting->SuspectedColonies;
+        if( !String::IsNullOrEmpty(plExisting->AlienName) &&
+            String::IsNullOrEmpty(planet->AlienName) )
+            planet->AlienName = plExisting->AlienName;
 
-        for each( Colony ^colony in m_Colonies->Values )
+        for each( Colony ^colony in system->Colonies )
             if( colony->Planet == plExisting )
                 colony->Planet = planet;
     }
@@ -457,55 +411,55 @@ void TurnData::AddTurnProducedEU(int eu)
     m_TurnEUProduced += eu;
 }
 
-Colony^ TurnData::AddColony(Alien ^sp, String ^name, StarSystem ^system, int plNum, bool isObserver)
+Colony^ TurnData::CreateColony(Alien ^sp, String ^name, StarSystem ^system, int plNum, bool isObserver)
 {
-    if( m_Colonies->ContainsKey( name->ToLower() ) )
+    for each( Colony ^colony in sp->Colonies )
     {
-        return m_Colonies[name->ToLower()];
+        if( colony->System == system &&
+            colony->PlanetNum == plNum )
+        {
+            return colony;
+        }
+    }
+
+    Colony ^colony = gcnew Colony(sp, name, system, plNum);
+    AddColony(colony);
+
+    if( !system->Planets->ContainsKey(plNum) )
+    {   // System is not yet known, initialize with defaults
+        system->Planets->Add(plNum, Planet::Default(system, plNum) );
+    }
+    colony->Planet = system->Planets[plNum];
+    if( GameData::Player && ( sp == GameData::Player ) )
+    {
+        colony->Planet->Name = name;
     }
     else
     {
-        Colony ^colony = gcnew Colony(sp, name, system, plNum);
-        m_Colonies->Add(name->ToLower(), colony);
-        sp->Colonies->Add(colony);
-
-        if( ! system->Planets->ContainsKey(plNum) )
-        {
-            // System is not yet known, initialize with defaults
-            system->Planets->Add(plNum, Planet::Default(system, plNum) );
-        }
-        colony->Planet = system->Planets[plNum];
-        if( GameData::Player && ( sp == GameData::Player ) )
-        {
-            colony->Planet->Name = name;
-        }
-        else
-        {
-            colony->Planet->AlienName = name;
-        }
-
-        //TODO: WTF? WHY DOES IT CRASH???
-        //if( colony->Planet->SuspectedColonies->ContainsKey(sp) )
-        //    colony->Planet->SuspectedColonies->Remove(sp);
-        if( isObserver && (sp == GameData::Player ) )
-        {
-            system->LastVisited = m_Turn;
-            DeleteAlienColonies(system);
-        }
-        return colony;
+        colony->Planet->AlienName = name;
     }
+
+    if( isObserver && (sp == GameData::Player ) )
+    {
+        system->LastVisited = m_Turn;
+        system->DeleteAlienColonies();
+    }
+    return colony;
 }
 
-void TurnData::DelColony(String ^name)
-{
-    String ^lowName = name->ToLower();
-    if( m_Colonies->ContainsKey( lowName ) )
+void TurnData::RemoveColony(String ^name)
+{   // Assume only player's colony may be deleted
+    for each( Colony ^colony in GameData::Player->Colonies )
     {
-        Colony ^colony = m_Colonies[lowName];
-        colony->Planet->Name = nullptr;
-        m_Colonies->Remove( lowName );
-        colony->Owner->Colonies->Remove(colony);
+        if( colony->Name == name )
+        {
+            GameData::Player->Colonies->Remove(colony);
+            colony->System->ColoniesOwned->Remove(colony);
+            return;
+        }
     }
+
+    throw gcnew FHUIDataIntegrityException("Trying to delete colony, but player doesn't have one: " + name);
 }
 
 void TurnData::Update()
@@ -528,19 +482,17 @@ void TurnData::Update()
 void TurnData::UpdateShips()
 {
     // Back up original cargo
-    for each( Ship ^ship in GameData::GetShips() )
+    for each( Ship ^ship in GameData::Player->Ships )
     {
-        if( ship->Owner == GameData::Player )
-            ship->Cargo->CopyTo(ship->CargoOriginal, 0);
+        ship->Cargo->CopyTo(ship->CargoOriginal, 0);
     }
 
     // Update wormhole targets
     for each( WormholeJump ^jump in m_WormholeJumps )
-    {
-        // The ship could have been intercepted
-        if( m_Ships->ContainsKey(jump->A->ToLower()) )
+    {   // The ship could have been intercepted
+        Ship ^ship = GameData::Player->FindShip(jump->A, true);
+        if( ship )
         {
-            Ship ^ship = GetShip(jump->A);
             StarSystem ^from = GetStarSystem(jump->B);
             // Add wormhole link
             from->SetWormhole( ship->System->GetId() );
@@ -549,12 +501,10 @@ void TurnData::UpdateShips()
 
     // Update misjumped ships
     for each( String ^misjump in m_Misjumps )
-    {
-        // The ship could have been intercepted
-        if( m_Ships->ContainsKey(misjump->ToLower()) )
-        {
-            GetShip(misjump)->HadMishap = true;
-        }
+    {   // The ship could have been intercepted
+        Ship ^ship = GameData::Player->FindShip(misjump, true);
+        if( ship )
+            ship->HadMishap = true;
     }
 }
 
@@ -574,11 +524,6 @@ void TurnData::UpdateSystems()
         {
             alien->HomeSystem->HomeSpecies = alien;
         }
-    }
-
-    for each( Colony ^colony in GetColonies() )
-    {
-        colony->System->AddColony(colony);
     }
 
     for each( StarSystem ^system in GetStarSystems() )
@@ -646,29 +591,32 @@ void TurnData::UpdateHomeWorlds()
         }
     }
 
-    for each( Colony ^colony in GetColonies() )
+    for each( StarSystem ^system in GetStarSystems() )
     {
-        if( colony->PlanetType == PLANET_HOME && 
-            colony->System->Planets->ContainsKey( colony->PlanetNum ) )
+        for each( Colony ^colony in system->Colonies )
         {
-            Planet ^planet = colony->System->Planets[colony->PlanetNum];
-
-            // Find species born here
-            for each( Alien ^alien in GetAliens() )
+            if( colony->PlanetType == PLANET_HOME && 
+                system->Planets->ContainsKey( colony->PlanetNum ) )
             {
-                if( alien->HomeSystem &&
-                    alien->HomeSystem->GetId() == colony->System->GetId() &&
-                    alien->HomePlanet == colony->PlanetNum )
+                Planet ^planet = system->Planets[colony->PlanetNum];
+
+                // Find species born here
+                for each( Alien ^alien in GetAliens() )
                 {
-                    // Update species' living requirements, if unknown
-                    if ( ! alien->AtmReq->IsValid() )
+                    if( alien->HomeSystem &&
+                        alien->HomeSystem == system &&
+                        alien->HomePlanet == colony->PlanetNum )
                     {
-                        alien->AtmReq->TempClass = planet->TempClass;
-                        alien->AtmReq->PressClass = planet->PressClass;
-                        for( int i = 0; i < GAS_MAX; ++i )
+                        // Update species' living requirements, if unknown
+                        if ( ! alien->AtmReq->IsValid() )
                         {
-                            if( planet->Atmosphere[i] )
-                                alien->AtmReq->Neutral[i] = true;
+                            alien->AtmReq->TempClass = planet->TempClass;
+                            alien->AtmReq->PressClass = planet->PressClass;
+                            for( int i = 0; i < GAS_MAX; ++i )
+                            {
+                                if( planet->Atmosphere[i] )
+                                    alien->AtmReq->Neutral[i] = true;
+                            }
                         }
                     }
                 }
@@ -712,14 +660,12 @@ void TurnData::UpdateColonies()
     GameData::Player->SortColoniesByProdOrder();
 }
 
-Ship^ TurnData::AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system)
+Ship^ TurnData::CreateShip(Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system)
 {
     Ship ^ship = gcnew Ship(sp, type, name, subLight);
     ship->System = system;
-    m_Ships[name->ToLower()] = ship;
 
-    m_ShipsByTonnage->Add( ship );
-    m_ShipsByTonnage->Sort( gcnew Ship::WarTonnageComparer );
+    //m_ShipsByTonnage->Sort( gcnew Ship::WarTonnageComparer );
 
     system->AddShip( ship );
     sp->Ships->Add( ship );
@@ -727,7 +673,7 @@ Ship^ TurnData::AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, S
     if( sp == GameData::Player )
     {
         if( IsParsingFinished() == false )
-            DeleteAlienColonies(system);
+            system->DeleteAlienColonies();
     }
 
     return ship;
@@ -735,8 +681,6 @@ Ship^ TurnData::AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, S
 
 void TurnData::RemoveShip(Ship ^ship)
 {
-    m_Ships->Remove(ship->Name->ToLower());
-    m_ShipsByTonnage->Remove( ship );
     ship->System->RemoveShip( ship );
     GameData::Player->Ships->Remove( ship );
 }
@@ -749,32 +693,6 @@ void TurnData::AddWormholeJump(String ^shipName, int fromSystemId)
 void TurnData::AddMishap(String ^shipName)
 {
     m_Misjumps->Add( shipName );
-}
-
-void TurnData::DeleteAlienColonies(StarSystem^ system)
-{
-    // Remove alien colonies from this system.
-    // They'll be restored by 'Aliens at...' parsing. If not - it means that alien
-    // colony was destroyed, assimilated or it is hiding. Add a note.
-    bool bRemoved = false;
-    do
-    {
-        bRemoved = false;
-        for each( KeyValuePair<String^, Colony^> ^iter in m_Colonies )
-        {
-            Colony ^c = iter->Value;
-            if( c->Owner != GameData::Player &&
-                c->System == system )
-            {
-                //TODO: WTF? WHY DOES IT CRASH???
-                //c->Planet->SuspectedColonies[c->Owner] = c->LastSeen;
-
-                m_Colonies->Remove(iter->Key);
-                bRemoved = true;
-                break; // for each
-            }
-        }
-    } while( bRemoved );
 }
 
 } // end namespace FHUI

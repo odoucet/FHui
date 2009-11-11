@@ -133,7 +133,7 @@ void CommandManager::AddCommand(Colony ^colony, ICommand ^cmd)
         if( cmd->GetCmdType() == CommandType::BuildShip )
         {
             ProdCmdBuildShip ^shipCmd = safe_cast<ProdCmdBuildShip^>(cmd);
-            Ship ^ship = GameData::AddShip(
+            Ship ^ship = GameData::CreateShip(
                 GameData::Player,
                 shipCmd->m_Type,
                 shipCmd->m_Name,
@@ -502,7 +502,7 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
 
         if( m_RM->Match(line, m_RM->ExpCmdColony) )
         {
-            Colony ^colony = m_GameData->GetColony(m_RM->Results[0]);
+            Colony ^colony = GameData::Player->FindColony(m_RM->Results[0], false);
             if( colony->Owner == GameData::Player)
             {
                 refColony = colony;
@@ -524,7 +524,7 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
     // --- obsolete ship commands ---
         else if( m_RM->Match(line, m_RM->ExpCmdShipJump_Obsolete) )
         {
-            Ship ^ship = m_GameData->GetShip(m_RM->Results[0]);
+            Ship ^ship = GameData::Player->FindShip(m_RM->Results[0], false);
             int x = m_RM->GetResultInt(1);
             int y = m_RM->GetResultInt(2);
             int z = m_RM->GetResultInt(3);
@@ -536,7 +536,7 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
         }
         else if( m_RM->Match(line, m_RM->ExpCmdShipWormhole_Obsolete) )
         {
-            Ship ^ship = m_GameData->GetShip(m_RM->Results[0]);
+            Ship ^ship = GameData::Player->FindShip(m_RM->Results[0], false);
             if( !ship->System->HasWormhole )
                 throw gcnew FHUIParsingException("Invalid ship wormhole command (no wormhole in system)!");
             int p = m_RM->GetResultInt(1);
@@ -548,18 +548,18 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
         }
         else if( m_RM->Match(line, m_RM->ExpCmdShipUpg_Obsolete) )
         {
-            Ship ^ship = m_GameData->GetShip(m_RM->Results[0]);
+            Ship ^ship = GameData::Player->FindShip(m_RM->Results[0], false);
             ship->AddCommand( CmdSetOrigin(gcnew ShipCmdUpgrade(ship)) );
         }
         else if( m_RM->Match(line, m_RM->ExpCmdShipRec_Obsolete) )
         {
-            Ship ^ship = m_GameData->GetShip(m_RM->Results[0]);
+            Ship ^ship = GameData::Player->FindShip(m_RM->Results[0], false);
             ship->AddCommand( CmdSetOrigin(gcnew ShipCmdRecycle(ship)) );
         }
     // --- end obsolete ship commands ---
         else if( m_RM->Match(line, m_RM->ExpCmdShip) )
         {
-            Ship ^ship = m_GameData->GetShip(m_RM->Results[0]);
+            Ship ^ship = GameData::Player->FindShip(m_RM->Results[0], false);
             if( ship->Owner == GameData::Player )
                 refShip = ship;
             else
@@ -585,14 +585,14 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
                 false);
             Planet ^planet = system->Planets[ m_RM->GetResultInt(3) ];
             String ^name = m_RM->Results[4];
-            Colony ^colony = m_GameData->AddColony(GameData::Player, name, system, planet->Number, false);
+            Colony ^colony = GameData::CreateColony(GameData::Player, name, system, planet->Number, false);
             colony->PlanetType = PLANET_COLONY;
             AddCommand( colony, CmdSetOrigin(gcnew CmdPlanetName(system, planet->Number, name)) );
         }
         else if( m_RM->Match(line, m_RM->ExpCmdPLDisband) )
         {
             AddCommand(
-                GameData::GetColony( m_RM->Results[0] ),
+                GameData::Player->FindColony( m_RM->Results[0], false ),
                 CmdSetOrigin(gcnew CmdDisband( m_RM->Results[0] )) );
         }
         else if( m_RM->Match(line, m_RM->ExpCmdSPNeutral) )
@@ -663,9 +663,9 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
             Ship    ^toShip = nullptr;
             // Parse source
             if( m_RM->Match(line, m_RM->ExpCmdTargetColony) )
-                fromColony = GameData::GetColony(m_RM->Results[0]->Trim());
+                fromColony = GameData::Player->FindColony(m_RM->Results[0]->Trim(), false);
             else if( m_RM->Match(line, m_RM->ExpCmdTargetShip) )
-                fromShip = GameData::GetShip(m_RM->Results[0]->Trim());
+                fromShip = GameData::Player->FindShip(m_RM->Results[0]->Trim(), false);
             else
                 throw gcnew FHUIParsingException("Unrecognized source for transfer command: " + line);
             // Skip ","
@@ -673,9 +673,9 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
                 throw gcnew FHUIParsingException("Missing source/target separator for transfer command: " + line);
             // Parse target
             if( m_RM->Match(line, m_RM->ExpCmdTargetColony) )
-                toColony = GameData::GetColony(m_RM->Results[0]->Trim());
+                toColony = GameData::Player->FindColony(m_RM->Results[0]->Trim(), false);
             else if( m_RM->Match(line, m_RM->ExpCmdTargetShip) )
-                toShip = GameData::GetShip(m_RM->Results[0]->Trim());
+                toShip = GameData::Player->FindShip(m_RM->Results[0]->Trim(), false);
             else
                 throw gcnew FHUIParsingException("Unrecognized target for transfer command: " + line);
 
@@ -730,11 +730,11 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
         {
             if( m_RM->Match(line, m_RM->ExpCmdTargetColony) )
             {
-                targetColony = GameData::GetColony( m_RM->Results[0] );
+                targetColony = GameData::Player->FindColony( m_RM->Results[0], false );
             }
             else if( m_RM->Match(line, m_RM->ExpCmdTargetShip) )
             {
-                targetShip = GameData::GetShip( m_RM->Results[0] );
+                targetShip = GameData::Player->FindShip( m_RM->Results[0], false );
             }
             else
             {
@@ -763,11 +763,11 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
         {
             if( m_RM->Match(line, m_RM->ExpCmdTargetColony) )
             {
-                targetColony = GameData::GetColony( m_RM->Results[0] );
+                targetColony = GameData::Player->FindColony( m_RM->Results[0], false );
             }
             else if( m_RM->Match(line, m_RM->ExpCmdTargetShip) )
             {
-                targetShip = GameData::GetShip( m_RM->Results[0] );
+                targetShip = GameData::Player->FindShip( m_RM->Results[0], false );
             }
             else
             {
@@ -825,7 +825,7 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
     // Install
     if( m_RM->Match(line, m_RM->ExpCmdInstall) )
     {
-        Colony ^colony = GameData::GetColony( m_RM->Results[2] );
+        Colony ^colony = GameData::Player->FindColony( m_RM->Results[2], false );
 
         AddCommand(colony, CmdSetOrigin(gcnew CmdInstall(
             m_RM->GetResultInt(0),
@@ -838,8 +838,8 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
     // Develop
     if( m_RM->Match(line, m_RM->ExpCmdDevelopCS) )
     {
-        Colony ^devColony = m_GameData->GetColony(m_RM->Results[1]);
-        Ship^ ship = m_GameData->GetShip(m_RM->Results[2]);
+        Colony ^devColony = GameData::Player->FindColony(m_RM->Results[1], false);
+        Ship^ ship = GameData::Player->FindShip(m_RM->Results[2], false);
         if( !ship )
             throw gcnew FHUIParsingException("JUMP order for unknown ship: {1}" + m_RM->Results[2]);
 
@@ -852,7 +852,7 @@ bool CommandManager::LoadCommandsColony(String ^line, Colony ^colony)
     }
     if( m_RM->Match(line, m_RM->ExpCmdDevelopC) )
     {
-        Colony ^devColony = m_GameData->GetColony(m_RM->Results[1]);
+        Colony ^devColony = GameData::Player->FindColony(m_RM->Results[1], false);
 
         AddCommand(colony, CmdSetOrigin(gcnew ProdCmdDevelop(
             m_RM->GetResultInt(0),
@@ -966,7 +966,7 @@ bool CommandManager::LoadCommandsShip(String ^line, Ship ^ship)
     // Orbit
     if( m_RM->Match(line, m_RM->ExpCmdShipOrbitPLName) )
     {
-        Planet ^planet = GameData::GetColony(m_RM->Results[1])->Planet;
+        Planet ^planet = GameData::Player->FindColony(m_RM->Results[1], false)->Planet;
         ship->AddCommand( CmdSetOrigin(gcnew ShipCmdOrbit(ship, planet)) );
         return true;
     }

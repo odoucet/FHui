@@ -58,4 +58,30 @@ String^ Alien::PrintRelation()
     }
 }
 
+Colony^ Alien::FindColony(String ^name, bool allowMissing)
+{
+    String ^nameLower = name->ToLower();
+    for each( Colony ^colony in Colonies )
+        if( colony->Name->ToLower() == nameLower )
+            return colony;
+
+    if( allowMissing )
+        return nullptr;
+
+    throw gcnew FHUIDataIntegrityException("Player's colony not found when required: " + name);
+}
+
+Ship^ Alien::FindShip(String ^name, bool allowMissing)
+{
+    String ^nameLower = name->ToLower();
+    for each( Ship ^ship in Ships )
+        if( ship->Name->ToLower() == nameLower )
+            return ship;
+
+    if( allowMissing )
+        return nullptr;
+
+    throw gcnew FHUIDataIntegrityException("Player's ship not found when required: " + name);
+}
+
 } // end namespace FHUI

@@ -383,31 +383,28 @@ void GridFilter::SetRefColony()
 
     Alien ^sp = GameData::Player;
 
-    Colony ^colony = nullptr;
-    bool bFound = false;
-    for each( colony in sp->Colonies )
+    Colony ^colony = sp->FindColony(ref, true);
+    if( !colony )
     {
-        if( colony->Name == ref )
+        for each( Alien ^alien in GameData::GetAliens() )
         {
-            bFound = true;
-            break;
-        }
-    }
-    if( !bFound )
-    {
-        for each( colony in GameData::GetColonies() )
-        {
-            if( colony->Owner == sp )
+            if( alien == sp )
                 continue;
-            if( ref->Substring(0, colony->Name->Length) == colony->Name &&
-                colony->Owner->Name == ref->Substring(colony->Name->Length + 2, ref->Length - colony->Name->Length - 3) )
+            for each( Colony ^iCol in alien->Colonies )
             {
-                bFound = true;
-                break;
+                // TODO: implement more robust and safe colony search
+                if( ref->Substring(0, iCol->Name->Length) == iCol->Name &&
+                    iCol->Owner->Name == ref->Substring(iCol->Name->Length + 2, ref->Length - iCol->Name->Length - 3) )
+                {
+                    colony = iCol;
+                    break;
+                }
             }
+            if( colony != nullptr )
+                break;
         }
     }
-    if( !bFound )
+    if( !colony )
         throw gcnew FHUIDataIntegrityException("Can't find reference colony: " + ref);
 
     if( RefSystem == colony->System )
@@ -466,7 +463,7 @@ Ship^ GridFilter::GetShipFromRefList(ComboBox ^combo)
 
     Match ^m = Regex("^[A-Z0-9s]+ (.*) \\(A\\d+\\)$").Match(ref);
     if( m->Success )
-        return GameData::GetShip( m->Groups[1]->ToString() );
+        return GameData::Player->FindShip( m->Groups[1]->ToString(), false );
 
     throw gcnew FHUIDataIntegrityException("Can't find reference ship: " + ref);
 }

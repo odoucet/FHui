@@ -33,13 +33,9 @@ public:
     StarSystem^     GetStarSystem(int id);
     StarSystem^     GetStarSystem(int x, int y, int z, bool allowVoid);
     StarSystem^     GetStarSystem(String ^name);
-    Colony^         GetColony(String ^name);
-    Ship^           GetShip(String ^name);
 
     IList<Alien^>^          GetAliens()                         { return m_Aliens->Values; }
     IList<StarSystem^>^     GetStarSystems()                    { return m_Systems->Values; }
-    IList<Ship^>^           GetShips()                          { return m_ShipsByTonnage; }
-    IList<Colony^>^         GetColonies()                       { return m_Colonies->Values; }
 
     bool            IsParsingFinished()                         { return m_bParsingFinished; }
 
@@ -56,10 +52,10 @@ public:
     void            AddPlanetScan(StarSystem ^system, Planet ^planet);
     void            SetTurnStartEU(int eu);
     void            AddTurnProducedEU(int eu);
-    void            AddColony(Colony^);
-    void            DelColony(String ^name);
-    Colony^         AddColony(Alien ^sp, String ^name, StarSystem ^system, int plNum, bool);
-    Ship^           AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);
+    Colony^         CreateColony(Alien ^sp, String ^name, StarSystem ^system, int plNum, bool);
+    void            AddColony(Colony ^colony);
+    void            RemoveColony(String ^name);
+    Ship^           CreateShip(Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);
     void            RemoveShip(Ship ^ship);
     void            AddWormholeJump(String ^shipName, int fromSystemId);
     void            AddMishap(String ^shipName);
@@ -67,9 +63,6 @@ public:
     void            PrintDebugStats();
 
 protected:
-
-    void            DeleteAlienColonies(StarSystem^ system);
-
     void            UpdateShips();
     void            UpdateAliens();
     void            UpdateSystems();
@@ -84,22 +77,12 @@ protected:
     String^         GetPlanetsSummary();
     String^         GetShipsSummary();
 
-    List<Ship^>^        GetShips(Alien ^sp)                 { return GetShips(nullptr, sp); }
-    List<Ship^>^        GetShips(StarSystem ^sys)           { return GetShips(sys, nullptr); }
-    List<Ship^>^        GetShips(StarSystem^, Alien^);
-    List<Colony^>^      GetColonies(Alien ^sp)              { return GetColonies(nullptr, sp); }
-    List<Colony^>^      GetColonies(StarSystem ^sys)        { return GetColonies(sys, nullptr); }
-    List<Colony^>^      GetColonies(StarSystem^, Alien^);
-
     int                 m_TurnEUStart;
     int                 m_TurnEUProduced;
     int                 m_FleetCost;
     int                 m_FleetCostPercent; // * 100
     SortedList<int, StarSystem^>^       m_Systems;
     SortedList<String^, Alien^>^        m_Aliens;
-    SortedList<String^, Colony^>^       m_Colonies;
-    SortedList<String^, Ship^>^         m_Ships;
-    List<Ship^>^                        m_ShipsByTonnage;
 
     typedef Pair<String^, int> WormholeJump;
     List<WormholeJump^>^                m_WormholeJumps;

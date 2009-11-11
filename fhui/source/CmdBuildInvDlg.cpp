@@ -23,7 +23,7 @@ ProdCmdBuildInv^ CmdBuildInvDlg::GetCommand()
     String ^target = Target->Text;
     if( target->Substring(0, 3) == "PL " )
     {
-        Colony ^colony = GameData::GetColony(target->Substring(3));
+        Colony ^colony = GameData::Player->FindColony(target->Substring(3), false);
         return gcnew ProdCmdBuildInv(amount, inv, colony, nullptr);
     }
 

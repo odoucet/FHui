@@ -188,7 +188,7 @@ void CmdTransferDlg::InitControlsUnits()
 
         String ^sel = combo->Text;
         if( sel->Substring(0, 3) == "PL " )
-            selColony = GameData::GetColony(sel->Substring(3));
+            selColony = GameData::Player->FindColony(sel->Substring(3), false);
         else
             selShip = Ship::FindRefListEntry( sel );
 

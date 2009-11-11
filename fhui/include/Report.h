@@ -46,8 +46,8 @@ public:
     int             GetLineCount()  { return m_Content->Count; }
     String^         GetText();
 
-    bool            Verify(String ^filename);
-    void            Parse(String ^filename);
+    bool            Verify(String ^fileName);
+    void            Parse(String ^fileName);
 
 private:
 

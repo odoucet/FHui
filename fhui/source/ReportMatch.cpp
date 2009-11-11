@@ -366,7 +366,7 @@ bool Report::MatchColonyInfo(String ^s)
 
         int plNum = m_RM->GetResultInt(4);
 
-        colony = m_GameData->AddColony(
+        colony = m_GameData->CreateColony(
             GameData::Player,
             plName,
             system,
@@ -754,7 +754,7 @@ bool Report::MatchShipInfo(String ^s, StarSystem ^system, Colony ^colony)
         {
             String ^spName = m_RM->Results[0];
             Alien ^sp = m_GameData->AddAlien(spName);
-            ship = m_GameData->AddShip( sp, type, name, subLight, system );
+            ship = m_GameData->CreateShip( sp, type, name, subLight, system );
 
             if( bInFD )
             {
@@ -765,7 +765,7 @@ bool Report::MatchShipInfo(String ^s, StarSystem ^system, Colony ^colony)
         }
         else
         {
-            ship = m_GameData->AddShip( GameData::Player, type, name, subLight, system);
+            ship = m_GameData->CreateShip( GameData::Player, type, name, subLight, system);
             if( ship == nullptr )
                 return false;
 
@@ -843,7 +843,7 @@ bool Report::MatchOtherPlanetsShips(String ^s)
             bool isObserver = ( m_RM->Results[5]->Length > 0 );
 
             // Treat as colony of size 0
-            Colony^ colony = m_GameData->AddColony(
+            Colony^ colony = m_GameData->CreateColony(
                 GameData::Player,
                 plName,
                 system,
@@ -947,7 +947,7 @@ bool Report::MatchAliens(String ^s)
             int plNum    = m_RM->GetResultInt(1);
             alien        = m_GameData->AddAlien(m_RM->Results[2]);
 
-            if( colony = m_GameData->AddColony(alien, name, system, plNum, false) )
+            if( colony = m_GameData->CreateColony(alien, name, system, plNum, false) )
             {
                 colony->LastSeen = Math::Max(m_Turn, colony->LastSeen);
                 colony->PlanetType = plType;
@@ -1057,7 +1057,7 @@ bool Report::MatchTemplateEntry(String ^s)
         // START PRODUCTION
         if( m_RM->Match(s, "^PRODUCTION\\s+PL\\s+([^,]+)$") )
         {
-            Colony^ colony = m_GameData->GetColony(m_RM->Results[0]);
+            Colony^ colony = GameData::Player->FindColony(m_RM->Results[0], false);
             if ( colony )
             {
                 m_TemplateColony = colony;
@@ -1076,7 +1076,7 @@ bool Report::MatchTemplateEntry(String ^s)
     // INSTALL
     if( m_RM->Match(s, m_RM->ExpCmdInstall) )
     {
-        Colony ^colony = GameData::GetColony( m_RM->Results[2] );
+        Colony ^colony = GameData::Player->FindColony( m_RM->Results[2], false );
 
         ICommand ^cmd = gcnew CmdInstall(
             m_RM->GetResultInt(0),
@@ -1090,7 +1090,7 @@ bool Report::MatchTemplateEntry(String ^s)
     // UNLOAD
     if( m_RM->Match(s, m_RM->ExpCmdShipUnload) )
     {
-        Ship^ ship = m_GameData->GetShip(m_RM->Results[0]);  
+        Ship^ ship = GameData::Player->FindShip(m_RM->Results[0], false);  
         if ( ship )
         {
             ICommand ^cmd = gcnew ShipCmdUnload(ship);
@@ -1105,7 +1105,7 @@ bool Report::MatchTemplateEntry(String ^s)
     // JUMP
     if( m_RM->Match(s, "^Jump\\s+(\\w+)\\s+([^,]+),\\s+(.+)$") )
     {
-        Ship^ ship = m_GameData->GetShip(m_RM->Results[1]);
+        Ship^ ship = GameData::Player->FindShip(m_RM->Results[1], false);
         if ( ship )
         {
             String ^target = m_RM->Results[2];
@@ -1126,7 +1126,7 @@ bool Report::MatchTemplateEntry(String ^s)
             }
             else if( m_RM->Match(target, "PL\\s+([^,;]+)") )
             {
-                Colony ^colony = GameData::GetColony(m_RM->Results[0]->TrimEnd());
+                Colony ^colony = GameData::Player->FindColony(m_RM->Results[0]->TrimEnd(), false);
                 if( colony )
                     cmd = gcnew ShipCmdJump(ship, colony->System, colony->PlanetNum);
             }
@@ -1144,8 +1144,8 @@ bool Report::MatchTemplateEntry(String ^s)
     // DEVELOP
     if( m_RM->Match(s, m_RM->ExpCmdDevelopCS) )
     {
-        Colony ^colony = m_GameData->GetColony(m_RM->Results[1]);
-        Ship^ ship = m_GameData->GetShip(m_RM->Results[2]);
+        Colony ^colony = GameData::Player->FindColony(m_RM->Results[1], false);
+        Ship^ ship = GameData::Player->FindShip(m_RM->Results[2], false);
         if( !ship )
             throw gcnew FHUIParsingException("JUMP order for unknown ship: {0}" + m_RM->Results[2]);
 
@@ -1158,7 +1158,7 @@ bool Report::MatchTemplateEntry(String ^s)
     }
     if( m_RM->Match(s, m_RM->ExpCmdDevelopC) )
     {
-        Colony ^colony = m_GameData->GetColony(m_RM->Results[1]);
+        Colony ^colony = GameData::Player->FindColony(m_RM->Results[1], false);
 
         ICommand ^cmd = gcnew ProdCmdDevelop(
             m_RM->GetResultInt(0),
@@ -1206,7 +1206,7 @@ bool Report::MatchTemplateEntry(String ^s)
     // RECYCLE SHIP
     if( m_RM->Match(s, m_RM->ExpCmdShipRec) )
     {
-        Ship ^ship = m_GameData->GetShip(m_RM->Results[0]);
+        Ship ^ship = GameData::Player->FindShip(m_RM->Results[0], false);
         ICommand ^cmd = gcnew ShipCmdRecycle( ship );
         cmd->Origin = CommandOrigin::Auto;
         ship->AddCommand( cmd );
@@ -1223,7 +1223,7 @@ bool Report::MatchTemplateEntry(String ^s)
     // SCAN
     if( m_RM->Match(s, m_RM->ExpCmdShipScan) )
     {
-        Ship ^ship = m_GameData->GetShip(m_RM->Results[0]);
+        Ship ^ship = GameData::Player->FindShip(m_RM->Results[0], false);
         ICommand ^cmd = gcnew ShipCmdScan( ship );
         cmd->Origin = CommandOrigin::Auto;
         ship->AddCommand( cmd );

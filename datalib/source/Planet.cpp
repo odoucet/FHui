@@ -21,7 +21,8 @@ String^ Planet::GetNameWithOrders()
     }
 
     String ^n = Name;
-    Colony ^colony = GameData::GetColony(Name);
+    Colony ^colony = GameData::Player->FindColony(Name, false);
+
     if( colony->IsNew )
     {
         n += " (new)";

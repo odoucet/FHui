@@ -116,58 +116,61 @@ void Form1::ShipsFillGrid()
     int ml = sp->TechLevelsAssumed[TECH_ML];
     double discount = Calculators::ShipMaintenanceDiscount(ml);
 
-    for each( Ship ^ship in m_GameData->GetShips() )
+    for each( Alien ^alien in GameData::GetAliens() )
     {
-        if( ShipsGrid->Filter->Filter(ship) )
-            continue;
-
-        DataGridViewRow ^row = ShipsGrid->Rows[ ShipsGrid->Rows->Add() ];
-        DataGridViewCellCollection ^cells = row->Cells;
-        cells[c.Object]->Value      = ship;
-        cells[c.Owner]->Value       = ship->Owner == sp ? String::Format("* {0}", sp->Name) : ship->Owner->Name;
-        cells[c.Class]->Value       = ship->PrintClass();
-        cells[c.Name]->Value        = ship->Name;
-        if( ship->BuiltThisTurn )
-            cells[c.Name]->Value    = ship->Name + " (new)";
-        if( ship->EUToComplete > 0 )
-            cells[c.Name]->Value    = ship->Name + " (incomplete)";
-        cells[c.Location]->Value    = ship->PrintLocation();
-        if( ship->HadMishap )
-            cells[c.Location]->Style->ForeColor = Color::Red;
-        if( !ship->IsPirate )
-            cells[c.Age]->Value     = ship->Age;
-        cells[c.Cap]->Value         = ship->Capacity;
-        cells[c.Dist]->Value        = GridPrintDistance(ship->System, ShipsGrid->Filter->RefSystem, gv, ship->Age);
-        cells[c.DistSec]->Value     = GridPrintDistance(ship->System, ShipsGrid->Filter->RefSystemPrev, gv, ship->Age);
-        if( sp == ship->Owner )
+        for each( Ship ^ship in alien->Ships )
         {
-            cells[c.Cargo]->Value   = ship->PrintCargo(false);
-            cells[c.Maint]->Value   = Calculators::ShipMaintenanceCost(ship->Type, ship->Size, ship->SubLight) * discount;
-            cells[c.UpgCost]->Value = ship->GetUpgradeCost();
-            cells[c.RecVal]->Value  = ship->GetRecycleValue();
+            if( ShipsGrid->Filter->Filter(ship) )
+                continue;
 
-            ICommand ^cmd = ship->GetJumpCommand();
-            if( cmd )
+            DataGridViewRow ^row = ShipsGrid->Rows[ ShipsGrid->Rows->Add() ];
+            DataGridViewCellCollection ^cells = row->Cells;
+            cells[c.Object]->Value      = ship;
+            cells[c.Owner]->Value       = ship->Owner == sp ? String::Format("* {0}", sp->Name) : ship->Owner->Name;
+            cells[c.Class]->Value       = ship->PrintClass();
+            cells[c.Name]->Value        = ship->Name;
+            if( ship->BuiltThisTurn )
+                cells[c.Name]->Value    = ship->Name + " (new)";
+            if( ship->EUToComplete > 0 )
+                cells[c.Name]->Value    = ship->Name + " (incomplete)";
+            cells[c.Location]->Value    = ship->PrintLocation();
+            if( ship->HadMishap )
+                cells[c.Location]->Style->ForeColor = Color::Red;
+            if( !ship->IsPirate )
+                cells[c.Age]->Value     = ship->Age;
+            cells[c.Cap]->Value         = ship->Capacity;
+            cells[c.Dist]->Value        = GridPrintDistance(ship->System, ShipsGrid->Filter->RefSystem, gv, ship->Age);
+            cells[c.DistSec]->Value     = GridPrintDistance(ship->System, ShipsGrid->Filter->RefSystemPrev, gv, ship->Age);
+            if( sp == ship->Owner )
             {
-                cells[c.JumpTarget]->Value  = cmd->PrintForUI();
-                if( cmd->GetCmdType() == CommandType::Jump &&
-                    cmd->GetRefSystem() == nullptr )
+                cells[c.Cargo]->Value   = ship->PrintCargo(false);
+                cells[c.Maint]->Value   = Calculators::ShipMaintenanceCost(ship->Type, ship->Size, ship->SubLight) * discount;
+                cells[c.UpgCost]->Value = ship->GetUpgradeCost();
+                cells[c.RecVal]->Value  = ship->GetRecycleValue();
+
+                ICommand ^cmd = ship->GetJumpCommand();
+                if( cmd )
                 {
-                    cells[c.JumpTarget]->Style->ForeColor = Color::Red;
+                    cells[c.JumpTarget]->Value  = cmd->PrintForUI();
+                    if( cmd->GetCmdType() == CommandType::Jump &&
+                        cmd->GetRefSystem() == nullptr )
+                    {
+                        cells[c.JumpTarget]->Style->ForeColor = Color::Red;
+                    }
                 }
+                cells[c.Commands]->Value        = ship->PrintCmdSummary();
+
+                String ^cmdDetails = ship->PrintCmdDetails();
+                cells[c.JumpTarget]->ToolTipText= cmdDetails;
+                cells[c.Commands]->ToolTipText  = cmdDetails;
+
+                if( ship->EUToComplete )
+                    cells[c.Commands]->Value    = ship->EUToComplete.ToString() + " EU to complete";
             }
-            cells[c.Commands]->Value        = ship->PrintCmdSummary();
 
-            String ^cmdDetails = ship->PrintCmdDetails();
-            cells[c.JumpTarget]->ToolTipText= cmdDetails;
-            cells[c.Commands]->ToolTipText  = cmdDetails;
-
-            if( ship->EUToComplete )
-                cells[c.Commands]->Value    = ship->EUToComplete.ToString() + " EU to complete";
+            for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
+                plugin->AddRowData(row, ShipsGrid->Filter, ship);
         }
-
-        for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
-            plugin->AddRowData(row, ShipsGrid->Filter, ship);
     }
 
     // Setup tooltips

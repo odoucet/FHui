@@ -27,13 +27,9 @@ public:
     static StarSystem^     GetStarSystem(int id)               { return m_CurrentTurnData->GetStarSystem(id); }
     static StarSystem^     GetStarSystem(int x, int y, int z, bool allowVoid)  { return m_CurrentTurnData->GetStarSystem(x, y, z, allowVoid); }
     static StarSystem^     GetStarSystem(String ^name)         { return m_CurrentTurnData->GetStarSystem(name); }
-    static Colony^         GetColony(String ^name)             { return m_CurrentTurnData->GetColony(name); }
-    static Ship^           GetShip(String ^name)               { return m_CurrentTurnData->GetShip(name); }
 
     static IList<Alien^>^          GetAliens()          { return m_CurrentTurnData->GetAliens(); }
     static IList<StarSystem^>^     GetStarSystems()     { return m_CurrentTurnData->GetStarSystems(); }
-    static IList<Ship^>^           GetShips()           { return m_CurrentTurnData->GetShips(); }
-    static IList<Colony^>^         GetColonies()        { return m_CurrentTurnData->GetColonies(); }
 
     static bool         IsParsingFinished()             { return m_CurrentTurnData->IsParsingFinished(); }
 
@@ -46,9 +42,9 @@ public:
     static void         AddPlanetScan(StarSystem ^system, Planet ^planet);
     static void         SetTurnStartEU(int eu);
     static void         AddTurnProducedEU(int eu);
-    static Colony^      AddColony(Alien ^sp, String ^name, StarSystem ^system, int plNum, bool);
-    static void         DelColony(String ^name);
-    static Ship^        AddShip(Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);
+    static Colony^      CreateColony(Alien ^sp, String ^name, StarSystem ^system, int plNum, bool);
+    static void         RemoveColony(String ^name);
+    static Ship^        CreateShip(Alien ^sp, ShipType type, String ^name, bool subLight, StarSystem ^system);
     static void         RemoveShip(Ship ^ship)          { m_CurrentTurnData->RemoveShip(ship); }
     static void         AddWormholeJump(String ^shipName, int fromSystemId);
     static void         AddMishap(String ^shipName);
@@ -64,9 +60,9 @@ public:
     {
         Alien^ get ()
         {
-            // In "turn 0" player may be uninitialized
-            if( m_CurrentTurn == 0 &&
-                String::IsNullOrEmpty(m_PlayerName) )
+            // In "turn 0" or while initializing turn 1
+            // player may be uninitialized
+            if( String::IsNullOrEmpty(m_PlayerName) )
             {
                 return nullptr;
             }
