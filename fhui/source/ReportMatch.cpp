@@ -278,7 +278,10 @@ bool Report::MatchSpeciesMet(String ^s)
         if( m_RM->MatchList( s + GET_MERGED_LINES(), "^Species met:", "SP\\s+([^,;]+)") )
         {
             for( int i = 0; i < m_RM->Results->Length; ++i )
-                m_GameData->AddAlien(m_RM->Results[i]);
+            {
+                m_GameData->AddAlien(m_RM->Results[i])->Relation = 
+                    m_GameData->Player->RelationDefault;
+            }
         }
         else
         {
