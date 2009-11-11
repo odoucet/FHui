@@ -390,6 +390,18 @@ bool Report::MatchPhaseLogPreDep(String ^s)
         return true;
     }
 
+    if( s == "Neutrality was declared towards ALL species." )
+    {
+        m_GameData->Player->RelationDefault = SP_NEUTRAL;
+        return true;
+    }
+
+    if( s == "Enmity was declared towards ALL species." )
+    {
+        m_GameData->Player->RelationDefault = SP_ENEMY;
+        return true;
+    }
+
     // TODO: Parse pre-departure log contents
     return true;
 }
@@ -466,6 +478,18 @@ bool Report::MatchPhaseLogPostArr(String ^s)
     if( MatchSystemScan(s) || 
         MatchMessageSent(s) )
     {
+        return true;
+    }
+
+    if( s == "Neutrality was declared towards ALL species." )
+    {
+        m_GameData->Player->RelationDefault = SP_NEUTRAL;
+        return true;
+    }
+
+    if( s == "Enmity was declared towards ALL species." )
+    {
+        m_GameData->Player->RelationDefault = SP_ENEMY;
         return true;
     }
 

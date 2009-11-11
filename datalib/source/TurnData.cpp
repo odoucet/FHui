@@ -517,7 +517,8 @@ void TurnData::UpdateAliens()
 {
     for each( Alien ^alien in GetAliens() )
     {
-        alien->RelationOriginal = alien->Relation;
+        if( alien->TurnMet == 0 )
+            alien->Relation = GameData::Player->RelationDefault;
     }
 }
 

@@ -495,7 +495,7 @@ void Form1::SystemsMenuCommandDel(ICommand ^cmd)
     case CommandType::AlienRelation:
         {
             CmdAlienRelation ^rel = safe_cast<CmdAlienRelation^>(cmd);
-            AliensMenuSetRelation( gcnew AlienRelationData(rel->m_Alien, rel->m_Alien->RelationOriginal) );
+            AliensMenuSetRelation( gcnew AlienRelationData(rel->m_Alien, rel->m_Alien->RelationParsed) );
         }
         break;
 

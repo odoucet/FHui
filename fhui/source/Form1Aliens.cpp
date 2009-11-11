@@ -459,7 +459,7 @@ void Form1::AliensMenuSetRelation(AlienRelationData ^data)
             CmdAlienRelation ^cmd = safe_cast<CmdAlienRelation^>(iCmd);
             if( cmd->m_Alien == alien )
             {
-                if( rel == alien->RelationOriginal )
+                if( rel == alien->RelationParsed )
                 {
                     m_CommandMgr->DelCommand(iCmd);
                 }
@@ -477,6 +477,7 @@ void Form1::AliensMenuSetRelation(AlienRelationData ^data)
     if( addNew )
     {
         // Add relation command
+        alien->RelationParsed = alien->Relation;
         m_CommandMgr->AddCommand( gcnew CmdAlienRelation(alien, rel) );
     }
 

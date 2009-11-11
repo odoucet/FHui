@@ -56,7 +56,7 @@ public:
         GovName = nullptr;
         GovType = nullptr;
         Relation = SP_NEUTRAL;
-        RelationOriginal = SP_NEUTRAL;
+        RelationDefault = SP_NEUTRAL;
         TurnMet = 0;
         Email = nullptr;
         HomeSystem = nullptr;
@@ -81,7 +81,7 @@ public:
         GovName = src->GovName;
         GovType = src->GovType;
         Relation = src->Relation;
-        RelationOriginal = src->Relation;
+        RelationDefault = src->RelationDefault;
         TurnMet = src->TurnMet;
         Email = src->Email;
         HomeSystem = home;
@@ -130,7 +130,8 @@ public:
     String^             GovName;
     String^             GovType;
     SPRelType           Relation;
-    SPRelType           RelationOriginal;
+    SPRelType           RelationDefault;
+    SPRelType           RelationParsed;
     int                 TurnMet;
     String^             Email;
 

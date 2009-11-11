@@ -608,20 +608,12 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
         else if( m_RM->Match(line, m_RM->ExpCmdSPAlly) )
         {
             Alien ^alien = m_GameData->GetAlien(m_RM->Results[0]);
-            if( alien->Relation != SP_ENEMY &&
-                alien->Relation != SP_NEUTRAL )
-                throw gcnew FHUIParsingException("Inconsistent alien relation command (ally)!");
-
             alien->Relation = SP_ALLY;
             AddCommand( CmdSetOrigin(gcnew CmdAlienRelation(alien, SP_ALLY)) );
         }
         else if( m_RM->Match(line, m_RM->ExpCmdSPEnemy) )
         {
             Alien ^alien = m_GameData->GetAlien(m_RM->Results[0]);
-            if( alien->Relation != SP_NEUTRAL &&
-                alien->Relation != SP_ALLY )
-                throw gcnew FHUIParsingException("Inconsistent alien relation command (enemy)!");
-
             alien->Relation = SP_ENEMY;
             AddCommand( CmdSetOrigin(gcnew CmdAlienRelation(alien, SP_ENEMY)) );
         }
@@ -630,9 +622,6 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
             TechType tech = FHStrings::TechFromString(m_RM->Results[0]);
             int level = m_RM->GetResultInt(1);
             Alien ^alien = m_GameData->GetAlien(m_RM->Results[2]);
-            if( alien->Relation != SP_NEUTRAL &&
-                alien->Relation != SP_ALLY )
-                throw gcnew FHUIParsingException("Inconsistent alien relation for Teach command!");
             if( level != GameData::Player->TechLevels[tech] )
                 throw gcnew FHUIParsingException("Inconsistent tech level for Teach command!");
 
