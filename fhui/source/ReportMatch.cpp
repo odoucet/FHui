@@ -352,15 +352,14 @@ bool Report::MatchColonyInfo(String ^s)
 
     if( m_RM->Match(s, "([^,;]+)\\s+Coordinates: x = (\\d+), y = (\\d+), z = (\\d+), planet number (\\d+)") )
     {
-        String ^plName = m_RM->Results[0];
-        plName = plName->TrimEnd(' ');
+        String ^plName = m_RM->Results[0]->TrimEnd();
+        int plNum = m_RM->GetResultInt(4);
 
         system = m_GameData->GetStarSystem(
             m_RM->GetResultInt(1),
             m_RM->GetResultInt(2),
             m_RM->GetResultInt(3),
             false );
-        int plNum = m_RM->GetResultInt(4);
 
         if( planetType == PLANET_HOME )
         {
@@ -375,6 +374,9 @@ bool Report::MatchColonyInfo(String ^s)
             plNum,
             true );
 
+        colony->MiBase = 0;
+        colony->MaBase = 0;
+        colony->Shipyards = 0;
         colony->PlanetType = planetType;
         s = GET_NON_EMPTY_LINE();
     }
@@ -441,8 +443,6 @@ bool Report::MatchColonyInfo(String ^s)
     if( ( colony->PlanetType == PLANET_COLONY_MINING ) &&
         m_RM->Match(s, "^This mining colony will generate (\\d+) - (\\d+) = \\d+ economic units this turn\\.") )
     {
-        colony->MaBase = 0;
-        colony->Shipyards = 0;
         colony->EUProd  = m_RM->GetResultInt(0);
         colony->EUFleet = m_RM->GetResultInt(1);
         m_GameData->AddTurnProducedEU( colony->EUProd );
@@ -464,8 +464,6 @@ bool Report::MatchColonyInfo(String ^s)
     if( ( colony->PlanetType == PLANET_COLONY_RESORT ) &&
         m_RM->Match(s, "^This resort colony will generate (\\d+) - (\\d+) = \\d+ economic units this turn\\.") )
     {
-        colony->MiBase = 0;
-        colony->Shipyards = 0;
         colony->EUProd  = m_RM->GetResultInt(0);
         colony->EUFleet = m_RM->GetResultInt(1);
         m_GameData->AddTurnProducedEU( colony->EUProd );
@@ -841,8 +839,7 @@ bool Report::MatchOtherPlanetsShips(String ^s)
             int plNum = m_RM->GetResultInt(3);
             String^ plName = m_RM->Results[4];
 
-            // TODO: Not sure if system is under observation when no CUs are present on the planet
-            bool isObserver = ( m_RM->Results[5]->Length > 0 );
+            bool isObserver = ( m_RM->Results[5]->Contains("CU") );
 
             // Treat as colony of size 0
             Colony^ colony = m_GameData->CreateColony(
