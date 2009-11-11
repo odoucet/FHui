@@ -26,7 +26,7 @@ TurnData::TurnData(int turn)
 {
 }
 
-void TurnData::PrintStats(bool debug)
+void TurnData::PrintDebugStats()
 {
     List<String^>^ stats = gcnew List<String^>;
 
@@ -60,14 +60,7 @@ void TurnData::PrintStats(bool debug)
 
     for each (String^ line in stats)
     {
-        if( debug )
-        {
-            Debug::WriteLine( line );
-        }
-        else
-        {
-            Console::WriteLine( line );
-        }
+        Debug::WriteLine( line );
     }
 }
 

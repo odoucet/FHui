@@ -7,7 +7,7 @@ using namespace System::IO;
 namespace FHUI
 {
 
-ReportParser::ReportParser(GameData^ gd, CommandManager^ cm, RegexMatcher ^rm, String^ galaxyPath, String^ reportPath)
+ReportParser::ReportParser(GameData^ gd, CommandManager^ cm, RegexMatcher^ rm, String^ galaxyPath, String^ reportPath)
     : m_GameData(gd)
     , m_CommandMgr(cm)
     , m_GalaxyPath(galaxyPath)
@@ -92,7 +92,7 @@ void ReportParser::ScanReports()
 
         if( Stats )
         {
-            m_GameData->PrintStats( true );
+            m_GameData->PrintDebugStats();
         }
 
         if( currTurn > 0 )

@@ -118,6 +118,7 @@ void Form1::InitData()
 
     m_ReportParser->Verbose = Verbose;
     m_ReportParser->Stats = Stats;
+
     m_ReportParser->ScanReports();
 
     if( m_ReportParser->Reports->Count > 0 )

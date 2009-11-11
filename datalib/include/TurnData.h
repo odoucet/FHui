@@ -64,7 +64,7 @@ public:
     void            AddWormholeJump(String ^shipName, int fromSystemId);
     void            AddMishap(String ^shipName);
 
-    void            PrintStats(bool debug);
+    void            PrintDebugStats();
 
 protected:
 

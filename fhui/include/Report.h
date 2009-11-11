@@ -2,6 +2,11 @@
 
 #include "enums.h"
 
+#define GET_LINE() GetLine(__FUNCTION__, __LINE__)
+#define GET_NON_EMPTY_LINE() GetNonEmptyLine(__FUNCTION__, __LINE__)
+#define EXPECTED_EMPTY_LINE() ExpectedEmptyLine(__FUNCTION__, __LINE__)
+#define GET_MERGED_LINES() GetMergedLines(__FUNCTION__, __LINE__)
+
 using namespace System;
 using namespace System::IO;
 using namespace System::Diagnostics;
@@ -16,38 +21,27 @@ ref class CommandManager;
 
 enum PhaseType
 {
-    PHASE_INIT = 0,
+    PHASE_NONE = 0,
     PHASE_GLOBAL,
-    PHASE_ORDERS_COMBAT,
-    PHASE_ORDERS_PRE_DEP,
-    PHASE_ORDERS_JUMP,
-    PHASE_ORDERS_PROD,
-    PHASE_ORDERS_POST_ARRIVAL,
-    PHASE_ORDERS_STRIKE,
-    PHASE_MESSAGE,
-    PHASE_SPECIES_MET,
-    PHASE_SPECIES_ALLIES,
-    PHASE_SPECIES_ENEMIES,
-    PHASE_SYSTEM_SCAN,
-    PHASE_ALIEN_ESTIMATE,
-    PHASE_COLONY,
-    PHASE_COLONY_INVENTORY,
-    PHASE_COLONY_SHIPS,
-    PHASE_OTHER_PLANETS_SHIPS,
-    PHASE_ALIENS_REPORT,
-    PHASE_ORDERS_TEMPLATE,
-    PHASE_TECH_LEVELS,
+    PHASE_LOG_USER, 
+    PHASE_LOG_COMBAT,
+    PHASE_LOG_PRE_DEP,
+    PHASE_LOG_JUMP,
+    PHASE_LOG_PROD,
+    PHASE_LOG_POST_ARRIVAL,
+    PHASE_LOG_STRIKE,
+    PHASE_LOG_OTHER,
+    PHASE_SPECIES_STATUS,
+    PHASE_COLONIES,
+    PHASE_TEMPLATE,
     PHASE_MAX
 };
-
-#define AGGREGATE_LINES_MAX  -1
 
 private ref class Report
 {
 public:
     Report(GameData^, CommandManager^, RegexMatcher^, bool);
 
-    bool            IsValid();
     int             GetTurn()       { return m_Turn; }
     int             GetLineCount()  { return m_Content->Count; }
     String^         GetText();
@@ -60,80 +54,66 @@ private:
     bool            ParseInternal(String^ s);
 
     String^         GetLine();
+    String^         GetLine( String^ function, int line );
+    void            ExpectedEmptyLine( String^ srcFun, int srcLine );
+    String^         GetNonEmptyLine( String^ srcFun, int srcLine );
+    String^         GetMergedLines( String^ srcFun, int srcLine );
 
-    bool            MatchPhaseGlobal(String ^s);
-    bool            MatchPhaseMessage(String ^s);
-    bool            MatchPhaseSpeciesMet(String ^s);
-    bool            MatchPhaseSpeciesAllies(String ^s);
-    bool            MatchPhaseSpeciesEnemies(String ^s);
-    bool            MatchPhaseOrdersCombat(String ^s);
-    bool            MatchPhaseOrdersPreDep(String ^s);
-    bool            MatchPhaseOrdersJump(String ^s);
-    bool            MatchPhaseOrdersProd(String ^s);
-    bool            MatchPhaseOrdersPostArr(String ^s);
-    bool            MatchPhaseOrdersStrike(String ^s);
-    bool            MatchPhaseTechLevels(String ^s);
-    bool            MatchPhaseAlienEstimate(String ^s);
-    bool            MatchPhaseSystemScan(String ^s);
-    bool            MatchPhaseColony(String ^s);
-    bool            MatchPhaseColonyInventory(String ^s);
-    bool            MatchPhaseColonyShips(String ^s);
-    bool            MatchPhaseOtherPlanetsShips(String ^s);
-    bool            MatchPhaseAliensReport(String ^s);
-    bool            MatchPhaseOrdersTemplate(String ^s);
-
-    bool            m_Verbose;
-
-    void            StartLineAggregate(PhaseType, String ^s, int aggrMaxLines);
-    String^         FinishLineAggregate(bool resetPhase);
+    bool            MatchPhaseNone(String ^s);
+    bool            MatchPhaseLogUser(String ^s);
+    bool            MatchPhaseLogCombat(String ^s);
+    bool            MatchPhaseLogPreDep(String ^s);
+    bool            MatchPhaseLogJump(String ^s);
+    bool            MatchPhaseLogProd(String ^s);
+    bool            MatchPhaseLogPostArr(String ^s);
+    bool            MatchPhaseLogStrike(String ^s);
+    bool            MatchPhaseLogOther(String ^s);
+    bool            MatchPhaseSpeciesStatus(String ^s);
+    bool            MatchPhaseColonies(String ^s);
+    bool            MatchPhaseTemplate(String ^s);
 
     bool            MatchSectionEnd(String ^s);
-    bool            MatchTech(String ^s, String ^techName, TechType tech);
+    bool            MatchSystemScan(String ^s);
+    bool            MatchPlanetScan(String ^s, StarSystem^ system);
+    bool            MatchAlienEstimate(String ^s);
+    bool            MatchMessageReceived(String ^s);
     bool            MatchMessageSent(String ^s);
-    bool            MatchSystemScanStart(String ^s);
-    void            MatchPlanetScan(String ^s);
-    void            MatchColonyScan(String ^s);
-    void            MatchColonyInventoryScan(String ^s);
-    void            MatchColonyShipsScan(String ^s);
-    void            MatchOtherPlanetsShipsScan(String ^s);
-    void            MatchShipScan(String ^s, bool bColony);
-    void            MatchAliensReport(String ^s);
-    void            MatchOrdersTemplate(String ^s);
+    bool            MatchTechLevels(String ^s);
+    bool            MatchTech(String ^s, String ^techName, TechType tech);
+    bool            MatchAtmReq(String ^s);
+    bool            MatchSpeciesMet(String ^s);
+    bool            MatchAllies(String ^s);
+    bool            MatchEnemies(String ^s);
+    bool            MatchColonyInfo(String ^s);
+    bool            MatchColonyInventory(String ^s, Colony ^colony);
+    bool            MatchColonyShips(String ^s, Colony ^colony);
+    bool            MatchShipInfo(String ^s, StarSystem^ system, Colony ^colony);
+    bool            MatchOtherPlanetsShips(String ^s);
+    bool            MatchAliens(String ^s);
+    bool            MatchTemplateEntry(String ^s);
+
     void            MatchAlienInfo(String ^s, Alien ^alien);
 
     GameData^       m_GameData;
     CommandManager^ m_CommandMgr;
     RegexMatcher^   m_RM;
-    List<String^>^  m_Content;
     int             m_Turn;
 
+    bool            m_Verbose;
+
     PhaseType       m_Phase;
-    PhaseType       m_PhasePreScan;
-    PhaseType       m_PhasePreAggregate;
 
-    bool            m_bParsingAggregate;
-    String^         m_StringAggregate;
-    int             m_AggregateMaxLines;
-
-    int             m_ScanX;
-    int             m_ScanY;
-    int             m_ScanZ;
-    bool            m_ScanHasPlanets;
-    StarSystem^     m_ScanSystem;
-    Alien^          m_ScanAlien;
-    String^         m_ScanMessage;
-    Colony^         m_ScanColony;
-    Ship^           m_ScanShip;
     int             m_PirateShipsCnt;
-
     CommandPhase    m_TemplatePhase;
-
-    Colony^         m_ColonyProduction;
+    Colony^         m_TemplateColony;
     Alien^          m_EstimateAlien;
 
     StreamReader^   m_Input;
 
     String^         PhaseToString(PhaseType phase);
+
+    List<String^>^  m_Content;
+
 };
 
 } // end namespace FHUI

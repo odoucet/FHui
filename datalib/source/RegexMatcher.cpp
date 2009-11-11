@@ -29,7 +29,7 @@ RegexMatcher::RegexMatcher()
     ExpCmdBuildInv      = gcnew Regex("^Build\\s+(\\d+)\\s+([A-Z0-9]+)");  // no $ here, target may follow
     ExpCmdBuildShipTR   = gcnew Regex("^Build\\s+TR(\\d+)([Ss]?)\\s+(.+)$");
     ExpCmdBuildShip     = gcnew Regex("^Build\\s+([A-Za-z]{2})([Ss]?)\\s+(.+)$");
-    ExpCmdDevelopCS     = gcnew Regex("^Develop\\s+(\\d+)\\s+PL\\s+([^,;]+),\\s+TR[0-9]+\\s+([^,;]+)$");
+    ExpCmdDevelopCS     = gcnew Regex("^Develop\\s+(\\d+\\s+)?PL\\s+([^,;]+),\\s+TR[0-9]+\\s+([^,;]+)$");
     ExpCmdDevelopC      = gcnew Regex("^Develop\\s+(\\d+)\\s+PL\\s+([^,;]+)$");
     ExpCmdDevelop       = gcnew Regex("^Develop\\s+(\\d+)$");
     ExpCmdShipJump      = gcnew Regex("^Jump\\s+[A-Z0-9]+\\s+[^,;]+,\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+([0-9-]+)$");
@@ -58,19 +58,29 @@ RegexMatcher::RegexMatcher()
 
 int RegexMatcher::GetResultInt(int arg)
 {
-    return int::Parse(m_Results[arg]);
+    if( String::IsNullOrEmpty( m_Results[arg] ) )
+        return 0;
+    else
+        return int::Parse(m_Results[arg]);
 }
 
 //float RegexMatcher::GetResultFloat(int arg)
 //{
 //    return Single::Parse(
-//        m_Results[arg],
+//        m_Results[arg],5
 //        Globalization::CultureInfo::InvariantCulture );
 //}
 
 bool RegexMatcher::Match(String ^%s, String ^exp)
 {
-    return Match(s, gcnew Regex(exp));
+    if( String::IsNullOrEmpty(s) )
+    {
+        return false;
+    }
+    else
+    {
+        return Match(s, gcnew Regex(exp));
+    }
 }
 
 bool RegexMatcher::Match(String ^%s, Regex ^exp)
@@ -81,6 +91,10 @@ bool RegexMatcher::Match(String ^%s, Regex ^exp)
     System::Text::RegularExpressions::Match ^m = exp->Match(s);
     if( m->Success )
     {
+        //if( exp->ToString() == "^Auto$" )
+        //{
+        //    Debug::WriteLine( s );        
+        //}
         String ^g = m->Groups[0]->ToString();
         s = s->Substring( s->IndexOf(g) + g->Length );
 

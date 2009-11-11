@@ -141,9 +141,9 @@ void GameData::InitTurn()
     }
 }
 
-void GameData::PrintStats( bool debug )
+void GameData::PrintDebugStats()
 {
-    m_CurrentTurnData->PrintStats(debug);
+    m_CurrentTurnData->PrintDebugStats();
 }
 
 int GameData::GetSystemId(int x, int y, int z)

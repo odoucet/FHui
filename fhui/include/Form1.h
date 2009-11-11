@@ -73,6 +73,7 @@ namespace FHUI {
         void        InitData();
         void        InitRefLists();
         void        InitControls();
+
         void        ShowReloadMenu();
         void        TurnReload(bool resetCommands);
         void        ReloadAutoCommands(Object^, EventArgs^);

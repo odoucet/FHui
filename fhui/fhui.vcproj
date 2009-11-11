@@ -209,7 +209,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)\Include&quot;;&quot;$(ProjectDir)\..\Include&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\Include&quot;;&quot;$(ProjectDir)\..\DataLib\Include&quot;;&quot;$(ProjectDir)\..\Include&quot;"
 				AdditionalUsingDirectories=""
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				RuntimeLibrary="2"

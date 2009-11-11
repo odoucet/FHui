@@ -89,7 +89,7 @@ public:
 
     bool SelectTurn(int turn);
 
-    void PrintStats(bool debug);
+    void PrintDebugStats();
 
 protected:
     void        InitTurn();

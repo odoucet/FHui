@@ -11,28 +11,19 @@ struct ReportPhaseStr
 };
 
 static ReportPhaseStr s_ReportPhaseStrings[PHASE_MAX] =
-{
-    { PHASE_INIT,                "INIT" },
-    { PHASE_GLOBAL,              "GLOBAL" },
-    { PHASE_ORDERS_COMBAT,       "ORDERS_COMBAT" },
-    { PHASE_ORDERS_PRE_DEP,      "ORDERS_PRE_DEP" },
-    { PHASE_ORDERS_JUMP,         "ORDERS_JUMP" },
-    { PHASE_ORDERS_PROD,         "ORDERS_PROD" },
-    { PHASE_ORDERS_POST_ARRIVAL, "ORDERS_POST_ARRIVAL" },
-    { PHASE_ORDERS_STRIKE,       "ORDERS_STRIKE" },
-    { PHASE_MESSAGE,             "MESSAGE" },
-    { PHASE_SPECIES_MET,         "SPECIES_MET" },
-    { PHASE_SPECIES_ALLIES,      "SPECIES_ALLIES" },
-    { PHASE_SPECIES_ENEMIES,     "SPECIES_ENEMIES" },
-    { PHASE_SYSTEM_SCAN,         "SYSTEM_SCAN" },
-    { PHASE_ALIEN_ESTIMATE,      "ALIEN_ESTIMATE" },
-    { PHASE_COLONY,              "COLONY" },
-    { PHASE_COLONY_INVENTORY,    "COLONY_INVENTORY" },
-    { PHASE_COLONY_SHIPS,        "COLONY_SHIPS" },
-    { PHASE_OTHER_PLANETS_SHIPS, "OTHER_PLANETS_SHIPS" },
-    { PHASE_ALIENS_REPORT,       "ALIENS_REPORT" },
-    { PHASE_ORDERS_TEMPLATE,     "ORDERS_TEMPLATE" },
-    { PHASE_TECH_LEVELS,         "TECH_LEVELS" }
+{                            //123456789012
+    { PHASE_NONE,             "NONE" },
+    { PHASE_LOG_USER,         "LOG_USER" },
+    { PHASE_LOG_COMBAT,       "LOG_COMBAT" },
+    { PHASE_LOG_PRE_DEP,      "LOG_PRE_DEP" },
+    { PHASE_LOG_JUMP,         "LOG_JUMP" },
+    { PHASE_LOG_PROD,         "LOG_PROD" },
+    { PHASE_LOG_POST_ARRIVAL, "LOG_POST_ARR" },
+    { PHASE_LOG_STRIKE,       "LOG_STRIKE" },
+    { PHASE_LOG_OTHER,        "LOG_OTHER" },
+    { PHASE_SPECIES_STATUS,   "SP_STATUS" },
+    { PHASE_COLONIES,         "COLONIES" },
+    { PHASE_TEMPLATE,         "TEMPLATE" },
 };
 
 String^ Report::PhaseToString(PhaseType phase)
@@ -44,40 +35,18 @@ String^ Report::PhaseToString(PhaseType phase)
             return gcnew String(s_ReportPhaseStrings[i].str);
 
     throw gcnew FHUIDataIntegrityException(
-        String::Format("Invalid ship type: {0}.", (int)phase) );
+        String::Format("Invalid phase type: {0}.", (int)phase) );
 }
 
 Report::Report(GameData ^gd, CommandManager^ cm, RegexMatcher ^rm, bool verbose)
     : m_GameData(gd)
     , m_CommandMgr(cm)
     , m_RM(rm)
-    , m_Phase(PHASE_INIT)
-    , m_PhasePreAggregate(PHASE_GLOBAL)
+    , m_Phase(PHASE_NONE)
     , m_Turn(-1)
-    , m_bParsingAggregate(false)
-    , m_StringAggregate(nullptr)
-    , m_AggregateMaxLines(-1)
-    , m_ScanX(0)
-    , m_ScanY(0)
-    , m_ScanZ(0)
-    , m_ScanHasPlanets(false)
-    , m_ScanAlien(nullptr)
-    , m_ScanColony(nullptr)
-    , m_ScanShip(nullptr)
-    , m_PirateShipsCnt(0)
-    , m_EstimateAlien(nullptr)
     , m_Content(gcnew List<String^>)
     , m_Verbose(verbose)
 {
-}
-
-bool Report::IsValid()
-{
-    return
-        GameData::Player != nullptr &&
-        GameData::Player->Name != nullptr &&
-        GameData::Player->AtmReq->IsValid() &&
-        m_Phase == PHASE_ORDERS_TEMPLATE;
 }
 
 String^ Report::GetText()
@@ -95,36 +64,52 @@ bool Report::Verify(String^ fileName)
     m_Input = File::OpenText(fileName);
     m_Turn = -1;
 
-    while( String ^line = GetLine() ) 
+    while( String ^s = GET_NON_EMPTY_LINE() )
     {
-        if( String::IsNullOrEmpty(line) )
-            continue;
-
-        if( m_RM->Match(line, "^EVENT LOG FOR TURN (\\d+)") )
-        {   // String matched, but keep looking for "Start of turn..."
-            m_Turn = m_RM->GetResultInt(0);
-        }
-        else if( m_RM->Match(line, "^START OF TURN (\\d+)") )
+        if( m_RM->Match(s, "^EVENT LOG FOR TURN (\\d+)") )
         {
-            m_Turn = m_RM->GetResultInt(0);
-            break;  // We're satisfied now
+            if ( 0 == ( m_Turn = m_RM->GetResultInt(0) ) )
+            {
+                // User content / turn 0
+                return true;
+            }
+            else
+            {
+                // Regular report / turn N+1
+                m_Turn++;
+                return true;
+            }
+        }
+        else if( m_RM->Match(s, "^START OF TURN (\\d+)") )
+        {
+            if ( 0 == ( m_Turn = m_RM->GetResultInt(0) ) )
+            {
+                // User content / turn 0
+                return true;
+            }
+            else
+            {
+                // User content / turn N
+                return true;
+            }
         }
     }
 
-    return m_Turn >= 0;
+    return false;
 }
 
 void Report::Parse(String^ fileName)
 {
     m_Input = File::OpenText(fileName);
-    String^ line;
+    String ^line;
 
     try
     {
-        while ( line = GetLine() )
+        while ( ! String::IsNullOrEmpty( line = GET_NON_EMPTY_LINE() ) )
         {
             ParseInternal( line );
         }
+        m_Phase = PHASE_NONE;
     }
     catch( Exception ^ex )
     {
@@ -132,7 +117,7 @@ void Report::Parse(String^ fileName)
             String::Format("Error occured while parsing report: {0}, line {1}:\r\n{2}\r\nError description:\r\n  {3}",
                 fileName,
                 m_Content->Count,
-                line,
+                m_Content[m_Content->Count-1],
                 ex->Message),
             ex );
     }
@@ -140,6 +125,53 @@ void Report::Parse(String^ fileName)
     {
         m_Input->Close();
     }
+}
+
+void Report::ExpectedEmptyLine( String^ srcFun, int srcLine )
+{
+    if ( ! String::IsNullOrEmpty( GetLine( srcFun, srcLine ) ) )
+        throw gcnew FHUIParsingException("Empty line was expected");
+}
+
+String^ Report::GetNonEmptyLine( String^ srcFun, int srcLine )
+{
+    String ^s = String::Empty;
+
+    while ( s && ( s->Length == 0 ) )
+    {
+        s = GetLine( srcFun, srcLine );
+    }
+
+    return s;
+}
+
+String^ Report::GetMergedLines( String^ srcFun, int srcLine )
+{
+    String ^merged;
+
+    while ( String ^s = GetLine( srcFun, srcLine ) )
+    {
+        if( String::IsNullOrEmpty(s) )
+            break;
+
+        merged += " " + s;
+    }
+
+    return merged;
+}
+
+String^ Report::GetLine( String^ srcFun, int srcLine )
+{
+    if ( m_Verbose && m_Content && m_Content->Count )
+    {
+        Debug::WriteLine( String::Format("{0,-24} {1,4} {2,-12} \"{3}\"", 
+            srcFun->Substring(14),
+            srcLine,
+            PhaseToString(m_Phase),
+            m_Content[m_Content->Count - 1]) );
+    }
+
+    return GetLine();
 }
 
 String^ Report::GetLine()
@@ -157,279 +189,152 @@ String^ Report::GetLine()
 
 bool Report::ParseInternal(String ^s)
 {
-    Debug::WriteLineIf( m_Verbose, String::Format( "{0,-20} \"{1}\"", PhaseToString(m_Phase), s) );
-
-    if( m_bParsingAggregate )
-    {
-        if( !String::IsNullOrEmpty(s) )
-        {
-            m_StringAggregate = String::Format("{0} {1}",
-                m_StringAggregate, s);
-            if( m_AggregateMaxLines == -1 ||
-                --m_AggregateMaxLines > 0 )
-            return true;
-        }
-    }
-
     bool recognized = false;
 
     switch( m_Phase )
     {
-    case PHASE_INIT:
-        m_Phase = PHASE_GLOBAL;
-        /* fall through */
-
-    case PHASE_GLOBAL:
-        recognized = MatchPhaseGlobal(s);
+    case PHASE_NONE:
+        recognized = MatchPhaseNone(s);
         break;
 
-    case PHASE_MESSAGE:
-        recognized = MatchPhaseMessage(s);
+    case PHASE_LOG_USER:
+        recognized = MatchPhaseLogUser(s);
         break;
 
-    case PHASE_SPECIES_MET:
-        recognized = MatchPhaseSpeciesMet(s);
+    case PHASE_LOG_COMBAT:
+        recognized = MatchPhaseLogCombat(s);
         break;
 
-    case PHASE_SPECIES_ALLIES:
-        recognized = MatchPhaseSpeciesAllies(s);
+    case PHASE_LOG_PRE_DEP:
+        recognized = MatchPhaseLogPreDep(s);
         break;
 
-    case PHASE_SPECIES_ENEMIES:
-        recognized = MatchPhaseSpeciesEnemies(s);
+    case PHASE_LOG_JUMP:
+        recognized = MatchPhaseLogJump(s);
         break;
 
-    case PHASE_ORDERS_COMBAT:
-        recognized = MatchPhaseOrdersCombat(s);
+    case PHASE_LOG_PROD:
+        recognized = MatchPhaseLogProd(s);
         break;
 
-    case PHASE_ORDERS_PRE_DEP:
-        recognized = MatchPhaseOrdersPreDep(s);
+    case PHASE_LOG_POST_ARRIVAL:
+        recognized = MatchPhaseLogPostArr(s);
         break;
 
-    case PHASE_ORDERS_JUMP:
-        recognized = MatchPhaseOrdersJump(s);
+    case PHASE_LOG_STRIKE:
+        recognized = MatchPhaseLogStrike(s);
         break;
 
-    case PHASE_ORDERS_PROD:
-        recognized = MatchPhaseOrdersProd(s);
+    case PHASE_LOG_OTHER:
+        recognized = MatchPhaseLogOther(s);
         break;
 
-    case PHASE_ORDERS_POST_ARRIVAL:
-        recognized = MatchPhaseOrdersPostArr(s);
+    case PHASE_SPECIES_STATUS:
+        recognized = MatchPhaseSpeciesStatus(s);
         break;
 
-    case PHASE_ORDERS_STRIKE:
-        recognized = MatchPhaseOrdersStrike(s);
+    case PHASE_COLONIES:
+        recognized = MatchPhaseColonies(s);
         break;
 
-    case PHASE_TECH_LEVELS:
-        recognized = MatchPhaseTechLevels(s);
-        break;
-
-    case PHASE_ALIEN_ESTIMATE:
-        recognized = MatchPhaseAlienEstimate(s);
-        break;
-
-    case PHASE_SYSTEM_SCAN:
-        recognized = MatchPhaseSystemScan(s);
-        break;
-
-    case PHASE_COLONY:
-        recognized = MatchPhaseColony(s);
-        break;
-
-    case PHASE_COLONY_INVENTORY:
-        recognized = MatchPhaseColonyInventory(s);
-        break;
-
-    case PHASE_COLONY_SHIPS:
-        recognized = MatchPhaseColonyShips(s);
-        break;
-
-    case PHASE_OTHER_PLANETS_SHIPS:
-        recognized = MatchPhaseOtherPlanetsShips(s);
-        break;
-
-    case PHASE_ALIENS_REPORT:
-        recognized = MatchPhaseAliensReport(s);
-        break;
-
-    case PHASE_ORDERS_TEMPLATE:
-        recognized = MatchPhaseOrdersTemplate(s);
+    case PHASE_TEMPLATE:
+        recognized = MatchPhaseTemplate(s);
         break;
 
     default:
-        return false;
+        recognized = false;
     }
 
     if( ! recognized )
     {
-        //Debug::WriteLine( String::Format("{0,-20} unrecognized line '{1}'", PhaseToString(m_Phase), s) );
+        Debug::WriteLine( String::Format(">>> unrecognized line \"{0}\"", s) );
     }
 
     return recognized;
 }
 
-bool Report::MatchPhaseGlobal(String ^s)
+bool Report::MatchPhaseNone(String ^s)
 {
-    if( String::IsNullOrEmpty(s) )
+    // System scan
+    if( MatchSystemScan(s) )
+    {
         return true;
+    }
+
+    if( s == "SPECIES STATUS" )
+    {
+        m_Phase = PHASE_SPECIES_STATUS;
+        return true;
+    }
 
     // Turn number
-    if( m_RM->Match(s, "^EVENT LOG FOR TURN (\\d+)") )
+    if( s->StartsWith("EVENT LOG FOR TURN") &&
+        m_RM->Match(s, "^EVENT LOG FOR TURN (\\d+)" ) )
     {
         m_Turn = m_RM->GetResultInt(0);
+        if( m_Turn == 0 )
+        {
+            m_Phase = PHASE_LOG_USER;
+        }
         return true;
     }
-
-    if( m_RM->Match(s, "^START OF TURN (\\d+)") )
+    else if( s->StartsWith("START OF TURN") &&
+        m_RM->Match(s, "^START OF TURN (\\d+)" ) )
     {
         m_Turn = m_RM->GetResultInt(0);
+        m_Phase = PHASE_LOG_USER;
         return true;
     }
 
-    // Species name
-    if( m_RM->Match(s, "^Species name: ([^,;]+)") )
-    {
-        m_GameData->SetSpecies( m_RM->Results[0] );
-        return true;
-    }
-
-    // Atmospheric requirements
-    if( m_RM->Match(s, "^Atmospheric Requirement: (\\d+)%-(\\d+)% ([A-Za-z0-9]+)") )
-    {
-        m_GameData->SetAtmosphereReq(
-            FHStrings::GasFromString( m_RM->Results[2] ), // required gas
-            m_RM->GetResultInt(0),               // min level
-            m_RM->GetResultInt(1) );             // max level
-        return true;
-    }
-
-    if( m_RM->MatchList(s, "^Neutral Gases:", "([A-Za-z0-9]+)") )
-    {
-        for( int i = 0; i < m_RM->Results->Length; ++i )
-            m_GameData->SetAtmosphereNeutral(
-                FHStrings::GasFromString(m_RM->Results[i]) );
-        return true;
-    }
-
-    if( m_RM->MatchList(s, "^Poisonous Gases:", "([A-Za-z0-9]+)") )
-    {
-        for( int i = 0; i < m_RM->Results->Length; ++i )
-            m_GameData->SetAtmospherePoisonous(
-                FHStrings::GasFromString(m_RM->Results[i]) );
-        return true;
-    }
-
-    // Economy
-    if( m_RM->Match(s, "^Economic units = (\\d+)") )
-    {
-        m_GameData->SetTurnStartEU( m_RM->GetResultInt(0) );
-        return true;
-    }
-
-    // Fleet maintenance
-    if( m_RM->Match(s, "^Fleet maintenance cost = (\\d+) \\((\\d+)\\.(\\d+)% of total production\\)") )
-    {
-        m_GameData->SetFleetCost(
-            m_RM->GetResultInt(0),
-            m_RM->GetResultInt(1)*100 + m_RM->GetResultInt(2) );
-        return true;
-    }
-
-    // Species...
-    if( Regex("^Species met:").Match(s)->Success )
-    {
-        StartLineAggregate(PHASE_SPECIES_MET, s, AGGREGATE_LINES_MAX);
-        return true;
-    }
-
+    // Initial home system data
     if( m_RM->Match(s, "^Scan of home star system for SP\\s+([^,;]+):$") )
     {
-        m_ScanAlien = m_GameData->AddAlien( m_RM->Results[0] );
+        m_GameData->AddAlien( m_RM->Results[0] );
         m_GameData->SetSpecies( m_RM->Results[0] );
-        return true;
+        if ( String::IsNullOrEmpty( s = GET_LINE() ) )
+        {
+            s = GET_LINE();
+        }
+        return MatchSystemScan(s);
     }
-    
-    if( Regex("^Allies:").Match(s)->Success )
+
+    if( s == "Combat orders:" || s == "Combat log:" )
     {
-        StartLineAggregate(PHASE_SPECIES_ALLIES, s, AGGREGATE_LINES_MAX);
-        return true;
-    }
-    
-    if( Regex("^Enemies:").Match(s)->Success )
-    {
-        StartLineAggregate(PHASE_SPECIES_ENEMIES, s, AGGREGATE_LINES_MAX);
+        m_Phase = PHASE_LOG_COMBAT;
         return true;
     }
 
-    if( m_RM->Match(s, "^Government name:\\s+(.+)$") )
+    if( s == "Pre-departure orders:" )
     {
-        GameData::Player->GovName = m_RM->Results[0];
+        m_Phase = PHASE_LOG_PRE_DEP;
         return true;
     }
 
-    if( m_RM->Match(s, "^Government type:\\s+(.+)$") )
+    if( s == "Jump orders:" )
     {
-        GameData::Player->GovType = m_RM->Results[0];
+        m_Phase = PHASE_LOG_JUMP;
         return true;
     }
 
-    if( m_RM->Match(s, "^Aliens at\\s+x\\s+=\\s+(\\d+), y\\s+=\\s+(\\d+), z\\s+=\\s+(\\d+)") )
+    if( s == "Production orders:" )
     {
-        m_ScanX = m_RM->GetResultInt(0);
-        m_ScanY = m_RM->GetResultInt(1);
-        m_ScanZ = m_RM->GetResultInt(2);
-        m_Phase = PHASE_ALIENS_REPORT;
+        m_Phase = PHASE_LOG_PROD;
         return true;
     }
 
-    if( Regex("^Estimate of the technology of SP ").Match(s)->Success )
-    {
-        m_EstimateAlien = nullptr;
-        StartLineAggregate(PHASE_ALIEN_ESTIMATE, s, 1);
-        return true;
-    }
+    return true;
+}
 
-    // Tech levels
-    if( Regex("^Tech Levels:").Match(s)->Success )
-    {
-        m_Phase = PHASE_TECH_LEVELS;
-        return true;
-    }
-
+bool Report::MatchPhaseLogUser(String ^s)
+{
     // System scan
-    if( MatchSystemScanStart(s) )
+    if( MatchSystemScan(s) )
     {
-        return true;
-    }
-    
-    if( Regex("^\\w+ PLANET: PL.+").Match(s)->Success ||
-        Regex("^\\w+ COLONY: PL.+").Match(s)->Success )
-    {
-        StartLineAggregate(PHASE_COLONY, s, 1);
         return true;
     }
 
-    if( Regex("^Other planets and ships:").Match(s)->Success )
+    if( MatchAliens(s) )
     {
-        m_Phase = PHASE_OTHER_PLANETS_SHIPS;
-        return true;
-    }
-
-    if( Regex("^Combat orders:").Match(s)->Success )
-    {
-        m_Phase = PHASE_ORDERS_COMBAT;
-        return true;
-    }
-
-    // Message
-    if( m_RM->Match(s, "^You received the following message from SP ([^,;]+):") )
-    {
-        m_ScanAlien = m_GameData->AddAlien(m_RM->Results[0]);
-        m_ScanMessage = "";
-        m_Phase = PHASE_MESSAGE;
         return true;
     }
 
@@ -437,6 +342,150 @@ bool Report::MatchPhaseGlobal(String ^s)
     if( m_RM->Match(s, "^INFO SP ([^,;]+)\\s*;\\s*") )
     {
         MatchAlienInfo(s, m_GameData->AddAlien(m_RM->Results[0]));
+        return true;
+    }
+
+    // TODO: Parse user log contents
+    return false;
+}
+
+bool Report::MatchPhaseLogCombat(String ^s)
+{
+    if( s == "Pre-departure orders:" )
+    {
+        m_Phase = PHASE_LOG_PRE_DEP;
+        return true;
+    }
+
+    // TODO: Parse combat log contents
+    return true;
+}
+
+bool Report::MatchPhaseLogPreDep(String ^s)
+{
+    if( s == "Jump orders:" )
+    {
+        m_Phase = PHASE_LOG_JUMP;
+        return true;
+    }
+    // System scan
+    if( MatchSystemScan(s) || 
+        MatchMessageSent(s) )
+    {
+        return true;
+    }
+
+    // TODO: Parse pre-departure log contents
+    return true;
+}
+
+bool Report::MatchPhaseLogJump(String ^s)
+{
+    if( s == "Production orders:" )
+    {
+        m_Phase = PHASE_LOG_PROD;
+        return true;
+    }
+
+    if( m_RM->Match(s, "^The star system at\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+was marked as visited\\.$") )
+    {
+        GameData::GetStarSystem(
+            m_RM->GetResultInt(0),
+            m_RM->GetResultInt(1),
+            m_RM->GetResultInt(2),
+            false)->IsMarkedVisited = true;
+        return true;
+    }
+
+    if( m_RM->Match(s, "^[A-Za-z0-9]+\\s+([^,;]+) will jump via natural wormhole at\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\.$") )
+    {
+        m_GameData->AddWormholeJump(
+            m_RM->Results[0],
+            GameData::GetSystemId(
+                m_RM->GetResultInt(1),
+                m_RM->GetResultInt(2),
+                m_RM->GetResultInt(3) ) );
+        return true;
+    }
+
+    // TODO: Parse jumps log contents
+    return true;
+}
+
+
+bool Report::MatchPhaseLogProd(String ^s)
+{
+    if( s == "Post-arrival orders:" )
+    {
+        m_Phase = PHASE_LOG_POST_ARRIVAL;
+        return true;
+    }
+
+    if( MatchAlienEstimate(s) )
+    {
+        return true;
+    }
+    // TODO: Parse production log contents
+    return true;
+}
+
+bool Report::MatchPhaseLogPostArr(String ^s)
+{
+    if( s == "Strike orders:" || s == "Strike log:" )
+    {
+        m_Phase = PHASE_LOG_STRIKE;
+        return true;
+    }
+    if( s == "Other events:" )
+    {
+        m_Phase = PHASE_LOG_OTHER;
+        return true;
+    }
+    if( s == "SPECIES STATUS" )
+    {
+        m_Phase = PHASE_SPECIES_STATUS;
+        return true;
+    }
+
+    // System scan
+    if( MatchSystemScan(s) || 
+        MatchMessageSent(s) )
+    {
+        return true;
+    }
+
+    // TODO: Parse post-arrival log contents
+    return true;
+}
+
+bool Report::MatchPhaseLogStrike(String ^s)
+{
+    if( s == "Other events:" )
+    {
+        m_Phase = PHASE_LOG_OTHER;
+        return true;
+    }
+
+    if( s == "SPECIES STATUS" )
+    {
+        m_Phase = PHASE_SPECIES_STATUS;
+        return true;
+    }
+
+    // TODO: Parse strike log contents
+    return true;
+}
+
+bool Report::MatchPhaseLogOther(String ^s)
+{
+    if( s == "SPECIES STATUS" )
+    {
+        m_Phase = PHASE_SPECIES_STATUS;
+        return true;
+    }
+    // Message 
+    if( MatchMessageReceived(s) )
+    {
         return true;
     }
     
@@ -447,290 +496,152 @@ bool Report::MatchPhaseGlobal(String ^s)
         return true;
     }
 
-    if( Regex("^ORDER SECTION.").Match(s)->Success )
-    {
-        m_Phase = PHASE_ORDERS_TEMPLATE;
-        m_TemplatePhase = CommandPhase::Custom;
-        return true;
-    }
-
+    // TODO: Parse other log contents
     return true;
 }
 
-bool Report::MatchPhaseMessage(String ^s)
+bool Report::MatchPhaseSpeciesStatus(String ^s)
 {
-    if( s == "*** End of Message ***" )
+    if( m_RM->Match(s, "^START OF TURN (\\d+)" ) )
     {
-        m_ScanAlien->LastMessageRecv = m_ScanMessage;
-        m_ScanAlien->LastMessageRecvTurn = m_GameData->CurrentTurn - 1;
-        m_ScanMessage = nullptr;
-        m_Phase = PHASE_GLOBAL;
-    }
-    else
-    {
-        m_ScanMessage += s + "\r\n";
-        if( m_RM->Match(s, "([a-zA-Z0-9_.-]+@[a-zA-Z0-9_.]+\\.[a-zA-Z0-9_]+)") )
-            m_ScanAlien->Email = m_RM->Results[0];
-    }
-    return true;
-}
+        m_Turn = m_RM->GetResultInt(0);
 
-bool Report::MatchPhaseSpeciesMet(String ^s)
-{
-    if( m_RM->MatchList(FinishLineAggregate(true), "^Species met:", "SP\\s+([^,;]+)") )
-    {
-        for( int i = 0; i < m_RM->Results->Length; ++i )
-            m_GameData->AddAlien(m_RM->Results[i]);
-    }
-    return false;
-}
+        if( ! String::IsNullOrEmpty( GET_LINE() ) )
+            throw gcnew FHUIParsingException("Species Status: empty line was expected");
 
-bool Report::MatchPhaseSpeciesAllies(String ^s)
-{
-    if( m_RM->MatchList(FinishLineAggregate(true), "^Allies:", "SP\\s+([^,;]+)") )
-    {
-        for( int i = 0; i < m_RM->Results->Length; ++i )
-            m_GameData->SetAlienRelation(m_RM->Results[i], SP_ALLY);
-    }
-    return false;
-}
-
-bool Report::MatchPhaseSpeciesEnemies(String ^s)
-{
-    if( m_RM->MatchList(FinishLineAggregate(true), "^Enemies:", "SP\\s+([^,;]+)") )
-    {
-        for( int i = 0; i < m_RM->Results->Length; ++i )
-            m_GameData->SetAlienRelation(m_RM->Results[i], SP_ENEMY);
-    }
-    return false;
-}
-
-bool Report::MatchPhaseOrdersCombat(String ^s)
-{
-    if( Regex("^Pre-departure orders:").Match(s)->Success )
-    {
-        m_Phase = PHASE_ORDERS_PRE_DEP;
-    }
-    return true;
-}
-
-bool Report::MatchPhaseOrdersPreDep(String ^s)
-{
-    if( m_RM->Match(s, "Named PL ([^,;]+) at (\\d+)\\s+(\\d+)\\s+(\\d+), planet #(\\d+)\\.") )
-    {
-        // Ignore, planet will be parsed later in the turn status
-    }
-    else if( Regex("^Jump orders:").Match(s)->Success )
-        m_Phase = PHASE_ORDERS_JUMP;
-    // System scan
-    else if( MatchSystemScanStart(s) )
-    {}
-    else if( MatchMessageSent(s) )
-    {}
-    return true;
-}
-
-bool Report::MatchPhaseOrdersJump(String ^s)
-{
-    //if( m_RM->Match(s, "^TR1 ([^,;]+) will jump via natural wormhole at\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\.$") )
-    if( m_RM->Match(s, "^[A-Za-z0-9]+\\s+([^,;]+) will jump via natural wormhole at\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\.$") )
-    {
-        m_GameData->AddWormholeJump(
-            m_RM->Results[0],
-            GameData::GetSystemId(
-                m_RM->GetResultInt(1),
-                m_RM->GetResultInt(2),
-                m_RM->GetResultInt(3) ) );
-    }
-    else if( m_RM->Match(s, "^The star system at\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+was marked as visited\\.$") )
-    {
-        GameData::GetStarSystem(
-            m_RM->GetResultInt(0),
-            m_RM->GetResultInt(1),
-            m_RM->GetResultInt(2),
-            false)->IsMarkedVisited = true;
-    }
-    else if( Regex("^Production orders:").Match(s)->Success )
-        m_Phase = PHASE_ORDERS_PROD;
-    return true;
-}
-
-bool Report::MatchPhaseOrdersProd(String ^s)
-{
-    if( Regex("^Post-arrival orders:").Match(s)->Success )
-        m_Phase = PHASE_ORDERS_POST_ARRIVAL;
-    else if( Regex("^Estimate of the technology of SP ").Match(s)->Success )
-    {
-        m_EstimateAlien = nullptr;
-        StartLineAggregate(PHASE_ALIEN_ESTIMATE, s, 1);
-    }
-    return true;
-}
-
-bool Report::MatchPhaseOrdersPostArr(String ^s)
-{
-    if( Regex("^Strike orders:").Match(s)->Success )
-        m_Phase = PHASE_ORDERS_STRIKE;
-    // System scan
-    else if( MatchSystemScanStart(s) )
-    {}
-    else if( MatchMessageSent(s) )
-    {}
-    return true;
-}
-
-bool Report::MatchPhaseOrdersStrike(String ^s)
-{
-    if( Regex("^Other events:").Match(s)->Success ||
-        Regex("^SPECIES STATUS$").Match(s)->Success )   // in case no other events happened
-        m_Phase = PHASE_GLOBAL;
-    // It may happen that no other events were present, but there's incoming message
-    else if( m_RM->Match(s, "^You received the following message from SP ([^,;]+):") )
-    {
-        m_ScanAlien = m_GameData->AddAlien(m_RM->Results[0]);
-        m_Phase = PHASE_MESSAGE;
-    }
-    return true;
-}
-
-bool Report::MatchPhaseTechLevels(String ^s)
-{
-    if( MatchTech(s, "^Mining", TECH_MI) ||
-        MatchTech(s, "^Manufacturing", TECH_MA) ||
-        MatchTech(s, "^Military", TECH_ML) ||
-        MatchTech(s, "^Gravitics", TECH_GV) ||
-        MatchTech(s, "^Life Support", TECH_LS) )
-        return true;
-    else if( MatchTech(s, "Biology", TECH_BI) )
-        m_Phase = PHASE_GLOBAL;
-    else
-        return false;
-    return true;
-}
-
-bool Report::MatchPhaseAlienEstimate(String ^s)
-{
-    if( m_bParsingAggregate )
-        s = FinishLineAggregate(false);
-
-    if( m_EstimateAlien != nullptr )
-    {
-        if( m_RM->Match(s, "MI =\\s+(\\d+), MA =\\s+(\\d+), ML =\\s+(\\d+), GV =\\s+(\\d+), LS =\\s+(\\d+), BI =\\s+(\\d+)\\.") )
+        // Species name
+        if( m_RM->Match(GET_LINE(), "^Species name: ([^,;]+)") )
         {
-            if( m_Turn > m_EstimateAlien->TechEstimateTurn )
-            {
-                m_EstimateAlien->TechLevels[TECH_MI] = m_RM->GetResultInt(0);
-                m_EstimateAlien->TechLevels[TECH_MA] = m_RM->GetResultInt(1);
-                m_EstimateAlien->TechLevels[TECH_ML] = m_RM->GetResultInt(2);
-                m_EstimateAlien->TechLevels[TECH_GV] = m_RM->GetResultInt(3);
-                m_EstimateAlien->TechLevels[TECH_LS] = m_RM->GetResultInt(4);
-                m_EstimateAlien->TechLevels[TECH_BI] = m_RM->GetResultInt(5);
-                m_EstimateAlien->TechEstimateTurn = m_Turn;
-                m_EstimateAlien = nullptr;
-                m_Phase = m_PhasePreAggregate;
-            }
+            m_GameData->SetSpecies( m_RM->Results[0] );
         }
         else
-            m_Phase = m_PhasePreAggregate;
-    }
-    else
-    {
-        if( m_RM->Match(s, "^Estimate of the technology of SP\\s+([^,;]+)\\s+\\(government name '([^']+)', government type '([^']+)'\\)") )
         {
-            m_EstimateAlien = m_GameData->AddAlien(m_RM->Results[0]);
-            m_EstimateAlien->GovName = m_RM->Results[1];
-            m_EstimateAlien->GovType = m_RM->Results[2];
+            throw gcnew FHUIParsingException("Species Status: unexpected line");
         }
-        else if( Regex("^Estimate of the technology of SP\\s+").Match(s)->Success )
+
+        if( m_RM->Match(GET_LINE(), "^Government name:\\s+(.+)$") )
         {
-            m_Phase = m_PhasePreAggregate;
-            StartLineAggregate(PHASE_ALIEN_ESTIMATE, s, 1);
+            GameData::Player->GovName = m_RM->Results[0];
         }
         else
-            m_Phase = m_PhasePreAggregate;
-    }
-    return true;
-}
-
-bool Report::MatchPhaseSystemScan(String ^s)
-{
-    if( String::IsNullOrEmpty(s) )
-    {
-        if( m_ScanHasPlanets )
         {
-            m_Phase = m_PhasePreScan;
-            m_ScanAlien = nullptr;
+            throw gcnew FHUIParsingException("Species Status: unexpected line");
+        }
+
+        if( m_RM->Match(GET_LINE(), "^Government type:\\s+(.+)$") )
+        {
+            GameData::Player->GovType = m_RM->Results[0];
+        }
+        else
+        {
+            throw gcnew FHUIParsingException("Species Status: unexpected line");
+        }
+        
+        if( ! String::IsNullOrEmpty( GET_LINE() ) )
+            throw gcnew FHUIParsingException("Species Status: empty line was expected");
+
+        // Tech levels
+        if( ! MatchTechLevels( GET_LINE() ) )
+        {
+            throw gcnew FHUIParsingException("Species Status: tech status was expected");
+        }
+
+        if( ! String::IsNullOrEmpty( GET_LINE() ) )
+            throw gcnew FHUIParsingException("Species Status: empty line was expected");
+
+        // Atmospheric requirements
+        if( ! MatchAtmReq( GET_LINE() ) )
+        {
+            throw gcnew FHUIParsingException("Species Status: atmospheric requirements were expected");
+        }
+
+        if( ! String::IsNullOrEmpty( GET_LINE() ) )
+            throw gcnew FHUIParsingException("Species Status: empty line was expected");
+      
+        // Fleet maintenance
+        if( m_RM->Match( GET_LINE(), "^Fleet maintenance cost = (\\d+) \\((\\d+)\\.(\\d+)% of total production\\)") )
+        {
+            m_GameData->SetFleetCost(
+                m_RM->GetResultInt(0),
+                m_RM->GetResultInt(1)*100 + m_RM->GetResultInt(2) );
+        }
+        else
+        {
+            throw gcnew FHUIParsingException("Species Status: unexpected line");
+        }
+
+        s = GET_NON_EMPTY_LINE();
+
+        // Species met, aliens and enemies
+        if( MatchSpeciesMet(s) )
+        {
+            s = GET_LINE();
+        }
+        if( MatchAllies(s) )
+        {
+            s = GET_LINE();
+        }
+        if( MatchEnemies(s) )
+        {
+            s = GET_LINE();
+        }
+
+        // Leftover EU
+        if( m_RM->Match(s, "^Economic units = (\\d+)") )
+        {
+            m_GameData->SetTurnStartEU( m_RM->GetResultInt(0) );
+            s = GET_NON_EMPTY_LINE();
+        }  
+
+        if( MatchSectionEnd(s) )
+        {
+            m_Phase = PHASE_COLONIES;
+            return true;
+        }
+        else
+        {
+            throw gcnew FHUIParsingException("Species Status: unexpected line");
         }
     }
-    else
-        MatchPlanetScan(s);
-    return true;
+    return false;
 }
 
-bool Report::MatchPhaseColony(String ^s)
+bool Report::MatchPhaseColonies(String ^s)
 {
-    if( MatchSectionEnd(s) )
+    while( MatchColonyInfo(s) )
     {
-        m_Phase = PHASE_GLOBAL;
-        m_ScanColony = nullptr;
-        m_ScanShip = nullptr;
+        s = GET_NON_EMPTY_LINE();
     }
-    else
-        MatchColonyScan(s);
-    return true;
-}
 
-bool Report::MatchPhaseColonyInventory(String ^s)
-{
-    if( String::IsNullOrEmpty(s) )
-        m_Phase = PHASE_COLONY;
-    else
-        MatchColonyInventoryScan(s);
-    return true;
-}
-
-bool Report::MatchPhaseColonyShips(String ^s)
-{
-   if( String::IsNullOrEmpty(s) )
+    if( MatchOtherPlanetsShips(s) )
     {
-        m_Phase = PHASE_COLONY;
-        m_ScanShip = nullptr;
+        s = GET_NON_EMPTY_LINE();
     }
-    else
-        MatchColonyShipsScan(s);
-    return true;
+
+    while( MatchAliens(s) || MatchSectionEnd(s) )
+    {
+        s = GET_NON_EMPTY_LINE();
+    }
+
+    if( s->StartsWith( "ORDER SECTION" ) &&
+        (s = GET_LINE())->StartsWith("them, and submit") )
+    {
+        m_Phase = PHASE_TEMPLATE;
+        return true;
+    }
+    return false;
 }
 
-bool Report::MatchPhaseOtherPlanetsShips(String ^s)
+bool Report::MatchPhaseTemplate(String ^s)
 {
-    if( MatchSectionEnd(s) )
+    while( MatchTemplateEntry(s) )
     {
-        m_Phase = PHASE_GLOBAL;
-        m_ScanColony = nullptr;
-        m_ScanShip = nullptr;
-    }
-    else
-        MatchOtherPlanetsShipsScan(s);
-    return true;
-}
+        s = GET_NON_EMPTY_LINE();
 
-bool Report::MatchPhaseAliensReport(String ^s)
-{
-    if( String::IsNullOrEmpty(s) )
-    {
-        m_Phase = PHASE_GLOBAL;
+        if( s == nullptr )
+            break;
     }
-    else
-        MatchAliensReport(s);
-    return true;
-}
-
-bool Report::MatchPhaseOrdersTemplate(String ^s)
-{
-    if( ! String::IsNullOrEmpty(s) )
-    {
-        MatchOrdersTemplate(s);
-    }
+    m_Phase = PHASE_NONE;
     return true;
 }
 
