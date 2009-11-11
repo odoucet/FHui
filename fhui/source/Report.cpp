@@ -333,7 +333,14 @@ bool Report::MatchPhaseLogUser(String ^s)
         return true;
     }
 
+    // Alien colonies and ships
     if( MatchAliens(s) )
+    {
+        return true;
+    }
+
+    // Estimate
+    if( MatchAlienEstimate(s) )
     {
         return true;
     }
