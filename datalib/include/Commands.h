@@ -628,6 +628,16 @@ public:
     {
     }
 
+    ProdCmdBuildInv^ operator = (ProdCmdBuildInv ^cmd)
+    {
+        Origin      = cmd->Origin;
+        m_Amount    = cmd->m_Amount;
+        m_Type      = cmd->m_Type;
+        m_Colony    = cmd->m_Colony;
+        m_Ship      = cmd->m_Ship;
+        return this;
+    }
+
     virtual bool    IsUsingShip(Ship ^ship) override { return m_Ship == ship; }
 
     virtual int     GetEUCost() override    { return m_Amount * Calculators::InventoryBuildCost(m_Type); }

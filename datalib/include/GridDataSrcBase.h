@@ -8,7 +8,7 @@ public ref class GridDataSrcBase : public IGridDataSrc
 {
 public:
     virtual Alien^      GetAlienForBgColor()        { throw gcnew FHUIDataImplException("Not implemented!"); }
-    virtual String^     GetTooltipText()            { return "<TODO...>"; }
+    virtual String^     GetTooltipText()            { throw gcnew FHUIDataImplException("Not implemented!"); }
 
     virtual StarSystem^ GetFilterSystem()           { return nullptr; }
     virtual StarSystem^ GetFilterLocation(int %pl)  { return nullptr; }

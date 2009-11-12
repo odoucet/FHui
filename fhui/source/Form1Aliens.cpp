@@ -107,6 +107,7 @@ void Form1::AliensFillGrid()
             cells[c.TC]->Value      = alien->AtmReq->TempClass;
             cells[c.PC]->Value      = alien->AtmReq->PressClass;
         }
+        cells[c.Atmosphere]->Value  = alien->PrintAtmosphere();
         cells[c.EMail]->Value       = alien->Email;
 
         // Teach orders
@@ -178,23 +179,6 @@ void Form1::AliensFillGrid()
                 cells[c.Message]->Value = msgCell;
                 cells[c.Message]->ToolTipText = msgToolTip;
             }
-        }
-
-        // Atmosphere
-        if( alien->AtmReq->GasRequired != GAS_MAX )
-        {
-            String ^toxicGases = "";
-            for( int gas = 0; gas < GAS_MAX; ++gas )
-            {
-                if( alien->AtmReq->Poisonous[gas] )
-                    toxicGases = toxicGases + String::Format(",{0}", FHStrings::GasToString(static_cast<GasType>(gas)));
-            }
-            cells[c.Atmosphere]->Value = String::Format(
-                "{0} {1}-{2}% P:{3}",
-                FHStrings::GasToString( alien->AtmReq->GasRequired ),
-                alien->AtmReq->ReqMin,
-                alien->AtmReq->ReqMax,
-                toxicGases->Length > 0 ? toxicGases->Substring(1) : "?");
         }
 
         for each( IGridPlugin ^plugin in PluginManager::GridPlugins )

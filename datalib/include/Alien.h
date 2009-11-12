@@ -100,6 +100,7 @@ public:
         LastMessageSentTurn = src->LastMessageSentTurn;
     }
     // -------- IGridDataSrc ----------------------------
+    virtual String^     GetTooltipText() override;
     virtual Alien^      GetAlienForBgColor() override   { return this; }
     virtual SPRelType   GetFilterRelType() override     { return Relation; }
     // -------- IComparers ------------------------------
@@ -120,6 +121,7 @@ public:
     String^         PrintRelation();
     String^         PrintHome();
     String^         PrintTechLevels();
+    String^         PrintAtmosphere();
 
     Colony^         FindColony(String ^name, bool allowMissing);
     Ship^           FindShip(String ^name, bool allowMissing);

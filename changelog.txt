@@ -10,6 +10,8 @@ FHUI build ??
 * Several transfer command related bug fixes.
 + Improved report parser -  about 3 times faster.
 + Improved teach command support.
++ Tooltip for Aliens tab: same data as in grid, but lets you hide less
+  imporant columns.
 
 FHUI build 303
 * Emergency fix for ship build targets.
