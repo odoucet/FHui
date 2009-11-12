@@ -107,6 +107,7 @@ public:
     void            RemoveShip(Ship ^ship);
     void            AddColony(Colony ^colony);
     void            DeleteAlienColonies();
+    void            SortShipsByTonnage();
 
     String^         PrintLocation() { return String::Format("{0} {1} {2}", X, Y, Z); }
     String^         PrintWormholeTarget();

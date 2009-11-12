@@ -1144,6 +1144,7 @@ void CommandManager::GenerateCombat()
     {
         if ( system->ShipsOwned->Count > 0 )
         {
+            system->SortShipsByTonnage();
             GenerateCombatInfo( system );
             for each( IOrdersPlugin ^plugin in PluginManager::OrderPlugins )
             {
@@ -1217,7 +1218,12 @@ List<String^>^ CommandManager::PrintSystemStatus(StarSystem^ system, bool listIn
     for each ( Ship^ ship in system->ShipsOwned )
     {
         // Skip incomplete ships
-        if( (listIncomplete == false) && (ship->EUToComplete > 0) ) continue;
+        if( listIncomplete == false )
+        {
+            if( ship->EUToComplete > 0 ||
+                ship->BuiltThisTurn )
+                continue;
+        }
 
         String^ inv = ship->PrintCargo(originalInventory);
         status->Add( String::Format("  ;   {0} {1}{2}{3}", 

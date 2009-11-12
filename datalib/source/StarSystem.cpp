@@ -61,6 +61,13 @@ void StarSystem::RemoveShip(Ship^ ship)
     }
 }
 
+void StarSystem::SortShipsByTonnage()
+{
+    IComparer<Ship^> ^cmpr = gcnew Ship::WarTonnageComparer;
+    m_ShipsOwned->Sort(cmpr);
+    m_ShipsAlien->Sort(cmpr);
+}
+
 void StarSystem::AddColony(Colony^ colony)
 {
     // Keep the list sorted - insert new elements in the proper place
