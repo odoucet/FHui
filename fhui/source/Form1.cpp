@@ -317,13 +317,15 @@ void Form1::ShowException(Exception ^e)
         "FHUI rev.: {1}\r\n"
         "Type     : {2}\r\n"
         "Message  : {3}\r\n"
+        "{4}"
         "---------------------------------------------------------------------------\r\n"
-        "{4}\r\n"
+        "{5}\r\n"
         "---------------------------------------------------------------------------\r\n",
         BuildInfo::ContactEmails,
         BuildInfo::Version,
         e->GetType()->ToString(),
         e->Message,
+        e->InnerException == nullptr ? "" : (e->InnerException->Message + "\r\n"),
         e->InnerException == nullptr ? e->StackTrace : e->InnerException->StackTrace );
 
     // Bring up the first tab

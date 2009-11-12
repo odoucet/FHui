@@ -997,7 +997,6 @@ void Form1::ColoniesMenuProdCommandAddBuildIuAu(ProdCmdBuildIUAU ^cmd)
         }
         else
         {
-
             newCmd = dlg->GetCUCommand();
             if( newCmd )
                 ColoniesMenuCommandAdd( newCmd );
@@ -1025,7 +1024,7 @@ void Form1::ColoniesMenuProdCommandAddBuildInventory(ProdCmdBuildInv ^cmd)
             int amount = dlg->GetAmount();
             if( amount >= 0 )
             {
-                cmd->m_Amount = amount;
+                *cmd = dlg->GetCommand();
                 ColoniesMenuCommandAdd(nullptr);
             }
             else
