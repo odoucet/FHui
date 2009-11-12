@@ -511,7 +511,7 @@ List<String^>^ StarSystem::PrintAliens()
 
     for each (Alien^ race in species)
     {
-        String^ info;
+        String^ info = "";
         for each (Colony^ colony in ColoniesAlien)
         {
             if (colony->Owner == race)
