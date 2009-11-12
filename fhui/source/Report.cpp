@@ -329,6 +329,12 @@ bool Report::MatchPhaseNone(String ^s)
 
 bool Report::MatchPhaseLogUser(String ^s)
 {
+    // Comment
+    if( s[0] == ';' )
+    {
+        return true;
+    }
+
     // System scan
     if( MatchSystemScan(s) )
     {
