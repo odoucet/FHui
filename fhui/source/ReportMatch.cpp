@@ -1132,9 +1132,17 @@ bool Report::MatchTemplateEntry(String ^s)
             }
             else if( m_RM->Match(target, "PL\\s+([^,;]+)") )
             {
-                Colony ^colony = GameData::Player->FindColony(m_RM->Results[0]->TrimEnd(), false);
-                if( colony )
-                    cmd = gcnew ShipCmdJump(ship, colony->System, colony->PlanetNum);
+                String^ plName = m_RM->Results[0]->TrimEnd();
+
+                if( plName == "Unused" )
+                {
+                    cmd = gcnew ShipCmdJump(ship, nullptr, -1);
+                }
+                else
+                {
+                    if( Colony ^colony = GameData::Player->FindColony(plName, false) )
+                        cmd = gcnew ShipCmdJump(ship, colony->System, colony->PlanetNum);
+                }
             }
             if( cmd )
             {
