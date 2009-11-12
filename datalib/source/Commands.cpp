@@ -306,7 +306,7 @@ String^ CmdTransfer::Print()
         to );
 }
 
-array<int>^ CmdTransfer::GetFromInventory()
+array<int>^ CmdTransfer::GetFromInventory(bool originalInventory)
 {
     if( m_Phase == CommandPhase::PostArrival )
     {
@@ -315,12 +315,18 @@ array<int>^ CmdTransfer::GetFromInventory()
             : m_FromShip->CargoPostArrival;
     }
 
+    if( originalInventory )
+    {
+        return m_FromColony
+            ? m_FromColony->Inventory
+            : m_FromShip->CargoOriginal;
+    }
     return m_FromColony
-        ? m_FromColony->Inventory
-        : m_FromShip->CargoOriginal;
+        ? m_FromColony->Res->Inventory
+        : m_FromShip->Cargo;
 }
 
-array<int>^ CmdTransfer::GetToInventory()
+array<int>^ CmdTransfer::GetToInventory(bool originalInventory)
 {
     if( m_Phase == CommandPhase::PostArrival )
     {
@@ -329,6 +335,12 @@ array<int>^ CmdTransfer::GetToInventory()
             : m_ToShip->CargoPostArrival;
     }
 
+    if( originalInventory )
+    {
+        return m_ToColony
+            ? m_ToColony->Inventory
+            : m_ToShip->CargoOriginal;
+    }
     return m_ToColony
         ? m_ToColony->Res->Inventory
         : m_ToShip->Cargo;

@@ -744,8 +744,8 @@ public:
 
     virtual String^ Print() override;
 
-    array<int>^     GetFromInventory();
-    array<int>^     GetToInventory();
+    array<int>^     GetFromInventory(bool originalInventory);
+    array<int>^     GetToInventory(bool originalInventory);
 
     CommandPhase    m_Phase;
     InventoryType   m_Type;

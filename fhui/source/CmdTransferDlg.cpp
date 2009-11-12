@@ -212,7 +212,7 @@ void CmdTransferDlg::InitControlsUnits()
     else
         m_CapacityLimit = 0;
 
-    m_Inv = m_Cmd->GetFromInventory();
+    m_Inv = m_Cmd->GetFromInventory(true);
 
     for( int i = 0; i < INV_MAX; ++i )
     {

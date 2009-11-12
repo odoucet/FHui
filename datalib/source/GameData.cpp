@@ -24,8 +24,8 @@ void GameData::EvalPostArrivalInventory(StarSystem ^system, ICommand ^cmdEnd)
             break;
 
         CmdTransfer ^cmdTr = safe_cast<CmdTransfer^>(cmd);
-        array<int> ^invFrom = cmdTr->GetFromInventory();
-        array<int> ^invTo = cmdTr->GetToInventory();
+        array<int> ^invFrom = cmdTr->GetFromInventory(false);
+        array<int> ^invTo = cmdTr->GetToInventory(false);
 
         int inv = (int)cmdTr->m_Type;
         int amount = Math::Min(cmdTr->m_Amount, invFrom[inv]);

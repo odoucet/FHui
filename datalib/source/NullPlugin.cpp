@@ -84,8 +84,8 @@ void BudgetTracker::EvalOrderTransfer(ICommand ^cmd)
     if( cmd->GetPhase() == CommandPhase::PostArrival )
         GameData::EvalPostArrivalInventory(cmd->GetRefSystem(), cmd);
 
-    array<int> ^invFrom = cmdTr->GetFromInventory();
-    array<int> ^invTo = cmdTr->GetToInventory();
+    array<int> ^invFrom = cmdTr->GetFromInventory(false);
+    array<int> ^invTo = cmdTr->GetToInventory(false);
 
     // Track Inventory
     InventoryType inv = cmdTr->m_Type;

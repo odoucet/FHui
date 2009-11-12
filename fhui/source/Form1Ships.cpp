@@ -735,14 +735,13 @@ void Form1::ShipsMenuCommandAdd(ShipCommandData ^data)
 
     SystemsGrid->Filter->Update();
     ShipsGrid->Filter->Update();
-    if( data && data->B->GetPhase() == CommandPhase::Production )
-        ColoniesGrid->Filter->Update();
+    ColoniesGrid->Filter->Update();
 }
 
 void Form1::ShipsMenuCommandDel(ICommand ^cmd)
 {
     if( cmd->GetCmdType() == CommandType::Transfer )
-        m_ShipsMenuRef->System->Transfers->Remove( cmd );
+        cmd->GetRefSystem()->Transfers->Remove( cmd );
     else
         m_ShipsMenuRef->DelCommand( cmd );
 
@@ -814,10 +813,16 @@ void Form1::ShipsMenuCommandDelAll(CommandPhase phase)
 
 void Form1::ShipsMenuCommandDelAllTransfers(CommandPhase phase)
 {
-    for each( ICommand ^cmd in m_ShipsMenuRef->System->GetTransfers(m_ShipsMenuRef) )
+    StarSystem ^system = m_ShipsMenuRef->System;
+    if( phase == CommandPhase::PostArrival )
+        system = m_ShipsMenuRef->GetPostArrivalSystem();
+    if( system )
     {
-        if( cmd->GetPhase() == phase )
-            m_ShipsMenuRef->System->Transfers->Remove(cmd);
+        for each( ICommand ^cmd in system->GetTransfers(m_ShipsMenuRef) )
+        {
+            if( cmd->GetPhase() == phase )
+                m_ShipsMenuRef->System->Transfers->Remove(cmd);
+        }
     }
 }
 

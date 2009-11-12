@@ -394,7 +394,8 @@ String^ Ship::PrintCmdDetailsPhase(CommandPhase phase)
         {
             for each( ICommand ^cmd in system->GetTransfers(this) )
             {
-                if( cmd->GetPhase() == phase )
+                if( cmd->GetPhase() == phase &&
+                    cmd->IsUsingShip(this) )
                     ret += cmd->Print() + "\r\n";
             }
         }
