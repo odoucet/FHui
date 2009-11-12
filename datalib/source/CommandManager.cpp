@@ -1465,7 +1465,7 @@ void CommandManager::GenerateProduction()
     // Generate production template for each colony
     for each( Colony ^colony in GameData::Player->Colonies )
     {
-        if ( (colony->EconomicBase <= 0) && (colony->HasInventory == false) )
+        if ( colony->EconomicBase <= 0 )
             continue;
 
         // Section header

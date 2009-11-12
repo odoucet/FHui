@@ -560,11 +560,10 @@ void TurnData::UpdateSystems()
 
                     // Update planet info with colony info, if there is any difference
                     // Helps with MD changed via mining or when there is no system scan
-                    if ( colony->Owner == GameData::Player )
+                    if ( colony->Owner == GameData::Player &&
+                         colony->EconomicBase > 0 )
                     {
-                        if( colony->EconomicBase > 0 )
-                            colony->CalculateBalance(false);
-
+                        colony->CalculateBalance(false);
                         planet->MiDiff = colony->MiDiff;
                         planet->LSN = colony->LSN;
                     }

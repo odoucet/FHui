@@ -167,6 +167,7 @@ bool Report::MatchAlienEstimate(String ^s)
         {
             throw gcnew FHUIParsingException("Estimate: failed to parse alien tech levels");
         }
+        return true;
     }
     return false;
 }
