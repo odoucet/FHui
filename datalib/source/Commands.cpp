@@ -87,9 +87,9 @@ String^ CmdAlienRelation::Print()
 
 String^ CmdTeach::Print()
 {
-    return String::Format("Teach {0} {1} SP {2}",
+    return String::Format("Teach {0} {1}SP {2}",
         FHStrings::TechToString(m_Tech),
-        m_Level,
+        (m_Level == 0 ? "" : m_Level.ToString() + " "),
         m_Alien->Name );
 }
 

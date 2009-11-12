@@ -19,7 +19,7 @@ RegexMatcher::RegexMatcher()
     ExpCmdSPNeutral     = gcnew Regex("^Neutral\\s+SP\\s+([^,;]+)$");
     ExpCmdSPAlly        = gcnew Regex("^Ally\\s+SP\\s+([^,;]+)$");
     ExpCmdSPEnemy       = gcnew Regex("^Enemy\\s+SP\\s+([^,;]+)$");
-    ExpCmdSPTeach       = gcnew Regex("^Teach\\s+([A-Z]{2})\\s+(\\d+)\\s+SP\\s+([^,;]+)$");
+    ExpCmdSPTeach       = gcnew Regex("^Teach\\s+([A-Z]{2})\\s+(\\d+\\s+)?SP\\s+([^,;]+)$");
     ExpCmdSPMsg         = gcnew Regex("^Message\\s+SP\\s+([^,;]+)$");
     ExpCmdResearch      = gcnew Regex("^Research\\s+(\\d+)\\s+([A-Z]{2})$");
     ExpCmdRecycle       = gcnew Regex("^Recycle\\s+(\\d+)\\s+(\\w+)$");

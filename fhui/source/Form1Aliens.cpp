@@ -5,6 +5,7 @@
 #include "GridSorter.h"
 
 #include "CmdMessage.h"
+#include "CmdTeachDlg.h"
 
 ////////////////////////////////////////////////////////////////
 
@@ -109,18 +110,23 @@ void Form1::AliensFillGrid()
         cells[c.EMail]->Value       = alien->Email;
 
         // Teach orders
-        if( alien->TeachOrders )
+        String ^teach = "";
+        for each( ICommand ^cmd in m_CommandMgr->GetCommands() )
         {
-            String ^teach = "";
-            if( alien->TeachOrders & (1 << TECH_MI) ) teach += ", MI";
-            if( alien->TeachOrders & (1 << TECH_MA) ) teach += ", MA";
-            if( alien->TeachOrders & (1 << TECH_ML) ) teach += ", ML";
-            if( alien->TeachOrders & (1 << TECH_GV) ) teach += ", GV";
-            if( alien->TeachOrders & (1 << TECH_LS) ) teach += ", LS";
-            if( alien->TeachOrders & (1 << TECH_BI) ) teach += ", BI";
-            if( !String::IsNullOrEmpty(teach) )
-                cells[c.Teach]->Value = teach->Substring(2);
+            if( cmd->GetCmdType() == CommandType::Teach )
+            {
+                CmdTeach ^cmdTeach = safe_cast<CmdTeach^>(cmd);
+                if( cmdTeach->m_Alien == alien )
+                {
+                    teach += String::Format("{0}{1}{2}",
+                        String::IsNullOrEmpty(teach) ? "" : ", ",
+                        FHStrings::TechToString(cmdTeach->m_Tech),
+                        cmdTeach->m_Level > 0 ? "(" + cmdTeach->m_Level.ToString() + ")" : "" );
+                }
+            }
         }
+        if( !String::IsNullOrEmpty(teach) )
+            cells[c.Teach]->Value = teach;
 
         // Message
         if( alien != GameData::Player )
@@ -223,7 +229,8 @@ void Form1::AliensFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
 
         AliensFillMenuRelations(menu);
         AliensFillMenuMessage(menu);
-        AliensFillMenuTeach(menu);
+        if( alien->Relation != SP_ENEMY )
+            AliensFillMenuTeach(menu);
     }
 }
 
@@ -272,11 +279,11 @@ void Form1::AliensFillMenuMessage(Windows::Forms::ContextMenuStrip ^menu)
 
                 msgMenu->DropDownItems->Add( "Edit",
                     nullptr,
-                    gcnew EventHandler(this, &Form1::AliensMenuMessageAdd));
+                    gcnew EventHandler(this, &Form1::AliensMenuCommandMessage));
 
                 msgMenu->DropDownItems->Add( "Cancel",
                     nullptr,
-                    gcnew EventHandler(this, &Form1::AliensMenuMessageCancel));
+                    gcnew EventHandler(this, &Form1::AliensMenuCommandMessageCancel));
 
                 menu->Items->Add(msgMenu);
 
@@ -287,10 +294,10 @@ void Form1::AliensFillMenuMessage(Windows::Forms::ContextMenuStrip ^menu)
 
     menu->Items->Add( "Send Message...",
         nullptr,
-        gcnew EventHandler(this, &Form1::AliensMenuMessageAdd) );
+        gcnew EventHandler(this, &Form1::AliensMenuCommandMessage) );
 }
 
-void Form1::AliensMenuMessageCancel(Object^, EventArgs^)
+void Form1::AliensMenuCommandMessageCancel(Object^, EventArgs^)
 {
     Alien ^alien = m_AliensMenuRef;
 
@@ -309,7 +316,7 @@ void Form1::AliensMenuMessageCancel(Object^, EventArgs^)
     }
 }
 
-void Form1::AliensMenuMessageAdd(Object^, EventArgs^)
+void Form1::AliensMenuCommandMessage(Object^, EventArgs^)
 {
     Alien ^alien = m_AliensMenuRef;
 
@@ -345,7 +352,7 @@ void Form1::AliensMenuMessageAdd(Object^, EventArgs^)
             }
         }
         else
-            AliensMenuMessageCancel(nullptr, nullptr);
+            AliensMenuCommandMessageCancel(nullptr, nullptr);
     }
 }
 
@@ -353,94 +360,128 @@ void Form1::AliensFillMenuTeach(Windows::Forms::ContextMenuStrip ^menu)
 {
     Alien ^alien = m_AliensMenuRef;
 
-    ToolStripMenuItem ^teachMenu = gcnew ToolStripMenuItem("Teach:");
+    ToolStripMenuItem ^teachMenu = nullptr;
+
     bool teachAny = false;
-
-    // Teach
-    if( alien->TeachOrders )
+    for each( ICommand ^cmd in m_CommandMgr->GetCommands() )
     {
-        teachMenu->DropDownItems->Add( "Cancel ALL",
-            nullptr,
-            gcnew EventHandler(this, &Form1::AliensMenuTeachCancel));
-        teachAny = true;
-    }
-    if( alien->Relation != SP_ENEMY )
-    {
-        if( teachAny )
-            teachMenu->DropDownItems->Add( gcnew ToolStripSeparator );
+        if( teachAny == false )
+            teachMenu = gcnew ToolStripMenuItem("Teach:");
 
-        teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Mining", TECH_MI) );
-        teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Manufacturing", TECH_MA) );
-        teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Military", TECH_ML) );
-        teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Gravitics", TECH_GV) );
-        teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Life Support", TECH_LS) );
-        teachMenu->DropDownItems->Add( AliensMenuCreateTeach("Biology", TECH_BI) );
-
-        teachMenu->DropDownItems->Add( gcnew ToolStripSeparator );
-        teachMenu->DropDownItems->Add( "Teach ALL",
-            nullptr,
-            gcnew EventHandler(this, &Form1::AliensMenuTeachAll));
-        teachAny = true;
+        if( cmd->GetCmdType() == CommandType::Teach )
+        {
+            CmdTeach ^cmdTeach = safe_cast<CmdTeach^>(cmd);
+            if( cmdTeach->m_Alien == alien )
+            {
+                ToolStripMenuItem ^teachItem = AliensMenuCreateTeach(cmdTeach);
+                teachMenu->DropDownItems->Add(teachItem);
+                teachAny = true;
+            }
+        }
     }
 
-    if( teachAny )
-        menu->Items->Add( teachMenu );
-}
-
-ToolStripMenuItem^ Form1::AliensMenuCreateTeach(String ^text, TechType tech)
-{
-    ToolStripMenuItem ^menuItem = CreateCustomMenuItem(
-        text,
-        gcnew TeachData(m_AliensMenuRef, tech, GameData::Player->TechLevels[tech]),
-        gcnew EventHandler1Arg<TeachData^>(this, &Form1::AliensMenuTeach) );
-
-    return menuItem;
-}
-
-void Form1::AliensMenuTeach(TeachData ^data)
-{
-    Alien ^alien = data->A;
-    TechType tech = (TechType)data->B;
-    int level = data->C;
-
-    m_CommandMgr->AddCommand( gcnew CmdTeach(alien, tech, level) );
-
-    alien->TeachOrders |= 1 << tech;
-    AliensGrid->Filter->Update();
-}
-
-void Form1::AliensMenuTeachAll(Object^, EventArgs^)
-{
-    AliensGrid->Filter->EnableUpdates = false;
-
-    for( int i = (int)TECH_MI; i < TECH_MAX; ++i )
+    if( teachAny == false )
     {
-        TechType tech = (TechType)i;
-        TeachData ^data = gcnew TeachData(
-            m_AliensMenuRef,
-            tech,
-            GameData::Player->TechLevels[tech]);
-        AliensMenuTeach(data);
+        // Teach dialog
+        menu->Items->Add( CreateCustomMenuItem<CmdTeach^>(
+            "Teach...",
+            safe_cast<CmdTeach^>(nullptr),
+            gcnew EventHandler1Arg<CmdTeach^>(this, &Form1::AliensMenuCommandTeach) ) );
+        return;
     }
 
-    AliensGrid->Filter->EnableUpdates = true;
-    AliensGrid->Filter->Update();
+    teachMenu->DropDownItems->Insert(0, gcnew ToolStripSeparator );
+    teachMenu->DropDownItems->Insert(0, CreateCustomMenuItem<CmdTeach^>(
+        "Teach...",
+        safe_cast<CmdTeach^>(nullptr),
+        gcnew EventHandler1Arg<CmdTeach^>(this, &Form1::AliensMenuCommandTeach) ) );
+
+    teachMenu->DropDownItems->Add( gcnew ToolStripSeparator );
+    teachMenu->DropDownItems->Add( CreateCustomMenuItem<CmdTeach^>(
+        "Cancel ALL",
+        safe_cast<CmdTeach^>(nullptr),
+        gcnew EventHandler1Arg<CmdTeach^>(this, &Form1::AliensMenuCommandTeachCancel) ) );
+    
+    menu->Items->Add( teachMenu );
 }
 
-void Form1::AliensMenuTeachCancel(Object^, EventArgs^)
+ToolStripMenuItem^ Form1::AliensMenuCreateTeach(CmdTeach ^cmd)
 {
-    for( int i = (int)TECH_MI; i < TECH_MAX; ++i )
-    {
-        TechType tech = (TechType)i;
+    ToolStripMenuItem ^teachItem = gcnew ToolStripMenuItem( cmd->Print() );
 
-        m_CommandMgr->DelCommand(
-            gcnew CmdTeach(
-                m_AliensMenuRef,
-                tech,
-                GameData::Player->TechLevels[tech]) );
+    teachItem->DropDownItems->Add( CreateCustomMenuItem<CmdTeach^>(
+        "Edit...",
+        cmd,
+        gcnew EventHandler1Arg<CmdTeach^>(this, &Form1::AliensMenuCommandTeach) ) );
+    teachItem->DropDownItems->Add( CreateCustomMenuItem<CmdTeach^>(
+        "Cancel",
+        cmd,
+        gcnew EventHandler1Arg<CmdTeach^>(this, &Form1::AliensMenuCommandTeachCancel) ) );
+
+    return teachItem;
+}
+
+void Form1::AliensMenuCommandTeach(CmdTeach ^cmd)
+{
+    Alien ^alien = m_AliensMenuRef;
+    if( cmd && ! alien )    // called from systems menu
+        alien = cmd->m_Alien;
+    if( ! alien )
+        throw gcnew FHUIDataIntegrityException("Missing alien for teach command!");
+
+    CmdTeachDlg ^dlg = gcnew CmdTeachDlg( alien, cmd );
+    if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
+    {
+        if( cmd )
+        {
+            int level = dlg->GetLevel( cmd->m_Tech );
+            if( level == -1 )
+                m_CommandMgr->DelCommand(cmd);
+            else if( level != cmd->m_Level )
+            {
+                cmd->m_Level = level;
+                m_CommandMgr->SaveCommands();
+            }
+        }
+        else
+        {
+            for( int i = 0; i < TECH_MAX; ++i )
+            {
+                cmd = dlg->GetCommand( static_cast<TechType>(i) );
+                if( cmd )
+                    m_CommandMgr->AddCommand( cmd );
+            }
+        }
+
+        AliensGrid->Filter->Update();
+    }
+}
+
+void Form1::AliensMenuCommandTeachCancel(CmdTeach ^cmd)
+{
+    if( cmd )
+    {   // Delete single command
+        m_CommandMgr->DelCommand( cmd );
+    }
+    else
+    {   // Delete all
+        bool bRepeat;
+        do
+        {
+            bRepeat = false;
+            for each( ICommand ^cmd in m_CommandMgr->GetCommands() )
+            {
+                if( cmd->GetCmdType() == CommandType::Teach &&
+                    safe_cast<CmdTeach^>(cmd)->m_Alien == m_AliensMenuRef )
+                {
+                    m_CommandMgr->DelCommand( cmd );
+                    bRepeat = true;
+                    break;
+                }
+            }
+        } while( bRepeat );
     }
 
-    m_AliensMenuRef->TeachOrders = 0;
     AliensGrid->Filter->Update();
 }
 
@@ -485,10 +526,9 @@ void Form1::AliensMenuSetRelation(AlienRelationData ^data)
     alien->Relation = rel;
 
     // Cancel any teach commands for enemy species
-    if( rel == SP_ENEMY && alien->TeachOrders )
-        AliensMenuTeachCancel(nullptr, nullptr);
+    if( rel == SP_ENEMY )
+        AliensMenuCommandTeachCancel(nullptr);
 
-    AliensGrid->Filter->Update();
     // Update other grids to reflect new colors
     UpdateAllGrids(false);
 }

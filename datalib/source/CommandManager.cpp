@@ -401,7 +401,7 @@ void CommandManager::LoadCommands()
         catch( Exception ^e )
         {
             throw gcnew FHUIParsingException( String::Format(
-                    "Failed loading internal commands file.\n"
+                    "Failed loading internal commands file:\n"
                     "File: {0}\n"
                     "Line {1}: {2}\n",
                     cmdPath,
@@ -622,11 +622,7 @@ void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
             TechType tech = FHStrings::TechFromString(m_RM->Results[0]);
             int level = m_RM->GetResultInt(1);
             Alien ^alien = m_GameData->GetAlien(m_RM->Results[2]);
-            if( level != GameData::Player->TechLevels[tech] )
-                throw gcnew FHUIParsingException("Inconsistent tech level for Teach command!");
-
             AddCommand( CmdSetOrigin(gcnew CmdTeach(alien, tech, level)) );
-            alien->TeachOrders |= 1 << tech;
         }
         else if( m_RM->Match(line, m_RM->ExpCmdSPMsg) )
         {

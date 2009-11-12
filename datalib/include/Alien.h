@@ -69,7 +69,6 @@ public:
         TechLevels        = gcnew array<int>(TECH_MAX){0};
         TechLevelsTeach   = gcnew array<int>(TECH_MAX){0};
         TechLevelsAssumed = gcnew array<int>(TECH_MAX){0};
-        TeachOrders = 0;
 
         LastMessageRecvTurn = 0;
         LastMessageSentTurn = 0;
@@ -95,7 +94,6 @@ public:
         TechLevelsTeach   = gcnew array<int>(TECH_MAX){0};
         TechLevelsAssumed = gcnew array<int>(TECH_MAX){0};
         src->TechLevels->CopyTo(TechLevels, 0);
-        TeachOrders = 0;
 
         LastMessageRecv = src->LastMessageRecv;
         LastMessageRecvTurn = src->LastMessageRecvTurn;
@@ -146,7 +144,6 @@ public:
     array<int>^         TechLevels;
     array<int>^         TechLevelsTeach;
     array<int>^         TechLevelsAssumed;
-    int                 TeachOrders;
 
     String^             LastMessageRecv;
     int                 LastMessageRecvTurn;

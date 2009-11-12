@@ -452,6 +452,13 @@ ToolStripMenuItem^ Form1::SystemsFillMenuCommandsOptions(ICommand ^cmd)
         menu->DropDownItems->Add( gcnew ToolStripSeparator );
 
     // Edit command
+    if( cmd->GetCmdType() == CommandType::Teach )
+    {
+        menu->DropDownItems->Add( CreateCustomMenuItem<CmdTeach^>(
+            "Edit...",
+            safe_cast<CmdTeach^>(cmd),
+            gcnew EventHandler1Arg<CmdTeach^>(this, &Form1::AliensMenuCommandTeach) ) );
+    }
     if( cmd->GetCmdType() == CommandType::Custom )
     {
         CmdCustom ^cmdCustom = safe_cast<CmdCustom^>(cmd);
@@ -497,14 +504,6 @@ void Form1::SystemsMenuCommandDel(ICommand ^cmd)
             CmdAlienRelation ^rel = safe_cast<CmdAlienRelation^>(cmd);
             AliensMenuSetRelation( gcnew AlienRelationData(rel->m_Alien, rel->m_Alien->RelationParsed) );
         }
-        break;
-
-    case CommandType::Teach:
-        {
-            CmdTeach ^teach = safe_cast<CmdTeach^>(cmd);
-            teach->m_Alien->TeachOrders &= ~(1 << teach->m_Tech);
-        }
-        m_CommandMgr->DelCommand(cmd);
         break;
 
     default:

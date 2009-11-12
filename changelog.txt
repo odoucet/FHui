@@ -9,6 +9,7 @@ FHUI build ??
 * [P] "Enmity/neutrality towards ALL species" is now correctly handled.
 * Several transfer command related bug fixes.
 + Improved report parser -  about 3 times faster.
++ Improved teach command support.
 
 FHUI build 303
 * Emergency fix for ship build targets.

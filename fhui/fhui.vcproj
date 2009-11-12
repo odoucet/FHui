@@ -342,6 +342,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\source\CmdTeachDlg.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\source\CmdTransferDlg.cpp"
 					>
 				</File>
@@ -508,6 +512,15 @@
 					>
 					<File
 						RelativePath=".\include\CmdResearch.resx"
+						>
+					</File>
+				</File>
+				<File
+					RelativePath=".\include\CmdTeachDlg.h"
+					FileType="3"
+					>
+					<File
+						RelativePath=".\include\CmdTeachDlg.resx"
 						>
 					</File>
 				</File>
