@@ -692,7 +692,10 @@ bool Report::MatchShipInfo(String ^s, StarSystem ^system, Colony ^colony)
 
     if( bMatch )
     {
-        system->LastVisited = m_Turn;
+        if( m_Phase != PHASE_LOG_USER )
+            system->LastVisited = m_Turn;
+        else
+            system->LastVisited = 0;
 
         if( bIncomplete )
         {

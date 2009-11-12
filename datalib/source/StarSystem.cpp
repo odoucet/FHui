@@ -309,14 +309,17 @@ String^ StarSystem::PrintScanStatus()
 {
     if( TurnScanned == -1 )
         return s_ScanNone;
-    else if( TurnScanned == 0 )
+
+    if( TurnScanned == 0 ||
+        LastVisited == -1 ||
+        (LastVisited > 0 && TurnScanned > LastVisited) )
     {
         if( IsMarkedVisited )
             return s_ScanDiplVisited;
         return s_ScanDipl;
     }
-    else
-        return s_ScanSelf;
+
+    return s_ScanSelf;
 }
 
 String^ StarSystem::PrintColoniesAll()
