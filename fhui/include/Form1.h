@@ -398,6 +398,7 @@ namespace FHUI {
         void        AliensFillMenuRelations(Windows::Forms::ContextMenuStrip ^menu);
         void        AliensFillMenuMessage(Windows::Forms::ContextMenuStrip ^menu);
         void        AliensFillMenuTeach(Windows::Forms::ContextMenuStrip ^menu);
+        void        AliensFillMenuEstimate(Windows::Forms::ContextMenuStrip ^menu);
         ToolStripMenuItem^ AliensMenuCreateTeach(CmdTeach ^cmd);
 
         typedef Pair<Alien^, int> AlienRelationData;
@@ -406,6 +407,8 @@ namespace FHUI {
         void        AliensMenuCommandTeachCancel(CmdTeach ^cmd);
         void        AliensMenuCommandMessage(Object^, EventArgs^);
         void        AliensMenuCommandMessageCancel(Object^, EventArgs^);
+        void        AliensMenuCommandEstimate(Object^, EventArgs^);
+        void        AliensMenuCommandEstimateCancel(ProdCmdEstimate ^cmd);
 
         value struct AliensColumns
         {

@@ -8,12 +8,12 @@ Minor changes are listed only if originally requested by player
 FHUI build ??
 * [P] "Enmity/neutrality towards ALL species" is now correctly handled.
 * Several transfer command related bug fixes.
-* Colonies/PR column shows total colony output, without fleet maintenance
+* Colonies/PR column shows total colony output, without fleet maintenance.
 + Improved report parser -  about 3 times faster.
 + Improved teach command support.
++ Added estimate command shortcut in context menu for Aliens tab.
 + Tooltip for Aliens tab: same data as in grid, but lets you hide less
   imporant columns.
-
 
 FHUI build 303
 * Emergency fix for ship build targets.

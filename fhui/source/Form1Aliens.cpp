@@ -215,6 +215,7 @@ void Form1::AliensFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
         AliensFillMenuMessage(menu);
         if( alien->Relation != SP_ENEMY )
             AliensFillMenuTeach(menu);
+        AliensFillMenuEstimate(menu);
     }
 }
 
@@ -538,6 +539,70 @@ void Form1::AliensMenuSetRelation(AlienRelationData ^data)
 
     // Update other grids to reflect new colors
     UpdateAllGrids(false);
+}
+
+void Form1::AliensFillMenuEstimate(Windows::Forms::ContextMenuStrip ^menu)
+{
+    for each( Colony ^colony in GameData::Player->Colonies )
+    {
+        for each( ICommand ^cmd in colony->Commands )
+        {
+            if( cmd->GetCmdType() == CommandType::Estimate )
+            {
+                ProdCmdEstimate ^estCmd = safe_cast<ProdCmdEstimate^>(cmd);
+                if( estCmd->m_Alien == m_AliensMenuRef )
+                {
+                    ToolStripMenuItem ^estMenu = gcnew ToolStripMenuItem( "Estimate on PL " + colony->Name );
+                    estMenu->DropDownItems->Add( CreateCustomMenuItem<ProdCmdEstimate^>(
+                        "Cancel",
+                        estCmd,
+                        gcnew EventHandler1Arg<ProdCmdEstimate^>(this, &Form1::AliensMenuCommandEstimateCancel) ) );
+                    menu->Items->Add( estMenu );
+                    return;
+                }
+            }
+        }
+    }
+
+    Colony ^home = GameData::Player->FindColony(
+        GameData::Player->HomeSystem->Planets[ GameData::Player->HomePlanet ]->Name,
+        true );
+    if( home && home->EconomicBase > 0 )
+    {
+        menu->Items->Add(
+            "Add Estimate on PL " + home->Name,
+            nullptr,
+            gcnew EventHandler(this, &Form1::AliensMenuCommandEstimate) );
+    }
+}
+
+void Form1::AliensMenuCommandEstimate(Object^, EventArgs^)
+{
+    Colony ^home = GameData::Player->FindColony(
+        GameData::Player->HomeSystem->Planets[ GameData::Player->HomePlanet ]->Name,
+        false );
+
+    m_CommandMgr->AddCommand(
+        home,
+        gcnew ProdCmdEstimate( m_AliensMenuRef ) );
+
+    ColoniesGrid->Filter->Update();
+}
+
+void Form1::AliensMenuCommandEstimateCancel(ProdCmdEstimate ^cmd)
+{
+    for each( Colony ^colony in GameData::Player->Colonies )
+    {
+        for each( ICommand ^iCmd in colony->Commands )
+        {
+            if( iCmd == cmd )
+            {
+                m_CommandMgr->DelCommand( colony, cmd );
+                ColoniesGrid->Filter->Update();
+                return;
+            }
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////
