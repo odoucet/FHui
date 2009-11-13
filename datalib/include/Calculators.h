@@ -33,7 +33,7 @@ public:
     static int      ColonyHideCost(Colony ^colony);
 
     static int      TransportCapacity(int size);
-    static int      ColonyProduction(Colony^, int mi, int ma, int ls, int fleetPercentCost);
+    static int      ColonyProduction(Colony^, int mi, int ma, int ls);
     static int      ProductionPenalty(int lsn, int ls);
 
     static int      LSN(Planet ^planet, Alien ^alien);

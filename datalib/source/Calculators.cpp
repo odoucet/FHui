@@ -277,7 +277,7 @@ int Calculators::ResearchCost(int startLevel, int endLevel, bool guided)
     return sum;
 }
 
-int Calculators::ColonyProduction(Colony^ colony, int mi, int ma, int ls, int fleetPercentCost)
+int Calculators::ColonyProduction(Colony^ colony, int mi, int ma, int ls)
 {
     if (colony->MiDiff == 0)
     {
@@ -312,7 +312,7 @@ int Calculators::ColonyProduction(Colony^ colony, int mi, int ma, int ls, int fl
         rawMaterialUnits += colony->Inventory[INV_RM];
         availableToSpend = Math::Min(rawMaterialUnits, productionCapacity);
     }
-    return ( availableToSpend - ((fleetPercentCost * availableToSpend + 5000) / 10000) );
+    return availableToSpend;
 }
 
 int Calculators::ProductionPenalty(int lsn, int ls)

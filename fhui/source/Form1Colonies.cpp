@@ -167,8 +167,7 @@ void Form1::ColoniesFillGrid()
                         colony,
                         sp->TechLevelsAssumed[TECH_MI],
                         sp->TechLevelsAssumed[TECH_MA],
-                        sp->TechLevelsAssumed[TECH_LS],
-                        m_GameData->GetFleetPercentCost() );
+                        sp->TechLevelsAssumed[TECH_LS] );
                     int prodPerc = 100 - Calculators::ProductionPenalty(colony->LSN, sp->TechLevelsAssumed[TECH_LS]);
 
                     // -- Summary update
