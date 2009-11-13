@@ -413,29 +413,52 @@ void Form1::AliensMenuCommandTeach(CmdTeach ^cmd)
     if( ! alien )
         throw gcnew FHUIDataIntegrityException("Missing alien for teach command!");
 
-    CmdTeachDlg ^dlg = gcnew CmdTeachDlg( alien, cmd );
+    CmdTeachDlg ^dlg = gcnew CmdTeachDlg( alien );
+
+    array<CmdTeach^> ^cmds = gcnew array<CmdTeach^>(TECH_MAX) { nullptr };
+    for each( ICommand ^iCmd in m_CommandMgr->GetCommands() )
+    {
+        if( iCmd->GetCmdType() == CommandType::Teach )
+        {
+            cmd = safe_cast<CmdTeach^>(iCmd);
+            if( cmd->m_Alien == m_AliensMenuRef )
+            {
+                cmds[cmd->m_Tech] = cmd;
+                dlg->AddCommand(cmd);
+            }
+        }
+    }
+
     if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
     {
-        if( cmd )
+        bool needSave = false;
+        for( int i = 0; i < TECH_MAX; ++i )
         {
-            int level = dlg->GetLevel( cmd->m_Tech );
-            if( level == -1 )
-                m_CommandMgr->DelCommand(cmd);
-            else if( level != cmd->m_Level )
+            TechType tech = static_cast<TechType>(i);
+            cmd = cmds[i];
+            if( cmd )
             {
-                cmd->m_Level = level;
-                m_CommandMgr->SaveCommands();
+                int level = dlg->GetLevel( tech );
+                if( level == -1 )
+                    m_CommandMgr->DelCommand(cmd);
+                else if( level != cmd->m_Level )
+                {
+                    needSave = true;
+                    cmd->m_Level = level;
+                }
             }
-        }
-        else
-        {
-            for( int i = 0; i < TECH_MAX; ++i )
+            else
             {
-                cmd = dlg->GetCommand( static_cast<TechType>(i) );
+                cmd = dlg->GetCommand( tech );
                 if( cmd )
+                {
                     m_CommandMgr->AddCommand( cmd );
+                    needSave = false;
+                }
             }
         }
+        if( needSave )
+            m_CommandMgr->SaveCommands();
 
         AliensGrid->Filter->Update();
     }

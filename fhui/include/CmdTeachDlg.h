@@ -24,13 +24,17 @@ namespace FHUI
 	public ref class CmdTeachDlg : public System::Windows::Forms::Form
 	{
 	public:
-		CmdTeachDlg(Alien ^alien, CmdTeach ^cmd)
+		CmdTeachDlg(Alien ^alien)
 		{
 			InitializeComponent();
 
+            m_Alien = alien;
+            InfoSP->Text = alien->Name;
+
             InitGroups();
-            InitData(alien, cmd);
         }
+
+        void            AddCommand(CmdTeach ^cmd);
 
         int             GetLevel(TechType tech);
         CmdTeach^       GetCommand(TechType tech);
@@ -48,8 +52,6 @@ namespace FHUI
 		}
 
         void    InitGroups();
-        void    InitData(Alien ^alien, CmdTeach ^cmd);
-
         void    UpdateEnables();
 
         value struct Group

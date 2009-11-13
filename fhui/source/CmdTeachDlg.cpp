@@ -40,24 +40,14 @@ void CmdTeachDlg::InitGroups()
     }
 }
 
-void CmdTeachDlg::InitData(Alien ^alien, CmdTeach ^cmd)
+void CmdTeachDlg::AddCommand(CmdTeach ^cmd)
 {
-    m_Alien = alien;
-    InfoSP->Text = alien->Name;
-
-    if( cmd )
+    m_Groups[cmd->m_Tech].En->Checked = true;
+    if( cmd->m_Level > 0 )
     {
-        for( int i = 0; i < TECH_MAX; ++i )
-            m_Groups[i].En->Enabled = false;
-
-        m_Groups[cmd->m_Tech].En->Enabled = true;
-        m_Groups[cmd->m_Tech].En->Checked = true;
-        if( cmd->m_Level > 0 )
-        {
-            m_Groups[cmd->m_Tech].EnLimit->Checked = true;
-            m_Groups[cmd->m_Tech].Limit->Value =
-                Math::Min( cmd->m_Level, GameData::Player->TechLevelsAssumed[cmd->m_Tech] );
-        }
+        m_Groups[cmd->m_Tech].EnLimit->Checked = true;
+        m_Groups[cmd->m_Tech].Limit->Value =
+            Math::Min( cmd->m_Level, GameData::Player->TechLevelsAssumed[cmd->m_Tech] );
     }
 }
 
