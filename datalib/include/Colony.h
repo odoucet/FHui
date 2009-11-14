@@ -40,6 +40,7 @@ public:
         Shipyards = -1;
         LastSeen = -1;
         Inventory = gcnew array<int>(INV_MAX){0};
+        InventoryPreDeparture = gcnew array<int>(INV_MAX){0};
         InventoryPostArrival = gcnew array<int>(INV_MAX){0};
         RMProduced = 0;
         RMUsed = 0;
@@ -161,6 +162,7 @@ public:
     property int EUAvail { int get() { return EUProd - EUFleet; } }
 
     array<int>^             Inventory;
+    array<int>^             InventoryPreDeparture;
     array<int>^             InventoryPostArrival;
     property bool           HasInventory 
     {

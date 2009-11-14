@@ -31,6 +31,7 @@ public:
         HadMishap = false;
         Cargo = gcnew array<int>(INV_MAX){0};
         CargoOriginal = gcnew array<int>(INV_MAX){0};
+        CargoPreDeparture = gcnew array<int>(INV_MAX){0};
         CargoPostArrival = gcnew array<int>(INV_MAX){0};
         DidWormholeJump = false;
         Commands = gcnew List<ICommand^>;
@@ -128,6 +129,7 @@ public:
     bool            DidWormholeJump;
     array<int>^     Cargo;
     array<int>^     CargoOriginal;
+    array<int>^     CargoPreDeparture;
     array<int>^     CargoPostArrival;
 
     property int            Size {

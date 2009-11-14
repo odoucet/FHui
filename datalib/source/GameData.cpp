@@ -8,6 +8,81 @@ namespace FHUI
 
 // ---------------------------------------------------------
 
+void GameData::EvalPreDepartureInventory(StarSystem ^system, ICommand ^cmdEnd, bool transfersOnly)
+{
+    IList<Ship^> ^ships         = system->ShipsOwned;
+    IList<Colony^> ^colonies    = system->ColoniesOwned;
+
+    // Copy initial data at the beginning of Post-Arrival phase
+    for each( Colony ^colony in colonies )
+        colony->Inventory->CopyTo(colony->InventoryPreDeparture, 0);
+    for each( Ship ^ship in ships )
+        ship->CargoOriginal->CopyTo(ship->CargoPreDeparture, 0);
+
+    // Transfers
+    for each( ICommand ^cmd in system->Transfers )
+    {
+        if( cmd->GetPhase() != CommandPhase::PreDeparture )
+            continue;
+        if( cmd == cmdEnd )
+            return;
+
+        CmdTransfer ^cmdTr = safe_cast<CmdTransfer^>(cmd);
+        array<int> ^invFrom = cmdTr->GetFromInventory(true);
+        array<int> ^invTo = cmdTr->GetToInventory(true);
+
+        int inv = (int)cmdTr->m_Type;
+        int amount = Math::Min(cmdTr->m_Amount, invFrom[inv]);
+        invFrom[inv] -= amount;
+        invTo[inv] += amount;
+    }
+
+    if( transfersOnly )
+        return;
+
+    // Ships
+    for each( Ship ^ship in ships )
+    {
+        for each( ICommand ^cmd in ship->Commands )
+        {
+            if( cmd->GetPhase() != CommandPhase::PreDeparture )
+                continue;
+            if( cmd == cmdEnd )
+                return;
+
+            array<int> ^inv = ship->CargoPreDeparture;
+            for( int i = 0; i < INV_MAX; ++i )
+            {
+                int amount = cmd->GetInvMod(static_cast<InventoryType>(i));
+                if( amount < 0 )
+                    amount = -Math::Min(-amount, inv[i]);
+                inv[i] += amount;
+            }
+        }
+    }
+
+    // Colonies
+    for each( Colony ^colony in colonies )
+    {
+        for each( ICommand ^cmd in colony->Commands )
+        {
+            if( cmd->GetPhase() != CommandPhase::PreDeparture )
+                continue;
+            if( cmd == cmdEnd )
+                return;
+
+            array<int> ^inv = colony->InventoryPreDeparture;
+            for( int i = 0; i < INV_MAX; ++i )
+            {
+                int amount = cmd->GetInvMod(static_cast<InventoryType>(i));
+                if( amount < 0 )
+                    amount = -Math::Min(-amount, inv[i]);
+                inv[i] += amount;
+            }
+        }
+    }
+}
+
 void GameData::EvalPostArrivalInventory(StarSystem ^system, ICommand ^cmdEnd)
 {
     // Copy initial data at the beginning of Post-Arrival phase

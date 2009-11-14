@@ -80,6 +80,7 @@ public:
     static const int MaxGalaxyDiameter = 100;
     static int GalaxyDiameter = MaxGalaxyDiameter;
 
+    static void     EvalPreDepartureInventory(StarSystem ^system, ICommand ^cmdEnd, bool transfersOnly);
     static void     EvalPostArrivalInventory(StarSystem ^system, ICommand ^cmdEnd);
     static String^  PrintInventory(array<int> ^inv);
 

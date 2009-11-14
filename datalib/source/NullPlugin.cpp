@@ -41,9 +41,10 @@ void BudgetTracker::SetColony(Colony ^colony, CommandPhase phase)
             m_Colony->Res->TotalEU = m_BudgetTotal;
             m_Colony->Res->AvailEU = m_BudgetAvail;
             m_Colony->Res->UsedEU  = 0;
+
+            m_Orders = m_Colony->OrdersText;
         }
 
-        m_Orders = m_Colony->OrdersText;
     }
     else
     {

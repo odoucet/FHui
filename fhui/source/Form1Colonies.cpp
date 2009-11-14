@@ -876,8 +876,12 @@ void Form1::ColoniesMenuProdCommandAddInstall(CmdInstall ^cmd)
 
 void Form1::ColoniesMenuProdCommandAddTransfer(CmdTransfer ^cmd)
 {
-    if( cmd->GetPhase() == CommandPhase::PostArrival )
+    if( cmd->GetPhase() == CommandPhase::PreDeparture )
+        GameData::EvalPreDepartureInventory(cmd->GetRefSystem(), cmd, true);
+    else if( cmd->GetPhase() == CommandPhase::PostArrival )
         GameData::EvalPostArrivalInventory(cmd->GetRefSystem(), cmd);
+    else
+        throw gcnew FHUIDataIntegrityException("Invalid phase for transfer command!");
 
     CmdTransferDlg ^dlg = gcnew CmdTransferDlg( cmd );
     if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )

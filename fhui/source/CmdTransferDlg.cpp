@@ -217,14 +217,7 @@ void CmdTransferDlg::InitControlsUnits()
     for( int i = 0; i < INV_MAX; ++i )
     {
         InventoryType inv = static_cast<InventoryType>(i);
-
         int cnt = m_Inv[i];
-        if( m_Cmd->GetPhase() != CommandPhase::PostArrival &&
-            m_Cmd->m_Type != INV_MAX &&
-            m_Cmd->m_Type == inv )
-        {
-            cnt += m_Cmd->m_Amount;
-        }
 
         m_UnitControls[i].Info->Text = cnt.ToString();
 

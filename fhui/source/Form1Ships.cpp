@@ -821,15 +821,19 @@ void Form1::ShipsMenuCommandDelAllTransfers(CommandPhase phase)
         for each( ICommand ^cmd in system->GetTransfers(m_ShipsMenuRef) )
         {
             if( cmd->GetPhase() == phase )
-                m_ShipsMenuRef->System->Transfers->Remove(cmd);
+                system->Transfers->Remove(cmd);
         }
     }
 }
 
 void Form1::ShipsMenuProdCommandAddTransfer(CmdTransfer ^cmd)
 {
-    if( cmd->GetPhase() == CommandPhase::PostArrival )
+    if( cmd->GetPhase() == CommandPhase::PreDeparture )
+        GameData::EvalPreDepartureInventory(cmd->GetRefSystem(), cmd, true);
+    else if( cmd->GetPhase() == CommandPhase::PostArrival )
         GameData::EvalPostArrivalInventory(cmd->GetRefSystem(), cmd);
+    else
+        throw gcnew FHUIDataIntegrityException("Invalid phase for transfer command!");
 
     CmdTransferDlg ^dlg = gcnew CmdTransferDlg( cmd );
     if( dlg->ShowDialog(this) == System::Windows::Forms::DialogResult::OK )
