@@ -82,6 +82,19 @@ void StarSystem::AddColony(Colony^ colony)
     }
 }
 
+void StarSystem::RemoveColony(Colony^ colony)
+{
+    m_Colonies->Remove(colony);
+    if (colony->Owner == GameData::Player)
+    {
+        m_ColoniesOwned->Remove(colony->PlanetNum);
+    }
+    else
+    {
+        m_ColoniesAlien->Remove(colony);
+    }
+}
+
 void StarSystem::DeleteAlienColonies()
 {
     // Remove alien colonies from this system.

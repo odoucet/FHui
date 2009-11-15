@@ -106,6 +106,7 @@ public:
     void            AddShip(Ship ^ship);
     void            RemoveShip(Ship ^ship);
     void            AddColony(Colony ^colony);
+    void            RemoveColony(Colony ^colony);
     void            DeleteAlienColonies();
     void            SortShipsByTonnage();
 
