@@ -90,6 +90,8 @@ public interface class ICommand : public IComparable
     int             GetInvMod(InventoryType);
     bool            RequiresShipyard();
 
+    array<int>^     GetInventory();
+
     String^         Print();
     String^         PrintForUI();
     String^         PrintOriginSuffix();
@@ -122,6 +124,8 @@ public:
     virtual int             GetPopCost()                { return 0; }
     virtual int             GetInvMod(InventoryType)    { return 0; }
     virtual bool            RequiresShipyard()          { return false; }
+
+    virtual array<int>^     GetInventory()              { return nullptr; }
 
     virtual String^         Print() abstract;
     virtual String^         PrintForUI()                { return Print(); }
@@ -292,6 +296,9 @@ public:
 
     virtual String^ Print() override;
     virtual String^ PrintForUI() override   { return "Unload"; }
+
+    virtual array<int>^     GetInventory() override;
+    virtual int             GetInvMod(InventoryType i) override;
 };
 
 // Land
@@ -606,7 +613,8 @@ public:
 
     virtual int     GetEUCost() override    { return m_Amount; }
     virtual int     GetPopCost() override   { return m_PopCost; }
-    virtual int     GetInvMod(InventoryType i) override { return (i == m_Unit && m_Colony == nullptr && m_Ship == nullptr) ? m_Amount : 0; }
+    virtual int     GetInvMod(InventoryType i) override { return i == m_Unit ? m_Amount : 0; }
+    virtual array<int>^     GetInventory() override;
 
     virtual String^ Print() override;
 
@@ -642,8 +650,8 @@ public:
 
     virtual int     GetEUCost() override    { return m_Amount * Calculators::InventoryBuildCost(m_Type); }
     virtual int     GetPopCost() override   { return m_Type == INV_PD ? m_Amount : 0; }
-    //virtual int     GetInvMod(InventoryType i) override { return i == m_Type ? m_Amount : 0; }
-    virtual int     GetInvMod(InventoryType i) override { return (i == m_Type && m_Colony == nullptr && m_Ship == nullptr) ? m_Amount : 0; }
+    virtual int     GetInvMod(InventoryType i) override { return i == m_Type ? m_Amount : 0; }
+    virtual array<int>^     GetInventory() override;
 
     virtual String^ Print() override;
 
@@ -754,8 +762,8 @@ public:
 
     virtual String^ Print() override;
 
-    array<int>^     GetFromInventory(bool preDepartureOnly);
-    array<int>^     GetToInventory(bool preDepartureOnly);
+    virtual array<int>^     GetFromInventory(bool preDepartureOnly);
+    virtual array<int>^     GetToInventory(bool preDepartureOnly);
 
     CommandPhase    m_Phase;
     InventoryType   m_Type;

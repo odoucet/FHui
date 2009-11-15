@@ -60,6 +60,7 @@ namespace FHUI {
         int     m_AvailPop;
         int     m_AvailEU;
         int     m_Capacity;
+        int     m_CapacityUsed;
 
     private: System::Windows::Forms::Label^  AvailPop;
     private: System::Windows::Forms::NumericUpDown^  IUAmount;
@@ -235,7 +236,7 @@ namespace FHUI {
             this->TotalCost->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
             this->TotalCost->Location = System::Drawing::Point(81, 177);
             this->TotalCost->Name = L"TotalCost";
-            this->TotalCost->Size = System::Drawing::Size(60, 17);
+            this->TotalCost->Size = System::Drawing::Size(80, 17);
             this->TotalCost->TabIndex = 5;
             this->TotalCost->Text = L"0";
             this->TotalCost->TextAlign = System::Drawing::ContentAlignment::MiddleLeft;
@@ -304,7 +305,7 @@ namespace FHUI {
             this->ShipCapacity->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
             this->ShipCapacity->Location = System::Drawing::Point(81, 152);
             this->ShipCapacity->Name = L"ShipCapacity";
-            this->ShipCapacity->Size = System::Drawing::Size(60, 17);
+            this->ShipCapacity->Size = System::Drawing::Size(80, 17);
             this->ShipCapacity->TabIndex = 5;
             this->ShipCapacity->Text = L"0";
             this->ShipCapacity->TextAlign = System::Drawing::ContentAlignment::MiddleLeft;

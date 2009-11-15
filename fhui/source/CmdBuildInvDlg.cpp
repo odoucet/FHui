@@ -150,8 +150,10 @@ void CmdBuildInvDlg::UpdateAmounts()
 
     if( m_Capacity != -1 )
     {
+        cap += m_CapacityUsed;
+
         ShipCapacity->Text = String::Format("{0} / {1}", cap, m_Capacity);
-        TotalCost->ForeColor = cap > m_Capacity ? Color::Red : Color::Black;
+        ShipCapacity->ForeColor = cap > m_Capacity ? Color::Red : Color::Black;
     }
 
     if( inv == INV_PD )
@@ -161,6 +163,8 @@ void CmdBuildInvDlg::UpdateAmounts()
 void CmdBuildInvDlg::UpdateShipCapacity()
 {
     m_Capacity = -1;
+    m_CapacityUsed = 0;
+
     if( Target->SelectedIndex != 0 )
     {
         String ^target = Target->Text;
@@ -168,16 +172,19 @@ void CmdBuildInvDlg::UpdateShipCapacity()
         {
             Ship ^ship = Ship::FindRefListEntry( target );
             m_Capacity = ship->Capacity;
+
+            array<int> ^inv = ship->Cargo;
+            for( int i = 0; i < INV_MAX; ++i )
+            {
+                m_CapacityUsed += Calculators::InventoryCarryCapacity( static_cast<InventoryType>(i), inv[i] );
+            }
         }
     }
 
     if( m_Capacity == -1 )
         ShipCapacity->Text = "N/A";
     else
-    {
-        ShipCapacity->Text = m_Capacity.ToString();
         UpdateAmounts();
-    }
 }
 
 } // end namespace FHUI

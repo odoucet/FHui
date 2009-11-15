@@ -212,6 +212,8 @@ void CmdTransferDlg::InitControlsUnits()
     else
         m_CapacityLimit = 0;
 
+    InfoInv->Text = GameData::PrintInventory( m_Cmd->GetToInventory(true) );
+
     m_Inv = m_Cmd->GetFromInventory(true);
 
     for( int i = 0; i < INV_MAX; ++i )
@@ -239,21 +241,29 @@ void CmdTransferDlg::InitControlsUnits()
 
 void CmdTransferDlg::UpdateAmounts()
 {
-    int sumCapacity = 0;
-    for( int i = 0; i < INV_MAX; ++i )
-    {
-        int cnt = Decimal::ToInt32(m_UnitControls[i].Amount->Value);
-        int cap = Calculators::InventoryCarryCapacity( static_cast<InventoryType>(i), cnt );
-        sumCapacity += cap;
-    }
+    bool transferAny = false;
 
     if( m_CapacityLimit > 0 )
     {
+        array<int> ^inv = m_Cmd->GetToInventory(true);
+        int sumCapacity = 0;
+
+        for( int i = 0; i < INV_MAX; ++i )
+        {
+            sumCapacity += Calculators::InventoryCarryCapacity( static_cast<InventoryType>(i), inv[i] );
+
+            int cnt = Decimal::ToInt32(m_UnitControls[i].Amount->Value);
+            int cap = Calculators::InventoryCarryCapacity( static_cast<InventoryType>(i), cnt );
+            sumCapacity += cap;
+
+            transferAny |= cnt > 0;
+        }
+
         InfoCapacityUsed->Text = sumCapacity.ToString();
         InfoCapacityUsed->ForeColor = (m_CapacityLimit >= sumCapacity ? Color::Black : Color::Red);
     }
 
-    BtnTransfer->Enabled = (sumCapacity > 0);
+    BtnTransfer->Enabled = transferAny;
 }
 
 } // end namespace FHUI

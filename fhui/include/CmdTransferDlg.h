@@ -232,6 +232,7 @@ private: System::Windows::Forms::NumericUpDown^  AmountSG8;
 private: System::Windows::Forms::Label^  InfoCapacityUsed;
 private: System::Windows::Forms::Button^  BtnTransfer;
 private: System::Windows::Forms::Button^  BtnCancel;
+private: System::Windows::Forms::Label^  InfoInv;
 
 
 
@@ -288,6 +289,7 @@ private: System::Windows::Forms::Button^  BtnCancel;
             System::Windows::Forms::Label^  label80;
             System::Windows::Forms::Label^  label81;
             System::Windows::Forms::Label^  label31;
+            System::Windows::Forms::Label^  label5;
             this->TransFrom = (gcnew System::Windows::Forms::ComboBox());
             this->TransTo = (gcnew System::Windows::Forms::ComboBox());
             this->InfoCapacityLimit = (gcnew System::Windows::Forms::Label());
@@ -360,6 +362,7 @@ private: System::Windows::Forms::Button^  BtnCancel;
             this->InfoCapacityUsed = (gcnew System::Windows::Forms::Label());
             this->BtnTransfer = (gcnew System::Windows::Forms::Button());
             this->BtnCancel = (gcnew System::Windows::Forms::Button());
+            this->InfoInv = (gcnew System::Windows::Forms::Label());
             label1 = (gcnew System::Windows::Forms::Label());
             label2 = (gcnew System::Windows::Forms::Label());
             label3 = (gcnew System::Windows::Forms::Label());
@@ -397,6 +400,7 @@ private: System::Windows::Forms::Button^  BtnCancel;
             label80 = (gcnew System::Windows::Forms::Label());
             label81 = (gcnew System::Windows::Forms::Label());
             label31 = (gcnew System::Windows::Forms::Label());
+            label5 = (gcnew System::Windows::Forms::Label());
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->AmountRM))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->AmountCU))->BeginInit();
             (cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->AmountIU))->BeginInit();
@@ -759,7 +763,7 @@ private: System::Windows::Forms::Button^  BtnCancel;
             // label31
             // 
             label31->AutoSize = true;
-            label31->Location = System::Drawing::Point(200, 46);
+            label31->Location = System::Drawing::Point(164, 46);
             label31->Name = L"label31";
             label31->Size = System::Drawing::Size(77, 13);
             label31->TabIndex = 1;
@@ -793,7 +797,7 @@ private: System::Windows::Forms::Button^  BtnCancel;
             this->InfoCapacityLimit->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
             this->InfoCapacityLimit->Location = System::Drawing::Point(91, 44);
             this->InfoCapacityLimit->Name = L"InfoCapacityLimit";
-            this->InfoCapacityLimit->Size = System::Drawing::Size(80, 17);
+            this->InfoCapacityLimit->Size = System::Drawing::Size(60, 17);
             this->InfoCapacityLimit->TabIndex = 1;
             this->InfoCapacityLimit->Text = L"N/A";
             // 
@@ -1394,9 +1398,9 @@ private: System::Windows::Forms::Button^  BtnCancel;
             // InfoCapacityUsed
             // 
             this->InfoCapacityUsed->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-            this->InfoCapacityUsed->Location = System::Drawing::Point(279, 44);
+            this->InfoCapacityUsed->Location = System::Drawing::Point(243, 44);
             this->InfoCapacityUsed->Name = L"InfoCapacityUsed";
-            this->InfoCapacityUsed->Size = System::Drawing::Size(80, 17);
+            this->InfoCapacityUsed->Size = System::Drawing::Size(60, 17);
             this->InfoCapacityUsed->TabIndex = 1;
             this->InfoCapacityUsed->Text = L"N/A";
             // 
@@ -1420,6 +1424,24 @@ private: System::Windows::Forms::Button^  BtnCancel;
             this->BtnCancel->TabIndex = 3;
             this->BtnCancel->Text = L"Cancel";
             this->BtnCancel->UseVisualStyleBackColor = true;
+            // 
+            // label5
+            // 
+            label5->AutoSize = true;
+            label5->Location = System::Drawing::Point(320, 46);
+            label5->Name = L"label5";
+            label5->Size = System::Drawing::Size(58, 13);
+            label5->TabIndex = 1;
+            label5->Text = L"Inv/Cargo:";
+            // 
+            // InfoInv
+            // 
+            this->InfoInv->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
+            this->InfoInv->Location = System::Drawing::Point(380, 44);
+            this->InfoInv->Name = L"InfoInv";
+            this->InfoInv->Size = System::Drawing::Size(255, 17);
+            this->InfoInv->TabIndex = 1;
+            this->InfoInv->Text = L"N/A";
             // 
             // CmdTransferDlg
             // 
@@ -1528,6 +1550,8 @@ private: System::Windows::Forms::Button^  BtnCancel;
             this->Controls->Add(label68);
             this->Controls->Add(label36);
             this->Controls->Add(label4);
+            this->Controls->Add(this->InfoInv);
+            this->Controls->Add(label5);
             this->Controls->Add(this->InfoCapacityUsed);
             this->Controls->Add(label31);
             this->Controls->Add(this->InfoCapacityLimit);

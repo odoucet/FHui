@@ -1298,7 +1298,10 @@ void CommandManager::GeneratePreDeparture()
             for each( ICommand ^cmd in ship->Commands )
             {
                 if( cmd->GetPhase() == CommandPhase::PreDeparture )
+                {
                     m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
+                    m_Budget->EvalOrder(cmd);
+                }
             }
         }
         for each( Colony ^colony in system->ColoniesOwned )

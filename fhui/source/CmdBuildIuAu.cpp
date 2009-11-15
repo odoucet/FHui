@@ -135,14 +135,16 @@ void CmdBuildIuAu::UpdateAmounts()
 
     if( m_Capacity != -1 )
     {
-        cuNew = Math::Min(cuNew, m_Capacity);
-        iuNew = Math::Min(iuNew, m_Capacity - cuNew);
-        auNew = Math::Min(auNew, m_Capacity - cuNew - iuNew);
+        int capAvail = Math::Max(0, m_Capacity - m_CapacityUsed);
 
-        cuNew = Math::Max(cuNew, 0);
-        iuNew = Math::Max(iuNew, 0);
-        auNew = Math::Max(auNew, 0);
+        cuNew = Math::Min(cuNew, capAvail);
+        iuNew = Math::Min(iuNew, capAvail - cuNew);
+        auNew = Math::Min(auNew, capAvail - cuNew - iuNew);
     }
+
+    cuNew = Math::Max(cuNew, 0);
+    iuNew = Math::Max(iuNew, 0);
+    auNew = Math::Max(auNew, 0);
 
     if( cu != cuNew )
         CUAmount->Value = cuNew;
@@ -154,11 +156,21 @@ void CmdBuildIuAu::UpdateAmounts()
     int sum = cuNew + iuNew + auNew;
     TotalCost->Text = sum.ToString();
     TotalCost->ForeColor = sum > m_AvailEU ? Color::Red : Color::Black;
+
+    if( m_Capacity != -1 )
+    {
+        int cap = sum + m_CapacityUsed;
+
+        ShipCapacity->Text = String::Format("{0} / {1}", cap, m_Capacity);
+        ShipCapacity->ForeColor = cap > m_Capacity ? Color::Red : Color::Black;
+    }
 }
 
 void CmdBuildIuAu::UpdateShipCapacity()
 {
     m_Capacity = -1;
+    m_CapacityUsed = 0;
+
     if( Target->SelectedIndex != 0 )
     {
         String ^target = Target->Text;
@@ -166,16 +178,19 @@ void CmdBuildIuAu::UpdateShipCapacity()
         {
             Ship ^ship = Ship::FindRefListEntry( target );
             m_Capacity = ship->Capacity;
+
+            array<int> ^inv = ship->Cargo;
+            for( int i = 0; i < INV_MAX; ++i )
+            {
+                m_CapacityUsed += Calculators::InventoryCarryCapacity( static_cast<InventoryType>(i), inv[i] );
+            }
         }
     }
 
     if( m_Capacity == -1 )
         ShipCapacity->Text = "N/A";
     else
-    {
-        ShipCapacity->Text = m_Capacity.ToString();
         UpdateAmounts();
-    }
 }
 
 } // end namespace FHUI

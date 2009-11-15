@@ -91,7 +91,7 @@ public:
 
     void        UpdateEU(int eu);
     void        UpdatePop(int pop);
-    void        UpdateInventory(InventoryType it, int mod);
+    void        UpdateInventory(ICommand ^cmd, InventoryType it);
 
     int         GetAvailBudget()        { return Math::Min(m_BudgetAvail, m_BudgetTotal); }
     int         GetTotalBudget()        { return m_BudgetTotal; }

@@ -128,6 +128,15 @@ String^ ProdCmdBuildIUAU::Print()
         target);
 }
 
+array<int>^ ProdCmdBuildIUAU::GetInventory()
+{
+    if( m_Colony )
+        return m_Colony->Res->Inventory;
+    if( m_Ship )
+        return m_Ship->Cargo;
+    return nullptr;
+}
+
 ////////////////////////////////////////////////////////////////
 // Build Inventory
 String^ ProdCmdBuildInv::Print()
@@ -142,6 +151,15 @@ String^ ProdCmdBuildInv::Print()
         m_Amount,
         FHStrings::InvToString(m_Type),
         target);
+}
+
+array<int>^ ProdCmdBuildInv::GetInventory()
+{
+    if( m_Colony )
+        return m_Colony->Res->Inventory;
+    if( m_Ship )
+        return m_Ship->Cargo;
+    return nullptr;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -173,6 +191,16 @@ String^ ShipCmdRecycle::Print()
 String^ ShipCmdUnload::Print()
 {
     return "Unload " + m_Ship->PrintClassWithName();
+}
+
+array<int>^ ShipCmdUnload::GetInventory()
+{
+    return m_Ship->Cargo;
+}
+
+int ShipCmdUnload::GetInvMod(InventoryType i)
+{
+    return -m_Ship->Cargo[i];
 }
 
 ////////////////////////////////////////////////////////////////

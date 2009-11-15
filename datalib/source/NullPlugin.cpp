@@ -55,17 +55,19 @@ void BudgetTracker::SetColony(Colony ^colony, CommandPhase phase)
 
 void BudgetTracker::EvalOrder(ICommand ^cmd)
 {
-    // Track budget
-    UpdateEU( cmd->GetEUCost() );
+    if( m_Colony )
+    {
+        // Track budget
+        UpdateEU( cmd->GetEUCost() );
 
-    // Track Populatiaon
-    UpdatePop( cmd->GetPopCost() );
+        // Track Populatiaon
+        UpdatePop( cmd->GetPopCost() );
+    }
 
     // Track Inventory
     for( int i = 0; i < INV_MAX; ++i )
     {
-        InventoryType it = static_cast<InventoryType>(i);
-        UpdateInventory( it, cmd->GetInvMod(it) );
+        UpdateInventory( cmd, static_cast<InventoryType>(i) );
     }
 
     // Track shipyards
@@ -156,16 +158,22 @@ void BudgetTracker::UpdatePop(int pop)
     }
 }
 
-void BudgetTracker::UpdateInventory(InventoryType it, int mod)
+void BudgetTracker::UpdateInventory(ICommand ^cmd, InventoryType it)
 {
-    m_Colony->Res->Inventory[it] += mod;
-    if( m_Colony->Res->Inventory[it] < 0 )
+    array<int> ^inv = cmd->GetInventory();
+    if( inv == nullptr )
+        inv = m_Colony->Res->Inventory;
+    
+    int mod = cmd->GetInvMod(it);
+    inv[it] += mod;
+
+    if( inv[it] < 0 )
     {
         AddComment( String::Format(
             "; !!!!!! NOT ENOUGH Inventory available ({0} {1} left) !!!!!!",
-            m_Colony->Res->Inventory[it] - mod,
+            inv[it] - mod,
             FHStrings::InvToString(it) ) );
-        m_Colony->Res->Inventory[it] = 0;
+        inv[it] = 0;
     }
 }
 

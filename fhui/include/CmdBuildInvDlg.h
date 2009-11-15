@@ -56,6 +56,7 @@ namespace FHUI
         int     m_AvailEU;
         int     m_AvailPop;
         int     m_Capacity;
+        int     m_CapacityUsed;
 
 
     private: System::Windows::Forms::ComboBox^  Target;
