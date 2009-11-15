@@ -364,7 +364,7 @@ namespace FHUI {
         ToolStripMenuItem^ ShipsMenuAddJumpsHere(
                         StarSystem ^system, int planetNum );
         ToolStripMenuItem^ ShipsMenuCreateJumpItem(
-                        Ship ^ship, StarSystem ^system, int planetNum, String ^text );
+                        Ship ^ship, StarSystem ^system, int planetNum, String ^text, bool addFromWhere );
 
 
         value struct ShipsColumns

@@ -220,6 +220,8 @@ String^ TurnData::GetShipsSummary()
             ship->Name,
             ship->PrintLocation() );
 
+    GameData::Player->Ships->Sort( gcnew Ship::WarTonnageComparer );
+
     return ret;
 }
 
@@ -454,7 +456,6 @@ Colony^ TurnData::CreateColony(Alien ^sp, String ^name, StarSystem ^system, int 
 
 void TurnData::RemoveColony(String ^name)
 {
-    bool repeat;
     // Assume only player's colony may be deleted
     for each( Colony ^colony in GameData::Player->Colonies )
     {

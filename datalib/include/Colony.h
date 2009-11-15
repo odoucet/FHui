@@ -106,6 +106,35 @@ public:
             return c1->ProductionOrder - c2->ProductionOrder;
         }
     };
+
+    ref class JumpsComparer : public IComparer<Colony^>
+    {
+    public:
+        JumpsComparer(StarSystem ^system)
+            : m_System(system)
+        {}
+
+        virtual int Compare(Colony ^c1, Colony ^c2)
+        {   
+            if( c1 == c2 )
+                return 0;
+            // Home always first
+            if( c1->PlanetType == PLANET_HOME )
+                return -1;
+            if( c2->PlanetType == PLANET_HOME )
+                return 1;
+            // In the same system, by size
+            if( c1->System == c2->System )
+                return c2->EconomicBase - c1->EconomicBase;
+            // By distance
+            double d1 = m_System->CalcDistance(c1->System);
+            double d2 = m_System->CalcDistance(c2->System);
+            return d1 < d2 ? -1 : (d1 == d2 ? 0 : 1);
+        }
+
+    protected:
+        StarSystem^ m_System;
+    };
     // --------------------------------------------------
 
     String^         PrintLocation() { return String::Format("{0} {1}", System->PrintLocation(), PlanetNum); }

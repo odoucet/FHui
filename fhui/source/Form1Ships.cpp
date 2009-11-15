@@ -437,11 +437,13 @@ ToolStripMenuItem^ Form1::ShipsFillMenuJumpsNew()
                 ship,
                 ShipsGrid->Filter->RefSystem,
                 -1,
-                ShipsRef->Text ) );
+                ShipsRef->Text,
+                false ) );
             anyJump = true;
         }
 
         // Colonies
+        GameData::Player->Colonies->Sort( gcnew Colony::JumpsComparer(ship->System) );
         for each( Colony ^colony in GameData::Player->Colonies )
         {
             if( colony->System != ship->System )
@@ -451,7 +453,8 @@ ToolStripMenuItem^ Form1::ShipsFillMenuJumpsNew()
                     ship,
                     colony->System,
                     colony->PlanetNum,
-                    "PL " + colony->Name ) );
+                    "PL " + colony->Name,
+                    false ) );
                 anyJump = true;
             }
         }
@@ -649,7 +652,7 @@ ToolStripMenuItem^ Form1::ShipsFillMenuCommandsOptions(ICommand ^cmd)
 }
 
 ToolStripMenuItem^ Form1::ShipsMenuCreateJumpItem(
-    Ship ^ship, StarSystem ^system, int planetNum, String ^text )
+    Ship ^ship, StarSystem ^system, int planetNum, String ^text, bool addFromWhere )
 {
     double mishap = ship->System->CalcMishap(
         system,
@@ -663,24 +666,24 @@ ToolStripMenuItem^ Form1::ShipsMenuCreateJumpItem(
         cargo = "; " + cargo;
     if( ship->System->IsWormholeTarget(system) )
     {
-        itemText = String::Format("{0}   (Wormhole) (A{2}{3}) From {1}",
+        itemText = String::Format("{0}   (Wormhole) (A{1}{2})",
             text,
             ship->Age,
-            cargo,
-            ship->PrintLocation() );
+            cargo);
         cmd = gcnew ShipCmdWormhole(ship, system, planetNum);
     }
     else
     {
-        itemText = String::Format("{0}   {1:F2}% (A{2}{3})  From {4}",
+        itemText = String::Format("{0}   {1:F2}% (A{2}{3})",
             text,
             mishap,
             ship->Age,
-            cargo,
-            ship->PrintLocation() );
+            cargo );
         cmd = gcnew ShipCmdJump(ship, system, planetNum);
     }
 
+    if( addFromWhere )
+        itemText += " From " + ship->PrintLocation();
     ToolStripMenuItem ^menuItem = CreateCustomMenuItem<ShipCommandData^>(
         itemText,
         gcnew ShipCommandData(ship, cmd),
@@ -706,7 +709,8 @@ ToolStripMenuItem^ Form1::ShipsMenuAddJumpsHere(
                 ship,
                 system,
                 planetNum,
-                ship->PrintClassWithName() );
+                ship->PrintClassWithName(),
+                true );
             if( menuItem->Checked )
                 jumpMenu->Checked = true;
             jumpMenu->DropDownItems->Add( menuItem );
