@@ -59,6 +59,8 @@ void StarSystem::RemoveShip(Ship^ ship)
     {
         m_ShipsAlien->Remove(ship);
     }
+
+    UpdateTooltip();
 }
 
 void StarSystem::SortShipsByTonnage()
@@ -80,6 +82,9 @@ void StarSystem::AddColony(Colony^ colony)
     {
         m_ColoniesAlien->Add(colony);
     }
+
+    UpdateMaster();
+    UpdateTooltip();
 }
 
 void StarSystem::RemoveColony(Colony^ colony)
@@ -181,9 +186,6 @@ void StarSystem::UpdateTooltip()
 
 String^ StarSystem::GenerateColoniesInfo()
 {
-    if( m_TooltipColonies )
-        return m_TooltipColonies;
-
     m_TooltipColonies = "";
 
     if( Colonies->Count )
@@ -213,9 +215,6 @@ String^ StarSystem::GenerateColoniesInfo()
 
 String^ StarSystem::GenerateShipsInfo()
 {
-    if( m_TooltipShips )
-        return m_TooltipShips;
-
     m_TooltipShips = "";
 
     if( Ships->Count )

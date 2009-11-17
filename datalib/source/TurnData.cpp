@@ -582,8 +582,6 @@ void TurnData::UpdateSystems()
 
         system->MinLSN      = minLSN;
         system->MinLSNAvail = minLSNAvail;
-
-        system->UpdateMaster();
     }
 }
 
