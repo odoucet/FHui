@@ -9,17 +9,17 @@ void CmdDevelopDlg::InidDialog(Colony ^colony, ProdCmdDevelop ^cmd)
 {
     m_Colony = colony;
 
-    int availEU = colony->Res->AvailEU;
-    int availPop = colony->Res->AvailPop;
+    m_AvailEU = colony->Res->AvailEU;
+    m_AvailPop = colony->Res->AvailPop;
     if( cmd )
     {
-        availEU += cmd->GetEUCost();
-        availPop += cmd->GetPopCost();
+        m_AvailEU += cmd->GetEUCost();
+        m_AvailPop += cmd->GetPopCost();
     }
 
     InfoColony->Text = colony->Name;
-    InfoBudget->Text = availEU.ToString();
-    InfoPop->Text = availPop.ToString();
+    InfoBudget->Text = m_AvailEU.ToString();
+    InfoPop->Text = m_AvailPop.ToString();
 
     List<String^> ^colonies = gcnew List<String^>;
     List<String^> ^ships = gcnew List<String^>;
@@ -76,6 +76,8 @@ bool CmdDevelopDlg::GenerateCommand(bool validate)
             m_Command->m_Colony->System != m_Colony->System );
 
     InfoCmd->Text = m_Command->Print();
+    InfoBudget->ForeColor = m_Command->GetEUCost() > m_AvailEU ? Color::Red : Color::Black;
+    InfoPop->ForeColor = m_Command->GetPopCost() > m_AvailPop ? Color::Red : Color::Black;
 
     if( validate )
     {

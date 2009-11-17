@@ -769,6 +769,15 @@ private: System::Windows::Forms::Label^  InfoInv;
             label31->TabIndex = 1;
             label31->Text = L"Capacity used:";
             // 
+            // label5
+            // 
+            label5->AutoSize = true;
+            label5->Location = System::Drawing::Point(320, 46);
+            label5->Name = L"label5";
+            label5->Size = System::Drawing::Size(58, 13);
+            label5->TabIndex = 1;
+            label5->Text = L"Inv/Cargo:";
+            // 
             // TransFrom
             // 
             this->TransFrom->DropDownStyle = System::Windows::Forms::ComboBoxStyle::DropDownList;
@@ -818,6 +827,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountRM->Size = System::Drawing::Size(55, 20);
             this->AmountRM->TabIndex = 2;
             this->AmountRM->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountRM->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // InfoCU
             // 
@@ -836,6 +846,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountCU->Size = System::Drawing::Size(55, 20);
             this->AmountCU->TabIndex = 2;
             this->AmountCU->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountCU->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // InfoIU
             // 
@@ -854,6 +865,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountIU->Size = System::Drawing::Size(55, 20);
             this->AmountIU->TabIndex = 2;
             this->AmountIU->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountIU->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // InfoAU
             // 
@@ -872,6 +884,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountAU->Size = System::Drawing::Size(55, 20);
             this->AmountAU->TabIndex = 2;
             this->AmountAU->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountAU->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // InfoPD
             // 
@@ -917,6 +930,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountPD->Size = System::Drawing::Size(55, 20);
             this->AmountPD->TabIndex = 2;
             this->AmountPD->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountPD->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountSU
             // 
@@ -926,6 +940,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountSU->Size = System::Drawing::Size(55, 20);
             this->AmountSU->TabIndex = 2;
             this->AmountSU->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountSU->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountFD
             // 
@@ -935,6 +950,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountFD->Size = System::Drawing::Size(55, 20);
             this->AmountFD->TabIndex = 2;
             this->AmountFD->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountFD->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountFS
             // 
@@ -944,6 +960,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountFS->Size = System::Drawing::Size(55, 20);
             this->AmountFS->TabIndex = 2;
             this->AmountFS->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountFS->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // InfoDR
             // 
@@ -989,6 +1006,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountDR->Size = System::Drawing::Size(55, 20);
             this->AmountDR->TabIndex = 2;
             this->AmountDR->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountDR->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountFM
             // 
@@ -998,6 +1016,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountFM->Size = System::Drawing::Size(55, 20);
             this->AmountFM->TabIndex = 2;
             this->AmountFM->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountFM->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountFJ
             // 
@@ -1007,6 +1026,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountFJ->Size = System::Drawing::Size(55, 20);
             this->AmountFJ->TabIndex = 2;
             this->AmountFJ->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountFJ->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountGW
             // 
@@ -1016,6 +1036,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountGW->Size = System::Drawing::Size(55, 20);
             this->AmountGW->TabIndex = 2;
             this->AmountGW->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountGW->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // InfoGT
             // 
@@ -1052,6 +1073,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountGT->Size = System::Drawing::Size(55, 20);
             this->AmountGT->TabIndex = 2;
             this->AmountGT->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountGT->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountJP
             // 
@@ -1061,6 +1083,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountJP->Size = System::Drawing::Size(55, 20);
             this->AmountJP->TabIndex = 2;
             this->AmountJP->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountJP->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountTP
             // 
@@ -1070,6 +1093,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountTP->Size = System::Drawing::Size(55, 20);
             this->AmountTP->TabIndex = 2;
             this->AmountTP->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountTP->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // InfoGU1
             // 
@@ -1160,6 +1184,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountGU1->Size = System::Drawing::Size(55, 20);
             this->AmountGU1->TabIndex = 2;
             this->AmountGU1->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountGU1->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountGU5
             // 
@@ -1169,6 +1194,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountGU5->Size = System::Drawing::Size(55, 20);
             this->AmountGU5->TabIndex = 2;
             this->AmountGU5->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountGU5->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountGU9
             // 
@@ -1178,6 +1204,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountGU9->Size = System::Drawing::Size(55, 20);
             this->AmountGU9->TabIndex = 2;
             this->AmountGU9->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountGU9->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountGU2
             // 
@@ -1187,6 +1214,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountGU2->Size = System::Drawing::Size(55, 20);
             this->AmountGU2->TabIndex = 2;
             this->AmountGU2->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountGU2->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountGU6
             // 
@@ -1196,6 +1224,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountGU6->Size = System::Drawing::Size(55, 20);
             this->AmountGU6->TabIndex = 2;
             this->AmountGU6->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountGU6->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountGU3
             // 
@@ -1205,6 +1234,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountGU3->Size = System::Drawing::Size(55, 20);
             this->AmountGU3->TabIndex = 2;
             this->AmountGU3->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountGU3->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountGU7
             // 
@@ -1214,6 +1244,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountGU7->Size = System::Drawing::Size(55, 20);
             this->AmountGU7->TabIndex = 2;
             this->AmountGU7->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountGU7->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountGU4
             // 
@@ -1223,6 +1254,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountGU4->Size = System::Drawing::Size(55, 20);
             this->AmountGU4->TabIndex = 2;
             this->AmountGU4->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountGU4->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountGU8
             // 
@@ -1232,6 +1264,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountGU8->Size = System::Drawing::Size(55, 20);
             this->AmountGU8->TabIndex = 2;
             this->AmountGU8->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountGU8->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // InfoSG1
             // 
@@ -1322,6 +1355,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountSG1->Size = System::Drawing::Size(55, 20);
             this->AmountSG1->TabIndex = 2;
             this->AmountSG1->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountSG1->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountSG5
             // 
@@ -1331,6 +1365,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountSG5->Size = System::Drawing::Size(55, 20);
             this->AmountSG5->TabIndex = 2;
             this->AmountSG5->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountSG5->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountSG9
             // 
@@ -1340,6 +1375,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountSG9->Size = System::Drawing::Size(55, 20);
             this->AmountSG9->TabIndex = 2;
             this->AmountSG9->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountSG9->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountSG2
             // 
@@ -1349,6 +1385,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountSG2->Size = System::Drawing::Size(55, 20);
             this->AmountSG2->TabIndex = 2;
             this->AmountSG2->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountSG2->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountSG6
             // 
@@ -1358,6 +1395,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountSG6->Size = System::Drawing::Size(55, 20);
             this->AmountSG6->TabIndex = 2;
             this->AmountSG6->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountSG6->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountSG3
             // 
@@ -1367,6 +1405,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountSG3->Size = System::Drawing::Size(55, 20);
             this->AmountSG3->TabIndex = 2;
             this->AmountSG3->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountSG3->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountSG7
             // 
@@ -1376,6 +1415,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountSG7->Size = System::Drawing::Size(55, 20);
             this->AmountSG7->TabIndex = 2;
             this->AmountSG7->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountSG7->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountSG4
             // 
@@ -1385,6 +1425,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountSG4->Size = System::Drawing::Size(55, 20);
             this->AmountSG4->TabIndex = 2;
             this->AmountSG4->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountSG4->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // AmountSG8
             // 
@@ -1394,6 +1435,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->AmountSG8->Size = System::Drawing::Size(55, 20);
             this->AmountSG8->TabIndex = 2;
             this->AmountSG8->ValueChanged += gcnew System::EventHandler(this, &CmdTransferDlg::Amounts_Update);
+            this->AmountSG8->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdTransferDlg::Amounts_KeyUp);
             // 
             // InfoCapacityUsed
             // 
@@ -1424,15 +1466,6 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->BtnCancel->TabIndex = 3;
             this->BtnCancel->Text = L"Cancel";
             this->BtnCancel->UseVisualStyleBackColor = true;
-            // 
-            // label5
-            // 
-            label5->AutoSize = true;
-            label5->Location = System::Drawing::Point(320, 46);
-            label5->Name = L"label5";
-            label5->Size = System::Drawing::Size(58, 13);
-            label5->TabIndex = 1;
-            label5->Text = L"Inv/Cargo:";
             // 
             // InfoInv
             // 
@@ -1610,6 +1643,9 @@ private: System::Void TransTo_SelectedIndexChanged(System::Object^  sender, Syst
          }
 private: System::Void Amounts_Update(System::Object^  sender, System::EventArgs^  e) {
              UpdateAmounts();
+         }
+private: System::Void Amounts_KeyUp(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
+             Amounts_Update(sender, nullptr);
          }
 };
 }

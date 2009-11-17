@@ -288,6 +288,7 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             this->AmountMI->TabIndex = 1;
             this->Tooltip->SetToolTip(this->AmountMI, L"Amount to spend");
             this->AmountMI->ValueChanged += gcnew System::EventHandler(this, &CmdResearch::Amount_ValueChanged);
+            this->AmountMI->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdResearch::Amount_KeyUp);
             // 
             // AmountMA
             // 
@@ -299,6 +300,7 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             this->AmountMA->TabIndex = 1;
             this->Tooltip->SetToolTip(this->AmountMA, L"Amount to spend");
             this->AmountMA->ValueChanged += gcnew System::EventHandler(this, &CmdResearch::Amount_ValueChanged);
+            this->AmountMA->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdResearch::Amount_KeyUp);
             // 
             // AmountML
             // 
@@ -310,6 +312,7 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             this->AmountML->TabIndex = 1;
             this->Tooltip->SetToolTip(this->AmountML, L"Amount to spend");
             this->AmountML->ValueChanged += gcnew System::EventHandler(this, &CmdResearch::Amount_ValueChanged);
+            this->AmountML->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdResearch::Amount_KeyUp);
             // 
             // AmountGV
             // 
@@ -321,6 +324,7 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             this->AmountGV->TabIndex = 1;
             this->Tooltip->SetToolTip(this->AmountGV, L"Amount to spend");
             this->AmountGV->ValueChanged += gcnew System::EventHandler(this, &CmdResearch::Amount_ValueChanged);
+            this->AmountGV->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdResearch::Amount_KeyUp);
             // 
             // AmountLS
             // 
@@ -332,6 +336,7 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             this->AmountLS->TabIndex = 1;
             this->Tooltip->SetToolTip(this->AmountLS, L"Amount to spend");
             this->AmountLS->ValueChanged += gcnew System::EventHandler(this, &CmdResearch::Amount_ValueChanged);
+            this->AmountLS->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdResearch::Amount_KeyUp);
             // 
             // AmountBI
             // 
@@ -343,6 +348,7 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             this->AmountBI->TabIndex = 1;
             this->Tooltip->SetToolTip(this->AmountBI, L"Amount to spend");
             this->AmountBI->ValueChanged += gcnew System::EventHandler(this, &CmdResearch::Amount_ValueChanged);
+            this->AmountBI->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdResearch::Amount_KeyUp);
             // 
             // AmountTotal
             // 
@@ -435,6 +441,7 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             // 
             // BtnResearch
             // 
+            this->BtnResearch->DialogResult = System::Windows::Forms::DialogResult::OK;
             this->BtnResearch->Location = System::Drawing::Point(142, 217);
             this->BtnResearch->Name = L"BtnResearch";
             this->BtnResearch->Size = System::Drawing::Size(75, 23);
@@ -442,17 +449,16 @@ private: System::Windows::Forms::Button^  CalcGuiBI;
             this->BtnResearch->Text = L"Research";
             this->Tooltip->SetToolTip(this->BtnResearch, L"Apply Research command(s)");
             this->BtnResearch->UseVisualStyleBackColor = true;
-            this->BtnResearch->Click += gcnew System::EventHandler(this, &CmdResearch::BtnResearch_Click);
             // 
             // BtnCancel
             // 
+            this->BtnCancel->DialogResult = System::Windows::Forms::DialogResult::Cancel;
             this->BtnCancel->Location = System::Drawing::Point(226, 217);
             this->BtnCancel->Name = L"BtnCancel";
             this->BtnCancel->Size = System::Drawing::Size(75, 23);
             this->BtnCancel->TabIndex = 3;
             this->BtnCancel->Text = L"Cancel";
             this->BtnCancel->UseVisualStyleBackColor = true;
-            this->BtnCancel->Click += gcnew System::EventHandler(this, &CmdResearch::BtnCancel_Click);
             // 
             // CalcLvlFromMI
             // 
@@ -824,16 +830,11 @@ private: System::Void En_CheckedChanged(System::Object^  sender, System::EventAr
 private: System::Void Amount_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
              UpdateAmount();
          }
+private: System::Void Amount_KeyUp(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
+             Amount_ValueChanged(sender, nullptr);
+         }
 private: System::Void Calc_Click(System::Object^  sender, System::EventArgs^  e) {
              Calc(sender);
-         }
-private: System::Void BtnCancel_Click(System::Object^  sender, System::EventArgs^  e) {
-             this->DialogResult = System::Windows::Forms::DialogResult::Cancel;
-             Close();
-         }
-private: System::Void BtnResearch_Click(System::Object^  sender, System::EventArgs^  e) {
-             this->DialogResult = System::Windows::Forms::DialogResult::OK;
-             Close();
          }
 };
 

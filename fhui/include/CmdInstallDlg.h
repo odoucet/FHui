@@ -235,6 +235,7 @@ namespace FHUI
             this->InstIU->Size = System::Drawing::Size(75, 20);
             this->InstIU->TabIndex = 1;
             this->InstIU->ValueChanged += gcnew System::EventHandler(this, &CmdInstallDlg::UpdateAmounts);
+            this->InstIU->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdInstallDlg::AmountsKeyUp);
             // 
             // InstAU
             // 
@@ -242,8 +243,9 @@ namespace FHUI
             this->InstAU->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {10000, 0, 0, 0});
             this->InstAU->Name = L"InstAU";
             this->InstAU->Size = System::Drawing::Size(75, 20);
-            this->InstAU->TabIndex = 1;
+            this->InstAU->TabIndex = 2;
             this->InstAU->ValueChanged += gcnew System::EventHandler(this, &CmdInstallDlg::UpdateAmounts);
+            this->InstAU->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdInstallDlg::AmountsKeyUp);
             // 
             // InfoColony
             // 
@@ -314,7 +316,7 @@ namespace FHUI
             this->BtnInstall->Location = System::Drawing::Point(90, 114);
             this->BtnInstall->Name = L"BtnInstall";
             this->BtnInstall->Size = System::Drawing::Size(75, 23);
-            this->BtnInstall->TabIndex = 2;
+            this->BtnInstall->TabIndex = 3;
             this->BtnInstall->Text = L"Install";
             this->BtnInstall->UseVisualStyleBackColor = true;
             // 
@@ -324,7 +326,7 @@ namespace FHUI
             this->BtnCancel->Location = System::Drawing::Point(170, 114);
             this->BtnCancel->Name = L"BtnCancel";
             this->BtnCancel->Size = System::Drawing::Size(75, 23);
-            this->BtnCancel->TabIndex = 2;
+            this->BtnCancel->TabIndex = 4;
             this->BtnCancel->Text = L"Cancel";
             this->BtnCancel->UseVisualStyleBackColor = true;
             // 
@@ -371,6 +373,9 @@ private: System::Void UpdateAmounts(System::Object^  sender, System::EventArgs^ 
                  InstIU->Value = iuNew;
              if( auNew != au )
                  InstAU->Value = auNew;
+         }
+private: System::Void AmountsKeyUp(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
+             UpdateAmounts(sender, nullptr);
          }
 };
 }

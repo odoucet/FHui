@@ -184,7 +184,7 @@ namespace FHUI
             this->Target->MaxDropDownItems = 20;
             this->Target->Name = L"Target";
             this->Target->Size = System::Drawing::Size(235, 21);
-            this->Target->TabIndex = 26;
+            this->Target->TabIndex = 3;
             this->Target->SelectedIndexChanged += gcnew System::EventHandler(this, &CmdBuildInvDlg::Target_SelectedIndexChanged);
             // 
             // BtnCancel
@@ -193,7 +193,7 @@ namespace FHUI
             this->BtnCancel->Location = System::Drawing::Point(167, 178);
             this->BtnCancel->Name = L"BtnCancel";
             this->BtnCancel->Size = System::Drawing::Size(75, 23);
-            this->BtnCancel->TabIndex = 18;
+            this->BtnCancel->TabIndex = 5;
             this->BtnCancel->Text = L"Cancel";
             this->BtnCancel->UseVisualStyleBackColor = true;
             // 
@@ -203,7 +203,7 @@ namespace FHUI
             this->BtnBuild->Location = System::Drawing::Point(86, 178);
             this->BtnBuild->Name = L"BtnBuild";
             this->BtnBuild->Size = System::Drawing::Size(75, 23);
-            this->BtnBuild->TabIndex = 15;
+            this->BtnBuild->TabIndex = 4;
             this->BtnBuild->Text = L"Build";
             this->BtnBuild->UseVisualStyleBackColor = true;
             // 
@@ -213,8 +213,9 @@ namespace FHUI
             this->Amount->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {10000, 0, 0, 0});
             this->Amount->Name = L"Amount";
             this->Amount->Size = System::Drawing::Size(60, 20);
-            this->Amount->TabIndex = 7;
+            this->Amount->TabIndex = 1;
             this->Amount->ValueChanged += gcnew System::EventHandler(this, &CmdBuildInvDlg::Amount_ValueChanged);
+            this->Amount->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdBuildInvDlg::Amount_KeyUp);
             // 
             // ShipCapacity
             // 
@@ -264,7 +265,7 @@ namespace FHUI
             this->Inventory->MaxDropDownItems = 20;
             this->Inventory->Name = L"Inventory";
             this->Inventory->Size = System::Drawing::Size(170, 21);
-            this->Inventory->TabIndex = 26;
+            this->Inventory->TabIndex = 2;
             this->Inventory->SelectedIndexChanged += gcnew System::EventHandler(this, &CmdBuildInvDlg::Inventory_SelectedIndexChanged);
             // 
             // AvailPop
@@ -308,6 +309,9 @@ namespace FHUI
         }
 #pragma endregion
     private: System::Void Amount_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+             UpdateAmounts();
+         }
+    private: System::Void Amount_KeyUp(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
              UpdateAmounts();
          }
     private: System::Void Inventory_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {

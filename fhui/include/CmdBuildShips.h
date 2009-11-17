@@ -262,6 +262,7 @@ namespace FHUI
             this->ShipSize->TabIndex = 3;
             this->ShipSize->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
             this->ShipSize->ValueChanged += gcnew System::EventHandler(this, &CmdBuildShips::ShipUpdateEvent);
+            this->ShipSize->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdBuildShips::ShipSize_KeyUp);
             // 
             // PresetScout
             // 
@@ -411,6 +412,9 @@ private: System::Void BtnCancel_Click(System::Object^  sender, System::EventArgs
              Close();
          }
 private: System::Void ShipUpdateEvent(System::Object^  sender, System::EventArgs^  e) {
+             ShipUpdate();
+         }
+private: System::Void ShipSize_KeyUp(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
              ShipUpdate();
          }
 };

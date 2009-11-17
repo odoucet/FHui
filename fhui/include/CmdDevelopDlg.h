@@ -49,13 +49,13 @@ namespace FHUI
         bool        GenerateCommand(bool validate);
 
         Colony^         m_Colony;
+        int             m_AvailEU;
+        int             m_AvailPop;
         ProdCmdDevelop^ m_Command;
 
     private: System::Windows::Forms::NumericUpDown^  DevAmount;
     private: System::Windows::Forms::ComboBox^  DevShip;
     private: System::Windows::Forms::ComboBox^  DevColony;
-    private: System::Windows::Forms::NumericUpDown^  numericUpDown1;
-    private: System::Windows::Forms::ComboBox^  comboBox2;
     private: System::Windows::Forms::Label^  InfoColony;
     private: System::Windows::Forms::Label^  InfoBudget;
     private: System::Windows::Forms::Label^  InfoPop;
@@ -175,6 +175,7 @@ namespace FHUI
             this->DevAmount->TabIndex = 1;
             this->DevAmount->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
             this->DevAmount->ValueChanged += gcnew System::EventHandler(this, &CmdDevelopDlg::DevAmount_ValueChanged);
+            this->DevAmount->KeyUp += gcnew System::Windows::Forms::KeyEventHandler(this, &CmdDevelopDlg::DevAmount_KeyUp);
             // 
             // DevShip
             // 
@@ -279,6 +280,9 @@ private: System::Void DevColony_SelectedIndexChanged(System::Object^  sender, Sy
              GenerateCommand(false);
          }
 private: System::Void DevAmount_ValueChanged(System::Object^  sender, System::EventArgs^  e) {
+             GenerateCommand(false);
+         }
+private: System::Void DevAmount_KeyUp(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
              GenerateCommand(false);
          }
 private: System::Void DevShip_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
