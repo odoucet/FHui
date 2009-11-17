@@ -160,11 +160,14 @@ void BudgetTracker::UpdatePop(int pop)
 
 void BudgetTracker::UpdateInventory(ICommand ^cmd, InventoryType it)
 {
+    int mod = cmd->GetInvMod(it);
+    if( mod == 0 )
+        return;
+
     array<int> ^inv = cmd->GetInventory();
     if( inv == nullptr )
         inv = m_Colony->Res->Inventory;
     
-    int mod = cmd->GetInvMod(it);
     inv[it] += mod;
 
     if( inv[it] < 0 )
