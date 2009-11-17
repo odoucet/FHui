@@ -756,17 +756,18 @@ void Form1::SetGridBgAndTooltip(DataGridView ^grid)
             for each( DataGridViewCell ^cell in row->Cells )
             {
                 Color cellColor(rowColor);
+                StarSystem ^system = iDataSrc->GetFilterSystem();
 
                 // Special CELL coloring rules
-                if( grid == SystemsGrid )
-                {
-                    StarSystem ^system = iDataSrc->GetFilterSystem();
-                    // Mark wormhole terminus'
-                    if( cell->ColumnIndex == m_SystemsColumns.Wormhole )
+                if( (grid == SystemsGrid && cell->ColumnIndex == m_SystemsColumns.Wormhole) ||
+                    (grid == PlanetsGrid && cell->ColumnIndex == m_PlanetsColumns.Wormhole) )
+                {   // Mark wormhole terminus
+                    if( system->HasWormhole &&
+                        system->WormholeTargetId != -1 )
                     {
-                        if( system->HasWormhole &&
-                            system->WormholeTargetId != -1 )
-                            cellColor = system->WormholeColor;
+                        cellColor = system->WormholeColor;
+                        tooltip = "WORMHOLE TERMINUS SYSTEM SCAN:\n" +
+                            GameData::GetStarSystem( system->WormholeTargetId )->GetTooltipText();
                     }
                 }
 

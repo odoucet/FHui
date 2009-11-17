@@ -34,6 +34,7 @@ void Form1::PlanetsInitControls()
     c.DistSec   = ADD_COLUMN("Dist Prev",   "Distance to previous ref system and mishap chance [%]", String, Ascending, DistanceSec);
     c.Visited   = ADD_COLUMN("Vis",         "Last turn you visited planet's system", int, Descending, Default);
     c.Scan      = ADD_COLUMN("Scan",        "Planet scan source",   String,     Ascending,  Default);
+    c.Wormhole  = ADD_COLUMN("WH",          "System's Wormhole target",      String,     Ascending,  Default);
     c.Colonies  = ADD_COLUMN("Colonies",    "Summary of colonies and named planets", String, Ascending,  Default);
 
     for each( IGridPlugin ^plugin in PluginManager::GridPlugins )
@@ -133,6 +134,8 @@ void Form1::PlanetsFillGrid()
             if( system->LastVisited != -1 )
                 cells[c.Visited]->Value = system->LastVisited;
             cells[c.Scan]->Value    = system->PrintScanStatus();
+            if( planet->System->HasWormhole )
+                cells[c.Wormhole]->Value = planet->System->PrintWormholeTarget();
             cells[c.Colonies]->Value= system->PrintColonies( planet->Number );
 
             String ^autoNote = "";

@@ -17,6 +17,8 @@ FHUI build ??
   imporant columns.
 + Colonies/PR column changed to show total colony output, without fleet
   maintenance. Useful to estimate technology changes affect to production.
++ Wormhole column added on Planets tab. ToolTip on wormhole column shows
+  scan of terminus system (if it was already explored).
 
 FHUI build 303
 * Emergency fix for ship build targets.

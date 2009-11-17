@@ -248,6 +248,7 @@ namespace FHUI {
             int DistSec;
             int Visited;
             int Scan;
+            int Wormhole;
             int Colonies;
             int Notes;
         };

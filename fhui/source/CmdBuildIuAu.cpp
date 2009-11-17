@@ -159,7 +159,7 @@ void CmdBuildIuAu::UpdateShipCapacity()
                 m_CapacityUsed += Calculators::InventoryCarryCapacity( static_cast<InventoryType>(i), inv[i] );
             }
 
-            if( ship == m_Cmd->m_Ship )
+            if( m_Cmd && ship == m_Cmd->m_Ship )
                 m_CapacityUsed -= Calculators::InventoryCarryCapacity( m_Cmd->m_Unit, m_Cmd->m_Amount );
         }
     }
