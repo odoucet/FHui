@@ -151,7 +151,7 @@ void CmdBuildInvDlg::UpdateAmounts()
     if( m_Capacity != -1 )
     {
         cap += m_CapacityUsed;
-        if( m_TargetShip == m_Cmd->m_Ship )
+        if( m_Cmd && m_TargetShip == m_Cmd->m_Ship )
             cap -= Calculators::InventoryCarryCapacity( m_Cmd->m_Type, m_Cmd->m_Amount );
 
         ShipCapacity->Text = String::Format("{0} / {1}", cap, m_Capacity);
