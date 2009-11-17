@@ -79,7 +79,7 @@ namespace FHUI {
         void        ReloadAutoCommands(Object^, EventArgs^);
         void        RecreatePluginCommands(Object^, EventArgs^);
         void        UpdateControls();
-        void        UpdateTabs();
+        void        UpdateTabs(bool tabChanged);
 
         void        RepModeChanged();
         void        DisplayReport();
@@ -114,6 +114,8 @@ namespace FHUI {
         typedef Pair<DataGridView^, int> ColumnsFilterData;
         void        ColoniesFilterOnOff(ColumnsFilterData ^data);
         void        UpdateSelectionMode(DblBufDGV ^grid, Object ^sender);
+
+        void        GridMarkedForUpdate()   { UpdateTabs(false); }
 
         generic<typename T>
         ToolStripMenuItem^ CreateCustomMenuItem(
@@ -3804,7 +3806,7 @@ private: System::Void PlanetsGrid_CellMouseDoubleClick(System::Object^  sender, 
 private: System::Void Colonies_Update(System::Object^  sender, System::EventArgs^  e) {
              if( sender == ColoniesSummaryRow )
              {
-                 ColoniesGrid->Filter->Update();
+                 ColoniesGrid->MarkForUpdate();
                  SaveUISettings();
              }
              else
@@ -3888,7 +3890,7 @@ private: System::Void Tech_ValueChanged(System::Object^  sender, System::EventAr
              TechLevelsChanged();
          }
 private: System::Void MenuTabs_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
-             UpdateTabs();
+             UpdateTabs(true);
          }
 private: System::Void PlanetsGrid_CellEndEdit(System::Object^  sender, System::Windows::Forms::DataGridViewCellEventArgs^  e) {
              PlanetsMenuAddName(e);

@@ -57,7 +57,7 @@ void Form1::ShipsInitControls()
     ShipsGrid->Columns[c.DistSec]->Visible = false;
 
     GridFilter ^filter = gcnew GridFilter(ShipsGrid, m_bGridUpdateEnabled);
-    filter->GridSetup += gcnew GridSetupHandler(this, &Form1::ShipsFillGrid);
+    filter->GridFill += gcnew GridFillHandler(this, &Form1::ShipsFillGrid);
     filter->GridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
     filter->Sorter = sorter;
 
@@ -737,9 +737,9 @@ void Form1::ShipsMenuCommandAdd(ShipCommandData ^data)
 
     m_CommandMgr->SaveCommands();
 
-    SystemsGrid->Filter->Update();
-    ShipsGrid->Filter->Update();
-    ColoniesGrid->Filter->Update();
+    SystemsGrid->MarkForUpdate();
+    ShipsGrid->MarkForUpdate();
+    ColoniesGrid->MarkForUpdate();
 }
 
 void Form1::ShipsMenuCommandDel(ICommand ^cmd)
@@ -751,10 +751,10 @@ void Form1::ShipsMenuCommandDel(ICommand ^cmd)
 
     m_CommandMgr->SaveCommands();
 
-    SystemsGrid->Filter->Update();
-    ShipsGrid->Filter->Update();
+    SystemsGrid->MarkForUpdate();
+    ShipsGrid->MarkForUpdate();
     if( cmd->GetPhase() == CommandPhase::Production )
-        ColoniesGrid->Filter->Update();
+        ColoniesGrid->MarkForUpdate();
 
     if( m_ShipsMenuRef->Commands->Count > 0 )
         ShowGridContextMenu(ShipsGrid, m_LastMenuEventArg);
@@ -810,9 +810,9 @@ void Form1::ShipsMenuCommandDelAll(CommandPhase phase)
 
     m_CommandMgr->SaveCommands();
 
-    SystemsGrid->Filter->Update();
-    ColoniesGrid->Filter->Update();
-    ShipsGrid->Filter->Update();
+    SystemsGrid->MarkForUpdate();
+    ColoniesGrid->MarkForUpdate();
+    ShipsGrid->MarkForUpdate();
 }
 
 void Form1::ShipsMenuCommandDelAllTransfers(CommandPhase phase)

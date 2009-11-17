@@ -402,7 +402,7 @@ int ShipsGridSorter::BackupCompare(DataGridViewRow ^r1, DataGridViewRow ^r2)
         result = (s1->Age - s2->Age) * GetForcedDirectionModifier(SortOrder::Ascending);
 
     // Step 3: by distance to ref system
-    result = CompareDistance(m_RefSystem, s1, s2) * GetForcedDirectionModifier(SortOrder::Ascending);
+    //result = CompareDistance(m_RefSystem, s1, s2) * GetForcedDirectionModifier(SortOrder::Ascending);
 
     // Step 4: by name
     if( result == 0 )

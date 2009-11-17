@@ -49,7 +49,7 @@ public interface class IGridFilter
     void    SetRefSystem(StarSystem ^system);
     void    SetRefSystem(Colony ^colony);
 
-    void    OnGridSetup();
+    void    OnGridFill();
     void    OnGridSelectionChanged();
 
     property bool           EnableUpdates;

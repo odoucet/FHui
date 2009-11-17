@@ -73,7 +73,7 @@ void Form1::ColoniesInitControls()
 
     // Filter setup
     GridFilter ^filter = gcnew GridFilter(ColoniesGrid, m_bGridUpdateEnabled);
-    filter->GridSetup += gcnew GridSetupHandler(this, &Form1::ColoniesFillGrid);
+    filter->GridFill += gcnew GridFillHandler(this, &Form1::ColoniesFillGrid);
     filter->GridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
     filter->Sorter = sorter;
 
@@ -822,7 +822,7 @@ void Form1::ColoniesMenuProdOrderAdjust(int adjustment)
     newOrder = Math::Min(newOrder, lastOrder + 1);
     m_ColoniesMenuRef->ProductionOrder = newOrder;
     GameData::Player->SortColoniesByProdOrder();
-    ColoniesGrid->Filter->Update();
+    ColoniesGrid->MarkForUpdate();
 
     m_CommandMgr->SaveCommands();
 }
@@ -834,8 +834,8 @@ void Form1::ColoniesMenuCommandAdd(ICommand ^cmd)
     else
         m_CommandMgr->SaveCommands();
 
-    ColoniesGrid->Filter->Update();
-    ShipsGrid->Filter->Update();
+    ColoniesGrid->MarkForUpdate();
+    ShipsGrid->MarkForUpdate();
     ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
 }
 
@@ -1057,8 +1057,8 @@ void Form1::ColoniesMenuCommandDel(ICommand ^cmd)
 {
     m_CommandMgr->DelCommand(m_ColoniesMenuRef, cmd);
 
-    ColoniesGrid->Filter->Update();
-    ShipsGrid->Filter->Update();
+    ColoniesGrid->MarkForUpdate();
+    ShipsGrid->MarkForUpdate();
 
     if( m_ColoniesMenuRef->Commands->Count > 0 )
         ShowGridContextMenu(ColoniesGrid, m_LastMenuEventArg);
@@ -1112,8 +1112,8 @@ void Form1::ColoniesMenuCommandDelAll(CommandPhase phase)
     }
     m_CommandMgr->SaveCommands();
 
-    ColoniesGrid->Filter->Update();
-    ShipsGrid->Filter->Update();
+    ColoniesGrid->MarkForUpdate();
+    ShipsGrid->MarkForUpdate();
 }
 
 void Form1::ColoniesMenuCommandDelAllTransfers(CommandPhase phase)

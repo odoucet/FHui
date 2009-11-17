@@ -6,7 +6,7 @@ using namespace System::Windows::Forms;
 namespace FHUI
 {
 
-delegate void GridSetupHandler();
+delegate void GridFillHandler();
 delegate void GridExceptionHandler(Exception ^e);
 
 ref class GridFilter : public IGridFilter
@@ -25,7 +25,7 @@ public:
         RefSystem = nullptr;
     }
 
-    virtual void OnGridSetup();
+    virtual void OnGridFill();
     virtual void OnGridSelectionChanged();
 
     virtual property StarSystem^    RefSystem
@@ -91,7 +91,7 @@ public:
     CheckBox        ^CtrlFiltTypeTr;
     Label           ^CtrlNumRows;
 
-    event GridSetupHandler      ^GridSetup;
+    event GridFillHandler       ^GridFill;
     event GridExceptionHandler  ^GridException;
 
     initonly static String  ^s_CaptionXYZ       = "[Select ref system]";

@@ -55,7 +55,7 @@ void Form1::AliensInitControls()
     AliensGrid->Columns[c.Atmosphere]->DefaultCellStyle->Font   = m_GridFontSmall;
 
     GridFilter ^filter = gcnew GridFilter(AliensGrid, m_bGridUpdateEnabled);
-    filter->GridSetup += gcnew GridSetupHandler(this, &Form1::AliensFillGrid);
+    filter->GridFill += gcnew GridFillHandler(this, &Form1::AliensFillGrid);
     filter->GridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
     filter->Sorter = sorter;
 
@@ -294,7 +294,7 @@ void Form1::AliensMenuCommandMessageCancel(Object^, EventArgs^)
             if( cmdMsg->m_Alien == alien )
             {
                 m_CommandMgr->DelCommand(cmd);
-                AliensGrid->Filter->Update();
+                AliensGrid->MarkForUpdate();
                 return;
             }
         }
@@ -333,7 +333,7 @@ void Form1::AliensMenuCommandMessage(Object^, EventArgs^)
             else
             {
                 m_CommandMgr->AddCommand( gcnew CmdMessage(alien, text) );
-                AliensGrid->Filter->Update();
+                AliensGrid->MarkForUpdate();
             }
         }
         else
@@ -461,7 +461,7 @@ void Form1::AliensMenuCommandTeach(CmdTeach ^cmd)
         if( needSave )
             m_CommandMgr->SaveCommands();
 
-        AliensGrid->Filter->Update();
+        AliensGrid->MarkForUpdate();
     }
 }
 
@@ -490,7 +490,7 @@ void Form1::AliensMenuCommandTeachCancel(CmdTeach ^cmd)
         } while( bRepeat );
     }
 
-    AliensGrid->Filter->Update();
+    AliensGrid->MarkForUpdate();
 }
 
 void Form1::AliensMenuSetRelation(AlienRelationData ^data)
@@ -586,7 +586,7 @@ void Form1::AliensMenuCommandEstimate(Object^, EventArgs^)
         home,
         gcnew ProdCmdEstimate( m_AliensMenuRef ) );
 
-    ColoniesGrid->Filter->Update();
+    ColoniesGrid->MarkForUpdate();
 }
 
 void Form1::AliensMenuCommandEstimateCancel(ProdCmdEstimate ^cmd)
@@ -598,7 +598,7 @@ void Form1::AliensMenuCommandEstimateCancel(ProdCmdEstimate ^cmd)
             if( iCmd == cmd )
             {
                 m_CommandMgr->DelCommand( colony, cmd );
-                ColoniesGrid->Filter->Update();
+                ColoniesGrid->MarkForUpdate();
                 return;
             }
         }

@@ -60,6 +60,14 @@ void Form1::InitControls()
 
     m_bGridUpdateEnabled = gcnew bool(false);
 
+    DblBufDGVMarkedForUpdateHandler ^handler = 
+        gcnew DblBufDGVMarkedForUpdateHandler(this, &Form1::GridMarkedForUpdate);
+    SystemsGrid->MarkedForUpdate += handler;
+    PlanetsGrid->MarkedForUpdate += handler;
+    ColoniesGrid->MarkedForUpdate += handler;
+    ShipsGrid->MarkedForUpdate += handler;
+    AliensGrid->MarkedForUpdate += handler;
+
     SystemsInitControls();
     PlanetsInitControls();
     ColoniesInitControls();
@@ -207,11 +215,37 @@ void Form1::UpdateControls()
     UpdateAllGrids(true);
 }
 
-void Form1::UpdateTabs()
+void Form1::UpdateTabs(bool tabChanged)
 {
     switch( MenuTabs->SelectedIndex )
     {
+    case TabIndex::Systems:
+        if( SystemsGrid->UpdatePending )
+            SystemsGrid->Filter->Update();
+        break;
+
+    case TabIndex::Planets:
+        if( PlanetsGrid->UpdatePending )
+            PlanetsGrid->Filter->Update();
+        break;
+
+    case TabIndex::Colonies:
+        if( ColoniesGrid->UpdatePending )
+            ColoniesGrid->Filter->Update();
+        break;
+
+    case TabIndex::Ships:
+        if( ShipsGrid->UpdatePending )
+            ShipsGrid->Filter->Update();
+        break;
+
+    case TabIndex::Aliens:
+        if( AliensGrid->UpdatePending )
+            AliensGrid->Filter->Update();
+        break;
+
     case TabIndex::Map:
+        if( tabChanged )
         {
             System::Windows::Forms::DialogResult result = MessageBox::Show(
                 this,
@@ -232,11 +266,13 @@ void Form1::UpdateTabs()
         break;
 
     case TabIndex::Orders:
-        m_CommandMgr->GenerateTemplate( OrderTemplate );
+        if( tabChanged )
+            m_CommandMgr->GenerateTemplate( OrderTemplate );
         break;
 
     case TabIndex::Utils:
-        UtilTabSelected();
+        if( tabChanged )
+            UtilTabSelected();
         break;
     }
 }
@@ -484,7 +520,7 @@ void Form1::DisplayTurn()
         }
 
         MapSetup();
-        UpdateTabs();
+        UpdateTabs(true);
     }
     catch( Exception ^e )
     {
@@ -574,14 +610,12 @@ void Form1::UpdateAllGrids( bool setRefSystems )
     }
     else
     {
-        SystemsGrid->Filter->Update();
-        PlanetsGrid->Filter->Update();
-        ColoniesGrid->Filter->Update();
-        ShipsGrid->Filter->Update();
+        SystemsGrid->MarkForUpdate();
+        PlanetsGrid->MarkForUpdate();
+        ColoniesGrid->MarkForUpdate();
+        ShipsGrid->MarkForUpdate();
     }
-    AliensGrid->Filter->Update();
-
-    UpdateTabs();
+    AliensGrid->MarkForUpdate();
 }
 
 void Form1::ApplyDataAndFormat(
@@ -867,7 +901,7 @@ void Form1::MenuCommandMoveUp(MenuCommandUpDownData ^data)
         commands->RemoveAt(i);
         commands->Insert(newPos, cmd);
         m_CommandMgr->SaveCommands();
-        m_LastMenuGrid->Filter->Update();
+        m_LastMenuGrid->MarkForUpdate();
     }
 }
 
@@ -886,7 +920,7 @@ void Form1::MenuCommandMoveDown(MenuCommandUpDownData ^data)
         commands->RemoveAt(i);
         commands->Insert(newPos, cmd);
         m_CommandMgr->SaveCommands();
-        m_LastMenuGrid->Filter->Update();
+        m_LastMenuGrid->MarkForUpdate();
     }
 }
 

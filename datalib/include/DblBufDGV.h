@@ -7,19 +7,38 @@ using namespace System::Windows::Forms;
 
 namespace FHUI {
 
+public delegate void DblBufDGVMarkedForUpdateHandler();
+
 public ref class DblBufDGV :  public System::Windows::Forms::DataGridView
 {
 public:
 	DblBufDGV(void)
 	{
         this->DoubleBuffered = true;
+        UpdatePending = false;
 	}
 
     property IGridFilter^   Filter;
     property IGridSorter^   Sorter;
 
+    property bool           UpdatePending;
+    event DblBufDGVMarkedForUpdateHandler^  MarkedForUpdate;
+
+    void MarkForUpdate()
+    {
+        UpdatePending = true;
+        OnMarkedForUpdate();
+    }
+
+    void OnMarkedForUpdate()
+    {
+        MarkedForUpdate();
+    }
+
     void FullUpdateBegin()
     {
+        UpdatePending = false;
+
         // Disable header size updates
         AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode::None;
 

@@ -63,7 +63,7 @@ void Form1::SystemsInitControls()
 
     // Filter setup
     GridFilter ^filter = gcnew GridFilter(SystemsGrid, m_bGridUpdateEnabled);
-    filter->GridSetup += gcnew GridSetupHandler(this, &Form1::SystemsFillGrid);
+    filter->GridFill += gcnew GridFillHandler(this, &Form1::SystemsFillGrid);
     filter->GridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
     filter->Sorter = sorter;
 

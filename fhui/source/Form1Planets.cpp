@@ -59,7 +59,7 @@ void Form1::PlanetsInitControls()
 
     // Filter setup
     GridFilter ^filter = gcnew GridFilter(PlanetsGrid, m_bGridUpdateEnabled);
-    filter->GridSetup += gcnew GridSetupHandler(this, &Form1::PlanetsFillGrid);
+    filter->GridFill += gcnew GridFillHandler(this, &Form1::PlanetsFillGrid);
     filter->GridException += gcnew GridExceptionHandler(this, &Form1::ShowException);
     filter->Sorter = sorter;
 
@@ -380,11 +380,11 @@ void Form1::PlanetsMenuAddName(DataGridViewCellEventArgs ^cell)
     m_CommandMgr->AddCommand( colony, 
         gcnew CmdPlanetName( m_PlanetsMenuRef->System, m_PlanetsMenuRef->Number, name ) );
 
-    SystemsGrid->Filter->Update();
-    ColoniesGrid->Filter->Update();
+    SystemsGrid->MarkForUpdate();
+    ColoniesGrid->MarkForUpdate();
     // TBD: can't update planets grid here - it causes exception
     // Find out a better way to do this...
-    //PlanetsGrid->Filter->Update();
+    //PlanetsGrid->MarkForUpdate();
 }
 
 void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
@@ -409,8 +409,8 @@ void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
         m_CommandMgr->AddCommand( colony, gcnew CmdDisband( m_PlanetsMenuRef->Name ) );
     }
 
-    PlanetsGrid->Filter->Update();
-    ColoniesGrid->Filter->Update();
+    PlanetsGrid->MarkForUpdate();
+    ColoniesGrid->MarkForUpdate();
 }
 
 void Form1::PlanetsMenuRemoveNameCancel(Object^, EventArgs^)
@@ -420,14 +420,14 @@ void Form1::PlanetsMenuRemoveNameCancel(Object^, EventArgs^)
         GameData::Player->FindColony( m_PlanetsMenuRef->Name, false ),
         gcnew CmdDisband( m_PlanetsMenuRef->Name ) );
 
-    PlanetsGrid->Filter->Update();
+    PlanetsGrid->MarkForUpdate();
 }
 
 void Form1::PlanetsMenuShowAlienLSN(Alien ^alien)
 {
     m_PlanetsAlienLSN = alien;
     PlanetsGrid->Columns[m_PlanetsColumns.AlienLSN]->Visible = true;
-    PlanetsGrid->Filter->Update();
+    PlanetsGrid->MarkForUpdate();
 }
 
 ////////////////////////////////////////////////////////////////
