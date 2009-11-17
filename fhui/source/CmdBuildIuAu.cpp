@@ -58,6 +58,7 @@ void CmdBuildIuAu::InitAvailResources(Colony ^colony, ProdCmdBuildIUAU ^cmd)
     m_Colony = colony;
     m_AvailPop = colony->Res->AvailPop;
     m_AvailEU  = colony->Res->AvailEU;
+    m_Cmd = cmd;
     if( cmd )
     {
         m_AvailEU += cmd->GetEUCost();
@@ -67,10 +68,6 @@ void CmdBuildIuAu::InitAvailResources(Colony ^colony, ProdCmdBuildIUAU ^cmd)
     InfoColony->Text    = m_Colony->Name;
     AvailPop->Text      = m_AvailPop.ToString();
     AvailEU->Text       = m_AvailEU.ToString();
-
-    CUAmount->Maximum = Math::Max(0, Math::Min(m_AvailPop, m_AvailEU));
-    IUAmount->Maximum = Math::Max(0, m_AvailEU);
-    AUAmount->Maximum = Math::Max(0, m_AvailEU);
 
     List<String^> ^targets = gcnew List<String^>;
     targets->Add("< Local Build >");
@@ -85,7 +82,6 @@ void CmdBuildIuAu::InitAvailResources(Colony ^colony, ProdCmdBuildIUAU ^cmd)
             targets->Add( ship->PrintRefListEntry() );
     }
     Target->DataSource = targets;
-    UpdateShipCapacity();
 
     if( cmd )
     {
@@ -118,8 +114,10 @@ void CmdBuildIuAu::InitAvailResources(Colony ^colony, ProdCmdBuildIUAU ^cmd)
         if( cmd->m_Ship )
             Target->Text = cmd->m_Ship->PrintRefListEntry();
 
-        UpdateShipCapacity();
+        Target->Enabled = false;
     }
+
+    UpdateShipCapacity();
 }
 
 void CmdBuildIuAu::UpdateAmounts()
@@ -128,34 +126,10 @@ void CmdBuildIuAu::UpdateAmounts()
     int iu = GetIUAmount();
     int au = GetAUAmount();
 
-    int cuNew = Math::Min(cu, m_AvailPop);
-    cuNew = Math::Min(cuNew, m_AvailEU);
-    int iuNew = Math::Min(iu, m_AvailEU - cuNew);
-    int auNew = Math::Min(au, m_AvailEU - cuNew - iuNew);
-
-    if( m_Capacity != -1 )
-    {
-        int capAvail = Math::Max(0, m_Capacity - m_CapacityUsed);
-
-        cuNew = Math::Min(cuNew, capAvail);
-        iuNew = Math::Min(iuNew, capAvail - cuNew);
-        auNew = Math::Min(auNew, capAvail - cuNew - iuNew);
-    }
-
-    cuNew = Math::Max(cuNew, 0);
-    iuNew = Math::Max(iuNew, 0);
-    auNew = Math::Max(auNew, 0);
-
-    if( cu != cuNew )
-        CUAmount->Value = cuNew;
-    if( iu != iuNew )
-        IUAmount->Value = iuNew;
-    if( au != auNew )
-        AUAmount->Value = auNew;
-
-    int sum = cuNew + iuNew + auNew;
+    int sum = cu + iu + au;
     TotalCost->Text = sum.ToString();
     TotalCost->ForeColor = sum > m_AvailEU ? Color::Red : Color::Black;
+    AvailPop->ForeColor = cu > m_AvailPop ? Color::Red : Color::Black;
 
     if( m_Capacity != -1 )
     {
@@ -184,6 +158,9 @@ void CmdBuildIuAu::UpdateShipCapacity()
             {
                 m_CapacityUsed += Calculators::InventoryCarryCapacity( static_cast<InventoryType>(i), inv[i] );
             }
+
+            if( ship == m_Cmd->m_Ship )
+                m_CapacityUsed -= Calculators::InventoryCarryCapacity( m_Cmd->m_Unit, m_Cmd->m_Amount );
         }
     }
 

@@ -200,7 +200,9 @@ array<int>^ ShipCmdUnload::GetInventory()
 
 int ShipCmdUnload::GetInvMod(InventoryType i)
 {
-    return -m_Ship->Cargo[i];
+    if( i == INV_CU || i == INV_IU || i == INV_AU )
+        return -m_Ship->Cargo[i];
+    return 0;
 }
 
 ////////////////////////////////////////////////////////////////

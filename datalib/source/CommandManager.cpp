@@ -291,8 +291,7 @@ void CommandManager::SaveCommands()
             // Put the NAME command outside of section
             for each( ICommand ^cmd in colony->Commands )
             {
-                if( cmd->GetCmdType() == CommandType::Name ||
-                    cmd->GetCmdType() == CommandType::Disband )
+                if( cmd->GetCmdType() == CommandType::Name )
                 {
                     commandList->Add( PrintCommandToFile(cmd) );
                 }
@@ -1254,8 +1253,11 @@ void CommandManager::GeneratePreDeparture()
     {
         for each( ICommand ^cmd in colony->Commands )
         {
-            if( cmd->GetCmdType() == CommandType::Name )
+            if( cmd->GetCmdType() == CommandType::Name ||
+                cmd->GetCmdType() == CommandType::Disband )
+            {
                 m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
+            }
         }
     }
 
@@ -1309,7 +1311,9 @@ void CommandManager::GeneratePreDeparture()
             m_Budget->SetColony(colony, CommandPhase::PreDeparture);
             for each( ICommand ^cmd in colony->Commands )
             {
-                if( cmd->GetPhase() == CommandPhase::PreDeparture )
+                if( cmd->GetPhase() == CommandPhase::PreDeparture &&
+                    cmd->GetCmdType() != CommandType::Name &&
+                    cmd->GetCmdType() != CommandType::Disband )
                 {
                     m_OrderList->Add( PrintCommandWithInfo(cmd, 2) );
                     m_Budget->EvalOrder(cmd);

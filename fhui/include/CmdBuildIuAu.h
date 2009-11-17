@@ -61,6 +61,7 @@ namespace FHUI {
         int     m_AvailEU;
         int     m_Capacity;
         int     m_CapacityUsed;
+        ProdCmdBuildIUAU^   m_Cmd;
 
     private: System::Windows::Forms::Label^  AvailPop;
     private: System::Windows::Forms::NumericUpDown^  IUAmount;
@@ -218,6 +219,7 @@ namespace FHUI {
             // IUAmount
             // 
             this->IUAmount->Location = System::Drawing::Point(81, 97);
+            this->IUAmount->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {10000, 0, 0, 0});
             this->IUAmount->Name = L"IUAmount";
             this->IUAmount->Size = System::Drawing::Size(60, 20);
             this->IUAmount->TabIndex = 0;
@@ -226,6 +228,7 @@ namespace FHUI {
             // AUAmount
             // 
             this->AUAmount->Location = System::Drawing::Point(147, 97);
+            this->AUAmount->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {10000, 0, 0, 0});
             this->AUAmount->Name = L"AUAmount";
             this->AUAmount->Size = System::Drawing::Size(60, 20);
             this->AUAmount->TabIndex = 1;
@@ -274,6 +277,7 @@ namespace FHUI {
             // CUAmount
             // 
             this->CUAmount->Location = System::Drawing::Point(15, 97);
+            this->CUAmount->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {10000, 0, 0, 0});
             this->CUAmount->Name = L"CUAmount";
             this->CUAmount->Size = System::Drawing::Size(60, 20);
             this->CUAmount->TabIndex = 0;

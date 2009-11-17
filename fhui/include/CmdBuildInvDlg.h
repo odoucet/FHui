@@ -52,11 +52,13 @@ namespace FHUI
         String^ GetInvString(int i);
         InventoryType GetInv();
 
-        Colony^ m_Colony;
-        int     m_AvailEU;
-        int     m_AvailPop;
-        int     m_Capacity;
-        int     m_CapacityUsed;
+        Colony^             m_Colony;
+        ProdCmdBuildInv^    m_Cmd;
+        Ship^               m_TargetShip;
+        int                 m_AvailEU;
+        int                 m_AvailPop;
+        int                 m_Capacity;
+        int                 m_CapacityUsed;
 
 
     private: System::Windows::Forms::ComboBox^  Target;
@@ -181,7 +183,7 @@ namespace FHUI
             this->Target->Location = System::Drawing::Point(81, 102);
             this->Target->MaxDropDownItems = 20;
             this->Target->Name = L"Target";
-            this->Target->Size = System::Drawing::Size(126, 21);
+            this->Target->Size = System::Drawing::Size(235, 21);
             this->Target->TabIndex = 26;
             this->Target->SelectedIndexChanged += gcnew System::EventHandler(this, &CmdBuildInvDlg::Target_SelectedIndexChanged);
             // 

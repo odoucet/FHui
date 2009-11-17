@@ -87,6 +87,7 @@ void CmdBuildInvDlg::InitAvailResources(Colony ^colony, ProdCmdBuildInv ^cmd)
     {
         m_AvailEU += cmd->GetEUCost();
         m_AvailPop += cmd->GetPopCost();
+        m_Cmd = cmd;
     }
 
     InfoColony->Text    = m_Colony->Name;
@@ -134,7 +135,6 @@ void CmdBuildInvDlg::InitAvailResources(Colony ^colony, ProdCmdBuildInv ^cmd)
             Amount->Enabled = false;
             BtnBuild->Enabled = false;
         }
-        Inventory->Enabled = false;
     }
 }
 
@@ -151,6 +151,8 @@ void CmdBuildInvDlg::UpdateAmounts()
     if( m_Capacity != -1 )
     {
         cap += m_CapacityUsed;
+        if( m_TargetShip == m_Cmd->m_Ship )
+            cap -= Calculators::InventoryCarryCapacity( m_Cmd->m_Type, m_Cmd->m_Amount );
 
         ShipCapacity->Text = String::Format("{0} / {1}", cap, m_Capacity);
         ShipCapacity->ForeColor = cap > m_Capacity ? Color::Red : Color::Black;
@@ -164,19 +166,21 @@ void CmdBuildInvDlg::UpdateShipCapacity()
 {
     m_Capacity = -1;
     m_CapacityUsed = 0;
+    m_TargetShip = nullptr;
 
     if( Target->SelectedIndex != 0 )
     {
         String ^target = Target->Text;
         if( target->Substring(0, 3) != "PL " )
         {
-            Ship ^ship = Ship::FindRefListEntry( target );
-            m_Capacity = ship->Capacity;
+            m_TargetShip = Ship::FindRefListEntry( target );
+            m_Capacity = m_TargetShip->Capacity;
 
-            array<int> ^inv = ship->Cargo;
+            array<int> ^inv = m_TargetShip->Cargo;
             for( int i = 0; i < INV_MAX; ++i )
             {
-                m_CapacityUsed += Calculators::InventoryCarryCapacity( static_cast<InventoryType>(i), inv[i] );
+                InventoryType it = static_cast<InventoryType>(i);
+                m_CapacityUsed += Calculators::InventoryCarryCapacity( it, inv[it] );
             }
         }
     }
