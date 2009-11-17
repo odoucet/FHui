@@ -262,6 +262,17 @@ void CmdTransferDlg::UpdateAmounts()
         InfoCapacityUsed->Text = sumCapacity.ToString();
         InfoCapacityUsed->ForeColor = (m_CapacityLimit >= sumCapacity ? Color::Black : Color::Red);
     }
+    else
+    {
+        for( int i = 0; i < INV_MAX; ++i )
+        {
+            if( Decimal::ToInt32(m_UnitControls[i].Amount->Value) > 0 )
+            {
+                transferAny = true;
+                break;
+            }
+        }
+    }
 
     BtnTransfer->Enabled = transferAny;
 }
