@@ -430,7 +430,6 @@ Colony^ TurnData::CreateColony(Alien ^sp, String ^name, StarSystem ^system, int 
     }
 
     Colony ^colony = gcnew Colony(sp, name, system, plNum);
-    AddColony(colony);
 
     if( !system->Planets->ContainsKey(plNum) )
     {   // System is not yet known, initialize with defaults
@@ -450,6 +449,9 @@ Colony^ TurnData::CreateColony(Alien ^sp, String ^name, StarSystem ^system, int 
     {
         colony->Planet->AlienName = name;
     }
+
+    // Add colony after setting all properties
+    AddColony(colony);
 
     if( isObserver && (sp == GameData::Player ) )
     {
