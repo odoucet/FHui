@@ -33,7 +33,7 @@ void CommandManager::SelectTurn(int turn)
     {
         m_CommandData[turn] = gcnew TurnCommands;
         // Disable saves until commands file is loaded
-        m_bSaveEnabled = false;
+        EnableSave( false );
     }
 }
 
@@ -92,8 +92,7 @@ void CommandManager::AddCommand(ICommand ^cmd)
     else
         m_CommandData[m_CurrentTurn]->Commands->Add(cmd);
 
-    if( m_bSaveEnabled )
-        SaveCommands();
+    SaveCommands();
 }
 
 void CommandManager::DelCommand(ICommand ^cmd)
@@ -127,8 +126,7 @@ void CommandManager::AddCommand(Colony ^colony, ICommand ^cmd)
     else
     {
         colony->Commands->Add(cmd);
-        if( m_bSaveEnabled )
-            SaveCommands();
+        SaveCommands();
 
         if( cmd->GetCmdType() == CommandType::BuildShip )
         {
@@ -265,6 +263,9 @@ String^ CommandManager::PrintCommandToFile(ICommand ^cmd)
 
 void CommandManager::SaveCommands()
 {
+    if( ! m_bSaveEnabled )
+        return;
+
     // Create directory
     DirectoryInfo ^dirInfo = gcnew DirectoryInfo(m_Path);
     if( !dirInfo->Exists )
@@ -414,7 +415,7 @@ void CommandManager::LoadCommands()
         }
     }
 
-    m_bSaveEnabled = true;
+    EnableSave( true );
 }
 
 void CommandManager::LoadCommandsGlobal(StreamReader ^sr)
@@ -1033,9 +1034,18 @@ void CommandManager::RemoveGeneratedCommandsFromList(List<ICommand^> ^orders, Co
 
 void CommandManager::AddPluginCommands()
 {
+    bool saveWasEnabled = m_bSaveEnabled;
+    EnableSave( false );
+
     for each( IOrdersPlugin ^plugin in PluginManager::OrderPlugins )
     {
         plugin->GenerateCommands( this );
+    }
+
+    if( saveWasEnabled )
+    {
+        EnableSave( false );
+        SaveCommands();
     }
 }
 

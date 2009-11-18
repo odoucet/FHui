@@ -428,12 +428,20 @@ void Form1::ShowReloadMenu()
     //    nullptr,
     //    gcnew EventHandler(this, &Form1::ReloadAutoCommands) );
 
+    menu->Items->Add( gcnew ToolStripSeparator );
+    menu->Items->Add( ColoniesFillMenuAuto() );
+
     if( m_PluginMgr->OrderPlugins->Count > 0 )
     {
+        menu->Items->Add( gcnew ToolStripSeparator );
         menu->Items->Add(
             "Recreate Plugin orders",
             nullptr,
             gcnew EventHandler(this, &Form1::RecreatePluginCommands) );
+        menu->Items->Add(
+            "Remove Plugin orders",
+            nullptr,
+            gcnew EventHandler(this, &Form1::RemovePluginCommands) );
     }
 
     // Show menu
@@ -480,6 +488,14 @@ void Form1::RecreatePluginCommands(Object^, EventArgs^)
 {
     m_CommandMgr->RemoveGeneratedCommands(CommandOrigin::Plugin, false, false);
     m_CommandMgr->AddPluginCommands();
+    m_CommandMgr->SaveCommands();
+
+    UpdateAllGrids(false);
+}
+
+void Form1::RemovePluginCommands(Object^, EventArgs^)
+{
+    m_CommandMgr->RemoveGeneratedCommands(CommandOrigin::Plugin, false, false);
     m_CommandMgr->SaveCommands();
 
     UpdateAllGrids(false);

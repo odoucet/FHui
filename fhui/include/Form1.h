@@ -78,6 +78,7 @@ namespace FHUI {
         void        TurnReload(bool resetCommands);
         void        ReloadAutoCommands(Object^, EventArgs^);
         void        RecreatePluginCommands(Object^, EventArgs^);
+        void        RemovePluginCommands(Object^, EventArgs^);
         void        UpdateControls();
         void        UpdateTabs(bool tabChanged);
 

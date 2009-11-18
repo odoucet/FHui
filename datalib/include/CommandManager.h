@@ -67,6 +67,8 @@ public:
         void set(bool v) { m_CommandData[m_CurrentTurn]->AutoEnabled = v; };
     }
 
+    void        EnableSave(bool en) { m_bSaveEnabled = en; }
+
 private:
     void        LoadCommandsGlobal(StreamReader ^sr);
     bool        LoadCommandsColony(String ^line, Colony ^colony);
