@@ -51,13 +51,25 @@ void GameData::EvalPreDepartureInventory(StarSystem ^system, ICommand ^cmdEnd, b
                 return;
 
             array<int> ^inv = ship->CargoPreDeparture;
-            for( int i = 0; i < INV_MAX; ++i )
+
+            switch( cmd->GetCmdType() )
             {
-                int amount = cmd->GetInvMod(static_cast<InventoryType>(i));
-                if( amount < 0 )
-                    amount = -Math::Min(-amount, inv[i]);
-                inv[i] += amount;
+            case CommandType::Unload:
+                inv[INV_CU] = 0;
+                inv[INV_AU] = 0;
+                inv[INV_IU] = 0;
+                break;
+
+            // TODO: Base, Repair when implemented
             }
+
+            //for( int i = 0; i < INV_MAX; ++i )
+            //{
+            //    int amount = cmd->GetInvMod(static_cast<InventoryType>(i));
+            //    if( amount < 0 )
+            //        amount = -Math::Min(-amount, inv[i]);
+            //    inv[i] += amount;
+            //}
         }
     }
 

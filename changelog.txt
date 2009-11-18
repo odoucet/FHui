@@ -6,6 +6,7 @@ Minor changes are listed only if originally requested by player
 [P] denotes player requested features
 
 FHUI build ??
+* Jump menu no longer correctly shows cargo not modified by production.
 
 FHUI build 342
 * [P] "Enmity/neutrality towards ALL species" is now correctly handled.

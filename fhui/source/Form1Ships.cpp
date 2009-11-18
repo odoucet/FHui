@@ -654,6 +654,8 @@ ToolStripMenuItem^ Form1::ShipsFillMenuCommandsOptions(ICommand ^cmd)
 ToolStripMenuItem^ Form1::ShipsMenuCreateJumpItem(
     Ship ^ship, StarSystem ^system, int planetNum, String ^text, bool addFromWhere )
 {
+    GameData::EvalPreDepartureInventory(ship->System, nullptr, false);
+
     double mishap = ship->System->CalcMishap(
         system,
         Decimal::ToInt32(TechGV->Value),
@@ -661,7 +663,7 @@ ToolStripMenuItem^ Form1::ShipsMenuCreateJumpItem(
 
     String ^itemText;
     ICommand ^cmd;
-    String ^cargo = ship->PrintCargo(false);
+    String ^cargo = GameData::PrintInventory(ship->CargoPreDeparture);
     if( !String::IsNullOrEmpty(cargo) )
         cargo = "; " + cargo;
     if( ship->System->IsWormholeTarget(system) )
@@ -683,7 +685,14 @@ ToolStripMenuItem^ Form1::ShipsMenuCreateJumpItem(
     }
 
     if( addFromWhere )
+    {
         itemText += " From " + ship->PrintLocation();
+
+        cmd = ship->GetJumpCommand();
+        if( cmd )
+            itemText += "; (Current: " + cmd->PrintForUI() + ")";
+    }
+
     ToolStripMenuItem ^menuItem = CreateCustomMenuItem<ShipCommandData^>(
         itemText,
         gcnew ShipCommandData(ship, cmd),

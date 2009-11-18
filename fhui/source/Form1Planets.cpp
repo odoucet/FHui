@@ -380,6 +380,7 @@ void Form1::PlanetsMenuAddName(DataGridViewCellEventArgs ^cell)
 
     SystemsGrid->MarkForUpdate();
     ColoniesGrid->MarkForUpdate();
+    ShipsGrid->MarkForUpdate();
     // TBD: can't update planets grid here - it causes exception
     // Find out a better way to do this...
     //PlanetsGrid->MarkForUpdate();
@@ -407,8 +408,7 @@ void Form1::PlanetsMenuRemoveName(Object^, EventArgs^)
         m_CommandMgr->AddCommand( colony, gcnew CmdDisband( m_PlanetsMenuRef->Name ) );
     }
 
-    PlanetsGrid->MarkForUpdate();
-    ColoniesGrid->MarkForUpdate();
+    UpdateAllGrids(false);
 }
 
 void Form1::PlanetsMenuRemoveNameCancel(Object^, EventArgs^)

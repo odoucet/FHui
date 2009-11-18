@@ -616,6 +616,9 @@ void Form1::UpdateAllGrids( bool setRefSystems )
         ShipsGrid->MarkForUpdate();
     }
     AliensGrid->MarkForUpdate();
+
+    if( MenuTabs->SelectedIndex == TabIndex::Orders )
+        UpdateTabs(true);
 }
 
 void Form1::ApplyDataAndFormat(
