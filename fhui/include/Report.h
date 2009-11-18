@@ -6,6 +6,7 @@
 #define GET_NON_EMPTY_LINE() GetNonEmptyLine(__FUNCTION__, __LINE__)
 #define EXPECTED_EMPTY_LINE() ExpectedEmptyLine(__FUNCTION__, __LINE__)
 #define GET_MERGED_LINES() GetMergedLines(__FUNCTION__, __LINE__)
+#define PARSING_EXCEPTION(s) ( throw gcnew FHUIParsingException( PrepareException(__FUNCTION__, __LINE__, s) ) )
 
 using namespace System;
 using namespace System::IO;
@@ -94,26 +95,25 @@ private:
 
     void            MatchAlienInfo(String ^s, Alien ^alien);
 
-    GameData^       m_GameData;
-    CommandManager^ m_CommandMgr;
-    RegexMatcher^   m_RM;
-    int             m_Turn;
-
     bool            m_Verbose;
-
     PhaseType       m_Phase;
+    String^         PhaseToString(PhaseType phase);
 
     int             m_PirateShipsCnt;
     CommandPhase    m_TemplatePhase;
     Colony^         m_TemplateColony;
-    Alien^          m_EstimateAlien;
 
-    StreamReader^   m_Input;
+    String^         PrepareException( String^ srcFun, int srcLine, String^ msg );
 
-    String^         PhaseToString(PhaseType phase);
-
+    int             m_Turn;
     List<String^>^  m_Content;
+    StreamReader^   m_Input;
+    String^         m_CurrentFileName;
+    int             m_CurrentFileLine;
 
+    GameData^       m_GameData;
+    CommandManager^ m_CommandMgr;
+    RegexMatcher^   m_RM;
 };
 
 } // end namespace FHUI

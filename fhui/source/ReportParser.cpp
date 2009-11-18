@@ -3,6 +3,7 @@
 #include "ReportParser.h"
 
 using namespace System::IO;
+using namespace System::Windows::Forms;
 
 namespace FHUI
 {
@@ -63,6 +64,8 @@ void ReportParser::ScanReports()
     int minTurn = int::MaxValue;
     int maxTurn = 0;
 
+    String^ unrecognized = "";
+
     for each( FileInfo ^f in dir->GetFiles() )
     {   // First check each file if it is a report and find out for which turn.
         // Then reports will be loaded in chronological order.
@@ -75,6 +78,24 @@ void ReportParser::ScanReports()
             minTurn = Math::Min(minTurn, turn);
             maxTurn = Math::Max(maxTurn, turn);
         }
+        else
+        {
+            if( ! String::IsNullOrEmpty(unrecognized) )
+            {
+                unrecognized += "\r\n";
+            }
+            unrecognized += f->Name;
+        }
+    }
+
+    if( ! String::IsNullOrEmpty(unrecognized) )
+    {
+        MessageBox::Show(
+            "The following files in the <report> folder were not recognized and will be ignored during parsing:\r\n\r\n" + unrecognized,
+            "Unrecognized files",
+            MessageBoxButtons::OK,
+            MessageBoxIcon::Error,
+            MessageBoxDefaultButton::Button1);
     }
 
     for (int currTurn = minTurn; currTurn <= maxTurn; currTurn ++)

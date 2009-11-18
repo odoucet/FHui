@@ -57,15 +57,15 @@ bool Report::MatchSystemScan(String ^s)
             s = GET_LINE();
         }
         else
-            throw gcnew FHUIParsingException("System Scan: unexpected line");
+            PARSING_EXCEPTION("System Scan: unexpected line");
 
         if ( s != "---------------------------------------------------------------------" )
-            throw gcnew FHUIParsingException("System Scan: unexpected line");
+            PARSING_EXCEPTION("System Scan: unexpected line");
 
         while ( ! String::IsNullOrEmpty( s = GET_LINE() ) )
         {
             if( ! MatchPlanetScan( s, system ) )
-                throw gcnew FHUIParsingException("System Scan: unexpected line");
+                PARSING_EXCEPTION("System Scan: unexpected line");
         }
         return true;
     }
@@ -97,7 +97,7 @@ bool Report::MatchPlanetScan(String ^s, StarSystem ^system)
             // just skip from input
         }
         else
-            throw gcnew FHUIParsingException("Report contains invalid planetary scan (LSN)");
+            PARSING_EXCEPTION("Report contains invalid planetary scan (LSN)");
 
         // Scan gases
         if( m_RM->Match(s, "^No atmosphere\\s*") )
@@ -114,7 +114,7 @@ bool Report::MatchPlanetScan(String ^s, StarSystem ^system)
                 planet->Atmosphere[gas] = m_RM->GetResultInt(1);
             }
             if( !bGasMatched )
-                throw gcnew FHUIParsingException("Report contains invalid planetary scan (atmosphere)");
+                PARSING_EXCEPTION("Report contains invalid planetary scan (atmosphere)");
         }
 
         if( !String::IsNullOrEmpty(s) )
@@ -147,7 +147,7 @@ bool Report::MatchAlienEstimate(String ^s)
         }
         else
         {
-            throw gcnew FHUIParsingException("Estimate: failed to parse alien info");
+            PARSING_EXCEPTION("Estimate: failed to parse alien info");
         }
 
         if( m_RM->Match( GET_LINE(), "MI =\\s+(\\d+), MA =\\s+(\\d+), ML =\\s+(\\d+), GV =\\s+(\\d+), LS =\\s+(\\d+), BI =\\s+(\\d+)\\.") )
@@ -165,7 +165,7 @@ bool Report::MatchAlienEstimate(String ^s)
         }
         else
         {
-            throw gcnew FHUIParsingException("Estimate: failed to parse alien tech levels");
+            PARSING_EXCEPTION("Estimate: failed to parse alien tech levels");
         }
         return true;
     }
@@ -205,7 +205,7 @@ bool Report::MatchTechLevels(String ^s)
         {
             return true;
         }
-        throw gcnew FHUIParsingException("Tech levels: missing entries");
+        PARSING_EXCEPTION("Tech levels: missing entries");
     }
     return false;
 }
@@ -247,7 +247,7 @@ bool Report::MatchAtmReq(String ^s)
                 m_RM->GetResultInt(1) );             // max level
         }
         else
-            throw gcnew FHUIParsingException("Failed to parse Atmospheric Requirement");
+            PARSING_EXCEPTION("Failed to parse Atmospheric Requirement");
 
         if( m_RM->MatchList( GET_LINE(), "^Neutral Gases:", "([A-Za-z0-9]+)") )
         {
@@ -256,7 +256,7 @@ bool Report::MatchAtmReq(String ^s)
                     FHStrings::GasFromString(m_RM->Results[i]) );
         }
         else
-            throw gcnew FHUIParsingException("Failed to parse Atmospheric Requirement");
+            PARSING_EXCEPTION("Failed to parse Atmospheric Requirement");
 
         if( m_RM->MatchList(GET_LINE(), "^Poisonous Gases:", "([A-Za-z0-9]+)") )
         {
@@ -265,7 +265,7 @@ bool Report::MatchAtmReq(String ^s)
                     FHStrings::GasFromString(m_RM->Results[i]) );
         }   
         else
-            throw gcnew FHUIParsingException("Failed to parse Atmospheric Requirement");
+            PARSING_EXCEPTION("Failed to parse Atmospheric Requirement");
 
         return true;
     }
@@ -286,7 +286,7 @@ bool Report::MatchSpeciesMet(String ^s)
         }
         else
         {
-            throw gcnew FHUIParsingException("Known Species: failure matching species met");
+            PARSING_EXCEPTION("Known Species: failure matching species met");
         }
         return true;
     }
@@ -304,7 +304,7 @@ bool Report::MatchAllies(String ^s)
         }
         else
         {
-            throw gcnew FHUIParsingException("Known Species: failure matching allies");
+            PARSING_EXCEPTION("Known Species: failure matching allies");
         }
         return true;
     }
@@ -322,7 +322,7 @@ bool Report::MatchEnemies(String ^s)
         }  
         else
         {
-            throw gcnew FHUIParsingException("Known Species: failure matching enemies");
+            PARSING_EXCEPTION("Known Species: failure matching enemies");
         }
         return true;
     }
@@ -386,8 +386,7 @@ bool Report::MatchColonyInfo(String ^s)
     }
     else
     {
-        throw gcnew FHUIParsingException(
-            String::Format("Unable to parse colony coordinates: {0}", s) );
+        PARSING_EXCEPTION( String::Format("Unable to parse colony coordinates: {0}", s) );
     }
 
     if( s == "WARNING! Home planet has not yet completely recovered from bombardment!" )
@@ -401,7 +400,7 @@ bool Report::MatchColonyInfo(String ^s)
         }
         else
         {
-            throw gcnew FHUIParsingException("Unexpected line");
+            PARSING_EXCEPTION("Unexpected line");
         }
     }
 
@@ -520,7 +519,7 @@ bool Report::MatchColonyInfo(String ^s)
     }
     else
     {
-        throw gcnew FHUIParsingException("End of section expected ");
+        PARSING_EXCEPTION("End of section expected ");
     }
 
     return false;
@@ -616,7 +615,7 @@ bool Report::MatchColonyShips(String ^s, Colony ^colony)
         while( ! String::IsNullOrEmpty( s = GET_LINE() ) )
         {
             if ( false == MatchShipInfo(s, colony->System, colony) )
-                throw gcnew FHUIParsingException("Failed to parse ship");
+                PARSING_EXCEPTION("Failed to parse ship");
         }
         return true;
     }
@@ -704,7 +703,7 @@ bool Report::MatchShipInfo(String ^s, StarSystem ^system, Colony ^colony)
             if( colony )
                 planetNum = colony->PlanetNum;
             else
-                throw gcnew FHUIParsingException("Ship under construction outside colony???");
+                PARSING_EXCEPTION("Ship under construction outside colony???");
         }
         else
         {
@@ -720,7 +719,7 @@ bool Report::MatchShipInfo(String ^s, StarSystem ^system, Colony ^colony)
                 location = SHIP_LOC_LANDED;
                 break;
             default:
-                throw gcnew FHUIParsingException("Invalid ship location: " + loc[0]);
+                PARSING_EXCEPTION("Invalid ship location: " + loc[0]);
             }
 
             if( location != SHIP_LOC_DEEP_SPACE )
@@ -728,8 +727,7 @@ bool Report::MatchShipInfo(String ^s, StarSystem ^system, Colony ^colony)
                 if( m_RM->Match(s, "^(\\d+)") )
                     planetNum = m_RM->GetResultInt(0);
                 else
-                    throw gcnew FHUIParsingException(
-                        String::Format("Unable to parse ship '{0}' location.", name));
+                    PARSING_EXCEPTION( String::Format("Unable to parse ship '{0}' location.", name) );
             }
         }
 
@@ -738,8 +736,7 @@ bool Report::MatchShipInfo(String ^s, StarSystem ^system, Colony ^colony)
             if( m_RM->Match(s, "^,(\\d+) tons") )
                 size = m_RM->GetResultInt(0);
             else
-                throw gcnew FHUIParsingException(
-                    String::Format("Unable to parse starbase '{0}' size.", name));
+                PARSING_EXCEPTION( String::Format("Unable to parse starbase '{0}' size.", name) );
         }
 
         if( colony )
@@ -747,14 +744,12 @@ bool Report::MatchShipInfo(String ^s, StarSystem ^system, Colony ^colony)
             if( m_RM->Match(s, "^\\)\\s+(\\d+)\\s*") )
                 capacity = m_RM->GetResultInt(0);
             else
-                throw gcnew FHUIParsingException(
-                    String::Format("Unable to parse ship '{0}' capacity.", name));
+                PARSING_EXCEPTION( String::Format("Unable to parse ship '{0}' capacity.", name) );
         }
         else
         {
             if( !m_RM->Match(s, "^\\)\\s*") )
-                throw gcnew FHUIParsingException(
-                    String::Format("Unable to parse ship '{0}'.", name));
+                PARSING_EXCEPTION( String::Format("Unable to parse ship '{0}'.", name) );
         }
 
         if( m_RM->Match(s, "^SP ([^,;]+)\\s*$") )
@@ -785,8 +780,7 @@ bool Report::MatchShipInfo(String ^s, StarSystem ^system, Colony ^colony)
                     ship->CanJump = false;
                 }
                 else
-                    throw gcnew FHUIParsingException(
-                        String::Format("Unable to parse ship '{0}' completion cost.", name));
+                    PARSING_EXCEPTION( String::Format("Unable to parse ship '{0}' completion cost.", name) );
             }
 
             while( !String::IsNullOrEmpty(s) )
@@ -798,8 +792,7 @@ bool Report::MatchShipInfo(String ^s, StarSystem ^system, Colony ^colony)
                     ship->Cargo[inv] = amount;
                 }
                 else
-                    throw gcnew FHUIParsingException(
-                        String::Format("Unable to parse ship '{0}' inventory.", name));
+                    PARSING_EXCEPTION( String::Format("Unable to parse ship '{0}' inventory.", name) );
             }
         }
     }
@@ -872,8 +865,7 @@ bool Report::MatchOtherPlanetsShips(String ^s)
                     colony->Inventory[inv] = amount;
                 }
                 else
-                    throw gcnew FHUIParsingException(
-                        String::Format("Unable to parse colony '{0}' inventory.", plName));
+                    PARSING_EXCEPTION( String::Format("Unable to parse colony '{0}' inventory.", plName) );
             }
         }
 
@@ -920,7 +912,7 @@ bool Report::MatchAliens(String ^s)
 
         if( system == nullptr )
         {
-            throw gcnew FHUIParsingException("Unexpected content");
+            PARSING_EXCEPTION("Unexpected content");
         }
 
         PlanetType plType = PLANET_MAX;
@@ -944,7 +936,7 @@ bool Report::MatchAliens(String ^s)
 
         if( plType == PLANET_MAX )
         {
-            throw gcnew FHUIParsingException("Unexpected content");
+            PARSING_EXCEPTION("Unexpected content");
         }
 
         if( m_RM->Match(s, "^([^,;]+)\\s+\\(pl #(\\d+)\\)\\s+SP\\s+([^,;]+)\\s*$") )
@@ -970,7 +962,7 @@ bool Report::MatchAliens(String ^s)
         }
         else
         {
-            throw gcnew FHUIParsingException("Unexpected content");
+            PARSING_EXCEPTION("Unexpected content");
         }
 
         if( ! colony )
@@ -999,7 +991,7 @@ bool Report::MatchAliens(String ^s)
         }
         else
         {
-            throw gcnew FHUIParsingException("Unexpected content");
+            PARSING_EXCEPTION("Unexpected content");
         }
 
         if( m_RM->Match(s, "^\\(There are (\\d+) Planetary Defense Units on the planet\\.\\)") )
@@ -1069,8 +1061,7 @@ bool Report::MatchTemplateEntry(String ^s)
                 m_TemplateColony = colony;
                 return true;
             }
-            throw gcnew FHUIParsingException(
-                "PRODUCTION order for unknown colony: PL " + m_RM->Results[0] );
+            PARSING_EXCEPTION( "PRODUCTION order for unknown colony: PL " + m_RM->Results[0] );
         }
 
         // Ignore any production command
@@ -1104,7 +1095,7 @@ bool Report::MatchTemplateEntry(String ^s)
             ship->AddCommand( cmd );
             return true;
         }
-        throw gcnew FHUIParsingException(
+        PARSING_EXCEPTION(
             String::Format("UNLOAD order for unknown ship: {0} {1}", m_RM->Results[0], m_RM->Results[1]) );
     }
 
@@ -1151,7 +1142,7 @@ bool Report::MatchTemplateEntry(String ^s)
             }
             return true;
         }
-        throw gcnew FHUIParsingException(
+        PARSING_EXCEPTION(
             String::Format("JUMP order for unknown ship: {0} {1}", m_RM->Results[0], m_RM->Results[1]) );
     }
 
@@ -1161,7 +1152,7 @@ bool Report::MatchTemplateEntry(String ^s)
         Colony ^colony = GameData::Player->FindColony(m_RM->Results[1], false);
         Ship^ ship = GameData::Player->FindShip(m_RM->Results[2], false);
         if( !ship )
-            throw gcnew FHUIParsingException("JUMP order for unknown ship: {0}" + m_RM->Results[2]);
+            PARSING_EXCEPTION("JUMP order for unknown ship: {0}" + m_RM->Results[2]);
 
         int cost = m_RM->GetResultInt(0) ? m_RM->GetResultInt(0) : ship->Capacity;
 

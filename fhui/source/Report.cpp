@@ -100,39 +100,25 @@ bool Report::Verify(String^ fileName)
 
 void Report::Parse(String^ fileName)
 {
+    m_CurrentFileName = fileName;
+    m_CurrentFileLine = 0;
+
     m_Input = File::OpenText(fileName);
     String ^line;
 
-    try
+    while ( ! String::IsNullOrEmpty( line = GET_NON_EMPTY_LINE() ) )
     {
-        while ( ! String::IsNullOrEmpty( line = GET_NON_EMPTY_LINE() ) )
-        {
-            ParseInternal( line );
-        }
-        if( m_Phase == PHASE_LOG_USER )
-            GameData::SetParsingUserContent(false);
-        m_Phase = PHASE_NONE;
+        ParseInternal( line );
     }
-    catch( Exception ^ex )
-    {
-        throw gcnew FHUIParsingException(
-            String::Format("Error occured while parsing report: {0}, line {1}:\r\n{2}\r\nError description:\r\n  {3}",
-                fileName,
-                m_Content->Count,
-                m_Content[m_Content->Count-1],
-                ex->Message),
-            ex );
-    }
-    finally
-    {
-        m_Input->Close();
-    }
+    if( m_Phase == PHASE_LOG_USER )
+        GameData::SetParsingUserContent(false);
+    m_Phase = PHASE_NONE;
 }
 
 void Report::ExpectedEmptyLine( String^ srcFun, int srcLine )
 {
     if ( ! String::IsNullOrEmpty( GetLine( srcFun, srcLine ) ) )
-        throw gcnew FHUIParsingException("Empty line was expected");
+        PARSING_EXCEPTION("Empty line was expected");
 }
 
 String^ Report::GetNonEmptyLine( String^ srcFun, int srcLine )
@@ -184,9 +170,47 @@ String^ Report::GetLine()
         m_Content->Add( line );
 
     if( line )
+    {
+        ++m_CurrentFileLine;
         return line->Trim();
+    }
     else
         return nullptr; //EOF
+}
+
+String^ Report::PrepareException(String ^srcFun, int srcLine, String ^msg)
+{
+    String^ text = "\r\n\r\n";
+
+    for (int i = Math::Max(-m_CurrentFileLine + 1, -8); i < 8; i++)
+    {
+        String^ line;
+        if( i < 0)
+        {
+            line = m_Content[m_Content->Count + i];
+        }
+        else
+        {
+            line = m_Input->ReadLine();
+            if( line == nullptr )
+                break;
+        }
+
+        text += String::Format("{0,-5}{1}'{2}'\r\n", m_CurrentFileLine + i + 1, (i == -1) ? ">" : " ", line);
+    }
+
+    text += String::Format(
+        "\r\nData parsing failed while processing file {0} line {1}\r\n"
+        "Error: {2}\r\nCurrent turn: {3}\r\nPhase: {4}\r\n{5}:{6}",
+        m_CurrentFileName,
+        m_CurrentFileLine,
+        msg,
+        m_Turn,
+        PhaseToString(m_Phase),
+        srcFun,
+        srcLine);
+
+    return text;
 }
 
 bool Report::ParseInternal(String ^s)
@@ -552,7 +576,7 @@ bool Report::MatchPhaseSpeciesStatus(String ^s)
         m_Turn = m_RM->GetResultInt(0);
 
         if( ! String::IsNullOrEmpty( GET_LINE() ) )
-            throw gcnew FHUIParsingException("Species Status: empty line was expected");
+            PARSING_EXCEPTION("Species Status: empty line was expected");
 
         // Species name
         if( m_RM->Match(GET_LINE(), "^Species name: ([^,;]+)") )
@@ -561,7 +585,7 @@ bool Report::MatchPhaseSpeciesStatus(String ^s)
         }
         else
         {
-            throw gcnew FHUIParsingException("Species Status: unexpected line");
+            PARSING_EXCEPTION("Species Status: unexpected line");
         }
 
         if( m_RM->Match(GET_LINE(), "^Government name:\\s+(.+)$") )
@@ -570,7 +594,7 @@ bool Report::MatchPhaseSpeciesStatus(String ^s)
         }
         else
         {
-            throw gcnew FHUIParsingException("Species Status: unexpected line");
+            PARSING_EXCEPTION("Species Status: unexpected line");
         }
 
         if( m_RM->Match(GET_LINE(), "^Government type:\\s+(.+)$") )
@@ -579,29 +603,29 @@ bool Report::MatchPhaseSpeciesStatus(String ^s)
         }
         else
         {
-            throw gcnew FHUIParsingException("Species Status: unexpected line");
+            PARSING_EXCEPTION("Species Status: unexpected line");
         }
         
         if( ! String::IsNullOrEmpty( GET_LINE() ) )
-            throw gcnew FHUIParsingException("Species Status: empty line was expected");
+            PARSING_EXCEPTION("Species Status: empty line was expected");
 
         // Tech levels
         if( ! MatchTechLevels( GET_LINE() ) )
         {
-            throw gcnew FHUIParsingException("Species Status: tech status was expected");
+            PARSING_EXCEPTION("Species Status: tech status was expected");
         }
 
         if( ! String::IsNullOrEmpty( GET_LINE() ) )
-            throw gcnew FHUIParsingException("Species Status: empty line was expected");
+            PARSING_EXCEPTION("Species Status: empty line was expected");
 
         // Atmospheric requirements
         if( ! MatchAtmReq( GET_LINE() ) )
         {
-            throw gcnew FHUIParsingException("Species Status: atmospheric requirements were expected");
+            PARSING_EXCEPTION("Species Status: atmospheric requirements were expected");
         }
 
         if( ! String::IsNullOrEmpty( GET_LINE() ) )
-            throw gcnew FHUIParsingException("Species Status: empty line was expected");
+            PARSING_EXCEPTION("Species Status: empty line was expected");
       
         // Fleet maintenance
         if( m_RM->Match( GET_LINE(), "^Fleet maintenance cost = (\\d+) \\((\\d+)\\.(\\d+)% of total production\\)") )
@@ -612,7 +636,7 @@ bool Report::MatchPhaseSpeciesStatus(String ^s)
         }
         else
         {
-            throw gcnew FHUIParsingException("Species Status: unexpected line");
+            PARSING_EXCEPTION("Species Status: unexpected line");
         }
 
         s = GET_NON_EMPTY_LINE();
@@ -645,7 +669,7 @@ bool Report::MatchPhaseSpeciesStatus(String ^s)
         }
         else
         {
-            throw gcnew FHUIParsingException("Species Status: unexpected line");
+            PARSING_EXCEPTION("Species Status: unexpected line");
         }
     }
     return false;

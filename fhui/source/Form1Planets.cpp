@@ -375,11 +375,6 @@ void Form1::PlanetsMenuAddName(DataGridViewCellEventArgs ^cell)
         m_PlanetsMenuRef->Number,
         false );
 
-    colony->MiBase = 0;
-    colony->MaBase = 0;
-    colony->Shipyards = 0;
-    colony->PlanetType = PLANET_COLONY;
-
     m_CommandMgr->AddCommand( colony, 
         gcnew CmdPlanetName( m_PlanetsMenuRef->System, m_PlanetsMenuRef->Number, name ) );
 

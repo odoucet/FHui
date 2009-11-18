@@ -440,6 +440,11 @@ Colony^ TurnData::CreateColony(Alien ^sp, String ^name, StarSystem ^system, int 
     if( GameData::Player && ( sp == GameData::Player ) )
     {
         colony->Planet->Name = name;
+        colony->PlanetType = PLANET_COLONY;
+        // for player colonies these are known and should never be -1
+        colony->MiBase = 0;
+        colony->MaBase = 0;
+        colony->Shipyards = 0;
     }
     else
     {
