@@ -59,7 +59,7 @@ public:
         virtual int Compare(Ship ^s1, Ship ^s2)
         {
             if( s1->Type != s2->Type ) return ((int)s1->Type - (int)s2->Type);
-            if( s1->Tonnage != s2->Tonnage ) return s1->Tonnage - s2->Tonnage;
+            if( s1->Tonnage != s2->Tonnage ) return s2->Tonnage - s1->Tonnage;
             if( s1->System->X != s2->System->X ) return s1->System->X - s2->System->X;
             if( s1->System->Y != s2->System->Y ) return s1->System->Y - s2->System->Y;
             if( s1->System->Z != s2->System->Z ) return s1->System->Z - s2->System->Z;
@@ -135,9 +135,21 @@ public:
     array<int>^     CargoPreDeparture;
     array<int>^     CargoPostArrival;
 
-    property int            Size {
+    property int    Size {
         int get() { return m_Size; }
         void set(int val) { m_Size = val; SetupTonnage(); }
+    }
+    property bool   IsIncomplete
+    {
+        bool get() { return EUToComplete > 0 || BuiltThisTurn; }
+    }
+    property bool   IsRecycled
+    {
+        bool get()
+        {
+            ICommand ^cmd = GetProdCommand();
+            return cmd && cmd->GetCmdType() == CommandType::RecycleShip;
+        }
     }
 
     // ---- Ship orders ----

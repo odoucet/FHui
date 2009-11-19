@@ -442,19 +442,6 @@ void Form1::ShowReloadMenu()
     menu->Items->Add( gcnew ToolStripSeparator );
     menu->Items->Add( ColoniesFillMenuAuto() );
 
-    if( m_PluginMgr->OrderPlugins->Count > 0 )
-    {
-        menu->Items->Add( gcnew ToolStripSeparator );
-        menu->Items->Add(
-            "Recreate Plugin orders",
-            nullptr,
-            gcnew EventHandler(this, &Form1::RecreatePluginCommands) );
-        menu->Items->Add(
-            "Remove Plugin orders",
-            nullptr,
-            gcnew EventHandler(this, &Form1::RemovePluginCommands) );
-    }
-
     // Show menu
     Rectangle r = TurnReloadBtn->DisplayRectangle;
     menu->Show(TurnReloadBtn, r.Left + r.Width / 2, r.Top + r.Height / 2);

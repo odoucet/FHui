@@ -1223,11 +1223,10 @@ List<String^>^ CommandManager::PrintSystemStatus(StarSystem^ system, bool listIn
     for each ( Ship^ ship in system->ShipsOwned )
     {
         // Skip incomplete ships
-        if( listIncomplete == false )
+        if( listIncomplete == false &&
+            ship->IsIncomplete )
         {
-            if( ship->EUToComplete > 0 ||
-                ship->BuiltThisTurn )
-                continue;
+            continue;
         }
 
         String^ inv = ship->PrintCargo(originalInventory);
@@ -1364,6 +1363,12 @@ void CommandManager::GenerateJumps()
 
     for each( Ship ^ship in jumpList )
     {
+        if( ship->IsIncomplete ||
+            ship->IsRecycled )
+        {
+            continue;
+        }
+
         GenerateJumpInfo(ship);
 
         int prevLines = m_OrderList->Count;
@@ -1554,10 +1559,7 @@ void CommandManager::GenerateProductionRecycle(Colony ^colony)
 
     for each( Ship ^ship in colony->System->ShipsOwned )
     {
-        ICommand ^prodCmd = ship->GetProdCommand();
-
-        if( prodCmd != nullptr &&
-            prodCmd->GetCmdType() == CommandType::RecycleShip &&
+        if( ship->IsRecycled &&
             ship->CommandProdPlanet == -1 )    // not yet done
         {
             // If ship is incomplete,
@@ -1566,6 +1568,7 @@ void CommandManager::GenerateProductionRecycle(Colony ^colony)
                 ship->PlanetNum != colony->PlanetNum )
                 continue;
 
+            ICommand ^prodCmd = ship->GetProdCommand();
             colony->OrdersText->Add( PrintCommandWithInfo( prodCmd, 4 ) );
             m_Budget->EvalOrder( prodCmd );
 

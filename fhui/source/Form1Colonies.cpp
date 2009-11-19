@@ -360,12 +360,13 @@ void Form1::ColoniesFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowInde
         if( colony->CanProduce )
             menu->Items->Add( ColoniesFillMenuCommands(CommandPhase::Production) );
         menu->Items->Add( ColoniesFillMenuCommands(CommandPhase::PostArrival) );
-        menu->Items->Add( ColoniesFillMenuAuto() );
 
         // Production order adjustment
         menu->Items->Add( gcnew ToolStripSeparator );
         menu->Items->Add( ColoniesFillMenuProductionOrder() );
 
+        // Auto orders
+        menu->Items->Add( ColoniesFillMenuAuto() );
     }
 
     // Ship jumps to this colony
@@ -403,6 +404,19 @@ ToolStripMenuItem^ Form1::ColoniesFillMenuAuto()
         "Delete all Auto commands",
         nullptr,
         gcnew EventHandler(this, &Form1::ColoniesMenuAutoDeleteAll) );
+
+    if( m_PluginMgr->OrderPlugins->Count > 0 )
+    {
+        autoMenu->DropDownItems->Add( gcnew ToolStripSeparator );
+        autoMenu->DropDownItems->Add(
+            "Recreate Plugin orders",
+            nullptr,
+            gcnew EventHandler(this, &Form1::RecreatePluginCommands) );
+        autoMenu->DropDownItems->Add(
+            "Remove Plugin orders",
+            nullptr,
+            gcnew EventHandler(this, &Form1::RemovePluginCommands) );
+    }
 
     return autoMenu;
 }
@@ -842,7 +856,10 @@ void Form1::ColoniesMenuProdOrderAdjust(int adjustment)
 void Form1::ColoniesMenuCommandAdd(ICommand ^cmd)
 {
     if( cmd )
+    {
+        cmd->Origin = CommandOrigin::GUI;
         m_CommandMgr->AddCommand(m_ColoniesMenuRef, cmd);
+    }
     else
         m_CommandMgr->SaveCommands();
 

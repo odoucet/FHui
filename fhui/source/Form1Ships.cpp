@@ -239,9 +239,7 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
             }
         }
 
-        ICommand ^cmd = ship->GetProdCommand();
-        if( cmd == nullptr ||
-            cmd->GetCmdType() != CommandType::RecycleShip )
+        if( ship->IsRecycled == false )
         {
             menu->Items->Add( ShipsFillMenuCommands(CommandPhase::PostArrival) );
         }
@@ -752,7 +750,10 @@ void Form1::ShipsMenuSelectRef(Object^, EventArgs ^e)
 void Form1::ShipsMenuCommandAdd(ShipCommandData ^data)
 {
     if( data )
+    {
         data->A->AddCommand( data->B );
+        data->B->Origin = CommandOrigin::GUI;
+    }
 
     m_CommandMgr->SaveCommands();
 

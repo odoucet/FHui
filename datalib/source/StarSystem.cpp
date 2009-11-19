@@ -671,7 +671,7 @@ List<Ship^>^ StarSystem::GetShipTargets(CommandPhase phase)
             if( ship->System != this )
                 continue;
             // In pre-departure skip any incomplete or being built ship
-            if( ship->EUToComplete > 0 || ship->BuiltThisTurn )
+            if( ship->IsIncomplete )
                 continue;
             break;
 
@@ -688,8 +688,7 @@ List<Ship^>^ StarSystem::GetShipTargets(CommandPhase phase)
                 else if( cmd )
                     continue;
 
-                cmd = ship->GetProdCommand();
-                if( cmd && cmd->GetCmdType() == CommandType::RecycleShip )
+                if( ship->IsRecycled )
                     continue;
             }
             // Skip incomplete ships
