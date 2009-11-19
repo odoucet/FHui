@@ -165,33 +165,44 @@ void Form1::InitRefLists()
     // -- ref systems xyz:
     m_RefListSystemsXYZ->Add( GridFilter::s_CaptionXYZ );
     for each( StarSystem ^system in m_GameData->GetStarSystems() )
+    {
         m_RefListSystemsXYZ->Add( system->PrintLocation() );
+    }
 
     // -- home systems:
     m_RefListHomes->Add( GridFilter::s_CaptionHome );
     m_RefListHomes->Add( sp->Name );
     for each( Alien ^alien in m_GameData->GetAliens() )
+    {
         if( alien != sp && alien->HomeSystem )
             m_RefListHomes->Add( alien->Name );
+    }
 
     // -- colonies:
     // owned first
     m_RefListColonies->Add( GridFilter::s_CaptionColony );
     for each( Colony ^colony in sp->Colonies )
+    {
         m_RefListColonies->Add( colony->PrintRefListEntry() );
+    }
     // then alien
     for each( Alien ^alien in GameData::GetAliens() )
+    {
         for each( Colony ^colony in alien->Colonies )
             m_RefListColonies->Add( colony->PrintRefListEntry() );
+    }
 
-    // -- ref ship age:
+    // -- ref ships:
     m_RefListShips->Add( GridFilter::s_CaptionShip );
+    sp->Ships->Sort( gcnew Ship::WarTonnageComparer );
     for each( Ship ^ship in sp->Ships )
+    {
         if( ship->Type != SHIP_BAS &&
             ship->SubLight == false )
         {
             m_RefListShips->Add( ship->PrintRefListEntry() );
         }
+    }
 }
 
 void Form1::UpdateControls()

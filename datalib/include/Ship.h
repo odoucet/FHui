@@ -86,9 +86,12 @@ public:
         virtual int Compare(Ship ^s1, Ship ^s2)
         {
             // Newer, Bigger ships first
-            if( s2->WarTonnage == s1->WarTonnage )
-                return s1->Age - s2->Age;
-            return s2->WarTonnage - s1->WarTonnage;
+            int result = s2->WarTonnage - s1->WarTonnage;
+            if( result == 0 )
+                result = s1->Age - s2->Age;
+            if( result == 0 )
+                result = s1->Name->CompareTo(s2->Name);
+            return result;
         }
     };
     // --------------------------------------------------

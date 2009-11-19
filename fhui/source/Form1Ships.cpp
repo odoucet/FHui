@@ -688,9 +688,9 @@ ToolStripMenuItem^ Form1::ShipsMenuCreateJumpItem(
     {
         itemText += " From " + ship->PrintLocation();
 
-        cmd = ship->GetJumpCommand();
-        if( cmd )
-            itemText += "; (Current: " + cmd->PrintForUI() + ")";
+        ICommand ^cmdJumpCurrent = ship->GetJumpCommand();
+        if( cmdJumpCurrent )
+            itemText += "; (Current: " + cmdJumpCurrent->PrintForUI() + ")";
     }
 
     ToolStripMenuItem ^menuItem = CreateCustomMenuItem<ShipCommandData^>(
