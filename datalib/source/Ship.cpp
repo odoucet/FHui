@@ -443,15 +443,27 @@ void Ship::AddCommand(ICommand ^cmd)
 
     if( cmd->GetPhase() == CommandPhase::Jump ||
         cmd->GetPhase() == CommandPhase::Production )
-    {   // Remove old one
-        for each( ICommand ^cmdIter in Commands )
+    {   // Remove exclusive orders
+        bool removePostArrival = (cmd->GetCmdType() == CommandType::RecycleShip);
+
+        bool repeat;
+        do
         {
-            if( cmdIter->GetPhase() == cmd->GetPhase() )
-            {
-                Commands->Remove( cmdIter );
-                break;
+            repeat = false;
+            for each( ICommand ^cmdIter in Commands )
+            {   // No production when jumping,
+                // and no jumping while production ops
+                // If production order is recycle, remove post-arrival orders too
+                if( cmdIter->GetPhase() == CommandPhase::Jump ||
+                    cmdIter->GetPhase() == CommandPhase::Production ||
+                    (removePostArrival && cmdIter->GetPhase() == CommandPhase::PostArrival) )
+                {
+                    DelCommand( cmdIter );
+                    repeat = true;
+                    break;
+                }
             }
-        }
+        } while( repeat );
     }
 
     // Only single scan per phase

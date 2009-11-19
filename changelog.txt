@@ -10,6 +10,8 @@ FHUI build ??
 + Shipyards column on Colonies tab now also shows available shipyard
   capacity and a warning when shipyard capacity exceeded with ship build
   orders.
++ Enable ship production commands only when no jumps orders issued.
+  Adding jump command cancels ship production order.
 
 FHUI build 342
 * [P] "Enmity/neutrality towards ALL species" is now correctly handled.

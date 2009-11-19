@@ -231,10 +231,20 @@ void Form1::ShipsFillMenu(Windows::Forms::ContextMenuStrip ^menu, int rowIndex)
         {
             menu->Items->Add( ShipsFillMenuCommands(CommandPhase::PreDeparture) );
             menu->Items->Add( ShipsFillMenuCommands(CommandPhase::Jump) );
-            if( prodOrderPossible )
+            // Can't issue ship related production commands on a ship that made a jump
+            if( prodOrderPossible &&
+                ship->GetJumpCommand() == nullptr )
+            {
                 menu->Items->Add( ShipsFillMenuCommands(CommandPhase::Production) );
+            }
         }
-        menu->Items->Add( ShipsFillMenuCommands(CommandPhase::PostArrival) );
+
+        ICommand ^cmd = ship->GetProdCommand();
+        if( cmd == nullptr ||
+            cmd->GetCmdType() != CommandType::RecycleShip )
+        {
+            menu->Items->Add( ShipsFillMenuCommands(CommandPhase::PostArrival) );
+        }
     }
 }
 
