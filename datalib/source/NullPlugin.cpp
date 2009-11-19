@@ -74,7 +74,10 @@ void BudgetTracker::EvalOrder(ICommand ^cmd)
     if( cmd->RequiresShipyard() && m_Colony )
     {
         if( m_Colony->Res->AvailShipyards == 0 )
+        {
             AddComment( "; !!!!!! NOT ENOUGH SHIPYARD capacity available!!!!!!" );
+            m_Colony->Res->ShipyardsOverload = true;
+        }
         else
             --m_Colony->Res->AvailShipyards;
     }

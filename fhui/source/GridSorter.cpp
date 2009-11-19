@@ -178,6 +178,10 @@ int GridSorterBase::Compare( Object^ obj1, Object^ obj2 )
         result = CompareRelation(o1, o2);
         break;
 
+    case CustomSortMode::Shipyards:
+        result = CompareShipyards(o1, o2);
+        break;
+
     default:
         throw gcnew FHUIDataImplException("Unsupported custom sort mode: " + m_SortModes[m_SortColumn].ToString() );
     }
@@ -287,6 +291,17 @@ int GridSorterBase::CompareDistance(StarSystem ^refSystem, IGridDataSrc ^o1, IGr
     if( distDiff == 0 )
         return 0;
     return distDiff < 0 ? -1 : 1;
+}
+
+int GridSorterBase::CompareShipyards(IGridDataSrc ^o1, IGridDataSrc ^o2)
+{
+    Colony ^c1 = safe_cast<Colony^>(o1);
+    Colony ^c2 = safe_cast<Colony^>(o2);
+
+    int s1 = c1->EconomicBase > 0 ? c1->Shipyards : -1;
+    int s2 = c2->EconomicBase > 0 ? c2->Shipyards : -1;
+
+    return s1 - s2;
 }
 
 int GridSorterBase::CompareRelation(IGridDataSrc ^o1, IGridDataSrc ^o2)

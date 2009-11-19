@@ -106,6 +106,7 @@ void Colony::ProductionReset()
     Res->AvailPop = AvailPop;
     Res->AvailShipyards = Shipyards;
     Res->Inventory = gcnew array<int>(INV_MAX){0};
+    Res->ShipyardsOverload = false;
     Inventory->CopyTo(Res->Inventory, 0);
 }
 

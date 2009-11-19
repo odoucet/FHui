@@ -39,7 +39,7 @@ void Form1::ColoniesInitControls()
     c.Prod      = ADD_COLUMN("PR",          "Production",                   int,    Descending, Default);
     c.ProdOrder = ADD_COLUMN("#",           "Production order for orders template", int, Ascending, Default);
     c.Budget    = ADD_COLUMN("$",           "Budget after production orders",String,Descending, Default);
-    c.Shipyards = ADD_COLUMN("SY",          "Shipyards",                    int,    Descending, Default);
+    c.Shipyards = ADD_COLUMN("SY",          "Shipyards",                    int,    Descending, Shipyards);
     c.MD        = ADD_COLUMN("MD",          "Mining Difficulty",            double, Ascending,  Default);
     c.Grav      = ADD_COLUMN("Grav",        "Gravitation",                  double, Ascending,  Default);
     c.LSN       = ADD_COLUMN("LSN",         "LSN",                          int,    Ascending,  Default);
@@ -215,16 +215,28 @@ void Form1::ColoniesFillGrid()
                     cells[c.Prod]->ToolTipText      = orders;
                     cells[c.ProdOrder]->ToolTipText = orders;
                     cells[c.Budget]->ToolTipText    = orders;
+
+                    if( colony->Shipyards > 0 )
+                    {
+                        cells[c.Shipyards]->Value   =
+                            String::Format("{0} ({1})",
+                                colony->Shipyards,
+                                colony->Res->ShipyardsOverload
+                                    ? "!EX!"
+                                    : colony->Res->AvailShipyards.ToString() );
+                        if( colony->Res->ShipyardsOverload )
+                            cells[c.Shipyards]->Style->ForeColor = Color::Red;
+                    }
+                    else
+                        cells[c.Shipyards]->Value   = "0";
                 }
                 else
                 {
                     if( colony->LastSeen > 0 )
                         cells[c.Seen]->Value = colony->LastSeen;
-                }
 
-                if( colony->Shipyards != -1 )
-                {
-                    cells[c.Shipyards]->Value = colony->Shipyards;
+                    if( colony->Shipyards != -1 )
+                        cells[c.Shipyards]->Value = colony->Shipyards;
                 }
             }
 

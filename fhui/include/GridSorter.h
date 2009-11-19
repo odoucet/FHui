@@ -44,6 +44,7 @@ public:
         Distance,
         DistanceSec,    // Secondary distance
         Relation,
+        Shipyards,
     };
 
     virtual int     AddColumn(String ^title, String ^description, Type ^type, SortOrder defaultSortOrder);
@@ -74,6 +75,7 @@ protected:
     virtual int     CompareLocation(IGridDataSrc ^o1, IGridDataSrc ^o2);
     virtual int     CompareDistance(StarSystem ^refSystem, IGridDataSrc ^o1, IGridDataSrc ^o2);
     virtual int     CompareRelation(IGridDataSrc ^o1, IGridDataSrc ^o2);
+    virtual int     CompareShipyards(IGridDataSrc ^o1, IGridDataSrc ^o2);
 
 protected:
     DataGridView^   m_Grid;

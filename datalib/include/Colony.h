@@ -215,6 +215,9 @@ public:
         int             UsedEU;
         int             AvailPop;
         int             AvailShipyards;
+
+        bool            ShipyardsOverload;
+
         array<int>^     Inventory;
     };
 
