@@ -660,6 +660,7 @@ void StarSystem::SetWormhole(int targetId)
 
 List<Ship^>^ StarSystem::GetShipTargets(CommandPhase phase)
 {
+    GameData::Player->Ships->Sort( gcnew Ship::WarTonnageComparer );
     List<Ship^> ^list = gcnew List<Ship^>;
 
     for each( Ship ^ship in GameData::Player->Ships )
@@ -685,6 +686,10 @@ List<Ship^>^ StarSystem::GetShipTargets(CommandPhase phase)
                         continue;
                 }
                 else if( cmd )
+                    continue;
+
+                cmd = ship->GetProdCommand();
+                if( cmd && cmd->GetCmdType() == CommandType::RecycleShip )
                     continue;
             }
             // Skip incomplete ships

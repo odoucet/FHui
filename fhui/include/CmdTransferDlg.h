@@ -52,6 +52,7 @@ namespace FHUI
         void    InitControlsUnits();
 
         void    UpdateAmounts();
+        void    AddAll();
 
         value struct UnitControls
         {
@@ -233,6 +234,8 @@ private: System::Windows::Forms::Label^  InfoCapacityUsed;
 private: System::Windows::Forms::Button^  BtnTransfer;
 private: System::Windows::Forms::Button^  BtnCancel;
 private: System::Windows::Forms::Label^  InfoInv;
+private: System::Windows::Forms::Button^  BtnAll;
+
 
 
 
@@ -363,6 +366,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             this->BtnTransfer = (gcnew System::Windows::Forms::Button());
             this->BtnCancel = (gcnew System::Windows::Forms::Button());
             this->InfoInv = (gcnew System::Windows::Forms::Label());
+            this->BtnAll = (gcnew System::Windows::Forms::Button());
             label1 = (gcnew System::Windows::Forms::Label());
             label2 = (gcnew System::Windows::Forms::Label());
             label3 = (gcnew System::Windows::Forms::Label());
@@ -574,7 +578,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // label28
             // 
             label28->AutoSize = true;
-            label28->Location = System::Drawing::Point(441, 294);
+            label28->Location = System::Drawing::Point(440, 294);
             label28->Name = L"label28";
             label28->Size = System::Drawing::Size(77, 13);
             label28->TabIndex = 1;
@@ -583,7 +587,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // label29
             // 
             label29->AutoSize = true;
-            label29->Location = System::Drawing::Point(441, 318);
+            label29->Location = System::Drawing::Point(440, 318);
             label29->Name = L"label29";
             label29->Size = System::Drawing::Size(65, 13);
             label29->TabIndex = 1;
@@ -682,7 +686,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // label68
             // 
             label68->AutoSize = true;
-            label68->Location = System::Drawing::Point(441, 78);
+            label68->Location = System::Drawing::Point(440, 78);
             label68->Name = L"label68";
             label68->Size = System::Drawing::Size(71, 13);
             label68->TabIndex = 1;
@@ -691,7 +695,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // label69
             // 
             label69->AutoSize = true;
-            label69->Location = System::Drawing::Point(441, 174);
+            label69->Location = System::Drawing::Point(440, 174);
             label69->Name = L"label69";
             label69->Size = System::Drawing::Size(71, 13);
             label69->TabIndex = 1;
@@ -700,7 +704,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // label70
             // 
             label70->AutoSize = true;
-            label70->Location = System::Drawing::Point(441, 270);
+            label70->Location = System::Drawing::Point(440, 270);
             label70->Name = L"label70";
             label70->Size = System::Drawing::Size(71, 13);
             label70->TabIndex = 1;
@@ -709,7 +713,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // label72
             // 
             label72->AutoSize = true;
-            label72->Location = System::Drawing::Point(441, 102);
+            label72->Location = System::Drawing::Point(440, 102);
             label72->Name = L"label72";
             label72->Size = System::Drawing::Size(71, 13);
             label72->TabIndex = 1;
@@ -718,7 +722,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // label73
             // 
             label73->AutoSize = true;
-            label73->Location = System::Drawing::Point(441, 198);
+            label73->Location = System::Drawing::Point(440, 198);
             label73->Name = L"label73";
             label73->Size = System::Drawing::Size(71, 13);
             label73->TabIndex = 1;
@@ -727,7 +731,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // label76
             // 
             label76->AutoSize = true;
-            label76->Location = System::Drawing::Point(441, 126);
+            label76->Location = System::Drawing::Point(440, 126);
             label76->Name = L"label76";
             label76->Size = System::Drawing::Size(71, 13);
             label76->TabIndex = 1;
@@ -736,7 +740,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // label77
             // 
             label77->AutoSize = true;
-            label77->Location = System::Drawing::Point(441, 222);
+            label77->Location = System::Drawing::Point(440, 222);
             label77->Name = L"label77";
             label77->Size = System::Drawing::Size(71, 13);
             label77->TabIndex = 1;
@@ -745,7 +749,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // label80
             // 
             label80->AutoSize = true;
-            label80->Location = System::Drawing::Point(441, 150);
+            label80->Location = System::Drawing::Point(440, 150);
             label80->Name = L"label80";
             label80->Size = System::Drawing::Size(71, 13);
             label80->TabIndex = 1;
@@ -754,7 +758,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // label81
             // 
             label81->AutoSize = true;
-            label81->Location = System::Drawing::Point(441, 246);
+            label81->Location = System::Drawing::Point(440, 246);
             label81->Name = L"label81";
             label81->Size = System::Drawing::Size(71, 13);
             label81->TabIndex = 1;
@@ -1041,7 +1045,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // InfoGT
             // 
             this->InfoGT->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-            this->InfoGT->Location = System::Drawing::Point(520, 292);
+            this->InfoGT->Location = System::Drawing::Point(519, 292);
             this->InfoGT->Name = L"InfoGT";
             this->InfoGT->Size = System::Drawing::Size(40, 17);
             this->InfoGT->TabIndex = 1;
@@ -1050,7 +1054,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // InfoJP
             // 
             this->InfoJP->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-            this->InfoJP->Location = System::Drawing::Point(520, 316);
+            this->InfoJP->Location = System::Drawing::Point(519, 316);
             this->InfoJP->Name = L"InfoJP";
             this->InfoJP->Size = System::Drawing::Size(40, 17);
             this->InfoJP->TabIndex = 1;
@@ -1068,7 +1072,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // AmountGT
             // 
             this->AmountGT->Enabled = false;
-            this->AmountGT->Location = System::Drawing::Point(567, 290);
+            this->AmountGT->Location = System::Drawing::Point(566, 290);
             this->AmountGT->Name = L"AmountGT";
             this->AmountGT->Size = System::Drawing::Size(55, 20);
             this->AmountGT->TabIndex = 2;
@@ -1078,7 +1082,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // AmountJP
             // 
             this->AmountJP->Enabled = false;
-            this->AmountJP->Location = System::Drawing::Point(567, 314);
+            this->AmountJP->Location = System::Drawing::Point(566, 314);
             this->AmountJP->Name = L"AmountJP";
             this->AmountJP->Size = System::Drawing::Size(55, 20);
             this->AmountJP->TabIndex = 2;
@@ -1269,7 +1273,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // InfoSG1
             // 
             this->InfoSG1->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-            this->InfoSG1->Location = System::Drawing::Point(520, 76);
+            this->InfoSG1->Location = System::Drawing::Point(519, 76);
             this->InfoSG1->Name = L"InfoSG1";
             this->InfoSG1->Size = System::Drawing::Size(40, 17);
             this->InfoSG1->TabIndex = 1;
@@ -1278,7 +1282,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // InfoSG5
             // 
             this->InfoSG5->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-            this->InfoSG5->Location = System::Drawing::Point(520, 172);
+            this->InfoSG5->Location = System::Drawing::Point(519, 172);
             this->InfoSG5->Name = L"InfoSG5";
             this->InfoSG5->Size = System::Drawing::Size(40, 17);
             this->InfoSG5->TabIndex = 1;
@@ -1287,7 +1291,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // InfoSG9
             // 
             this->InfoSG9->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-            this->InfoSG9->Location = System::Drawing::Point(520, 268);
+            this->InfoSG9->Location = System::Drawing::Point(519, 268);
             this->InfoSG9->Name = L"InfoSG9";
             this->InfoSG9->Size = System::Drawing::Size(40, 17);
             this->InfoSG9->TabIndex = 1;
@@ -1296,7 +1300,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // InfoSG2
             // 
             this->InfoSG2->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-            this->InfoSG2->Location = System::Drawing::Point(520, 100);
+            this->InfoSG2->Location = System::Drawing::Point(519, 100);
             this->InfoSG2->Name = L"InfoSG2";
             this->InfoSG2->Size = System::Drawing::Size(40, 17);
             this->InfoSG2->TabIndex = 1;
@@ -1305,7 +1309,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // InfoSG6
             // 
             this->InfoSG6->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-            this->InfoSG6->Location = System::Drawing::Point(520, 196);
+            this->InfoSG6->Location = System::Drawing::Point(519, 196);
             this->InfoSG6->Name = L"InfoSG6";
             this->InfoSG6->Size = System::Drawing::Size(40, 17);
             this->InfoSG6->TabIndex = 1;
@@ -1314,7 +1318,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // InfoSG3
             // 
             this->InfoSG3->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-            this->InfoSG3->Location = System::Drawing::Point(520, 124);
+            this->InfoSG3->Location = System::Drawing::Point(519, 124);
             this->InfoSG3->Name = L"InfoSG3";
             this->InfoSG3->Size = System::Drawing::Size(40, 17);
             this->InfoSG3->TabIndex = 1;
@@ -1323,7 +1327,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // InfoSG7
             // 
             this->InfoSG7->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-            this->InfoSG7->Location = System::Drawing::Point(520, 220);
+            this->InfoSG7->Location = System::Drawing::Point(519, 220);
             this->InfoSG7->Name = L"InfoSG7";
             this->InfoSG7->Size = System::Drawing::Size(40, 17);
             this->InfoSG7->TabIndex = 1;
@@ -1332,7 +1336,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // InfoSG4
             // 
             this->InfoSG4->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-            this->InfoSG4->Location = System::Drawing::Point(520, 148);
+            this->InfoSG4->Location = System::Drawing::Point(519, 148);
             this->InfoSG4->Name = L"InfoSG4";
             this->InfoSG4->Size = System::Drawing::Size(40, 17);
             this->InfoSG4->TabIndex = 1;
@@ -1341,7 +1345,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // InfoSG8
             // 
             this->InfoSG8->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-            this->InfoSG8->Location = System::Drawing::Point(520, 244);
+            this->InfoSG8->Location = System::Drawing::Point(519, 244);
             this->InfoSG8->Name = L"InfoSG8";
             this->InfoSG8->Size = System::Drawing::Size(40, 17);
             this->InfoSG8->TabIndex = 1;
@@ -1350,7 +1354,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // AmountSG1
             // 
             this->AmountSG1->Enabled = false;
-            this->AmountSG1->Location = System::Drawing::Point(567, 74);
+            this->AmountSG1->Location = System::Drawing::Point(566, 74);
             this->AmountSG1->Name = L"AmountSG1";
             this->AmountSG1->Size = System::Drawing::Size(55, 20);
             this->AmountSG1->TabIndex = 2;
@@ -1360,7 +1364,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // AmountSG5
             // 
             this->AmountSG5->Enabled = false;
-            this->AmountSG5->Location = System::Drawing::Point(567, 170);
+            this->AmountSG5->Location = System::Drawing::Point(566, 170);
             this->AmountSG5->Name = L"AmountSG5";
             this->AmountSG5->Size = System::Drawing::Size(55, 20);
             this->AmountSG5->TabIndex = 2;
@@ -1370,7 +1374,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // AmountSG9
             // 
             this->AmountSG9->Enabled = false;
-            this->AmountSG9->Location = System::Drawing::Point(567, 266);
+            this->AmountSG9->Location = System::Drawing::Point(566, 266);
             this->AmountSG9->Name = L"AmountSG9";
             this->AmountSG9->Size = System::Drawing::Size(55, 20);
             this->AmountSG9->TabIndex = 2;
@@ -1380,7 +1384,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // AmountSG2
             // 
             this->AmountSG2->Enabled = false;
-            this->AmountSG2->Location = System::Drawing::Point(567, 98);
+            this->AmountSG2->Location = System::Drawing::Point(566, 98);
             this->AmountSG2->Name = L"AmountSG2";
             this->AmountSG2->Size = System::Drawing::Size(55, 20);
             this->AmountSG2->TabIndex = 2;
@@ -1390,7 +1394,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // AmountSG6
             // 
             this->AmountSG6->Enabled = false;
-            this->AmountSG6->Location = System::Drawing::Point(567, 194);
+            this->AmountSG6->Location = System::Drawing::Point(566, 194);
             this->AmountSG6->Name = L"AmountSG6";
             this->AmountSG6->Size = System::Drawing::Size(55, 20);
             this->AmountSG6->TabIndex = 2;
@@ -1400,7 +1404,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // AmountSG3
             // 
             this->AmountSG3->Enabled = false;
-            this->AmountSG3->Location = System::Drawing::Point(567, 122);
+            this->AmountSG3->Location = System::Drawing::Point(566, 122);
             this->AmountSG3->Name = L"AmountSG3";
             this->AmountSG3->Size = System::Drawing::Size(55, 20);
             this->AmountSG3->TabIndex = 2;
@@ -1410,7 +1414,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // AmountSG7
             // 
             this->AmountSG7->Enabled = false;
-            this->AmountSG7->Location = System::Drawing::Point(567, 218);
+            this->AmountSG7->Location = System::Drawing::Point(566, 218);
             this->AmountSG7->Name = L"AmountSG7";
             this->AmountSG7->Size = System::Drawing::Size(55, 20);
             this->AmountSG7->TabIndex = 2;
@@ -1420,7 +1424,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // AmountSG4
             // 
             this->AmountSG4->Enabled = false;
-            this->AmountSG4->Location = System::Drawing::Point(567, 146);
+            this->AmountSG4->Location = System::Drawing::Point(566, 146);
             this->AmountSG4->Name = L"AmountSG4";
             this->AmountSG4->Size = System::Drawing::Size(55, 20);
             this->AmountSG4->TabIndex = 2;
@@ -1430,7 +1434,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // AmountSG8
             // 
             this->AmountSG8->Enabled = false;
-            this->AmountSG8->Location = System::Drawing::Point(567, 242);
+            this->AmountSG8->Location = System::Drawing::Point(566, 242);
             this->AmountSG8->Name = L"AmountSG8";
             this->AmountSG8->Size = System::Drawing::Size(55, 20);
             this->AmountSG8->TabIndex = 2;
@@ -1450,7 +1454,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // 
             this->BtnTransfer->DialogResult = System::Windows::Forms::DialogResult::OK;
             this->BtnTransfer->Enabled = false;
-            this->BtnTransfer->Location = System::Drawing::Point(245, 352);
+            this->BtnTransfer->Location = System::Drawing::Point(240, 352);
             this->BtnTransfer->Name = L"BtnTransfer";
             this->BtnTransfer->Size = System::Drawing::Size(75, 23);
             this->BtnTransfer->TabIndex = 3;
@@ -1460,7 +1464,7 @@ private: System::Windows::Forms::Label^  InfoInv;
             // BtnCancel
             // 
             this->BtnCancel->DialogResult = System::Windows::Forms::DialogResult::Cancel;
-            this->BtnCancel->Location = System::Drawing::Point(326, 352);
+            this->BtnCancel->Location = System::Drawing::Point(321, 352);
             this->BtnCancel->Name = L"BtnCancel";
             this->BtnCancel->Size = System::Drawing::Size(75, 23);
             this->BtnCancel->TabIndex = 3;
@@ -1470,17 +1474,28 @@ private: System::Windows::Forms::Label^  InfoInv;
             // InfoInv
             // 
             this->InfoInv->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-            this->InfoInv->Location = System::Drawing::Point(380, 44);
+            this->InfoInv->Location = System::Drawing::Point(381, 44);
             this->InfoInv->Name = L"InfoInv";
-            this->InfoInv->Size = System::Drawing::Size(255, 17);
+            this->InfoInv->Size = System::Drawing::Size(240, 17);
             this->InfoInv->TabIndex = 1;
             this->InfoInv->Text = L"N/A";
+            // 
+            // BtnAll
+            // 
+            this->BtnAll->Location = System::Drawing::Point(546, 12);
+            this->BtnAll->Name = L"BtnAll";
+            this->BtnAll->Size = System::Drawing::Size(75, 21);
+            this->BtnAll->TabIndex = 4;
+            this->BtnAll->Text = L"Add All";
+            this->BtnAll->UseVisualStyleBackColor = true;
+            this->BtnAll->Click += gcnew System::EventHandler(this, &CmdTransferDlg::BtnAll_Click);
             // 
             // CmdTransferDlg
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
             this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-            this->ClientSize = System::Drawing::Size(647, 385);
+            this->ClientSize = System::Drawing::Size(637, 385);
+            this->Controls->Add(this->BtnAll);
             this->Controls->Add(this->BtnCancel);
             this->Controls->Add(this->BtnTransfer);
             this->Controls->Add(this->AmountGW);
@@ -1646,6 +1661,9 @@ private: System::Void Amounts_Update(System::Object^  sender, System::EventArgs^
          }
 private: System::Void Amounts_KeyUp(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
              Amounts_Update(sender, nullptr);
+         }
+private: System::Void BtnAll_Click(System::Object^  sender, System::EventArgs^  e) {
+             AddAll();
          }
 };
 }

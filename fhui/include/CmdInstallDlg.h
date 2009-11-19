@@ -108,6 +108,7 @@ namespace FHUI
     private: System::Windows::Forms::Label^  InfoMIBase;
     private: System::Windows::Forms::Button^  BtnInstall;
     private: System::Windows::Forms::Button^  BtnCancel;
+    private: System::Windows::Forms::Button^  BtnAll;
 
     protected: 
 
@@ -143,6 +144,7 @@ namespace FHUI
             this->InfoMIBase = (gcnew System::Windows::Forms::Label());
             this->BtnInstall = (gcnew System::Windows::Forms::Button());
             this->BtnCancel = (gcnew System::Windows::Forms::Button());
+            this->BtnAll = (gcnew System::Windows::Forms::Button());
             label1 = (gcnew System::Windows::Forms::Label());
             label2 = (gcnew System::Windows::Forms::Label());
             label3 = (gcnew System::Windows::Forms::Label());
@@ -330,11 +332,22 @@ namespace FHUI
             this->BtnCancel->Text = L"Cancel";
             this->BtnCancel->UseVisualStyleBackColor = true;
             // 
+            // BtnAll
+            // 
+            this->BtnAll->Location = System::Drawing::Point(12, 81);
+            this->BtnAll->Name = L"BtnAll";
+            this->BtnAll->Size = System::Drawing::Size(35, 21);
+            this->BtnAll->TabIndex = 5;
+            this->BtnAll->Text = L"All";
+            this->BtnAll->UseVisualStyleBackColor = true;
+            this->BtnAll->Click += gcnew System::EventHandler(this, &CmdInstallDlg::BtnAll_Click);
+            // 
             // CmdInstallDlg
             // 
             this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
             this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
             this->ClientSize = System::Drawing::Size(337, 147);
+            this->Controls->Add(this->BtnAll);
             this->Controls->Add(this->BtnCancel);
             this->Controls->Add(this->BtnInstall);
             this->Controls->Add(this->InstAU);
@@ -376,6 +389,15 @@ private: System::Void UpdateAmounts(System::Object^  sender, System::EventArgs^ 
          }
 private: System::Void AmountsKeyUp(System::Object^  sender, System::Windows::Forms::KeyEventArgs^  e) {
              UpdateAmounts(sender, nullptr);
+         }
+private: System::Void BtnAll_Click(System::Object^  sender, System::EventArgs^  e) {
+             int cu = m_Colony->InventoryPreDeparture[INV_CU];
+             int iu = m_Colony->InventoryPreDeparture[INV_IU];
+             int au = m_Colony->InventoryPreDeparture[INV_AU];
+             iu = Math::Min(cu, iu);
+             au = Math::Min(cu - iu, au);
+             InstIU->Value = iu;
+             InstAU->Value = au;
          }
 };
 }

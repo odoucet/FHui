@@ -12,6 +12,7 @@ FHUI build ??
   orders.
 + Enable ship production commands only when no jumps orders issued.
   Adding jump command cancels ship production order.
++ Added "All" buttons on Install and Transfer dialogs.
 
 FHUI build 342
 * [P] "Enmity/neutrality towards ALL species" is now correctly handled.
@@ -19,7 +20,7 @@ FHUI build 342
   inventory handling. Transfer, Install and Build inventory/colony units
   should be more accurate.
 + Improved report parser -  about 3 times faster.
-+ Modified user content handling
++ Modified user content handling.
 + Improved teach command support.
 + Added estimate command shortcut in context menu for Aliens tab.
 + Tooltip for Aliens tab: same data as in grid, but lets you hide less

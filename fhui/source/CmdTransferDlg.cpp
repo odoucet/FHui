@@ -277,4 +277,13 @@ void CmdTransferDlg::UpdateAmounts()
     BtnTransfer->Enabled = transferAny;
 }
 
+void CmdTransferDlg::AddAll()
+{
+    array<int> ^inv = m_Cmd->GetFromInventory(true);
+    for( int i = 0; i < INV_MAX; ++i )
+    {
+        m_UnitControls[i].Amount->Value = inv[i];
+    }
+}
+
 } // end namespace FHUI
