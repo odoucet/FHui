@@ -5,6 +5,11 @@
      License : Freeware
 -------------------------------------------------------------------------------------
 
+*********************************************************
+** GIT CLONE OF https://sourceforge.net/projects/fhui/ **
+** Original authors : madmaxer and prozenfeld          **
+*********************************************************
+
 Requirements:
 -------------
   You need following components:
